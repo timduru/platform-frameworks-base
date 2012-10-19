@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Slog;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import android.widget.Toast;
 import com.android.systemui.statusbar.policy.NetworkController;
 
 import com.android.systemui.R;
@@ -41,15 +43,20 @@ public class SignalClusterView
 
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0, mWifiActivityId = 0;
+    private boolean mEthernetVisible = false;
+    private int mEthernetStatusId, mEthernetActivityId = 0;
     private boolean mMobileVisible = false;
     private int mMobileStrengthId = 0, mMobileActivityId = 0, mMobileTypeId = 0;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
-    private String mWifiDescription, mMobileDescription, mMobileTypeDescription;
+    private String mWifiDescription, mMobileDescription, mMobileTypeDescription,
+            mEthernetDescription;
 
-    ViewGroup mWifiGroup, mMobileGroup;
-    ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType, mAirplane;
+    ViewGroup mWifiGroup, mEthernetGroup, mMobileGroup;
+    ImageView mWifi, mEthernet, mMobile, mWifiActivity, mMobileActivity, mMobileType, mAirplane,
+            mEthernetActivity;
     View mSpacer;
+    View mSpacer2;
 
     public SignalClusterView(Context context) {
         this(context, null);
@@ -82,21 +89,30 @@ public class SignalClusterView
         mMobileType = (ImageView) findViewById(R.id.mobile_type);
         mSpacer = findViewById(R.id.spacer);
         mAirplane = (ImageView) findViewById(R.id.airplane);
+        mEthernetGroup  = (ViewGroup) findViewById(R.id.ethernet_combo);
+        mEthernet       = (ImageView) findViewById(R.id.ethernet_status);
+        mEthernetActivity = (ImageView) findViewById(R.id.ethernet_inout);
+        mSpacer2        =             findViewById(R.id.spacer2);
+        mAirplane       = (ImageView) findViewById(R.id.airplane);
 
         apply();
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        mWifiGroup = null;
-        mWifi = null;
-        mWifiActivity = null;
-        mMobileGroup = null;
-        mMobile = null;
+        mWifiGroup      = null;
+        mWifi           = null;
+        mWifiActivity   = null;
+        mEthernetGroup  = null;
+        mEthernet       = null;
+        mEthernetActivity = null;
+        mMobileGroup    = null;
+        mMobile         = null;
         mMobileActivity = null;
-        mMobileType = null;
-        mSpacer = null;
-        mAirplane = null;
+        mMobileType     = null;
+        mSpacer         = null;
+        mSpacer2        = null;
+        mAirplane       = null;
 
         super.onDetachedFromWindow();
     }
@@ -108,6 +124,16 @@ public class SignalClusterView
         mWifiStrengthId = strengthIcon;
         mWifiActivityId = activityIcon;
         mWifiDescription = contentDescription;
+
+        apply();
+    }
+
+    @Override
+    public void setEthernetIndicators(boolean visible, int statusIcon, int activityIcon, String contentDescription) {
+        mEthernetVisible = visible;
+        mEthernetStatusId = statusIcon;
+        mEthernetActivityId = activityIcon;
+        mEthernetDescription = contentDescription;
 
         apply();
     }
@@ -139,6 +165,8 @@ public class SignalClusterView
         // ignore content description, so populate manually
         if (mWifiVisible && mWifiGroup.getContentDescription() != null)
             event.getText().add(mWifiGroup.getContentDescription());
+        if (mEthernetVisible && mEthernetGroup.getContentDescription() != null)
+            event.getText().add(mEthernetGroup.getContentDescription());
         if (mMobileVisible && mMobileGroup.getContentDescription() != null)
             event.getText().add(mMobileGroup.getContentDescription());
         return super.dispatchPopulateAccessibilityEvent(event);
@@ -164,6 +192,20 @@ public class SignalClusterView
                             (mWifiVisible ? "VISIBLE" : "GONE"),
                             mWifiStrengthId, mWifiActivityId));
 
+        if(mEthernetVisible) {
+            mEthernetGroup.setVisibility(View.VISIBLE);
+            mEthernet.setImageResource(mEthernetStatusId);
+            mEthernetActivity.setImageResource(mEthernetActivityId);
+            mEthernetGroup.setContentDescription(mEthernetDescription);
+        } else {
+            mEthernetGroup.setVisibility(View.GONE);
+        }
+
+        if (DEBUG) Slog.d(TAG,
+                String.format("ethernet: %s sig=%d act=%d",
+                        (mEthernetVisible ? "VISIBLE" : "GONE"),
+                        mEthernetStatusId, mEthernetActivityId));
+
         if (mMobileVisible && !mIsAirplaneMode) {
             mMobileGroup.setVisibility(View.VISIBLE);
             mMobile.setImageResource(mMobileStrengthId);
@@ -181,19 +223,23 @@ public class SignalClusterView
             mAirplane.setVisibility(View.GONE);
         }
 
-        if (mMobileVisible && mWifiVisible && mIsAirplaneMode) {
+        if(mEthernetVisible) {
             mSpacer.setVisibility(View.INVISIBLE);
         } else {
             mSpacer.setVisibility(View.GONE);
         }
 
-        if (DEBUG)
-            Slog.d(TAG,
-                    String.format("mobile: %s sig=%d act=%d typ=%d",
-                            (mMobileVisible ? "VISIBLE" : "GONE"),
-                            mMobileStrengthId, mMobileActivityId, mMobileTypeId));
+        if (mMobileVisible && (mWifiVisible || mEthernetVisible) && mIsAirplaneMode) {
+            mSpacer2.setVisibility(View.INVISIBLE);
+        } else {
+            mSpacer2.setVisibility(View.GONE);
+        }
 
-        mMobileType.setVisibility(
-                !mWifiVisible ? View.VISIBLE : View.GONE);
+        if (DEBUG) Slog.d(TAG,
+                String.format("mobile: %s sig=%d act=%d typ=%d",
+                    (mMobileVisible ? "VISIBLE" : "GONE"),
+                    mMobileStrengthId, mMobileActivityId, mMobileTypeId));
+
+        mMobileType.setVisibility( !(mWifiVisible || mEthernetVisible) ? View.VISIBLE : View.GONE);
     }
 }

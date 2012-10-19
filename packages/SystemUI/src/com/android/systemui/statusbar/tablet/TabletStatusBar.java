@@ -303,6 +303,14 @@ public class TabletStatusBar extends BaseStatusBar {
         mNetworkController.addWifiLabelView(
                 (TextView) mNotificationPanel.findViewById(R.id.wifi_text));
 
+        final ImageView ethernetRSSI =
+                (ImageView)mNotificationPanel.findViewById(R.id.ethernet_status);
+        if(ethernetRSSI != null) {
+            mNetworkController.addEthernetIconView(ethernetRSSI);
+        }
+        mNetworkController.addEthernetLabelView(
+                (TextView)mNotificationPanel.findViewById(R.id.ethernet_text));
+
         mNetworkController.addDataTypeIconView(
                 (ImageView) mNotificationPanel.findViewById(R.id.mobile_type));
         mNetworkController.addMobileLabelView(
