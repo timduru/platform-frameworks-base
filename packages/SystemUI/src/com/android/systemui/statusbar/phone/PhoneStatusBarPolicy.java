@@ -102,6 +102,13 @@ public class PhoneStatusBarPolicy {
     private int mLastWifiSignalLevel = -1;
     private boolean mIsWifiConnected = false;
 
+    //ethernet
+    private static final int[] sEthernetImages = {
+        R.drawable.stat_sys_ethernet_transitional,
+        R.drawable.stat_sys_ethernet_connected
+    };
+    private boolean mIsEthernetConnected = false;
+
     // state of inet connection - 0 not connected, 100 connected
     private int mInetCondition = 0;
 

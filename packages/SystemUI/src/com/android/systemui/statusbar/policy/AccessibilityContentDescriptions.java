@@ -40,4 +40,9 @@ public class AccessibilityContentDescriptions {
         R.string.accessibility_wimax_three_bars,
         R.string.accessibility_wimax_signal_full
     };
+
+    static final int[] ETHERNET_CONNECTION_STRENGTH = {
+        R.string.accessibility_no_ethernet,
+        R.string.accessibility_ethernet_connected,
+    };
 }

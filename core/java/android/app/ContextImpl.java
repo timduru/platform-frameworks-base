@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.Preconditions;
 
@@ -108,6 +110,8 @@ import android.app.admin.DevicePolicyManager;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.IDropBoxManagerService;
+import com.android.internal.ethernet.EthernetManager;
+import com.android.internal.ethernet.IEthernetManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -348,6 +352,15 @@ class ContextImpl extends Context {
         registerService(DOWNLOAD_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return new DownloadManager(ctx.getContentResolver(), ctx.getPackageName());
+                }});
+
+        registerService(ETHERNET_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = checkNotNull(ServiceManager.getService(ETHERNET_SERVICE),
+                            "No ETHERNET_SERVICE");
+                    IEthernetManager service = checkNotNull(IEthernetManager.Stub.asInterface(b),
+                            "No IEthernetManager");
+                    return checkNotNull(new EthernetManager(service), "No EthernetManager");
                 }});
 
         registerService(NFC_SERVICE, new ServiceFetcher() {

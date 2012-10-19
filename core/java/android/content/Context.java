@@ -2069,6 +2069,17 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.ethernet.EthernetManager} for handling management of
+     * Ethernet access.
+     *
+     * @see #getSystemService
+     * @see android.net.ethernet.EthernetManager
+     * @hide
+     */
+    public static final String ETHERNET_SERVICE = "ethernet";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
      * android.net.nsd.NsdManager} for handling management of network service
      * discovery
      *

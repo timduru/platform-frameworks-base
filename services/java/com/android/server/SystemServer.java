@@ -66,7 +66,6 @@ import com.android.server.search.SearchManagerService;
 import com.android.server.usb.UsbService;
 import com.android.server.wifi.WifiService;
 import com.android.server.wm.WindowManagerService;
-
 import dalvik.system.VMRuntime;
 import dalvik.system.Zygote;
 
@@ -153,6 +152,7 @@ class ServerThread extends Thread {
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
+        EthernetService eth = null;
 
         // Create a shared handler thread for UI within the system server.
         // This thread is used by at least the following components:
@@ -491,6 +491,14 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.WIFI_SERVICE, wifi);
             } catch (Throwable e) {
                 reportWtf("starting Wi-Fi Service", e);
+            }
+
+           try {
+                Slog.i(TAG, "Ethernet Service");
+                eth = new EthernetService(context);
+                ServiceManager.addService(Context.ETHERNET_SERVICE, eth);
+            } catch (Throwable e) {
+                reportWtf("starting Ethernet Service", e);
             }
 
             try {
