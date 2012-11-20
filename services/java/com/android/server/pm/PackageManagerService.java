@@ -716,7 +716,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         PackageInstalledInfo res = data.res;
 
                         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                            res.removedInfo.sendBroadcast(false, true, false);
+                            res.removedInfo.sendBroadcast(false, true, false, false);
                             Bundle extras = new Bundle(1);
                             extras.putInt(Intent.EXTRA_UID, res.uid);
                             // Determine the set of users who are adding this
@@ -753,7 +753,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 }
                             }
                             sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                                    res.pkg.applicationInfo.packageName,
+                                    res.pkg.applicationInfo.packageName, null,
                                     extras, null, null, firstUsers);
                             final boolean update = res.removedInfo.removedPackage != null;
                             if (update) {
@@ -764,14 +764,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 category = Intent.CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE;
                             }
                             sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                                    res.pkg.applicationInfo.packageName,
+                                    res.pkg.applicationInfo.packageName, category,
                                     extras, null, null, updateUsers);
                             if (update) {
                                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
-                                        res.pkg.applicationInfo.packageName,
+                                        res.pkg.applicationInfo.packageName, category,
                                         extras, null, null, updateUsers);
                                 sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
-                                        null, null,
+                                        null, null, null,
                                         res.pkg.applicationInfo.packageName, null, updateUsers);
                             }
                             if (res.removedInfo.args != null) {
@@ -1214,7 +1214,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (mSettings.isDisabledSystemPackageLPr(ps.name)) {
                             Slog.i(TAG, "Expecting better updatd system app for " + ps.name
                                     + "; removing system app");
-                            removePackageLI(ps.pkg, true);
+                            removePackageLI(ps, true);
                         }
 
                         continue;
@@ -4550,7 +4550,27 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    void removePackageLI(PackageParser.Package pkg, boolean chatty) {
+    void removePackageLI(PackageSetting ps, boolean chatty) {
+        if (DEBUG_INSTALL) {
+            if (chatty)
+                Log.d(TAG, "Removing package " + ps.name);
+        }
+
+        // writer
+        synchronized (mPackages) {
+            mPackages.remove(ps.name);
+            if (ps.codePathString != null) {
+                mAppDirs.remove(ps.codePathString);
+            }
+
+            final PackageParser.Package pkg = ps.pkg;
+            if (pkg != null) {
+                cleanPackageDataStructuresLILPw(pkg, chatty);
+            }
+        }
+    }
+
+    void removeInstalledPackageLI(PackageParser.Package pkg, boolean chatty) {
         if (DEBUG_INSTALL) {
             if (chatty)
                 Log.d(TAG, "Removing package " + pkg.applicationInfo.packageName);
@@ -5403,10 +5423,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             return (v1 > v2) ? -1 : ((v1 < v2) ? 1 : 0);
         }
     };
-    
-    static final void sendPackageBroadcast(String action, String pkg,
+
+    static final void sendPackageBroadcast(String action, String pkg, String intentCategory,
             Bundle extras, String targetPkg, IIntentReceiver finishedReceiver,
-            int[] userIds, String category) {
+            int[] userIds) {
         IActivityManager am = ActivityManagerNative.getDefault();
         if (am != null) {
             try {
@@ -5421,9 +5441,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     if (targetPkg != null) {
                         intent.setPackage(targetPkg);
-                    }
-                    if (category != null) {
-                    	intent.addCategory(category);
                     }
                     // Modify the UID when posting to other users
                     int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
@@ -5440,18 +5457,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 + intent.toShortString(false, true, false, false)
                                 + " " + intent.getExtras(), here);
                     }
+                    if (intentCategory != null) {
+                        intent.addCategory(intentCategory);
+                    }
                     am.broadcastIntent(null, intent, null, finishedReceiver,
                             0, null, null, null, finishedReceiver != null, false, id);
                 }
             } catch (RemoteException ex) {
             }
         }
-    }
-
-    static final void sendPackageBroadcast(String action, String pkg,
-            Bundle extras, String targetPkg, IIntentReceiver finishedReceiver,
-            int[] userIds) {
-    	sendPackageBroadcast(action, pkg, extras, targetPkg, finishedReceiver, userIds, null);
     }
 
     /**
@@ -5529,12 +5543,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             String addedPackage = null;
             int addedAppId = -1;
             int[] addedUsers = null;
+            String category = null;
 
             // TODO post a message to the handler to obtain serial ordering
             synchronized (mInstallLock) {
                 String fullPathStr = null;
                 File fullPath = null;
-                String category = null;
                 if (path != null) {
                     fullPath = new File(mRootDir, path);
                     fullPathStr = fullPath.getPath();
@@ -5560,6 +5574,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 synchronized (mPackages) {
                     p = mAppDirs.get(fullPathStr);
                     if (p != null) {
+                        if (p.mIsThemeApk) {
+                            category = Intent.CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE;
+                        }
                         ps = mSettings.mPackages.get(p.applicationInfo.packageName);
                         if (ps != null) {
                             removedUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
@@ -5571,10 +5588,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 if ((event&REMOVE_EVENTS) != 0) {
                     if (ps != null) {
-                    	if (p.mIsThemeApk) {
-                            category = Intent.CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE;
-                        }
-                        removePackageLI(p, true);
+                        removePackageLI(ps, true);
                         removedPackage = ps.name;
                         removedAppId = ps.appId;
                     }
@@ -5619,13 +5633,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Bundle extras = new Bundle(1);
                 extras.putInt(Intent.EXTRA_UID, removedAppId);
                 extras.putBoolean(Intent.EXTRA_DATA_REMOVED, false);
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage, category,
                         extras, null, null, removedUsers);
             }
             if (addedPackage != null) {
                 Bundle extras = new Bundle(1);
                 extras.putInt(Intent.EXTRA_UID, addedAppId);
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, addedPackage,
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, addedPackage, category,
                         extras, null, null, addedUsers);
             }
         }
@@ -5722,7 +5736,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (sendAdded) {
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, null,
                         packageName, extras, null, null, new int[] {userId});
             }
         } finally {
@@ -7748,7 +7762,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         res.removedInfo.uid = oldPkg.applicationInfo.uid;
         res.removedInfo.removedPackage = packageName;
         // Remove existing system package
-        removePackageLI(oldPkg, true);
+        removePackageLI(oldPkgSetting, true);
         // writer
         synchronized (mPackages) {
             if (!mSettings.disableSystemPackageLPw(packageName) && deletedPackage != null) {
@@ -7787,7 +7801,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Re installation failed. Restore old information
             // Remove new pkg information
             if (newPackage != null) {
-                removePackageLI(newPackage, true);
+                removeInstalledPackageLI(newPackage, true);
             }
             // Add back the old system package
             scanPackageLI(oldPkg, parseFlags, SCAN_MONITOR | SCAN_UPDATE_SIGNATURE, 0, user);
@@ -8201,12 +8215,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Package p = mPackages.get(packageName);
             if (p != null) {
                 info.isThemeApk = p.mIsThemeApk;
-                if (info.isThemeApk && !info.isRemovedPackageSystemUpdate) {
+                if (info.isThemeApk &&
+                    !info.isRemovedPackageSystemUpdate) {
                     deleteLockedZipFileIfExists(p.mPath);
                 }
             }
         }
-
+ 
         synchronized (mInstallLock) {
             res = deletePackageLI(packageName,
                     (flags & PackageManager.DELETE_ALL_USERS) != 0
@@ -8219,7 +8234,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (res) {
-            info.sendBroadcast(true, systemUpdate, removedForAllUsers);
+            info.sendBroadcast(true, systemUpdate, removedForAllUsers, true);
 
             // If the removed package was a system update, the old system package
             // was re-enabled; we need to broadcast this information
@@ -8234,12 +8249,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     category = Intent.CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE;
                 }
 
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName, extras,
-                        null, null, info.removedUsers, category);
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName, extras,
-                        null, null, info.removedUsers, category);
-                sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null,
-                        null, packageName, null, info.removedUsers);
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName, category,
+                        extras, null, null, null);
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName, category,
+                        extras, null, null, null);
+                sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null, null,
+                        null, packageName, null, null);
             }
         }
         // Force a gc here.
@@ -8265,7 +8280,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         InstallArgs args = null;
         boolean isThemeApk = false;
 
-        void sendBroadcast(boolean fullRemove, boolean replacing, boolean removedForAllUsers) {
+        void sendBroadcast(boolean fullRemove, boolean replacing, boolean removedForAllUsers,
+                 boolean deleteLockedZipFileIfExists) {
             Bundle extras = new Bundle(1);
             extras.putInt(Intent.EXTRA_UID, removedAppId >= 0 ? removedAppId : uid);
             extras.putBoolean(Intent.EXTRA_DATA_REMOVED, fullRemove);
@@ -8278,15 +8294,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (isThemeApk) {
                     category = Intent.CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE;
                 }
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
+                sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage, category,
                         extras, null, null, removedUsers);
                 if (fullRemove && !replacing) {
-                    sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED, removedPackage,
+                    sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED, removedPackage, category,
                             extras, null, null, removedUsers);
                 }
             }
             if (removedAppId >= 0) {
-                sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras, null, null,
+                sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, null, extras, null, null,
                         removedUsers);
             }
         }
@@ -8301,7 +8317,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void removePackageDataLI(PackageSetting ps, PackageRemovedInfo outInfo,
             int flags, boolean writeSettings) {
         String packageName = ps.name;
-        removePackageLI(ps.pkg, (flags&REMOVE_CHATTY) != 0);
+        removePackageLI(ps, (flags&REMOVE_CHATTY) != 0);
         // Retrieve object to delete permissions for shared user later on
         final PackageSetting deletedPs;
         // reader
@@ -9141,7 +9157,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         extras.putStringArray(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST, nameList);
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, killFlag);
         extras.putInt(Intent.EXTRA_UID, packageUid);
-        sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras, null, null,
+        sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, null, extras, null, null,
                 new int[] {UserHandle.getUserId(packageUid)});
     }
 
@@ -9806,7 +9822,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
                     : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
-            sendPackageBroadcast(action, null, extras, null, finishedReceiver, null);
+            sendPackageBroadcast(action, null, null, extras, null, finishedReceiver, null);
         }
     }
 

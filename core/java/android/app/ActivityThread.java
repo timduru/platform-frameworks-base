@@ -79,9 +79,9 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.text.TextUtils;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -102,12 +102,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.renderscript.RenderScript;
 
-import com.android.internal.os.BinderInternal;
-import com.android.internal.os.RuntimeInit;
-import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.util.Objects;
-
-import org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -1528,11 +1523,6 @@ public final class ActivityThread {
         final private boolean mIsThemeable;
         final private int mHash;
 
-
-        ResourcesKey(String resDir, int displayId, Configuration overrideConfiguration, float scale) {
-        	this(resDir, displayId, overrideConfiguration, scale, true);
-        }
-
         ResourcesKey(String resDir, int displayId, Configuration overrideConfiguration, float scale, boolean isThemeable) {
             mResDir = resDir;
             mDisplayId = displayId;
@@ -1582,8 +1572,7 @@ public final class ActivityThread {
             if (mScale != peer.mScale) {
                 return false;
             }
-            return mResDir.equals(peer.mResDir) && mScale == peer.mScale &&
-                    mIsThemeable == peer.mIsThemeable;
+            return mIsThemeable == peer.mIsThemeable;
         }
     }
 
@@ -1616,6 +1605,18 @@ public final class ActivityThread {
 
     private void flushDisplayMetricsLocked() {
         mDefaultDisplayMetrics.clear();
+    }
+
+    // NOTE: this method can return null if the SystemServer is still
+    // initializing (for example, of another SystemServer component is accessing
+    // a resources object)
+    public static IAssetRedirectionManager getAssetRedirectionManager() {
+        if (sAssetRedirectionManager != null) {
+            return sAssetRedirectionManager;
+        }
+        IBinder b = ServiceManager.getService("assetredirection");
+        sAssetRedirectionManager = IAssetRedirectionManager.Stub.asInterface(b);
+        return sAssetRedirectionManager;
     }
 
     DisplayMetrics getDisplayMetricsLocked(int displayId, CompatibilityInfo ci) {
@@ -1655,18 +1656,6 @@ public final class ActivityThread {
         return dm;
     }
 
-// NOTE: this method can return null if the SystemServer is still
-// initializing (for example, of another SystemServer component is accessing
-// a resources object)
-public static IAssetRedirectionManager getAssetRedirectionManager() {
-    if (sAssetRedirectionManager != null) {
-        return sAssetRedirectionManager;
-    }
-    IBinder b = ServiceManager.getService("assetredirection");
-    sAssetRedirectionManager = IAssetRedirectionManager.Stub.asInterface(b);
-    return sAssetRedirectionManager;
-}
-
     private Configuration mMainThreadConfig = new Configuration();
     Configuration applyConfigCompatMainThread(int displayDensity, Configuration config,
             CompatibilityInfo compat) {
@@ -1688,11 +1677,13 @@ public static IAssetRedirectionManager getAssetRedirectionManager() {
      * @param compInfo the compability info. It will use the default compatibility info when it's
      * null.
      */
-
     Resources getTopLevelResources(String resDir,
             int displayId, Configuration overrideConfiguration,
             CompatibilityInfo compInfo) {
-        ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfiguration, compInfo.applicationScale, compInfo.isThemeable);
+        ResourcesKey key = new ResourcesKey(resDir,
+                displayId, overrideConfiguration,
+                compInfo.applicationScale,
+                compInfo.isThemeable);
         Resources r;
         synchronized (mPackages) {
             // Resources is app scale dependent.
@@ -1723,8 +1714,23 @@ public static IAssetRedirectionManager getAssetRedirectionManager() {
             return null;
         }
 
+        //Slog.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
+        DisplayMetrics dm = getDisplayMetricsLocked(displayId, null);
+        Configuration config;
+        boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
+        if (!isDefaultDisplay || key.mOverrideConfiguration != null) {
+            config = new Configuration(getConfiguration());
+            if (!isDefaultDisplay) {
+                applyNonDefaultDisplayMetricsToConfigurationLocked(dm, config);
+            }
+            if (key.mOverrideConfiguration != null) {
+                config.updateFrom(key.mOverrideConfiguration);
+            }
+        } else {
+            config = getConfiguration();
+        }
+
         /* Attach theme information to the resulting AssetManager when appropriate. */
-        Configuration config = getConfiguration();
         if (compInfo.isThemeable && config != null) {
             if (config.customTheme == null) {
                 config.customTheme = CustomTheme.getBootTheme();
@@ -1735,22 +1741,7 @@ public static IAssetRedirectionManager getAssetRedirectionManager() {
             }
         }
 
-        //Slog.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
-        DisplayMetrics dm = getDisplayMetricsLocked(displayId, null);
-        Configuration config1;
-        boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
-        if (!isDefaultDisplay || key.mOverrideConfiguration != null) {
-            config1 = new Configuration(getConfiguration());
-            if (!isDefaultDisplay) {
-                applyNonDefaultDisplayMetricsToConfigurationLocked(dm, config1);
-            }
-            if (key.mOverrideConfiguration != null) {
-                config1.updateFrom(key.mOverrideConfiguration);
-            }
-        } else {
-            config1 = getConfiguration();
-        }
-        r = new Resources(assets, dm, config1, compInfo);
+        r = new Resources(assets, dm, config, compInfo);
         if (false) {
             Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
                     + r.getConfiguration() + " appScale="
@@ -3997,6 +3988,16 @@ public static IAssetRedirectionManager getAssetRedirectionManager() {
                 boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
                 DisplayMetrics dm = defaultDisplayMetrics;
                 Configuration overrideConfig = entry.getKey().mOverrideConfiguration;
+                boolean themeChanged = (changes & ActivityInfo.CONFIG_THEME_RESOURCE) != 0;
+                if (themeChanged) {
+                    AssetManager am = r.getAssets();
+                    if (am.hasThemeSupport()) {
+                        detachThemeAssets(am);
+                        if (!TextUtils.isEmpty(config.customTheme.getThemePackageName())) {
+                            attachThemeAssets(am, config.customTheme);
+                        }
+                    }
+                }
                 if (!isDefaultDisplay || overrideConfig != null) {
                     if (tmpConfig == null) {
                         tmpConfig = new Configuration();
@@ -4010,17 +4011,9 @@ public static IAssetRedirectionManager getAssetRedirectionManager() {
                         tmpConfig.updateFrom(overrideConfig);
                     }
                     r.updateConfiguration(tmpConfig, dm, compat);
-                boolean themeChanged = (changes & ActivityInfo.CONFIG_THEME_RESOURCE) != 0;
-                if (themeChanged) {
-                    AssetManager am = r.getAssets();
-                    if (am.hasThemeSupport()) {
-                        detachThemeAssets(am);
-                        if (!TextUtils.isEmpty(config.customTheme.getThemePackageName())) {
-                            attachThemeAssets(am, config.customTheme);
-                        }
-                    }
+                } else {
+                    r.updateConfiguration(config, dm, compat);
                 }
-                r.updateConfiguration(config, dm, compat);
                 if (themeChanged) {
                     r.updateStringCache();
                 }
@@ -4030,7 +4023,6 @@ public static IAssetRedirectionManager getAssetRedirectionManager() {
                 //Slog.i(TAG, "Removing old resources " + v.getKey());
                 it.remove();
             }
-        }
         }
         
         return changes;

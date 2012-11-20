@@ -715,6 +715,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         return lp;
     }
 
+    void onBarViewDetached() {
+     //   WindowManagerImpl.getDefault().removeView(mStatusBarWindow);
+    }
+
     @Override
     protected void updateSearchPanel() {
         super.updateSearchPanel();
@@ -2478,7 +2482,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         // Update the QuickSettings container
         if (mQS != null) mQS.updateResources();
 
-        loadDimens();
+//        loadDimens();
     }
 
     protected void loadDimens() {
