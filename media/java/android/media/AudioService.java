@@ -70,6 +70,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.VolumePanel;
 
+import com.android.internal.app.ThemeUtils;
 import com.android.internal.telephony.ITelephony;
 
 import java.io.FileDescriptor;
@@ -115,6 +116,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** The UI */
     private VolumePanel mVolumePanel;
+    private Context mUiContext;
+    private Handler mHandler;
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -436,8 +439,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     private boolean mDockAudioMediaEnabled = true;
 
-    private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
-
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -446,6 +447,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     public AudioService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+        mHandler = new Handler();
         mVoiceCapable = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_voice_capable);
 
@@ -526,6 +528,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         pkgFilter.addDataScheme("package");
         context.registerReceiver(mReceiver, pkgFilter);
+
+        ThemeUtils.registerThemeChangeReceiver(context, new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mUiContext = null;
+            }
+        });
 
         // Register for phone state monitoring
         TelephonyManager tmgr = (TelephonyManager)
@@ -1068,7 +1077,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             streamType = AudioSystem.STREAM_NOTIFICATION;
         }
 
-        mVolumePanel.postVolumeChanged(streamType, flags);
+        showVolumeChangeUi(streamType, flags);
 
         if ((flags & AudioManager.FLAG_FIXED_VOLUME) == 0) {
             oldIndex = (oldIndex + 5) / 10;
@@ -3326,13 +3335,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                 mBluetoothA2dpEnabled ?
                                         AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
                     }
-
-                    synchronized (mSettingsLock) {
-                        AudioSystem.setForceUse(AudioSystem.FOR_DOCK,
-                                mDockAudioMediaEnabled ?
-                                        AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE);
-                    }
-
                     // indicate the end of reconfiguration phase to audio HAL
                     AudioSystem.setParameters("restarting=false");
                     break;
@@ -3760,7 +3762,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         config = AudioSystem.FORCE_BT_CAR_DOCK;
                         break;
                     case Intent.EXTRA_DOCK_STATE_LE_DESK:
-                        config = AudioSystem.FORCE_ANALOG_DOCK;
+                        synchronized (mSettingsLock) {
+                            if (mDockAudioMediaEnabled) {
+                                config = AudioSystem.FORCE_ANALOG_DOCK;
+                            } else {
+                                config = AudioSystem.FORCE_NONE;
+                            }
+                        }
                         break;
                     case Intent.EXTRA_DOCK_STATE_HE_DESK:
                         config = AudioSystem.FORCE_DIGITAL_DOCK;
@@ -3769,14 +3777,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     default:
                         config = AudioSystem.FORCE_NONE;
                 }
-                // Low end docks have a menu to enable or disable audio
-                // (see mDockAudioMediaEnabled)
-                if (!((dockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
-                      ((dockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) &&
-                       (mDockState == Intent.EXTRA_DOCK_STATE_LE_DESK)))) {
-                    AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
-                }
-                mDockState = dockState;
+
+                AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
             } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
@@ -3943,6 +3945,25 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         0,
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
             }
+        }
+    }
+
+    private void showVolumeChangeUi(final int streamType, final int flags) {
+        if (mUiContext != null && mVolumePanel != null) {
+            mVolumePanel.postVolumeChanged(streamType, flags);
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mUiContext == null) {
+                        mUiContext = ThemeUtils.createUiContext(mContext);
+                    }
+
+                    final Context context = mUiContext != null ? mUiContext : mContext;
+                    mVolumePanel = new VolumePanel(context, AudioService.this);
+                    mVolumePanel.postVolumeChanged(streamType, flags);
+                }
+            });
         }
     }
 
