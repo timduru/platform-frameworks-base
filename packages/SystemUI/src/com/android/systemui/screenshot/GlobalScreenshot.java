@@ -38,12 +38,14 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Process;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -56,6 +58,8 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
+
+import org.teameos.jellybean.settings.EOSConstants;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -90,6 +94,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     private String mImageFilePath;
     private long mImageTime;
     private BigPictureStyle mNotificationStyle;
+    private Float[] mEosScaleValues = {1.0f, 0.75f, 0.50f, 0.25f};
 
     // WORKAROUND: We want the same notification across screenshots that we update so that we don't
     // spam a user's notification drawer.  However, we only show the ticker for the saving state
@@ -170,6 +175,15 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         Context context = params[0].context;
         Bitmap image = params[0].image;
         Resources r = context.getResources();
+
+        int scaleIndex = Settings.System.getInt(context.getContentResolver(),
+                EOSConstants.SYSTEMUI_SCREENSHOT_SCALE_INDEX, 0);
+        // only scale if not at full size image as determined by index value
+        if (scaleIndex != 0) {
+            int newWidth = Math.round(image.getWidth() * mEosScaleValues[scaleIndex]);
+            int newHeight = Math.round(image.getHeight() * mEosScaleValues[scaleIndex]);
+            image = Bitmap.createScaledBitmap(image, newWidth, newHeight, true);
+        }
 
         try {
             // Save the screenshot to the MediaStore

@@ -28,6 +28,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.recent.TaskDescription;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
@@ -83,6 +84,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import org.teameos.jellybean.settings.EOSConstants;
+
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks {
     public static final String TAG = "StatusBar";
@@ -122,6 +125,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     // Search panel
     protected SearchPanelView mSearchPanelView;
 
+    private EosUiController mEosUiController;
     protected PopupMenu mNotificationBlamePopup;
 
     protected int mCurrentUserId = 0;
@@ -141,6 +145,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
+    private boolean isLongPressFeatureEnabled = false;
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -149,6 +154,45 @@ public abstract class BaseStatusBar extends SystemUI implements
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
     }
+
+    protected boolean isLongPressFeatureEnabled() {
+        return isLongPressFeatureEnabled;
+    }
+    
+    protected void setNavControllerParent(View v, WindowManager.LayoutParams lp) {
+        mEosUiController.setRootContainer(v, lp);
+        updateNavControllerState();
+    }
+
+    protected void setStatusBar(View v) {
+        mEosUiController.setStatusBar(v);
+    }
+
+    protected void setStatusBarContainer(View v, WindowManager.LayoutParams lp) {
+        mEosUiController.setStatusBarContainer(v, lp);
+    }
+
+    protected void setBatteryController(BatteryController bc) {
+    	mEosUiController.setBatteryController(bc);
+    }
+
+    protected void updateNavControllerState() {
+        isLongPressFeatureEnabled = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE,
+                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE_DEF) == 1;
+        if(isLongPressFeatureEnabled) {
+            mEosUiController.loadActions();
+        } else {
+            mEosUiController.unloadActions();
+        }
+    }
+
+    private ContentObserver mNavigationAreaObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            updateNavControllerState();
+        }
+    };
 
     private ContentObserver mProvisioningObserver = new ContentObserver(new Handler()) {
         @Override
@@ -159,6 +203,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mDeviceProvisioned = provisioned;
                 updateNotificationIcons();
             }
+        }
+    };
+
+    private ContentObserver mClockSettingsObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            processClockSettingsChange();
         }
     };
 
@@ -203,10 +254,23 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mProvisioningObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_VISIBLE), false,
+                mClockSettingsObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_COLOR), false,
+                mClockSettingsObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE), false,
+                mNavigationAreaObserver);
+        isLongPressFeatureEnabled = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE,
+                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE_DEF) == 1;
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mStatusBarContainer = new FrameLayout(mContext);
+        mEosUiController = new EosUiController(mContext);
 
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
@@ -442,8 +506,17 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Provide SearchPanel with a temporary parent to allow layout params to work.
         LinearLayout tmpRoot = new LinearLayout(mContext);
-        mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
-                 R.layout.status_bar_search_panel, tmpRoot, false);
+        boolean isHybridUi = mContext.getResources()
+                .getBoolean(com.android.internal.R.bool.config_isHybridUiDevice);
+        if (isHybridUi && Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_USE_TABLET_UI,
+                EOSConstants.SYSTEMUI_USE_TABLET_UI_DEF) == 1) {
+            mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
+                    R.layout.status_bar_search_panel_tablet, tmpRoot, false);
+        } else {
+            mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
+                    R.layout.status_bar_search_panel, tmpRoot, false);
+        }
         mSearchPanelView.setOnTouchListener(
                  new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
         mSearchPanelView.setVisibility(View.GONE);
@@ -989,6 +1062,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract void updateExpandedViewPos(int expandedPosition);
     protected abstract int getExpandedViewMaxHeight();
     protected abstract boolean shouldDisableNavbarGestures();
+    protected abstract void processClockSettingsChange();
+    protected abstract void notifyUiVisibilityChanged();
 
     protected boolean isTopNotification(ViewGroup parent, NotificationData.Entry entry) {
         return parent != null && parent.indexOfChild(entry.row) == 0;

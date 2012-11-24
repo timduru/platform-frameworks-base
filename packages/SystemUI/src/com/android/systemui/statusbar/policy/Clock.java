@@ -22,9 +22,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.provider.Settings;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
@@ -44,6 +47,8 @@ import java.util.TimeZone;
 
 import com.android.internal.R;
 
+import org.teameos.jellybean.settings.EOSConstants;
+
 /**
  * This widget display an analogic clock with two hands for hours and
  * minutes.
@@ -57,8 +62,8 @@ public class Clock extends TextView {
     private static final int AM_PM_STYLE_NORMAL  = 0;
     private static final int AM_PM_STYLE_SMALL   = 1;
     private static final int AM_PM_STYLE_GONE    = 2;
-
-    private static final int AM_PM_STYLE = AM_PM_STYLE_GONE;
+    
+    private static int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
     public Clock(Context context) {
         this(context, null);
@@ -86,6 +91,10 @@ public class Clock extends TextView {
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
 
             getContext().registerReceiver(mIntentReceiver, filter, null, getHandler());
+
+            getContext().getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_AMPM), false,
+                    mClockAmPmObserver);
         }
 
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
@@ -95,7 +104,7 @@ public class Clock extends TextView {
         mCalendar = Calendar.getInstance(TimeZone.getDefault());
 
         // Make sure we update to the current time
-        updateClock();
+        updateAmPm();
     }
 
     @Override
@@ -103,6 +112,7 @@ public class Clock extends TextView {
         super.onDetachedFromWindow();
         if (mAttached) {
             getContext().unregisterReceiver(mIntentReceiver);
+            getContext().getContentResolver().unregisterContentObserver(mClockAmPmObserver);
             mAttached = false;
         }
     }
@@ -118,7 +128,7 @@ public class Clock extends TextView {
                     mClockFormat.setTimeZone(mCalendar.getTimeZone());
                 }
             }
-            updateClock();
+            updateAmPm();
         }
     };
 
@@ -204,5 +214,20 @@ public class Clock extends TextView {
         return result;
 
     }
+
+    private void updateAmPm() {
+        AM_PM_STYLE = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_CLOCK_AMPM,
+                EOSConstants.SYSTEMUI_CLOCK_AMPM_DEF);
+        mClockFormatString = null;
+        updateClock();
+    }
+    
+    private ContentObserver mClockAmPmObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            updateAmPm();
+        }
+    };
 }
 

@@ -21,7 +21,13 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.Gravity;
@@ -34,11 +40,15 @@ import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
+
+import org.teameos.jellybean.settings.EOSConstants;
 
 public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         View.OnClickListener {
@@ -62,9 +72,12 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     View mSettingsView;
     ViewGroup mContentParent;
     TabletStatusBar mBar;
-    View mClearButton;
+    ImageView mClearButton;
     static Interpolator sAccelerateInterpolator = new AccelerateInterpolator();
     static Interpolator sDecelerateInterpolator = new DecelerateInterpolator();
+
+    Drawable mBigButton;
+    Drawable mStockButton;
 
     // amount to slide mContentParent down by when mContentFrame is missing
     float mContentFrameMissingTranslation;
@@ -102,8 +115,15 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mContentFrameMissingTranslation = 0; // not needed with current assets
 
         // the "X" that appears in place of the clock when the panel is showing notifications
-        mClearButton = findViewById(R.id.clear_all_button);
+        mClearButton = (ImageView)findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
+
+        mClearButton.setAdjustViewBounds(true);
+        mStockButton = mClearButton.getDrawable();
+        int mBigX = Math.round(mStockButton.getIntrinsicWidth() * 1.5f);
+        int mBigY = Math.round(mStockButton.getIntrinsicHeight() * 1.5f);
+        Bitmap bigButton = Bitmap.createScaledBitmap(EosUiController.drawableToBitmap(mStockButton), mBigX, mBigY, true);
+        mBigButton = new BitmapDrawable(getResources(), bigButton);
 
         mShowing = false;
     }
@@ -117,6 +137,11 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
         mExpandHelper.setGravity(Gravity.BOTTOM);
+
+        // also set here for initial view
+        boolean mBigClearButton = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_TABLET_BIG_CLEAR_BUTTON, 0) == 1 ? true : false;
+        mClearButton.setImageDrawable(mBigClearButton ? mBigButton : mStockButton);
     }
 
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
@@ -174,6 +199,12 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     @Override
     public void onVisibilityChanged(View v, int vis) {
         super.onVisibilityChanged(v, vis);
+        // I think this is better than registering yet another observer
+        if (vis == View.VISIBLE) {
+            boolean mBigClearButton = Settings.System.getInt(mContext.getContentResolver(),
+                    EOSConstants.SYSTEMUI_TABLET_BIG_CLEAR_BUTTON, 0) == 1 ? true : false;
+            mClearButton.setImageDrawable(mBigClearButton ? mBigButton : mStockButton);
+        }
         // when we hide, put back the notifications
         if (vis != View.VISIBLE) {
             if (mSettingsView != null) removeSettingsView();

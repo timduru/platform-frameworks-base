@@ -54,8 +54,8 @@
                 android:src="@drawable/ic_sysbar_back"
                 systemui:keyCode="4"
                 android:layout_weight="0"
-                android:scaleType="center"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyIdentifier="0"
                 android:contentDescription="@string/accessibility_back"
                 />
             <View 
@@ -72,6 +72,7 @@
                 systemui:keyRepeat="false"
                 android:layout_weight="0"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyIdentifier="1"
                 android:contentDescription="@string/accessibility_home"
                 />
             <View 
@@ -86,6 +87,7 @@
                 android:src="@drawable/ic_sysbar_recent"
                 android:layout_weight="0"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyIdentifier="2"
                 android:contentDescription="@string/accessibility_recent"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
@@ -96,6 +98,7 @@
                 android:layout_weight="0"
                 android:visibility="invisible"
                 android:contentDescription="@string/accessibility_menu"
+                systemui:keyIdentifier="3"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 />
         </LinearLayout>
@@ -194,6 +197,7 @@
                 android:layout_weight="0"
                 android:visibility="invisible"
                 android:contentDescription="@string/accessibility_menu"
+                systemui:keyIdentifier="3"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
@@ -202,6 +206,7 @@
                 android:src="@drawable/ic_sysbar_recent_land"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_recent"
+                systemui:keyIdentifier="2"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 />
             <View 
@@ -218,6 +223,7 @@
                 systemui:keyRepeat="false"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_home"
+                systemui:keyIdentifier="1"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 />
             <View 
@@ -230,10 +236,10 @@
                 android:layout_height="80dp"
                 android:layout_width="match_parent"
                 android:src="@drawable/ic_sysbar_back_land"
-                android:scaleType="center"
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_back"
+                systemui:keyIdentifier="0"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 />
             <View

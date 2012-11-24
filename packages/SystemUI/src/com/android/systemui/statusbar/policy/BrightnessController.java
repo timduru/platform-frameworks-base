@@ -53,6 +53,10 @@ public class BrightnessController implements ToggleSlider.Listener {
     public interface BrightnessStateChangeCallback {
         public void onBrightnessLevelChanged();
     }
+    
+    public BrightnessController(Context context, ToggleSlider control) {
+    	this(context, null, control);
+    }
 
     public BrightnessController(Context context, ImageView icon, ToggleSlider control) {
         mContext = context;

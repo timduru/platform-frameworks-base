@@ -145,4 +145,16 @@ public class TvStatusBar extends BaseStatusBar {
     @Override
     public void animateExpandSettingsPanel() {
     }
+
+	@Override
+	protected void processClockSettingsChange() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void notifyUiVisibilityChanged() {
+		// TODO Auto-generated method stub
+		
+	}
 }

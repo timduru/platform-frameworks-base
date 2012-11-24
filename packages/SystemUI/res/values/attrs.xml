@@ -22,6 +22,11 @@
         <attr name="keyRepeat" format="boolean" />
         <!-- drawable to use for a swelling, glowing background on press -->
         <attr name="glowBackground" format="reference" />
+        <!-- scale factor for glowBackground for grouper special case -->
+        <attr name="glowScaleFactorWidth" format="float" />
+        <attr name="glowScaleFactorHeight" format="float" />
+        <!-- identifies for color controls and who knows what else -->
+        <attr name="keyIdentifier" format="integer" />
     </declare-styleable>
     <declare-styleable name="ToggleSlider">
         <attr name="text" format="string" />

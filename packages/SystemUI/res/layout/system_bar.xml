@@ -60,6 +60,9 @@
                     systemui:keyCode="4"
                     android:contentDescription="@string/accessibility_back"
                     systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                    systemui:glowScaleFactorWidth="0.65"
+                    systemui:glowScaleFactorHeight="0.75"
+                    systemui:keyIdentifier="0"
                     />
                 <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
                     android:layout_width="@dimen/navigation_key_width"
@@ -68,6 +71,9 @@
                     systemui:keyCode="3"
                     android:contentDescription="@string/accessibility_home"
                     systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                    systemui:glowScaleFactorWidth="0.65"
+                    systemui:glowScaleFactorHeight="0.75"
+                    systemui:keyIdentifier="1"
                     />
                 <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
                     android:layout_width="@dimen/navigation_key_width"
@@ -75,6 +81,9 @@
                     android:src="@drawable/ic_sysbar_recent"
                     android:contentDescription="@string/accessibility_recent"
                     systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                    systemui:glowScaleFactorWidth="0.65"
+                    systemui:glowScaleFactorHeight="0.75"
+                    systemui:keyIdentifier="2"
                     />
                 <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
                     android:layout_width="@dimen/navigation_menu_key_width"
@@ -84,6 +93,9 @@
                     android:visibility="invisible"
                     android:contentDescription="@string/accessibility_menu"
                     systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                    systemui:glowScaleFactorWidth="0.15"
+                    systemui:glowScaleFactorHeight="0.45"
+                    systemui:keyIdentifier="3"
                     />
             </LinearLayout>
 

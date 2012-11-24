@@ -1000,4 +1000,39 @@
          provisioning on some carriers, working around a bug (7305641)
          where if the preferred is used we don't try the others. -->
     <bool name="config_dontPreferApn">false</bool>
+
+        <!-- EOS device compat boolean -->
+    <bool name="config_hideMobileSignalOnWifi">false</bool>
+
+    <!-- Umts Everest RIL hacks -->
+    <bool name="config_umtsEverestRadio">false</bool>
+
+    <!-- Dock battery compatibility disabled by default -->
+    <bool name="config_hasDockBattery">false</bool>
+
+    <!-- Touchpad compatibility disabled by default -->
+    <bool name="config_hasTouchpad">false</bool>
+
+    <!-- disabled by default -->
+    <bool name="config_reportsIncorrectLidStatus">false</bool>
+
+    <!-- The number of degrees to rotate the display when the device is in a keyboard dock.
+         A value of -1 means no change in orientation by default. -->
+    <integer name="config_keyboardDockRotation">0</integer>
+
+    <!-- Control whether being in the keyboard dock should enable accelerometer based
+         screen orientation.  This defaults to false because putting a device in
+         a keyboard dock should lock in the default orientation. -->
+    <bool name="config_keyboardDockEnablesAccelerometer">false</bool>
+
+    <!-- Boolean to enable stk functionality on Samsung phones -->
+    <bool name="config_samsung_stk">false</bool>   
+
+    <!-- We now need to use a constant bool as reference
+         for whether or not this is a hybrid ui device, i.e. grouper. -->
+    <bool name="config_isHybridUiDevice">false</bool>
+
+    <!-- Set Max wallpaper width for high res screens (1920x1200),
+        wallpaper suggestion is too large for CPU to handle -->
+    <integer name="config_wallpaperMaxWidth">-1</integer>
 </resources>

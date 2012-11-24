@@ -22,12 +22,14 @@ import android.animation.LayoutTransition;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.animation.AccelerateInterpolator;
@@ -49,6 +51,8 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
 import com.android.systemui.statusbar.policy.DeadZone;
 
+import org.teameos.jellybean.settings.EOSConstants;
+
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
     final static String TAG = "PhoneStatusBar/NavigationBarView";
@@ -69,7 +73,7 @@ public class NavigationBarView extends LinearLayout {
     boolean mVertical;
     boolean mScreenOn;
 
-    boolean mHidden, mLowProfile, mShowMenu;
+    boolean mHidden, mLowProfile, mShowMenu, mShowMenuPersist;
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
 
@@ -77,6 +81,8 @@ public class NavigationBarView extends LinearLayout {
     
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
+	
+    private Context mContext;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
@@ -155,6 +161,7 @@ public class NavigationBarView extends LinearLayout {
 
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mContext = context;
 
         mHidden = false;
 
@@ -167,12 +174,23 @@ public class NavigationBarView extends LinearLayout {
         mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
         mVertical = false;
         mShowMenu = false;
+        mShowMenuPersist = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST, 0) == 1 ? true : false;
         mDelegateHelper = new DelegateViewHelper(this);
 
         mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
         mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
         mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST), false,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateMenuPersist();
+                    }
+                });
     }
 
     public void notifyScreenOn(boolean screenOn) {
@@ -260,6 +278,9 @@ public class NavigationBarView extends LinearLayout {
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
+		        if (mShowMenuPersist) {
+            getMenuButton().setVisibility(disableRecent    ? View.INVISIBLE : View.VISIBLE);
+        }
 
         getSearchLight().setVisibility((disableHome && !disableSearch) ? View.VISIBLE : View.GONE);
     }
@@ -363,6 +384,7 @@ public class NavigationBarView extends LinearLayout {
                                                 : findViewById(R.id.rot270);
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
+        updateMenuPersist();
     }
 
     public void reorient() {
@@ -511,4 +533,12 @@ public class NavigationBarView extends LinearLayout {
         pw.println("    }");
     }
 
+    private void updateMenuPersist() {
+        mShowMenuPersist = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST, 0) == 1 ? true : false;
+        findViewById(R.id.rot0).findViewById(R.id.menu)
+                .setVisibility(mShowMenuPersist ? View.VISIBLE : View.INVISIBLE);
+        findViewById(R.id.rot90).findViewById(R.id.menu)
+                .setVisibility(mShowMenuPersist ? View.VISIBLE : View.INVISIBLE);
+    }
 }

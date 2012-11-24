@@ -29,10 +29,13 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
+
+import org.teameos.jellybean.settings.EOSConstants;
 
 public class SystemUIService extends Service {
     static final String TAG = "SystemUIService";
@@ -68,19 +71,30 @@ public class SystemUIService extends Service {
 
     @Override
     public void onCreate() {
-        // Tell the accessibility layer that this process will
-        // run as the current user, i.e. run across users.
-        AccessibilityManager.createAsSharedAcrossUsers(this);
+		// Tell the accessibility layer that this process will
+		// run as the current user, i.e. run across users.
+		AccessibilityManager.createAsSharedAcrossUsers(this);
+		boolean isHybridUi = getResources().getBoolean(
+				com.android.internal.R.bool.config_isHybridUiDevice);
+		if (isHybridUi) {
+			boolean useTabletUi = (Settings.System.getInt(
+					this.getContentResolver(),
+					EOSConstants.SYSTEMUI_USE_TABLET_UI,
+					EOSConstants.SYSTEMUI_USE_TABLET_UI_DEF) == 1) ? true
+					: false;
+			SERVICES[0] = (useTabletUi) ? R.string.config_systemBarComponent
+					: R.string.config_statusBarComponent;
+		} else {
 
-        // Pick status bar or system bar.
-        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-        try {
-            SERVICES[0] = wm.hasSystemNavBar()
-                    ? R.string.config_systemBarComponent
-                    : R.string.config_statusBarComponent;
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Failing checking whether status bar can hide", e);
-        }
+			// Pick status bar or system bar.
+			IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+			try {
+				SERVICES[0] = wm.hasSystemNavBar() ? R.string.config_systemBarComponent
+						: R.string.config_statusBarComponent;
+			} catch (RemoteException e) {
+				Slog.w(TAG, "Failing checking whether status bar can hide", e);
+			}
+		}
 
         final int N = SERVICES.length;
         mServices = new SystemUI[N];
@@ -96,6 +110,7 @@ public class SystemUIService extends Service {
             }
             mServices[i].mContext = this;
             Slog.d(TAG, "running: " + mServices[i]);
+
             mServices[i].start();
         }
     }

@@ -114,6 +114,19 @@ public class StatusBarWindowView extends FrameLayout
         return handled;
     }
 
+	@Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        // TODO Auto-generated method stub
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility == View.VISIBLE) {
+            if (mService.mEosSettingsTop != null) mService.mEosSettingsTop.attach();
+            if (mService.mEosSettingsBottom != null) mService.mEosSettingsBottom.attach();
+        } else {
+            if (mService.mEosSettingsTop != null) mService.mEosSettingsTop.detach();
+            if (mService.mEosSettingsBottom != null) mService.mEosSettingsBottom.detach();
+        }
+    }
+
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);

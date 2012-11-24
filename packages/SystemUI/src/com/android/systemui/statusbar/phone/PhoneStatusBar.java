@@ -27,6 +27,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -88,6 +89,7 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.HorizontalPager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DateView;
@@ -98,9 +100,16 @@ import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.Prefs;
 
+import com.android.systemui.statusbar.policy.ToggleSlider;
+import com.android.systemui.statusbar.policy.VolumeController;
+import com.android.systemui.statusbar.policy.BrightnessController;
+import com.android.systemui.statusbar.preferences.EosSettings;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+
+import org.teameos.jellybean.settings.EOSConstants;
 
 public class PhoneStatusBar extends BaseStatusBar {
     static final String TAG = "PhoneStatusBar";
@@ -208,6 +217,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     View mClearButton;
     ImageView mSettingsButton, mNotificationButton;
 
+    // boolean to help with the public method
+    private boolean mIsClockVisible = true;
     // carrier/wifi label
     private TextView mCarrierLabel;
     private boolean mCarrierLabelVisible = false;
@@ -320,6 +331,14 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
     };
+    EosSettings mEosSettingsTop;
+    EosSettings mEosSettingsBottom;
+    ContentObserver mEosSettingsContentObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            processEosSettingsChange();
+        }
+    };
 
     @Override
     public void start() {
@@ -418,6 +437,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
+                setNavControllerParent(mNavigationBarView, getNavigationBarLayoutParams());
             }
         } catch (RemoteException ex) {
             // no window manager? good luck with that
@@ -484,6 +504,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mNotificationButton.setOnClickListener(mNotificationButtonListener);
             }
         }
+		new BrightnessController(mContext, (ToggleSlider) mStatusBarWindow.findViewById(R.id.brightness));
+		new VolumeController(mContext, (ToggleSlider) mStatusBarWindow.findViewById(R.id.volume));
 
         mScrollView = (ScrollView)mStatusBarWindow.findViewById(R.id.scroll);
         mScrollView.setVerticalScrollBarEnabled(false); // less drawing during pulldowns
@@ -493,6 +515,15 @@ public class PhoneStatusBar extends BaseStatusBar {
                     View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
                     View.STATUS_BAR_DISABLE_CLOCK);
         }
+
+        mNotificationPanel.findViewById(R.id.pager_receiver).setOnTouchListener(
+            new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                	((HorizontalPager) mStatusBarWindow.findViewById(R.id.eos_header_scroll)).receiveTouchEvent(event);
+                	return false;
+                }
+            });
 
         mTicker = new MyTicker(context, mStatusBarView);
 
@@ -507,7 +538,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         // Other icons
         mLocationController = new LocationController(mContext); // will post a notification
         mBatteryController = new BatteryController(mContext);
-        mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));
+		mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));
+		setBatteryController(mBatteryController);
+		processClockSettingsChange();
         mNetworkController = new NetworkController(mContext);
         mBluetoothController = new BluetoothController(mContext);
         final SignalClusterView signalCluster =
@@ -623,7 +656,17 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
+		filter.addAction(EOSConstants.INTENT_SYSTEMUI_REMOVE_BAR);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+		context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_PHONE_TOP), false,
+                mEosSettingsContentObserver);
+        context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_PHONE_BOTTOM), false,
+                mEosSettingsContentObserver);
+        processEosSettingsChange();
+        setStatusBar(mStatusBarView);
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
@@ -684,14 +727,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         return lp;
     }
 
-    protected void updateRecentsPanel() {
-        preloadRecentTasksList();
-    }
-
-    void onBarViewDetached() {
-     //   WindowManagerImpl.getDefault().removeView(mStatusBarWindow);
-    }
-
     @Override
     protected void updateSearchPanel() {
         super.updateSearchPanel();
@@ -702,6 +737,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void showSearchPanel() {
         super.showSearchPanel();
+		if (isNavBarRemoved()) return;
         mHandler.removeCallbacks(mShowSearchPanel);
 
         // we want to freeze the sysui state wherever it is
@@ -716,6 +752,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void hideSearchPanel() {
         super.hideSearchPanel();
+        if (isNavBarRemoved()) return;
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -799,8 +836,14 @@ public class PhoneStatusBar extends BaseStatusBar {
         mWindowManager.addView(mNavigationBarView, getNavigationBarLayoutParams());
     }
 
+    private boolean isNavBarRemoved() {
+        return (Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_HIDE_BARS,
+                EOSConstants.SYSTEMUI_HIDE_BARS_DEF) == 1) ? true : false;
+    }
     private void repositionNavigationBar() {
         if (mNavigationBarView == null) return;
+        if (isNavBarRemoved()) return;
 
         CustomTheme newTheme = mContext.getResources().getConfiguration().customTheme;
         if (newTheme != null &&
@@ -977,16 +1020,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         setAreThereNotifications();
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        try {
-            updateRecentsPanel();
-        } catch(android.view.InflateException avIE) {
-            Log.d(TAG, "Reinflation failure for the recents panel, new theme is '" + newConfig.customTheme + "' vs current '" + mContext.getResources().getConfiguration().customTheme + "'");
-        }
-        updateShowSearchHoldoff();
     }
 
     private void updateShowSearchHoldoff() {
@@ -1194,7 +1227,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mStatusBarView == null) return;
         View clock = mStatusBarView.findViewById(R.id.clock);
         if (clock != null) {
-            clock.setVisibility(show ? View.VISIBLE : View.GONE);
+            if (mIsClockVisible) {
+                clock.setVisibility(show ? View.VISIBLE : View.GONE);
+            } else {
+                clock.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -1663,6 +1700,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             mPostCollapseCleanup.run();
             mPostCollapseCleanup = null;
         }
+        ((HorizontalPager) mStatusBarWindow.findViewById(R.id.eos_header_scroll))
+                .setCurrentScreen(1, false);
     }
 
     /**
@@ -1902,7 +1941,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    private void notifyUiVisibilityChanged() {
+    protected void notifyUiVisibilityChanged() {
         try {
             mWindowManagerService.statusBarVisibilityChanged(mSystemUiVisibility);
         } catch (RemoteException ex) {
@@ -2093,6 +2132,14 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private void addStatusBarWindow() {
+        makeStatusBarView();
+        mStatusBarContainer.addView(mStatusBarWindow);
+        setStatusBarContainer(mStatusBarContainer, getStatusBarWindowParams());
+        mWindowManager.addView(mStatusBarContainer, getStatusBarWindowParams());
+        mContext.sendBroadcast(new Intent().setAction(EOSConstants.INTENT_SYSTEMUI_BAR_RESTORED));
+    }
+
+    private WindowManager.LayoutParams getStatusBarWindowParams() {
         // Put up the view
         final int height = getStatusBarHeight();
 
@@ -2114,9 +2161,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.setTitle("StatusBar");
         lp.packageName = mContext.getPackageName();
 
-        makeStatusBarView();
-        mStatusBarContainer.addView(mStatusBarWindow);
-        mWindowManager.addView(mStatusBarContainer, lp);
+        return lp;
     }
 
     void setNotificationIconVisibility(boolean visible, int anim) {
@@ -2320,6 +2365,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                 // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
                 repositionNavigationBar();
                 notifyNavigationBarScreenOn(true);
+			}
+            else if (EOSConstants.INTENT_SYSTEMUI_REMOVE_BAR.equals(action)) {
+                mContext.sendBroadcast(new Intent().setAction(EOSConstants.INTENT_SYSTEMUI_KILL_SERVICE));
+                System.exit(0);    
             }
         }
     };
@@ -2585,5 +2634,69 @@ public class PhoneStatusBar extends BaseStatusBar {
         @Override
         public void setBounds(Rect bounds) {
         }
+    }
+
+    protected void processClockSettingsChange() {
+        if (mStatusBarView == null) return;
+        TextView clock = (TextView) mStatusBarView.findViewById(R.id.clock);
+
+        mIsClockVisible = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_CLOCK_VISIBLE,
+                EOSConstants.SYSTEMUI_CLOCK_VISIBLE_DEF) == 1 ? true : false;
+        showClock(true);
+        int color = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_CLOCK_COLOR,
+                EOSConstants.SYSTEMUI_CLOCK_COLOR_DEF);
+        if (color == -1) {
+            color = mContext.getResources()
+                    .getColor(android.R.color.holo_blue_light);
+        }
+        clock.setTextColor(color);
+    }
+
+    private void processEosSettingsChange() {
+        ContentResolver resolver = mContext.getContentResolver();
+        ViewGroup topSettings = (ViewGroup) mStatusBarWindow.findViewById(R.id.eos_settings_top);
+        ViewGroup bottomSettings = (ViewGroup) mStatusBarWindow
+                .findViewById(R.id.eos_settings_bottom);
+        boolean eosSettingsEnabled = Settings.System.getInt(resolver,
+                EOSConstants.SYSTEMUI_SETTINGS_ENABLED,
+                EOSConstants.SYSTEMUI_SETTINGS_ENABLED_DEF) == 1;
+        boolean eosSettingsTop = Settings.System.getInt(resolver,
+                EOSConstants.SYSTEMUI_SETTINGS_PHONE_TOP,
+                EOSConstants.SYSTEMUI_SETTINGS_PHONE_TOP_DEF) == 1;
+        boolean eosSettingsBottom = Settings.System.getInt(resolver,
+                EOSConstants.SYSTEMUI_SETTINGS_PHONE_BOTTOM,
+                EOSConstants.SYSTEMUI_SETTINGS_PHONE_BOTTOM_DEF) == 1;
+        if ( (eosSettingsEnabled && eosSettingsTop) || (eosSettingsEnabled && !(eosSettingsTop || eosSettingsBottom))) {
+            if (mEosSettingsTop != null) {
+                mEosSettingsTop.detach();
+            }
+
+            mEosSettingsTop = new EosSettings(topSettings, mContext);
+            topSettings.setVisibility(View.VISIBLE);
+        } else {
+            if (mEosSettingsTop != null) {
+                mEosSettingsTop.detach();
+            }
+            topSettings.setVisibility(View.GONE);
+            topSettings.removeAllViews();
+        }
+
+        if (eosSettingsEnabled && eosSettingsBottom) {
+            if (mEosSettingsBottom != null) {
+                mEosSettingsBottom.detach();
+            }
+
+            mEosSettingsBottom = new EosSettings(bottomSettings, mContext);
+            bottomSettings.setVisibility(View.VISIBLE);
+        } else {
+            if (mEosSettingsBottom != null) {
+                mEosSettingsBottom.detach();
+            }
+            bottomSettings.setVisibility(View.GONE);
+            bottomSettings.removeAllViews();
+        }
+
     }
 }

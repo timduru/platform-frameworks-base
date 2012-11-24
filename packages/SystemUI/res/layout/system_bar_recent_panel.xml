@@ -61,12 +61,38 @@
 
         </com.android.systemui.recent.RecentsVerticalScrollView>
 
+        <Button android:id="@+id/recents_kill_all_button"
+            android:layout_gravity="bottom|left"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textColor="@android:color/holo_blue_dark"
+            android:text="@string/recents_kill_all_button_text" />
+
+        <ProgressBar android:id="@+id/recents_memory_bar" 
+            style="?android:attr/progressBarStyleHorizontal" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|left"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp" />
+
+        <TextView android:id="@+id/recents_memory_text" 
+            android:textColor="@android:color/holo_blue_dark"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|left"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp" />
+
         <include layout="@layout/system_bar_no_recent_apps"
             android:id="@+id/recents_no_apps"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginLeft="58dip"
-            android:layout_marginBottom="36dip"
+            android:layout_marginBottom="46dip"
             android:visibility="invisible" />
 
     </FrameLayout>

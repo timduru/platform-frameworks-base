@@ -31,14 +31,18 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.CustomTheme;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.inputmethodservice.InputMethodService;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
@@ -66,10 +70,12 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DoNotDisturb;
+import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CompatModeButton;
@@ -81,6 +87,8 @@ import com.android.systemui.statusbar.policy.Prefs;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+
+import org.teameos.jellybean.settings.EOSConstants;
 
 public class TabletStatusBar extends BaseStatusBar implements
         InputMethodsPanel.OnHardKeyboardEnabledChangeListener {
@@ -135,6 +143,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     View mMenuButton;
     View mRecentButton;
     private boolean mAltBackButtonEnabledForIme;
+    private boolean mShowMenuPersist = false;
 
     ViewGroup mFeedbackIconArea; // notification icons, IME icon, compat icon
     InputMethodButton mInputMethodSwitchButton;
@@ -183,6 +192,15 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     private int mShowSearchHoldoff = 0;
 
+    /**
+     * A boolean so that we can disable the IME button on sw600 tablets (i.e grouper), as they have
+     * a IME switch button in the notifications, and we don't have space for this view in portrait.
+     */
+    private boolean mIsSw600Device = false;
+
+    // boolean to help with the public method
+    private boolean mIsClockVisible = true;
+
     public Context getContext() { return mContext; }
 
     private Runnable mShowSearchPanel = new Runnable() {
@@ -218,7 +236,12 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     private void addStatusBarWindow() {
         final View sb = makeStatusBarView();
+        mStatusBarContainer.addView(sb);
+        mWindowManager.addView(mStatusBarContainer, getSystemBarWindowParams());
+        mContext.sendBroadcast(new Intent().setAction(EOSConstants.INTENT_SYSTEMUI_BAR_RESTORED));
+    }
 
+    private WindowManager.LayoutParams getSystemBarWindowParams() {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -236,7 +259,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.gravity = getStatusBarGravity();
         lp.setTitle("SystemBar");
         lp.packageName = mContext.getPackageName();
-        mWindowManager.addView(sb, lp);
+
+        return lp;
     }
 
     // last theme that was applied in order to detect theme change (as opposed
@@ -261,6 +285,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         mBatteryController.addIconView((ImageView)mNotificationPanel.findViewById(R.id.battery));
         mBatteryController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.battery_text));
+        setBatteryController(mBatteryController);
 
         // Bt
         mBluetoothController.addIconView(
@@ -477,7 +502,12 @@ public class TabletStatusBar extends BaseStatusBar implements
             reloadAllNotificationIcons(); // reload the tray
         }
 
-        final int numIcons = res.getInteger(R.integer.config_maxNotificationIcons);
+        int numIcons;
+        if (mIsSw600Device) {
+            numIcons = res.getInteger(R.integer.config_maxNotificationIcons_tablet);
+        }else {
+            numIcons = res.getInteger(R.integer.config_maxNotificationIcons);
+        }
         if (numIcons != mMaxNotificationIcons) {
             mMaxNotificationIcons = numIcons;
             if (DEBUG) Slog.d(TAG, "max notification icons: " + mMaxNotificationIcons);
@@ -492,6 +522,10 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     protected View makeStatusBarView() {
         final Context context = mContext;
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_USE_TABLET_UI, EOSConstants.SYSTEMUI_USE_TABLET_UI_DEF) == 1) {
+            mIsSw600Device = true;
+        }
 
         CustomTheme currentTheme = mContext.getResources().getConfiguration().customTheme;
         if (currentTheme != null) {
@@ -543,6 +577,9 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
+        // we are safe updating clock here as the method checks
+        // for a null statusbar
+        processClockSettingsChange();
         mBluetoothController = new BluetoothController(mContext);
         mBluetoothController.addIconView((ImageView)sb.findViewById(R.id.bluetooth));
 
@@ -558,6 +595,18 @@ public class TabletStatusBar extends BaseStatusBar implements
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
         mRecentButton.setOnClickListener(mOnClickListener);
+        mShowMenuPersist = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST, 0) == 1 ? true : false;
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST), false,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateMenuPersist();
+                    }
+                });
+        updateMenuPersist();
 
         LayoutTransition lt = new LayoutTransition();
         lt.setDuration(250);
@@ -651,7 +700,12 @@ public class TabletStatusBar extends BaseStatusBar implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        context.registerReceiver(mBroadcastReceiver, filter);
+        filter.addAction(EOSConstants.INTENT_SYSTEMUI_REMOVE_BAR);
+        context.registerReceiver(mBroadcastReceiver, filter);        
+
+        // initialize the NavAreaController here
+        // after all the dust has settled
+        setNavControllerParent(mStatusBarView, getSystemBarWindowParams());
 
         return sb;
     }
@@ -713,18 +767,21 @@ public class TabletStatusBar extends BaseStatusBar implements
     public void showSearchPanel() {
         super.showSearchPanel();
         WindowManager.LayoutParams lp =
-            (android.view.WindowManager.LayoutParams) mStatusBarView.getLayoutParams();
+            (android.view.WindowManager.LayoutParams) mStatusBarContainer.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        mWindowManager.updateViewLayout(mStatusBarView, lp);
+        mWindowManager.updateViewLayout(mStatusBarContainer, lp);
     }
 
     @Override
     public void hideSearchPanel() {
         super.hideSearchPanel();
+        boolean hideBar = (Settings.System.getInt(mContext.getContentResolver(), EOSConstants.SYSTEMUI_HIDE_BARS,
+                EOSConstants.SYSTEMUI_HIDE_BARS_DEF) == 1) ? true : false;
+        if (hideBar) return;
         WindowManager.LayoutParams lp =
-            (android.view.WindowManager.LayoutParams) mStatusBarView.getLayoutParams();
+            (android.view.WindowManager.LayoutParams) mStatusBarContainer.getLayoutParams();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        mWindowManager.updateViewLayout(mStatusBarView, lp);
+        mWindowManager.updateViewLayout(mStatusBarContainer, lp);
     }
 
     public int getStatusBarHeight() {
@@ -934,10 +991,16 @@ public class TabletStatusBar extends BaseStatusBar implements
         View clock = mBarContents.findViewById(R.id.clock);
         View network_text = mBarContents.findViewById(R.id.network_text);
         if (clock != null) {
-            clock.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-        if (network_text != null) {
-            network_text.setVisibility((!show) ? View.VISIBLE : View.GONE);
+            if (mIsClockVisible) {
+                clock.setVisibility(show ? View.VISIBLE : View.GONE);
+            } else {
+                clock.setVisibility(View.GONE);
+                if (network_text != null) {
+                    // if i don't want to see my clock, why for 
+                    // goodness sakes would I want to see this?
+                    network_text.setVisibility(View.GONE);
+                }
+            }
         }
     }
 
@@ -1003,7 +1066,9 @@ public class TabletStatusBar extends BaseStatusBar implements
         mBackButton.setVisibility(disableBack ? View.INVISIBLE : View.VISIBLE);
         mHomeButton.setVisibility(disableHome ? View.INVISIBLE : View.VISIBLE);
         mRecentButton.setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
-
+        if (mShowMenuPersist) {
+            mMenuButton.setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
+        }
         mInputMethodSwitchButton.setScreenLocked(
                 (visibility & StatusBarManager.DISABLE_SYSTEM_INFO) != 0);
     }
@@ -1104,7 +1169,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                 : R.drawable.ic_sysbar_back);
     }
 
-    private void notifyUiVisibilityChanged() {
+    protected void notifyUiVisibilityChanged() {
         try {
             mWindowManagerService.statusBarVisibilityChanged(mSystemUiVisibility);
         } catch (RemoteException ex) {
@@ -1150,7 +1215,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         if (DEBUG) {
             Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
         }
-        mMenuButton.setVisibility(showMenu ? View.VISIBLE : View.GONE);
+        if (!mShowMenuPersist) mMenuButton.setVisibility(showMenu ? View.VISIBLE : View.GONE);
 
         // See above re: lights-out policy for legacy apps.
         if (showMenu) setLightsOn(true);
@@ -1209,10 +1274,12 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
-        mInputMethodSwitchButton.setImeWindowStatus(token,
-                (vis & InputMethodService.IME_ACTIVE) != 0);
-        updateNotificationIcons();
-        mInputMethodsPanel.setImeToken(token);
+        if (!mIsSw600Device) {
+            mInputMethodSwitchButton.setImeWindowStatus(token,
+                    (vis & InputMethodService.IME_ACTIVE) != 0);
+            updateNotificationIcons();
+            mInputMethodsPanel.setImeToken(token);
+        }
 
         boolean altBack = (backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS)
             || ((vis & InputMethodService.IME_VISIBLE) != 0);
@@ -1558,6 +1625,9 @@ public class TabletStatusBar extends BaseStatusBar implements
                     }
                 }
                 animateCollapsePanels(flags);
+            } else if (EOSConstants.INTENT_SYSTEMUI_REMOVE_BAR.equals(action)) {
+                mContext.sendBroadcast(new Intent().setAction(EOSConstants.INTENT_SYSTEMUI_KILL_SERVICE));
+                System.exit(0);
             }
         }
     };
@@ -1588,6 +1658,32 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected boolean shouldDisableNavbarGestures() {
         return mNotificationPanel.getVisibility() == View.VISIBLE
                 || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
+    }
+
+    protected void processClockSettingsChange() {
+        if (mStatusBarView == null) return;
+        TextView clock = (TextView) mStatusBarView.findViewById(R.id.clock);
+
+        mIsClockVisible = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_CLOCK_VISIBLE,
+                EOSConstants.SYSTEMUI_CLOCK_VISIBLE_DEF) == 1 ? true : false;
+        showClock(true);
+        int color = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_CLOCK_COLOR,
+                EOSConstants.SYSTEMUI_CLOCK_COLOR_DEF);
+        if (color == -1) {
+            if (color == -1) {
+                color = mContext.getResources()
+                        .getColor(android.R.color.holo_blue_light);
+            }
+        }
+        clock.setTextColor(color);
+    }    
+
+	private void updateMenuPersist() {
+        mShowMenuPersist = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST, 0) == 1 ? true : false;
+        mMenuButton.setVisibility(mShowMenuPersist ? View.VISIBLE : View.INVISIBLE);
     }
 }
 

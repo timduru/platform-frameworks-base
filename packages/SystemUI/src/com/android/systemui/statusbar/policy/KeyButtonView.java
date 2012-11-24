@@ -16,17 +16,26 @@
 
 package com.android.systemui.statusbar.policy;
 
+import java.util.Arrays;
+
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.RectF;
 import android.hardware.input.InputManager;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.HapticFeedbackConstants;
@@ -42,8 +51,11 @@ import android.widget.ImageView;
 
 import com.android.systemui.R;
 
+import org.teameos.jellybean.settings.EOSConstants;
+
 public class KeyButtonView extends ImageView {
     private static final String TAG = "StatusBar.KeyButtonView";
+    private static Mode mMode = Mode.SRC_ATOP;
 
     final float GLOW_MAX_SCALE_FACTOR = 1.8f;
     final float BUTTON_QUIESCENT_ALPHA = 0.70f;
@@ -57,21 +69,54 @@ public class KeyButtonView extends ImageView {
     boolean mSupportsLongpress = true;
     RectF mRect = new RectF(0f,0f,0f,0f);
     AnimatorSet mPressedAnim;
+    boolean mDisabled = false;
+    boolean mIsLongPressing = false;
+    boolean mIsSw600Device = false;
+    boolean mIsTabletMode = false;
+    float glowScaleWidth;
+    float glowScaleHeight;
+    IWindowManager mWindowManager;
+    int mKeyFilterColor;
+    int mGlowFilterColor;
+    int mKeyIndex;
 
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
                 // Slog.d("KeyButtonView", "longpressed: " + this);
-                if (mCode != 0) {
+                if (mCode != 0  && !mDisabled) {
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
                 } else {
                     // Just an old-fashioned ImageView
+                    mIsLongPressing = true;
+                    if (mDisabled) {
+                        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                    }
                     performLongClick();
                 }
             }
         }
     };
+
+	private static int parseColorString(String colorString, int index) {
+		if (colorString == null || colorString.equals("") || colorString.equals(" ")) {
+			return -1;
+		}
+		String[] colors = colorString.split("\\|");
+		int color;
+		try {
+			color = Integer.parseInt(colors[index]);
+		} catch (NumberFormatException e) {
+			color = -1;
+		}
+		return color;
+	}
+
+    public void disableLongPressIntercept(Boolean disable) {
+        mDisabled = disable;
+    }
 
     public KeyButtonView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -82,9 +127,33 @@ public class KeyButtonView extends ImageView {
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.KeyButtonView,
                 defStyle, 0);
+        
+        // only apply special case to tablet mode
+        mWindowManager = IWindowManager.Stub.asInterface(
+                ServiceManager.getService(Context.WINDOW_SERVICE));
+        try {
+            mIsTabletMode = mWindowManager.hasSystemNavBar();
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        // apply special case to sw600 device in table tablet mode
+        // use this call from tabletstatusbar to try and trim the 
+        // GlowBG width some. We need to do this because the glow
+        // bleeds into the notfication area. Also, we don't want to
+        // change the background resource name because it will interfere
+        // with themes
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_USE_TABLET_UI, EOSConstants.SYSTEMUI_USE_TABLET_UI_DEF) == 1) {
+            mIsSw600Device = true;
+        }
 
         mCode = a.getInteger(R.styleable.KeyButtonView_keyCode, 0);
-        
+        mKeyIndex = a.getInteger(R.styleable.KeyButtonView_keyIdentifier, 0);
+        glowScaleWidth = a.getFloat(R.styleable.KeyButtonView_glowScaleFactorWidth, 1.0f);
+        glowScaleHeight = a.getFloat(R.styleable.KeyButtonView_glowScaleFactorHeight, 1.0f);
+
         mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
 
         mGlowBG = a.getDrawable(R.styleable.KeyButtonView_glowBackground);
@@ -92,18 +161,86 @@ public class KeyButtonView extends ImageView {
             setDrawingAlpha(BUTTON_QUIESCENT_ALPHA);
             mGlowWidth = mGlowBG.getIntrinsicWidth();
             mGlowHeight = mGlowBG.getIntrinsicHeight();
+            if (mIsTabletMode && mIsSw600Device) {
+                mGlowWidth = Math.round(mGlowWidth*glowScaleWidth);
+                mGlowHeight = Math.round(mGlowHeight*glowScaleHeight);
+            }
         }
-        
+
         a.recycle();
 
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVKEY_COLOR), false,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateKeyFilter();
+                    }
+                });
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVGLOW_COLOR), false,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateGlowFilter();
+                    }
+                });
+        mKeyFilterColor = parseColorString(Settings.System.getString(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_NAVKEY_COLOR), mKeyIndex);
+        mGlowFilterColor = parseColorString(Settings.System.getString(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_NAVGLOW_COLOR), mKeyIndex);
     }
+
+	private void updateKeyFilter() {
+		int color = parseColorString(Settings.System.getString(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_NAVKEY_COLOR), mKeyIndex);
+		if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
+			mKeyFilterColor = EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF;
+		} else {
+			mKeyFilterColor = Color.argb(0xFF, Color.red(color),
+					Color.green(color), Color.blue(color));
+		}
+		applyKeyFilter(mKeyFilterColor);
+	}
+
+	private void applyKeyFilter(int color) {
+		if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
+			getDrawable().clearColorFilter();
+			invalidate();
+			return;
+		} else {
+			getDrawable().setColorFilter(color, mMode);
+		}
+	}
+
+	private void updateGlowFilter() {
+		int color = parseColorString(Settings.System.getString(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_NAVGLOW_COLOR), mKeyIndex);
+		if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
+			mGlowFilterColor = EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF;
+		} else {
+			mGlowFilterColor = Color.argb(0xFF, Color.red(color),
+					Color.green(color), Color.blue(color));
+		}
+	}
+
+	private void applyGlowFilter(int color) {
+		if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
+			mGlowBG.clearColorFilter();
+			invalidate();
+			return;
+		} else {
+			mGlowBG.setColorFilter(color, mMode);
+		}
+	}
 
     @Override
     protected void onDraw(Canvas canvas) {
         if (mGlowBG != null) {
             canvas.save();
+            applyGlowFilter(mGlowFilterColor);
             final int w = getWidth();
             final int h = getHeight();
             final float aspect = (float)mGlowWidth / mGlowHeight;
@@ -118,7 +255,24 @@ public class KeyButtonView extends ImageView {
             mRect.right = w;
             mRect.bottom = h;
         }
+        applyKeyFilter(mKeyFilterColor);
         super.onDraw(canvas);
+    }
+
+    public int getKeyCode() {
+        return mCode;
+    }
+
+    public void setKeyCode(int keyCode) {
+        mCode = keyCode;
+    }
+
+    public boolean getSupportsLongPress() {
+        return mSupportsLongpress;
+    }
+
+    public void setSupportsLongPress(boolean longPress) {
+        mSupportsLongpress = longPress;
     }
 
     public float getDrawingAlpha() {
@@ -210,6 +364,8 @@ public class KeyButtonView extends ImageView {
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getAction();
         int x, y;
+        // update regardless of motion event
+        // applyColorFilter(mKeyFilterColor);
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
@@ -237,18 +393,19 @@ public class KeyButtonView extends ImageView {
                 break;
             case MotionEvent.ACTION_CANCEL:
                 setPressed(false);
-                if (mCode != 0) {
+                if (mCode != 0 && !mIsLongPressing) {
                     sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
                 }
                 if (mSupportsLongpress) {
                     removeCallbacks(mCheckLongPress);
+                    mIsLongPressing = false;
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 final boolean doIt = isPressed();
                 setPressed(false);
                 if (mCode != 0) {
-                    if (doIt) {
+                    if (doIt & !mIsLongPressing) {
                         sendEvent(KeyEvent.ACTION_UP, 0);
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                         playSoundEffect(SoundEffectConstants.CLICK);
@@ -257,12 +414,13 @@ public class KeyButtonView extends ImageView {
                     }
                 } else {
                     // no key code, just a regular ImageView
-                    if (doIt) {
+                    if (doIt & !mIsLongPressing) {
                         performClick();
                     }
                 }
                 if (mSupportsLongpress) {
                     removeCallbacks(mCheckLongPress);
+                    mIsLongPressing = false;
                 }
                 break;
         }

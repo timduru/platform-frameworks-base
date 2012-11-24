@@ -123,6 +123,8 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 
+import org.teameos.jellybean.settings.EOSConstants;
+
 /**
  * @hide
  */
@@ -369,11 +371,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         // setup our unique device name
         if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
-            String id = Settings.Secure.getString(context.getContentResolver(),
-                    Settings.Secure.ANDROID_ID);
-            if (id != null && id.length() > 0) {
-                String name = new String("android-").concat(id);
-                SystemProperties.set("net.hostname", name);
+            String overrideHostname = Settings.System.getString(context.getContentResolver(),
+                    EOSConstants.NET_HOSTNAME);
+            if (!TextUtils.isEmpty(overrideHostname)) {
+                SystemProperties.set("net.hostname", overrideHostname);
+            } else {
+                String id = Settings.Secure.getString(context.getContentResolver(),
+                        Settings.Secure.ANDROID_ID);
+                if (id != null && id.length() > 0) {
+                    String name = new String("android-").concat(id);
+                    SystemProperties.set("net.hostname", name);
+                }
             }
         }
 

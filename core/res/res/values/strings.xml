@@ -3997,5 +3997,13 @@
     <string name="eos_globalactions_reboot_bootloader">Bootloader</string>
     <string name="eos_globalactions_reboot_recovery">Recovery</string>
     <string name="reboot_title">Reboot</string>
-
+    <string name="eos_globalactions_hide_systembar_title">Tablet Statusbar mode</string>
+    <string name="eos_globalactions_hide_statusbar_title">Statusbar mode</string>
+    <string name="eos_globalactions_hide_bars_title">Systembars mode</string>
+    <string name="eos_globalactions_hide_systembar_visible">Tablet Statusbar is visible</string>
+    <string name="eos_globalactions_hide_statusbar_visible">Statusbar is visible</string>
+    <string name="eos_globalactions_hide_bars_visible">Systembars are visible</string>
+    <string name="eos_globalactions_hide_systembar_hidden">Tablet Statusbar is hidden</string>
+    <string name="eos_globalactions_hide_statusbar_hidden">Statusbar is hidden</string>
+    <string name="eos_globalactions_hide_bars_hidden">Systembars are hidden</string>
 </resources>

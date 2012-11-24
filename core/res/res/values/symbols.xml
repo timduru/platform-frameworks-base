@@ -37,6 +37,26 @@
   <java-symbol type="string" name="eos_globalactions_reboot_bootloader" />
   <java-symbol type="string" name="eos_globalactions_reboot_recovery" />
   <java-symbol type="string" name="reboot_title" />
+  <java-symbol type="string" name="eos_globalactions_hide_systembar_title" />
+  <java-symbol type="string" name="eos_globalactions_hide_statusbar_title" />
+  <java-symbol type="string" name="eos_globalactions_hide_bars_title" />
+  <java-symbol type="string" name="eos_globalactions_hide_systembar_visible" />
+  <java-symbol type="string" name="eos_globalactions_hide_statusbar_visible" />
+  <java-symbol type="string" name="eos_globalactions_hide_bars_visible" />
+  <java-symbol type="string" name="eos_globalactions_hide_systembar_hidden" />
+  <java-symbol type="string" name="eos_globalactions_hide_statusbar_hidden" />
+  <java-symbol type="string" name="eos_globalactions_hide_bars_hidden" />
+
+  <java-symbol type="bool" name="config_hideMobileSignalOnWifi" />
+  <java-symbol type="bool" name="config_umtsEverestRadio" />
+  <java-symbol type="bool" name="config_hasDockBattery" />
+  <java-symbol type="bool" name="config_reportsIncorrectLidStatus" />
+  <java-symbol type="bool" name="config_keyboardDockEnablesAccelerometer" />
+  <java-symbol type="bool" name="config_samsung_stk" />
+  <java-symbol type="bool" name="config_isHybridUiDevice" />
+
+  <java-symbol type="integer" name="config_keyboardDockRotation" />
+  <java-symbol type="integer" name="config_wallpaperMaxWidth" />
 
 <!-- End Eos symbols -->
 <eat-comment />
