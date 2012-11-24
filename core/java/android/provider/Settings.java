@@ -2646,6 +2646,14 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS =
             Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS;
+
+         /**
+         * Expanded desktop
+         * @hide
+         */
+        public static final String EXPANDED_DESKTOP_STATE = "expanded_desktop_state";
+        public static final String POWER_MENU_EXPANDED_DESKTOP_ENABLED = "power_menu_expanded_desktop_enabled";
+
     }
 
     /**
@@ -5482,6 +5490,7 @@ public final class Settings {
          * @hide
          */
         public static final String SELINUX_STATUS = "selinux_status";
+
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
