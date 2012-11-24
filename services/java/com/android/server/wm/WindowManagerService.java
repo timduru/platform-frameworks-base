@@ -5437,6 +5437,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     // Called by window manager policy.  Not exposed externally.
+    // added by bigrushdog for eos
+	@Override
+	public void reboot(Object object, boolean confirm) {
+        ShutdownThread.reboot(getUiContext(), (String)object, confirm);	
+	}
+
+    // Called by window manager policy.  Not exposed externally.
     @Override
     public void rebootSafeMode(boolean confirm) {
         ShutdownThread.rebootSafeMode(getUiContext(), confirm);

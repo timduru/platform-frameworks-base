@@ -3992,4 +3992,10 @@
     <!-- Default name of the owner user [CHAR LIMIT=20] -->
     <string name="owner_name" msgid="3879126011135546571">Owner</string>
 
+    <!-- Eos Strings -->
+    <string name="eos_globalactions_reboot">Reboot</string>
+    <string name="eos_globalactions_reboot_bootloader">Bootloader</string>
+    <string name="eos_globalactions_reboot_recovery">Recovery</string>
+    <string name="reboot_title">Reboot</string>
+
 </resources>
