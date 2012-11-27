@@ -154,6 +154,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.teameos.jellybean.settings.*;
+
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
  * introduces a new method suffix, Lp, for an internal lock of the
@@ -270,6 +272,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mNavigationBarOnBottom = true; // is the navigation bar on the bottom *right now*?
     int[] mNavigationBarHeightForRotation = new int[4];
     int[] mNavigationBarWidthForRotation = new int[4];
+    // we need 100% certainty if this is a hybrid ui device
+    boolean mIsHybridUi = false;
+    // low profile mode smaller system/nav bar
+    boolean mLowProfile = false;
 
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
@@ -552,7 +558,56 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             updateRotation(false);
         }
     }
-    
+
+    class EosUiModeObserver extends ContentObserver {
+        ContentResolver resolver;
+        EosUiModeObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    EOSConstants.SYSTEMUI_USE_TABLET_UI), false, this);
+            updateUiMode();
+        }
+
+        @Override public void onChange(boolean selfChange) {
+            updateUiMode();
+            setNavigationBarSize();
+            mContext.sendBroadcast(new Intent().setAction(Intent.ACTION_CONFIGURATION_CHANGED));
+        }
+
+        void updateUiMode() {
+            boolean isTabletMode = (Settings.System.getInt(resolver,
+                    EOSConstants.SYSTEMUI_USE_TABLET_UI,
+                    EOSConstants.SYSTEMUI_USE_TABLET_UI_DEF) == 1) ? true : false;
+            mHasSystemNavBar = isTabletMode ? true : false;
+            mHasNavigationBar = !mHasSystemNavBar;
+        }
+    }
+
+    class EosBarModeObserver extends ContentObserver {
+        ContentResolver resolver;
+
+        EosBarModeObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    EOSConstants.SYSTEMUI_BAR_SIZE_MODE), false, this);
+            setNavigationBarSize();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            setNavigationBarSize();
+            mContext.sendBroadcast(new Intent().setAction(Intent.ACTION_CONFIGURATION_CHANGED));
+        }
+    }
+
     class MyOrientationListener extends WindowOrientationListener {
         MyOrientationListener(Context context) {
             super(context);
@@ -863,6 +918,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } catch (RemoteException ex) { }
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
+        mIsHybridUi = mContext.getResources()
+                .getBoolean(com.android.internal.R.bool.config_isHybridUiDevice);
+        if(mIsHybridUi) {
+            EosUiModeObserver eosUiModeObserver = new EosUiModeObserver(mHandler);
+            eosUiModeObserver.observe();
+        }
+        EosBarModeObserver eosBarModeObserver = new EosBarModeObserver(mHandler);
+        eosBarModeObserver.observe();
         mShortcutManager = new ShortcutManager(context, mHandler);
         mShortcutManager.observe();
         mHomeIntent =  new Intent(Intent.ACTION_MAIN, null);
@@ -948,6 +1011,35 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void setNavigationBarSize() {
+        // get low profile settings here
+        // for now only apply to navigation bar
+        mLowProfile = (Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0) == 1) && mHasNavigationBar;
+            mNavigationBarHeightForRotation[mPortraitRotation] =
+            mNavigationBarHeightForRotation[mUpsideDownRotation] =
+                mContext.getResources()
+                    .getDimensionPixelSize(mLowProfile ? 
+                         com.android.internal.R.dimen.navigation_bar_height_low_profile
+                         : com.android.internal.R.dimen.navigation_bar_height);
+            mNavigationBarHeightForRotation[mLandscapeRotation] =
+            mNavigationBarHeightForRotation[mSeascapeRotation] =
+                mContext.getResources()
+                     .getDimensionPixelSize(mLowProfile ?
+                         com.android.internal.R.dimen.navigation_bar_height_landscape_low_profile
+                         : com.android.internal.R.dimen.navigation_bar_height_landscape);
+
+            // Width of the navigation bar when presented vertically along
+            // one side
+            mNavigationBarWidthForRotation[mPortraitRotation] =
+            mNavigationBarWidthForRotation[mUpsideDownRotation] =
+            mNavigationBarWidthForRotation[mLandscapeRotation] =
+            mNavigationBarWidthForRotation[mSeascapeRotation] =
+                mContext.getResources()
+                    .getDimensionPixelSize(mLowProfile ?
+                         com.android.internal.R.dimen.navigation_bar_width_low_profile
+                         : com.android.internal.R.dimen.navigation_bar_width);
+    }
     public void setInitialDisplaySize(Display display, int width, int height, int density) {
         mDisplay = display;
 
@@ -983,34 +1075,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
 
-        // Height of the navigation bar when presented horizontally at bottom
-        mNavigationBarHeightForRotation[mPortraitRotation] =
-        mNavigationBarHeightForRotation[mUpsideDownRotation] =
-                mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height);
-        mNavigationBarHeightForRotation[mLandscapeRotation] =
-        mNavigationBarHeightForRotation[mSeascapeRotation] =
-                mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height_landscape);
-
-        // Width of the navigation bar when presented vertically along one side
-        mNavigationBarWidthForRotation[mPortraitRotation] =
-        mNavigationBarWidthForRotation[mUpsideDownRotation] =
-        mNavigationBarWidthForRotation[mLandscapeRotation] =
-        mNavigationBarWidthForRotation[mSeascapeRotation] =
-                mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_width);
-
         // SystemUI (status bar) layout policy
         int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
 
-        if (shortSizeDp < 600) {
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_USE_TABLET_UI, EOSConstants.SYSTEMUI_USE_TABLET_UI_DEF) == 1) {
+            mHasSystemNavBar = true;
+            mNavigationBarCanMove = false;
+        } else if (shortSizeDp < 600) {
             // 0-599dp: "phone" UI with a separate status & navigation bar
             mHasSystemNavBar = false;
             mNavigationBarCanMove = true;
         } else if (shortSizeDp < 720) {
             // 600+dp: "phone" UI with modifications for larger screens
             mHasSystemNavBar = false;
+            mNavigationBarCanMove = false;
+        } else {
+            // 720dp: "tablet" UI with a single combined status & navigation bar
+            mHasSystemNavBar = true;
             mNavigationBarCanMove = false;
         }
 
@@ -1027,6 +1109,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             mHasNavigationBar = false;
         }
+
+        // set it here once all the bar state
+        // bools have been initialized
+        setNavigationBarSize();
 
         if (mHasSystemNavBar) {
             // The system bar is always at the bottom.  If you are watching
@@ -3241,11 +3327,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Tell the audio service to adjust the volume appropriate to the event.
      * @param keycode
      */
-    void handleVolumeKey(int stream, int keycode) {
+    void handleVolumeKey(int stream, int key) {
+        int keycode = key;
+
         IAudioService audioService = getAudioService();
         if (audioService == null) {
             return;
         }
+
+        try {
+            if (Settings.System.getInt(mContext.getContentResolver(),
+                    EOSConstants.SYSTEM_VOLUME_KEYS_SWITCH_ON_ROTATION,
+                    EOSConstants.SYSTEM_VOLUME_KEYS_SWITCH_ON_ROTATION_DEF) == 1) {
+                int rotation = mWindowManager.getRotation();
+                if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_180) {
+                    // Switch the volume keys around.
+                    if (keycode == KeyEvent.KEYCODE_VOLUME_UP)
+                        keycode = KeyEvent.KEYCODE_VOLUME_DOWN;
+                    else
+                        keycode = KeyEvent.KEYCODE_VOLUME_UP;
+                }
+            }
+        } catch (RemoteException e1) {
+        }
+
         try {
             // since audio is playing, we shouldn't have to hold a wake lock
             // during the call, but we do it as a precaution for the rare possibility

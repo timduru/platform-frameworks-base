@@ -37,6 +37,7 @@ import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -53,6 +54,7 @@ import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -70,6 +72,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.internal.app.ThemeUtils;
+
+import org.teameos.jellybean.settings.EOSConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,12 +97,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private Context mUiContext;
     private final AudioManager mAudioManager;
     private final IDreamManager mDreamManager;
+    private IWindowManager mIWindowManager;
 
     private ArrayList<Action> mItems;
     private GlobalActionsDialog mDialog;
 
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
+    private SystemBarsToggleAction mSystemBarsToggleAction;
 
     private MyAdapter mAdapter;
 
@@ -109,6 +115,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mHasTelephony;
     private boolean mHasVibrator;
     private boolean mRebootMenu = false;
+    private boolean mHasNavBar = false;
+    private boolean mHasSystemBar = false;
+    private boolean mHasStatBarOnly = false;
 
     /**
      * @param context everything needs a context :(
@@ -139,8 +148,22 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
+        if (mContext.getResources().getBoolean(R.bool.config_isHybridUiDevice)) {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(EOSConstants.SYSTEMUI_USE_TABLET_UI), true,
+                    mHybridUiObserver);
+        }
         Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = vibrator != null && vibrator.hasVibrator();
+        try {
+            mHasNavBar = getWindowManager().hasNavigationBar();
+            mHasSystemBar = getWindowManager().hasSystemNavBar();
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        mHasStatBarOnly = false;
+        if (!mHasNavBar && !mHasSystemBar) mHasStatBarOnly = true;
     }
 
     /**
@@ -190,6 +213,44 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mUiContext = ThemeUtils.createUiContext(mContext);
         }
         return mUiContext != null ? mUiContext : mContext;
+    }
+
+    // helper methods to help properly initialize the show/hide bars feature
+    // based on the proper device configuration
+    private int getTitle() {
+        if (mHasSystemBar) {
+            return R.string.eos_globalactions_hide_systembar_title;
+        } else if (mHasNavBar) {
+            return R.string.eos_globalactions_hide_bars_title;
+        } else if (mHasStatBarOnly) {
+            return R.string.eos_globalactions_hide_statusbar_title;
+        } else {
+            return R.string.eos_globalactions_hide_statusbar_title;
+        }
+    }
+
+    private int getStatusOn() {
+        if (mHasSystemBar) {
+            return R.string.eos_globalactions_hide_systembar_hidden;
+        } else if (mHasNavBar) {
+            return R.string.eos_globalactions_hide_bars_hidden;
+        } else if (mHasStatBarOnly) {
+            return R.string.eos_globalactions_hide_statusbar_hidden;
+        } else {
+            return R.string.eos_globalactions_hide_statusbar_hidden;
+        }
+    }
+
+    private int getStatusOff() {
+        if (mHasSystemBar) {
+            return R.string.eos_globalactions_hide_systembar_visible;
+        } else if (mHasNavBar) {
+            return R.string.eos_globalactions_hide_bars_visible;
+        } else if (mHasStatBarOnly) {
+            return R.string.eos_globalactions_hide_statusbar_visible;
+        } else {
+            return R.string.eos_globalactions_hide_statusbar_visible;
+        }
     }
 
     /**
@@ -285,6 +346,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 			}
 		};
 		onAirplaneModeChanged();
+
+		mSystemBarsToggleAction = new SystemBarsToggleAction();
 
 		mItems = new ArrayList<Action>();
 
@@ -404,6 +467,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 		if (SystemProperties.getBoolean("fw.power_user_switcher", false)) {
 			addUsersToMenu(mItems);
 		}
+		mItems.add(mSystemBarsToggleAction);
 	}
 
 	private void createRebootMenuItems() {
@@ -520,6 +584,24 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             ((ToggleAction)mSilentModeAction).updateState(
                     silentModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
         }
+    }
+
+	private void refreshBarMode() {
+        try {
+            mHasNavBar = getWindowManager().hasNavigationBar();
+            mHasSystemBar = getWindowManager().hasSystemNavBar();
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        mHasStatBarOnly = false;
+        if (!mHasNavBar && !mHasSystemBar)
+            mHasStatBarOnly = true;
+        final boolean mBarHidden = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_HIDE_BARS,
+                EOSConstants.SYSTEMUI_HIDE_BARS_DEF) == 1 ? true : false;
+        ((ToggleAction) mSystemBarsToggleAction).updateState(
+                mBarHidden ? ToggleAction.State.On : ToggleAction.State.Off);
     }
 
     /** {@inheritDoc} */
@@ -858,6 +940,33 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             return false;
         }
     }
+    
+    private class SystemBarsToggleAction extends ToggleAction {
+        public SystemBarsToggleAction() {
+            super(com.android.internal.R.drawable.ic_lock_reboot_recovery,
+                    com.android.internal.R.drawable.ic_lock_reboot_recovery,
+                    getTitle(), getStatusOn(), getStatusOff());
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        @Override
+        void onToggle(boolean on) {
+            // TODO Auto-generated method stub
+            Settings.System.putInt(mContext.getContentResolver(),
+                    EOSConstants.SYSTEMUI_HIDE_BARS, on ? 1 : 0);
+        }
+    }
 
     private static class SilentModeTriStateAction implements Action, View.OnClickListener {
 
@@ -983,6 +1092,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     };
 
+    private ContentObserver mHybridUiObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            mHandler.sendEmptyMessage(MESSAGE_REFRESH);
+        }
+    };
+
     private static final int MESSAGE_DISMISS = 0;
     private static final int MESSAGE_REFRESH = 1;
     private static final int MESSAGE_SHOW = 2;
@@ -998,6 +1114,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 break;
             case MESSAGE_REFRESH:
                 refreshSilentMode();
+                refreshBarMode();
                 mAdapter.notifyDataSetChanged();
                 break;
             case MESSAGE_SHOW:
@@ -1151,5 +1268,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
             return super.onKeyUp(keyCode, event);
         }
+    }
+
+    private IWindowManager getWindowManager() {
+        if (mIWindowManager == null) {
+            IBinder b = ServiceManager.getService(Context.WINDOW_SERVICE);
+            mIWindowManager = IWindowManager.Stub.asInterface(b);
+        }
+        return mIWindowManager;
     }
 }

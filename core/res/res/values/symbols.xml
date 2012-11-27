@@ -57,6 +57,10 @@
 
   <java-symbol type="integer" name="config_keyboardDockRotation" />
   <java-symbol type="integer" name="config_wallpaperMaxWidth" />
+  
+  <java-symbol type="dimen" name="navigation_bar_height_low_profile" />
+  <java-symbol type="dimen" name="navigation_bar_height_landscape_low_profile" />
+  <java-symbol type="dimen" name="navigation_bar_width_low_profile" />
 
 <!-- End Eos symbols -->
 <eat-comment />
