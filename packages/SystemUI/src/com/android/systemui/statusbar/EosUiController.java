@@ -468,7 +468,7 @@ public class EosUiController extends ActionHandler {
                 EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE,
                 EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE_DEF) == 1) {
             if (batteryText != null) {
-                mBatteryController.addLabelView(batteryText);
+//                mBatteryController.addLabelView(batteryText);
                 batteryText.setVisibility(View.VISIBLE);
             }
         } else {
