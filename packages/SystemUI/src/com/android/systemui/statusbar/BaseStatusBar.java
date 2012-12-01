@@ -506,17 +506,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Provide SearchPanel with a temporary parent to allow layout params to work.
         LinearLayout tmpRoot = new LinearLayout(mContext);
-        boolean isHybridUi = mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_isHybridUiDevice);
-        if (isHybridUi && Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_USE_TABLET_UI,
-                EOSConstants.SYSTEMUI_USE_TABLET_UI_DEF) == 1) {
-            mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
-                    R.layout.status_bar_search_panel_tablet, tmpRoot, false);
-        } else {
-            mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
-                    R.layout.status_bar_search_panel, tmpRoot, false);
-        }
+        mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
+                 R.layout.status_bar_search_panel, tmpRoot, false);
         mSearchPanelView.setOnTouchListener(
                  new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
         mSearchPanelView.setVisibility(View.GONE);
@@ -1063,7 +1054,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract int getExpandedViewMaxHeight();
     protected abstract boolean shouldDisableNavbarGestures();
     protected abstract void processClockSettingsChange();
-    protected abstract void notifyUiVisibilityChanged();
 
     protected boolean isTopNotification(ViewGroup parent, NotificationData.Entry entry) {
         return parent != null && parent.indexOfChild(entry.row) == 0;

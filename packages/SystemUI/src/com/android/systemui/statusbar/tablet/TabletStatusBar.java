@@ -238,7 +238,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         final View sb = makeStatusBarView();
         mStatusBarContainer.addView(sb);
         mWindowManager.addView(mStatusBarContainer, getSystemBarWindowParams());
-        mContext.sendBroadcast(new Intent().setAction(EOSConstants.INTENT_SYSTEMUI_BAR_RESTORED));
     }
 
     private WindowManager.LayoutParams getSystemBarWindowParams() {
@@ -502,12 +501,7 @@ public class TabletStatusBar extends BaseStatusBar implements
             reloadAllNotificationIcons(); // reload the tray
         }
 
-        int numIcons;
-        if (mIsSw600Device) {
-            numIcons = res.getInteger(R.integer.config_maxNotificationIcons_tablet);
-        }else {
-            numIcons = res.getInteger(R.integer.config_maxNotificationIcons);
-        }
+        final int numIcons = res.getInteger(R.integer.config_maxNotificationIcons);
         if (numIcons != mMaxNotificationIcons) {
             mMaxNotificationIcons = numIcons;
             if (DEBUG) Slog.d(TAG, "max notification icons: " + mMaxNotificationIcons);
@@ -522,10 +516,6 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     protected View makeStatusBarView() {
         final Context context = mContext;
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_USE_TABLET_UI, EOSConstants.SYSTEMUI_USE_TABLET_UI_DEF) == 1) {
-            mIsSw600Device = true;
-        }
 
         CustomTheme currentTheme = mContext.getResources().getConfiguration().customTheme;
         if (currentTheme != null) {
@@ -700,7 +690,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(EOSConstants.INTENT_SYSTEMUI_REMOVE_BAR);
         context.registerReceiver(mBroadcastReceiver, filter);        
 
         // initialize the NavAreaController here
@@ -1169,7 +1158,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                 : R.drawable.ic_sysbar_back);
     }
 
-    protected void notifyUiVisibilityChanged() {
+    private void notifyUiVisibilityChanged() {
         try {
             mWindowManagerService.statusBarVisibilityChanged(mSystemUiVisibility);
         } catch (RemoteException ex) {
@@ -1274,12 +1263,10 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
-        if (!mIsSw600Device) {
-            mInputMethodSwitchButton.setImeWindowStatus(token,
-                    (vis & InputMethodService.IME_ACTIVE) != 0);
-            updateNotificationIcons();
-            mInputMethodsPanel.setImeToken(token);
-        }
+        mInputMethodSwitchButton.setImeWindowStatus(token,
+                (vis & InputMethodService.IME_ACTIVE) != 0);
+        updateNotificationIcons();
+        mInputMethodsPanel.setImeToken(token);
 
         boolean altBack = (backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS)
             || ((vis & InputMethodService.IME_VISIBLE) != 0);
@@ -1625,9 +1612,6 @@ public class TabletStatusBar extends BaseStatusBar implements
                     }
                 }
                 animateCollapsePanels(flags);
-            } else if (EOSConstants.INTENT_SYSTEMUI_REMOVE_BAR.equals(action)) {
-                mContext.sendBroadcast(new Intent().setAction(EOSConstants.INTENT_SYSTEMUI_KILL_SERVICE));
-                System.exit(0);
             }
         }
     };

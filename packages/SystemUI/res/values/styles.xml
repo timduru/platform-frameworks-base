@@ -58,36 +58,7 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@android:color/holo_blue_light</item>
     </style>
-    
-        <style name="StatusBarPanelSettingsRow">
-        <item name="android:paddingRight">16dp</item>
-        <item name="android:layout_height">64dp</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:orientation">horizontal</item>
-        <item name="android:background">?android:attr/listChoiceBackgroundIndicator</item>
-    </style>
 
-    <style name="StatusBarPanelSettingsIcon">
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_width">64dp</item>
-        <item name="android:scaleType">center</item>
-    </style>
-
-    <style name="StatusBarPanelSettingsContents">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:layout_gravity">left|center_vertical</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">18sp</item>
-    </style>
-
-    <style name="StatusBarPanelSettingsPanelSeparator">
-        <item name="android:layout_marginRight">0dp</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">1dp</item>
-        <item name="android:background">@android:drawable/divider_horizontal_dark</item>
-    </style>
 
     <!-- Duplicate of TextAppearance.StatusBar.Clock, because TextAppearance.StatusBar.Clock gets
          overwritten in sw600dp, but we also need to retain the original value for the
@@ -98,7 +69,6 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@android:color/holo_blue_light</item>
     </style>
-
     <style name="TextAppearance.StatusBar.Date" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">16dp</item>
         <item name="android:textStyle">normal</item>
@@ -106,7 +76,7 @@
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
-    
+
     <style name="TextAppearance.StatusBar.Expanded.Clock">
         <item name="android:textSize">32dp</item>
         <item name="android:fontFamily">sans-serif-light</item>
@@ -201,7 +171,7 @@
         <!-- Note: must be dp to fit in status bar -->
         <item name="android:textSize">14dp</item>
     </style>
-    
+
     <style name="TextAppearance.StatusBar.BatteryText"
         parent="@*android:style/TextAppearance.StatusBar">
         <item name="android:textSize">16dp</item>

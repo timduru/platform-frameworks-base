@@ -44,11 +44,6 @@
         android:layout_marginBottom="@dimen/close_handle_height"
         android:layout_gravity="bottom"
         />
-                                    <LinearLayout
-        android:id="@+id/pager_receiver"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="top" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -58,7 +53,7 @@
         android:animateLayoutChanges="false"
         >
 
-        <include layout="@layout/eos_status_bar_expanded_header"
+        <include layout="@layout/status_bar_expanded_header"
             android:layout_width="match_parent"
             android:layout_height="@dimen/notification_panel_header_height"
             />
@@ -104,13 +99,12 @@
                     systemui:rowHeight="@dimen/notification_row_min_height"
                     />
             </ScrollView>
-
-            <LinearLayout
+        </FrameLayout>
+	            <LinearLayout
                 android:id="@+id/eos_settings_bottom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="34dp"
                 android:visibility="gone" />
-        </FrameLayout>
     </LinearLayout>
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->

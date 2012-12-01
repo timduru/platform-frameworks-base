@@ -151,10 +151,4 @@ public class TvStatusBar extends BaseStatusBar {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	protected void notifyUiVisibilityChanged() {
-		// TODO Auto-generated method stub
-		
-	}
 }

@@ -117,7 +117,7 @@
     
             <com.android.systemui.statusbar.policy.Clock
                 android:id="@+id/clock"
-                android:textAppearance="@style/TextAppearance.StatusBar.Clock.Phone"
+                android:textAppearance="@style/TextAppearance.StatusBar.Clock"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:singleLine="true"

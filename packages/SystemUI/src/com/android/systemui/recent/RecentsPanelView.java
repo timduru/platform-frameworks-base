@@ -20,7 +20,6 @@ import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
-import android.app.ActivityManager.MemoryInfo;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
@@ -29,7 +28,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
@@ -37,7 +35,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -54,9 +51,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -70,13 +64,6 @@ import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 import java.util.ArrayList;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import org.teameos.jellybean.settings.EOSConstants;
 
 public class RecentsPanelView extends FrameLayout implements OnItemClickListener, RecentsCallback,
         StatusBarPanel, Animator.AnimatorListener {
@@ -102,8 +89,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private int mRecentItemLayoutId;
     private boolean mHighEndGfx;
 
-    private Button mRecentsKillAllButton;
-    private ContentObserver mRecentsKillAllButtonObserver;
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
         public void setAdapter(TaskDescriptionAdapter adapter);
@@ -458,17 +443,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 ((BitmapDrawable) mRecentsScrim.getBackground()).setTileModeY(TileMode.REPEAT);
             }
         }
-        mRecentsKillAllButtonObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateRecentsKillAllButton();
-            }
-        };
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_RECENTS_KILLALL_BUTTON), false,
-                mRecentsKillAllButtonObserver);
-
-        updateRecentsKillAllButton();
     }
 
     public void setMinSwipeAlpha(float minAlpha) {
@@ -787,93 +761,5 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             }
         });
         popup.show();
-    }
-
-    private void updateRecentsKillAllButton() {
-        boolean enableKillallButton = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_RECENTS_KILLALL_BUTTON, 0) == 1;
-
-        mRecentsKillAllButton = (Button) findViewById(R.id.recents_kill_all_button);
-        if (mRecentsKillAllButton != null) {
-            if (enableKillallButton) {
-                mRecentsKillAllButton.setVisibility(View.VISIBLE);
-                mRecentsKillAllButton.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        killAllRecentApps();
-                    }
-                });
-            } else {
-                mRecentsKillAllButton.setVisibility(View.GONE);
-                mRecentsKillAllButton.setOnClickListener(null);
-            }
-        }
-    }
-
-    private void killAllRecentApps() {
-        final ActivityManager am = (ActivityManager) mContext
-                .getSystemService(Context.ACTIVITY_SERVICE);
-        if (!mRecentTaskDescriptions.isEmpty()) {
-            for (TaskDescription ad : mRecentTaskDescriptions) {
-                am.removeTask(ad.persistentTaskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
-                // Accessibility feedback
-                setContentDescription(mContext.getString(
-                        R.string.accessibility_recents_item_dismissed, ad.getLabel()));
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-                setContentDescription(null);
-            }
-            mRecentTaskDescriptions.clear();
-        }
-    }
-
-    private boolean showMemDisplay() {
-        boolean enableMemDisplay = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_RECENTS_MEM_DISPLAY, 0) == 1;
-
-        final TextView memText = (TextView) findViewById(R.id.recents_memory_text);
-        final ProgressBar memBar = (ProgressBar) findViewById(R.id.recents_memory_bar);
-
-        if (!enableMemDisplay) {
-            memText.setVisibility(View.GONE);
-            memBar.setVisibility(View.GONE);
-            return false;
-        }
-
-        memText.setVisibility(View.VISIBLE);
-        memBar.setVisibility(View.VISIBLE);
-
-        int totalMem = getTotalMemory();
-        memBar.setMax(totalMem);
-
-        int availMem = Integer.parseInt(getAvailMemory());
-        memText.setText("Free RAM: " + String.valueOf(availMem) + "MB");
-        memBar.setProgress(totalMem - availMem);
-
-        return true;
-    }
-
-    private String getAvailMemory() {
-        MemoryInfo memInfo = new MemoryInfo();
-        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        am.getMemoryInfo(memInfo);
-        long availableMem = memInfo.availMem / 1048576L;
-        return String.valueOf(availableMem);
-    }
-
-    public int getTotalMemory() {
-        String str1 = "/proc/meminfo";
-        String str2;
-        String[] arrayOfString;
-        int memory = 0;
-        try {
-            FileReader localFileReader = new FileReader(str1);
-            BufferedReader localBufferedReader = new BufferedReader(localFileReader, 8192);
-            str2 = localBufferedReader.readLine(); // meminfo
-            arrayOfString = str2.split("\\s+");
-            memory = Integer.valueOf(arrayOfString[1]).intValue() * 1024;
-            localBufferedReader.close();
-        } catch (IOException e) { //
-        }
-        return memory / 1048576;
     }
 }

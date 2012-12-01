@@ -504,8 +504,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mNotificationButton.setOnClickListener(mNotificationButtonListener);
             }
         }
-		new BrightnessController(mContext, (ToggleSlider) mStatusBarWindow.findViewById(R.id.brightness));
-		new VolumeController(mContext, (ToggleSlider) mStatusBarWindow.findViewById(R.id.volume));
 
         mScrollView = (ScrollView)mStatusBarWindow.findViewById(R.id.scroll);
         mScrollView.setVerticalScrollBarEnabled(false); // less drawing during pulldowns
@@ -515,15 +513,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                     View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
                     View.STATUS_BAR_DISABLE_CLOCK);
         }
-
-        mNotificationPanel.findViewById(R.id.pager_receiver).setOnTouchListener(
-            new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                	((HorizontalPager) mStatusBarWindow.findViewById(R.id.eos_header_scroll)).receiveTouchEvent(event);
-                	return false;
-                }
-            });
 
         mTicker = new MyTicker(context, mStatusBarView);
 
@@ -656,7 +645,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
-		filter.addAction(EOSConstants.INTENT_SYSTEMUI_REMOVE_BAR);
         context.registerReceiver(mBroadcastReceiver, filter);
 
 		context.getContentResolver().registerContentObserver(
@@ -1700,8 +1688,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             mPostCollapseCleanup.run();
             mPostCollapseCleanup = null;
         }
-        ((HorizontalPager) mStatusBarWindow.findViewById(R.id.eos_header_scroll))
-                .setCurrentScreen(1, false);
     }
 
     /**
@@ -1941,7 +1927,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    protected void notifyUiVisibilityChanged() {
+    private void notifyUiVisibilityChanged() {
         try {
             mWindowManagerService.statusBarVisibilityChanged(mSystemUiVisibility);
         } catch (RemoteException ex) {
@@ -2136,7 +2122,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mStatusBarContainer.addView(mStatusBarWindow);
         setStatusBarContainer(mStatusBarContainer, getStatusBarWindowParams());
         mWindowManager.addView(mStatusBarContainer, getStatusBarWindowParams());
-        mContext.sendBroadcast(new Intent().setAction(EOSConstants.INTENT_SYSTEMUI_BAR_RESTORED));
+//        mContext.sendBroadcast(new Intent().setAction(EOSConstants.INTENT_SYSTEMUI_BAR_RESTORED));
     }
 
     private WindowManager.LayoutParams getStatusBarWindowParams() {
@@ -2366,10 +2352,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 repositionNavigationBar();
                 notifyNavigationBarScreenOn(true);
 			}
-            else if (EOSConstants.INTENT_SYSTEMUI_REMOVE_BAR.equals(action)) {
-                mContext.sendBroadcast(new Intent().setAction(EOSConstants.INTENT_SYSTEMUI_KILL_SERVICE));
-                System.exit(0);    
-            }
         }
     };
 

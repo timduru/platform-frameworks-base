@@ -22,14 +22,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         >
-	
-	<LinearLayout
-            android:id="@+id/eos_settings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            />
 
     <!-- Airplane mode -->
     <LinearLayout
@@ -101,27 +93,8 @@
             android:id="@+id/rotate_separator"
             style="@style/SystemBarPanelSettingsPanelSeparator" />
 
-    <!-- Volume -->
-    <LinearLayout style="@style/StatusBarPanelSettingsRow" android:id="@+id/volume_row">
-        <ImageView
-                android:id="@+id/eos_sound_icon"
-                style="@style/StatusBarPanelSettingsIcon"
-                />
-        <com.android.systemui.statusbar.policy.ToggleSlider
-                android:id="@+id/volume"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:layout_weight="1"
-                android:layout_marginRight="2dp"
-                systemui:text="@string/statusbar_eos_volume_slider_label"
-                />
-    </LinearLayout>
-     <View
-            android:id="@+id/rotate_separator"
-            style="@style/StatusBarPanelSettingsPanelSeparator" />
-
     <!-- Brightness -->
-    <LinearLayout style="@style/SystemBarPanelSettingsRow" android:id="@+id/brightness_row">
+    <LinearLayout style="@style/SystemBarPanelSettingsRow" >
         <ImageView
                 android:id="@+id/brightness_icon"
                 style="@style/SystemBarPanelSettingsIcon"

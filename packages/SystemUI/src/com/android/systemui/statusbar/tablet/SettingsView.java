@@ -25,7 +25,6 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.widget.LinearLayout;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -37,8 +36,6 @@ import com.android.systemui.statusbar.policy.BrightnessController;
 import com.android.systemui.statusbar.policy.DoNotDisturbController;
 import com.android.systemui.statusbar.policy.ToggleSlider;
 import com.android.systemui.statusbar.policy.VolumeController;
-import com.android.systemui.statusbar.preferences.EosSettings;
-import org.teameos.jellybean.settings.EOSConstants;
 
 public class SettingsView extends LinearLayout implements View.OnClickListener {
     static final String TAG = "SettingsView";
@@ -47,11 +44,8 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
     AutoRotateController mRotate;
     BrightnessController mBrightness;
     DoNotDisturbController mDoNotDisturb;
-    VolumeController mVolume;
     View mRotationLockContainer;
     View mRotationLockSeparator;
-
-    EosSettings mEosSettings;
 
     public SettingsView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -78,11 +72,8 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
                 new AutoRotateController.RotationLockCallbacks() {
                     @Override
                     public void setRotationLockControlVisibility(boolean show) {
-                        if (Settings.System.getInt(mContext.getContentResolver(),
-                                EOSConstants.SYSTEMUI_SETTINGS_STANDARD_ROTATION, 1) == 1) {
-                            mRotationLockContainer.setVisibility(show ? View.VISIBLE : View.GONE);
-                            mRotationLockSeparator.setVisibility(show ? View.VISIBLE : View.GONE);
-                        }
+                        mRotationLockContainer.setVisibility(show ? View.VISIBLE : View.GONE);
+                        mRotationLockSeparator.setVisibility(show ? View.VISIBLE : View.GONE);
                     }
                 });
 
@@ -92,44 +83,6 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
         mDoNotDisturb = new DoNotDisturbController(context,
                 (CompoundButton)findViewById(R.id.do_not_disturb_checkbox));
         findViewById(R.id.settings).setOnClickListener(this);
-
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SETTINGS_ENABLED, EOSConstants.SYSTEMUI_SETTINGS_ENABLED_DEF) == 1) {
-            findViewById(R.id.eos_settings).setVisibility(View.VISIBLE);
-            mEosSettings = new EosSettings((ViewGroup) findViewById(R.id.eos_settings), context);
-        }
-
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SETTINGS_STANDARD_AIRPLANE, 1) == 0)
-            findViewById(R.id.airplane).setVisibility(View.GONE);
-
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SETTINGS_STANDARD_WIFI, 1) == 0)
-            findViewById(R.id.network).setVisibility(View.GONE);
-
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SETTINGS_STANDARD_ROTATION, 1) == 0)
-            findViewById(R.id.rotate).setVisibility(View.GONE);
-
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SETTINGS_STANDARD_BRIGHTNESS, 1) == 0)
-            findViewById(R.id.brightness_row).setVisibility(View.GONE);
-
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SETTINGS_STANDARD_NOTIFICATIONS, 1) == 0)
-            findViewById(R.id.do_not_disturb).setVisibility(View.GONE);
-
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SETTINGS_STANDARD_VOLUME,
-                EOSConstants.SYSTEMUI_SETTINGS_STANDARD_VOLUME_DEF) == 1) {
-            mVolume = new VolumeController(mContext, (ToggleSlider) findViewById(R.id.volume));
-        } else {
-            findViewById(R.id.volume_row).setVisibility(View.GONE);
-        }
-
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SETTINGS_STANDARD_SETTINGS, 1) == 0)
-            findViewById(R.id.settings).setVisibility(View.GONE);
     }
 
     @Override
