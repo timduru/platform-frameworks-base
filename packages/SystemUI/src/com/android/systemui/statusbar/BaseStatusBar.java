@@ -172,10 +172,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mEosUiController.setStatusBarContainer(v, lp);
     }
 
-    protected void setBatteryController(BatteryController bc) {
-    	mEosUiController.setBatteryController(bc);
-    }
-
     protected void updateNavControllerState() {
         isLongPressFeatureEnabled = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE,

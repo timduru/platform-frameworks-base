@@ -284,7 +284,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         mBatteryController.addIconView((ImageView)mNotificationPanel.findViewById(R.id.battery));
         mBatteryController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.battery_text));
-        setBatteryController(mBatteryController);
 
         // Bt
         mBluetoothController.addIconView(

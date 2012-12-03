@@ -23,7 +23,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.os.BatteryManager;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Slog;
 import android.widget.ImageView;
@@ -39,8 +41,7 @@ public class BatteryController extends BroadcastReceiver {
     private Context mContext;
     private ArrayList<ImageView> mIconViews = new ArrayList<ImageView>();
     private ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
-	
-	private boolean mLastPlugged = false;
+
     private int mLastPercentage = 0;
 
     private ArrayList<BatteryStateChangeCallback> mChangeCallbacks =
@@ -56,6 +57,34 @@ public class BatteryController extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         context.registerReceiver(this, filter);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE), false,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateLabelPercent();
+                    }
+                });
+    }
+    
+    private void updateLabelPercent() {
+        int N = mLabelViews.size();
+        for (int i = 0; i < N; i++) {
+            TextView v = mLabelViews.get(i);
+            String label = mContext.getString(
+                    R.string.status_bar_settings_battery_meter_format,
+                    mLastPercentage);
+            if (v.getTag() != null
+                    && v.getTag().equals(
+                            EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
+                if (Settings.System.getInt(mContext.getContentResolver(),
+                        EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE,
+                        EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
+                    label = trimPercent(label);
+                }
+            }
+            v.setText(label);
+        }
     }
 
     public void addIconView(ImageView v) {
@@ -96,7 +125,6 @@ public class BatteryController extends BroadcastReceiver {
             final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
             final boolean plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
             mLastPercentage = level;
-            mLastPlugged = plugged;
             final int icon = plugged ? R.drawable.stat_sys_battery_charge 
                                      : R.drawable.stat_sys_battery;
             int N = mIconViews.size();
@@ -108,24 +136,22 @@ public class BatteryController extends BroadcastReceiver {
                         level));
             }
             N = mLabelViews.size();
-			for (int i = 0; i < N; i++) {
-				TextView v = mLabelViews.get(i);
-				String label = mContext.getString(
-						R.string.status_bar_settings_battery_meter_format,
-						mLastPercentage);
-				if (v.getTag() != null
-						&& v.getTag().equals(
-								EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
-					if (Settings.System.getInt(mContext.getContentResolver(),
-							EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE,
-							EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
-						label = trimPercent(label);
-					}
-				}
-				v.setText(mContext.getString(
-						R.string.status_bar_settings_battery_meter_format,
-						level));
-			}
+            for (int i = 0; i < N; i++) {
+                TextView v = mLabelViews.get(i);
+                String label = mContext.getString(
+                        R.string.status_bar_settings_battery_meter_format,
+                        mLastPercentage);
+                if (v.getTag() != null
+                        && v.getTag().equals(
+                                EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
+                    if (Settings.System.getInt(mContext.getContentResolver(),
+                            EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE,
+                            EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
+                        label = trimPercent(label);
+                    }
+                }
+                v.setText(label);
+            }
 
             for (BatteryStateChangeCallback cb : mChangeCallbacks) {
                 cb.onBatteryLevelChanged(level, plugged);
