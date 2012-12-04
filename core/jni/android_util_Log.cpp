@@ -22,6 +22,9 @@
 #include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -32,6 +35,10 @@
 #define MIN(a,b) ((a<b)?a:b)
 
 namespace android {
+
+static int loggingMode = -1;
+static int loggingUids [100];
+static int loggingUidsCount = 0;
 
 struct levels_t {
     jint verbose;
@@ -55,6 +62,58 @@ static int toLevel(const char* value)
         case 'S': return -1; // SUPPRESS
     }
     return levels.info;
+}
+
+static int canUidLog() {
+    int uid = getuid();
+    int i = 0;
+    if (loggingMode == 2) { // Let everything log.
+        return 1;
+    } else if (loggingMode == -1) { // Default value and need to load settings.
+        FILE *file;
+        char line [50];
+
+        /* Load the logging mode */
+        file = fopen("/eos/uids_mode", "r");
+        if (file == NULL) {
+            loggingMode = -2; // Unknown, let everything log.
+            return 1; // Let the application log.
+        } else {
+            if (fgets(line, sizeof(line), file) != NULL) {
+                if (strncmp("whitelist", line, 9) == 0) {
+                    loggingMode = 1;
+                } else if (strncmp("blacklist", line, 9) == 0) {
+                    loggingMode = 0;
+                } else {
+                    loggingMode = 2;
+                }
+            }
+
+            fclose(file);
+            if (loggingMode == 2) {
+                return 1;
+            }
+        }
+
+        /* Load the user ids */
+        file = fopen("/eos/uids_list", "r");
+        if (file != NULL) {
+            i = 0;
+            while (fgets (line, sizeof(line), file) != NULL) {
+                if (i < sizeof(loggingUids)) {
+                    loggingUids[i] = atoi(line);
+                    loggingUidsCount++;
+                }
+            }
+            fclose(file);
+        }
+    }
+
+    for (i = 0; i < loggingUidsCount && i < sizeof(loggingUids); i++) {
+        if (uid == loggingUids[i]) return loggingMode;
+    }
+
+    return loggingMode == 1 ? 0 : 1;
 }
 
 static jboolean isLoggable(const char* tag, jint level) {
@@ -110,6 +169,10 @@ static jint android_util_Log_println_native(JNIEnv* env, jobject clazz,
 {
     const char* tag = NULL;
     const char* msg = NULL;
+
+    if (canUidLog() == 0) {
+        return 0;
+    }
 
     if (msgObj == NULL) {
         jniThrowNullPointerException(env, "println needs a message");
