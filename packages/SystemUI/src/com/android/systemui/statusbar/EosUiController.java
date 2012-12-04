@@ -49,6 +49,8 @@ public class EosUiController extends ActionHandler {
     static final int RECENT_KEY = com.android.systemui.R.id.recent_apps;
     static final int MENU_KEY = com.android.systemui.R.id.menu;
 
+    private ArrayList<View> mBatteryList = new ArrayList<View>();
+
     // we'll cheat just a little to help with the two navigation bar views
     static final int NAVBAR_ROT_90 = com.android.systemui.R.id.rot90;
     static final int NAVBAR_ROT_0 = com.android.systemui.R.id.rot0;
@@ -78,7 +80,6 @@ public class EosUiController extends ActionHandler {
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams mSystemBarParams;
     private WindowManager.LayoutParams mStatusBarParams;
-    private BatteryController mBatteryController;
     private boolean mHasNavBar = false;
     private boolean mHasStatusBar = false;
     private boolean mHasSystemBar = false;
@@ -145,10 +146,6 @@ public class EosUiController extends ActionHandler {
             mContext.registerReceiver(mEosInterfaceReceiver, filter);
         }
     }
-    
-    public void setBatteryController(BatteryController bc) {
-    	mBatteryController = bc;
-    }
 
     class EosInterfaceReceiver extends BroadcastReceiver {
         @Override
@@ -184,6 +181,17 @@ public class EosUiController extends ActionHandler {
                     }
                 });
         updateStatusBarColor();
+
+        // now we're sure we're getting the correct batteries
+        View text = mStatusBarView
+                .findViewById(R.id.signal_battery_cluster)
+                .findViewById(R.id.battery_text);
+        text.setTag(EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG);
+        mBatteryList.add(text);
+
+        mBatteryList.add(mStatusBarView
+                .findViewById(R.id.signal_battery_cluster)
+                .findViewById(R.id.battery));
         processBatterySettingsChange();
     }
 
@@ -213,7 +221,19 @@ public class EosUiController extends ActionHandler {
 
         initSoftKeys();
         updateSystemBarColor();
-        if (mHasSystemBar) processBatterySettingsChange();
+        if (mHasSystemBar) {
+            // now we're sure we're getting the correct batteries
+            View text = mRootView
+                    .findViewById(R.id.signal_battery_cluster)
+                    .findViewById(R.id.battery_text);
+            text.setTag(EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG);
+            mBatteryList.add(text);
+
+            mBatteryList.add(mRootView
+                    .findViewById(R.id.signal_battery_cluster)
+                    .findViewById(R.id.battery));
+            processBatterySettingsChange();
+        }
     }
 
     static void log(String s) {
@@ -446,35 +466,14 @@ public class EosUiController extends ActionHandler {
     }
 
     private void processBatterySettingsChange() {
-        View bar = mHasStatusBar ? mStatusBarView : mRootView;
-
-        ImageView batteryIcon = (ImageView) bar.findViewById(R.id.battery);
-        TextView batteryText = (TextView) bar.findViewById(R.id.battery_text);
-        batteryText.setTag(EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG);
-
-        if (Settings.System.getInt(mContext.getContentResolver(),
+        int icon_visible = (Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE,
-                EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE_DEF) == 1) {
-            if (batteryIcon != null) {
-//                mBatteryController.addIconView(batteryIcon);
-                batteryIcon.setVisibility(View.VISIBLE);
-            }
-        } else {
-//            mBatteryController.removeIconView(batteryIcon);
-            if (batteryIcon != null) batteryIcon.setVisibility(View.GONE);
-        }
+                EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE_DEF) == 1) ? View.VISIBLE : View.GONE;
 
-        if (Settings.System.getInt(mContext.getContentResolver(),
+        int text_visible = (Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE,
-                EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE_DEF) == 1) {
-            if (batteryText != null) {
-//                mBatteryController.addLabelView(batteryText);
-                batteryText.setVisibility(View.VISIBLE);
-            }
-        } else {
-//            mBatteryController.removeLabelView(batteryText);
-            if (batteryIcon != null) batteryText.setVisibility(View.GONE);
-        }
+                EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE_DEF) == 1) ? View.VISIBLE : View.GONE;
+
         int color = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_BATTERY_TEXT_COLOR,
                 EOSConstants.SYSTEMUI_BATTERY_TEXT_COLOR_DEF);
@@ -482,7 +481,18 @@ public class EosUiController extends ActionHandler {
             color = mContext.getResources()
                     .getColor(android.R.color.holo_blue_light);
         }
-        batteryText.setTextColor(color);
+        for (View v : mBatteryList) {
+            if (v.getTag() != null
+                    && v.getTag().equals(EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
+                // this is our text view
+                ((TextView)v).setTextColor(color);
+                v.setVisibility(text_visible);
+            } else {
+                // this works for now as we are only controlling
+                // two views at any time
+                v.setVisibility(icon_visible);
+            }
+        }
     }
 
     // utility to help bigclearbutton feature

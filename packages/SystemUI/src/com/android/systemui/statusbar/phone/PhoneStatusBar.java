@@ -528,7 +528,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mLocationController = new LocationController(mContext); // will post a notification
         mBatteryController = new BatteryController(mContext);
 		mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));
-		setBatteryController(mBatteryController);
+		mBatteryController.addLabelView((TextView)mStatusBarView.findViewById(R.id.battery_text));
 		processClockSettingsChange();
         mNetworkController = new NetworkController(mContext);
         mBluetoothController = new BluetoothController(mContext);
