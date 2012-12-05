@@ -34,9 +34,13 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.VolumePanel;
+import android.view.WindowManager;
 
 import java.util.HashMap;
+
+import org.teameos.jellybean.settings.EOSConstants;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -468,6 +472,22 @@ public class AudioManager {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if (Settings.System.getInt(mContext.getContentResolver(),
+                        EOSConstants.SYSTEM_VOLUME_KEYS_SWITCH_ON_ROTATION,
+                        EOSConstants.SYSTEM_VOLUME_KEYS_SWITCH_ON_ROTATION_DEF) == 1) {
+                    int rotation = ((WindowManager) mContext
+                            .getSystemService(Context.WINDOW_SERVICE))
+                            .getDefaultDisplay()
+                            .getRotation();
+                    if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_180) {
+                        // Switch the volume keys around.
+                        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+                            keyCode = KeyEvent.KEYCODE_VOLUME_DOWN;
+                        } else {
+                            keyCode = KeyEvent.KEYCODE_VOLUME_UP;
+                        }
+                    }
+                }
                 /*
                  * Adjust the volume in on key down since it is more
                  * responsive to the user.
