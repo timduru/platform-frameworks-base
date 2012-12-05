@@ -73,6 +73,8 @@ import android.view.VolumePanel;
 import com.android.internal.app.ThemeUtils;
 import com.android.internal.telephony.ITelephony;
 
+import org.teameos.jellybean.settings.EOSConstants;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -2466,7 +2468,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 } else {
                     if (DEBUG_VOL)
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
-                    return AudioSystem.STREAM_RING;
+                    if ("media".equals(Settings.System.getString(mContentResolver,
+                            EOSConstants.SYSTEM_DEFAULT_VOLUME_STREAM))) {
+                        return AudioSystem.STREAM_MUSIC;
+                    } else {
+                        return AudioSystem.STREAM_RING;
+                    }
                 }
             } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
                 if (DEBUG_VOL)
