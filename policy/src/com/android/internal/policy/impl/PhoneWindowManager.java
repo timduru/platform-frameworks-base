@@ -4054,9 +4054,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 sensorRotation = lastRotation;
             }
 
+            Log.v(TAG, "mLidState=" + mLidState+ " mLidOpenRotation=" + mLidOpenRotation+ " mDockMode="+ mDockMode+ " mAllowAllRotations=" +mAllowAllRotations);
+
             final int preferredRotation;
-            if (mLidState == LID_OPEN && mLidOpenRotation >= 0) {
-                // Ignore sensor when lid switch is open and rotation is forced.
+            if (mDockMode != Intent.EXTRA_DOCK_STATE_UNDOCKED && mLidState == LID_OPEN && mLidOpenRotation >= 0) {
+                // Ignore sensor when docked && lid switch is open and rotation is forced.
                 preferredRotation = mLidOpenRotation;
             } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR
                     && (mCarDockEnablesAccelerometer || mCarDockRotation >= 0)) {
