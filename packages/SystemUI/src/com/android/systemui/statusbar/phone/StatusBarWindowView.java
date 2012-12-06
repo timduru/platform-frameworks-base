@@ -119,11 +119,9 @@ public class StatusBarWindowView extends FrameLayout
         // TODO Auto-generated method stub
         super.onWindowVisibilityChanged(visibility);
         if (visibility == View.VISIBLE) {
-            if (mService.mEosSettingsTop != null) mService.mEosSettingsTop.attach();
-            if (mService.mEosSettingsBottom != null) mService.mEosSettingsBottom.attach();
+            if (mService.mEosSettings != null) mService.mEosSettings.attach();
         } else {
-            if (mService.mEosSettingsTop != null) mService.mEosSettingsTop.detach();
-            if (mService.mEosSettingsBottom != null) mService.mEosSettingsBottom.detach();
+            if (mService.mEosSettings != null) mService.mEosSettings.detach();
         }
     }
 

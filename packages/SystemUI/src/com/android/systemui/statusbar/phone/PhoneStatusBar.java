@@ -331,8 +331,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
     };
-    EosSettings mEosSettingsTop;
-    EosSettings mEosSettingsBottom;
+    EosSettings mEosSettings;
     ContentObserver mEosSettingsContentObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
@@ -648,10 +647,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         context.registerReceiver(mBroadcastReceiver, filter);
 
 		context.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_PHONE_TOP), false,
-                mEosSettingsContentObserver);
-        context.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_PHONE_BOTTOM), false,
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_ENABLED), false,
                 mEosSettingsContentObserver);
         processEosSettingsChange();
         setStatusBar(mStatusBarView);
@@ -2642,47 +2638,20 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private void processEosSettingsChange() {
         ContentResolver resolver = mContext.getContentResolver();
-        ViewGroup topSettings = (ViewGroup) mStatusBarWindow.findViewById(R.id.eos_settings_top);
-        ViewGroup bottomSettings = (ViewGroup) mStatusBarWindow
-                .findViewById(R.id.eos_settings_bottom);
+        ViewGroup toggles = (ViewGroup) mStatusBarWindow.findViewById(R.id.eos_toggles);
         boolean eosSettingsEnabled = Settings.System.getInt(resolver,
                 EOSConstants.SYSTEMUI_SETTINGS_ENABLED,
                 EOSConstants.SYSTEMUI_SETTINGS_ENABLED_DEF) == 1;
-        boolean eosSettingsTop = Settings.System.getInt(resolver,
-                EOSConstants.SYSTEMUI_SETTINGS_PHONE_TOP,
-                EOSConstants.SYSTEMUI_SETTINGS_PHONE_TOP_DEF) == 1;
-        boolean eosSettingsBottom = Settings.System.getInt(resolver,
-                EOSConstants.SYSTEMUI_SETTINGS_PHONE_BOTTOM,
-                EOSConstants.SYSTEMUI_SETTINGS_PHONE_BOTTOM_DEF) == 1;
-        if ( (eosSettingsEnabled && eosSettingsTop) || (eosSettingsEnabled && !(eosSettingsTop || eosSettingsBottom))) {
-            if (mEosSettingsTop != null) {
-                mEosSettingsTop.detach();
-            }
-
-            mEosSettingsTop = new EosSettings(topSettings, mContext);
-            topSettings.setVisibility(View.VISIBLE);
+        if (eosSettingsEnabled) {
+            mEosSettings = new EosSettings(toggles, mContext);
+            toggles.setVisibility(View.VISIBLE);
         } else {
-            if (mEosSettingsTop != null) {
-                mEosSettingsTop.detach();
+            if (mEosSettings != null) {
+                mEosSettings.detach();
+                mEosSettings = null;
             }
-            topSettings.setVisibility(View.GONE);
-            topSettings.removeAllViews();
+            toggles.setVisibility(View.GONE);
+            toggles.removeAllViews();
         }
-
-        if (eosSettingsEnabled && eosSettingsBottom) {
-            if (mEosSettingsBottom != null) {
-                mEosSettingsBottom.detach();
-            }
-
-            mEosSettingsBottom = new EosSettings(bottomSettings, mContext);
-            bottomSettings.setVisibility(View.VISIBLE);
-        } else {
-            if (mEosSettingsBottom != null) {
-                mEosSettingsBottom.detach();
-            }
-            bottomSettings.setVisibility(View.GONE);
-            bottomSettings.removeAllViews();
-        }
-
     }
 }

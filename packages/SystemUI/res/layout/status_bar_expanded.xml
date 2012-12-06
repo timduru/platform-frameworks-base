@@ -69,7 +69,7 @@
             />
 	    
 	    <LinearLayout
-                android:id="@+id/eos_settings_top"
+                android:id="@+id/eos_toggles"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="2dp"
@@ -100,11 +100,5 @@
                     />
             </ScrollView>
         </FrameLayout>
-		    <LinearLayout
-                android:id="@+id/eos_settings_bottom"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
-                android:visibility="gone" />
     </LinearLayout>
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->
