@@ -108,6 +108,8 @@ import com.android.systemui.statusbar.preferences.EosSettings;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -210,6 +212,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     View mFlipSettingsView;
     QuickSettingsContainerView mSettingsContainer;
     int mSettingsPanelGravity;
+    public List<String> mEnabledTiles;
 
     // top bar
     View mNotificationPanelHeader;
@@ -336,6 +339,13 @@ public class PhoneStatusBar extends BaseStatusBar {
         @Override
         public void onChange(boolean selfChange) {
             processEosSettingsChange();
+        }
+    };
+
+    ContentObserver mEosQsObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            processEosQsChange();
         }
     };
 
@@ -602,27 +612,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     }
                 }
             }
-
-            // wherever you find it, Quick Settings needs a container to survive
-            mSettingsContainer = (QuickSettingsContainerView)
-                    mStatusBarWindow.findViewById(R.id.quick_settings_container);
-            if (mSettingsContainer != null) {
-                mQS = new QuickSettings(mContext, mSettingsContainer);
-                if (!mNotificationPanelIsFullScreenWidth) {
-                    mSettingsContainer.setSystemUiVisibility(
-                            View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
-                            | View.STATUS_BAR_DISABLE_SYSTEM_INFO);
-                }
-                if (mSettingsPanel != null) {
-                    mSettingsPanel.setQuickSettings(mQS);
-                }
-                mQS.setService(this);
-                mQS.setBar(mStatusBarView);
-                mQS.setup(mNetworkController, mBluetoothController, mBatteryController,
-                        mLocationController);
-            } else {
-                mQS = null; // fly away, be free
-            }
+            // our own slighty enhanced verion
+            processEosQsChange();
         }
 
         mClingShown = ! (DEBUG_CLINGS 
@@ -649,6 +640,15 @@ public class PhoneStatusBar extends BaseStatusBar {
 		context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_ENABLED), false,
                 mEosSettingsContentObserver);
+        context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_DISABLED), false,
+                mEosQsObserver);
+        context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES), false,
+                mEosQsObserver);
+        context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT), false,
+                mEosQsObserver);
         processEosSettingsChange();
         setStatusBar(mStatusBarView);
 
@@ -2652,6 +2652,42 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
             toggles.setVisibility(View.GONE);
             toggles.removeAllViews();
+        }
+    }
+    
+    private void processEosQsChange() {
+        // get updated tile list
+        List<String> tiles;
+        String tempTilesString = Settings.System.getString(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES);
+        if (tempTilesString != null) {
+            tiles = Arrays.asList(tempTilesString.split("\\|"));
+        } else {
+            tiles = Arrays.asList(EOSConstants.SYSTEMUI_PANEL_DEFAULTS);
+        }
+
+        // wherever you find it, Quick Settings needs a container to survive
+        mSettingsContainer = (QuickSettingsContainerView)
+                mStatusBarWindow.findViewById(R.id.quick_settings_container);
+        if (mSettingsContainer != null) {
+            mSettingsContainer.removeAllViews();
+            if (mQS != null) mQS.removeReceivers();
+            mQS = new QuickSettings(mContext, mSettingsContainer);
+            if (!mNotificationPanelIsFullScreenWidth) {
+                mSettingsContainer.setSystemUiVisibility(
+                        View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
+                                | View.STATUS_BAR_DISABLE_SYSTEM_INFO);
+            }
+            if (mSettingsPanel != null) {
+                mSettingsPanel.setQuickSettings(mQS);
+            }
+            mQS.setService(this);
+            mQS.setBar(mStatusBarView);
+            mQS.setEnabledTiles(tiles);
+            mQS.setup(mNetworkController, mBluetoothController, mBatteryController,
+                    mLocationController);
+        } else {
+            mQS = null; // fly away, be free
         }
     }
 }

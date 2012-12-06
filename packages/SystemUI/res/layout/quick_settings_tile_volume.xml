@@ -13,13 +13,30 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<TextView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/TextAppearance.QuickSettings.TileView"
-    android:id="@+id/volume_tileview"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:gravity="center"
-    android:drawableTop="@drawable/stat_ring_on"
+	android:gravity="center"
+    android:orientation="vertical">
+    <TextView
+        style="@style/TextAppearance.QuickSettings.TileView"
+        android:id="@+id/volume_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+		android:paddingBottom="15dp"
+        android:paddingTop="15dp"
+        />
+	<SeekBar
+		android:id="@+id/volume_seekbar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:gravity="center"
+        android:layout_marginLeft="7dp"
+        android:layout_marginRight="7dp"
     />
+</LinearLayout>

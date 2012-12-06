@@ -15,28 +15,24 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_gravity="center"
-	android:gravity="center"
     android:orientation="vertical">
-    <TextView
-        style="@style/TextAppearance.QuickSettings.TileView"
-        android:id="@+id/brightness_textview"
+    <ImageView
+        android:id="@+id/torch_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:gravity="center"
-		android:paddingBottom="15dp"
-        android:paddingTop="15dp"
+        android:paddingBottom="10dp"
         />
-	<SeekBar
-		android:id="@+id/brightness_seekbar"
-		android:layout_width="match_parent"
+    <TextView
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		style="@style/TextAppearance.QuickSettings.TileView"
+		android:id="@+id/torch_textview"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center"
 		android:gravity="center"
-        android:layout_marginLeft="7dp"
-        android:layout_marginRight="7dp"
     />
 </LinearLayout>

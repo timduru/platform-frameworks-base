@@ -556,4 +556,148 @@ public final class EOSConstants {
      * @hide
      */
     public static final String SYSTEMUI_LOCKSCREEN_SHOW_ALL_WIDGETS = "eos_interface_lockscreen_show_all_widgets";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_SETTINGS_TILE = "QS_Settings";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_USER_TILE = "QS_User";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_BRIGHTNESS_TILE = "QS_Brightness";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_VOLUME_TILE = "QS_Volume";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_BATTERY_TILE = "QS_Battery";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_ROTATION_TILE = "QS_Rotation";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_AIRPLANE_TILE = "QS_Airplane";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_WIFI_TILE = "QS_Wifi";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_DATA_TILE = "QS_Data";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_BT_TILE = "QS_BT";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_SCREENOFF_TILE = "QS_Screen";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_LOCATION_TILE= "QS_Location";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_RINGER_TILE = "QS_Ringer";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_WIFIAP_TILE = "QS_WifiAp";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_TORCH_TILE = "QS_Torch";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_TORCH_INTENT = "QuickSettingsMod.UPDATE_TORCH_TILE";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_COLUMN_COUNT = "QS_Columns";
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_PANEL_COLUMNS_DEF = 3;
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_DISABLED = "QS_Panel_Enabled";
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_PANEL_DISABLED_DEF = 0;
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_ENABLED_TILES = "QS_Enabled_Tiles";
+
+    /**
+     * @hide
+     */
+    public static final String[] SYSTEMUI_PANEL_DEFAULTS = {
+            SYSTEMUI_PANEL_USER_TILE,
+            SYSTEMUI_PANEL_SETTINGS_TILE,
+            SYSTEMUI_PANEL_BRIGHTNESS_TILE,
+            SYSTEMUI_PANEL_VOLUME_TILE,
+            SYSTEMUI_PANEL_BATTERY_TILE,
+            SYSTEMUI_PANEL_ROTATION_TILE,
+            SYSTEMUI_PANEL_WIFI_TILE,
+            SYSTEMUI_PANEL_DATA_TILE,
+            SYSTEMUI_PANEL_BT_TILE
+    };
+
+    /**
+     * @hide
+     */
+    public static final Map<String, Boolean> getEosSystemUIPanelMap() {
+        LinkedHashMap<String, Boolean> map = new LinkedHashMap<String, Boolean>();
+        map.put(SYSTEMUI_PANEL_USER_TILE, true);
+        map.put(SYSTEMUI_PANEL_SETTINGS_TILE, true);
+        map.put(SYSTEMUI_PANEL_BRIGHTNESS_TILE, true);
+        map.put(SYSTEMUI_PANEL_VOLUME_TILE, true);
+        map.put(SYSTEMUI_PANEL_BATTERY_TILE, true);
+        map.put(SYSTEMUI_PANEL_ROTATION_TILE, true);
+        map.put(SYSTEMUI_PANEL_AIRPLANE_TILE, false);
+        map.put(SYSTEMUI_PANEL_WIFI_TILE, true);
+        map.put(SYSTEMUI_PANEL_DATA_TILE, true);
+        map.put(SYSTEMUI_PANEL_BT_TILE, true);
+        map.put(SYSTEMUI_PANEL_SCREENOFF_TILE, false);
+        map.put(SYSTEMUI_PANEL_LOCATION_TILE, false);
+        map.put(SYSTEMUI_PANEL_RINGER_TILE, false);
+        map.put(SYSTEMUI_PANEL_WIFIAP_TILE, false);
+        map.put(SYSTEMUI_PANEL_TORCH_TILE, false);
+
+        return map;
+    }
 }
