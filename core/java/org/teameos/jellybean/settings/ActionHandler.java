@@ -252,7 +252,7 @@ public abstract class ActionHandler {
 
     private void screenOff() {
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        pm.goToSleep(SystemClock.uptimeMillis() + 1);
+        pm.goToSleep(SystemClock.uptimeMillis());
     }
 
     private void startAssistActivity() {
