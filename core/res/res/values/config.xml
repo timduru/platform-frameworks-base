@@ -1142,4 +1142,13 @@
         <item>com.android.inputmethod.latin</item>
     </string-array>
 
+
+
+
+   <!-- Dock battery compatibility disabled by default -->
+    <bool name="config_hasDockBattery">false</bool>
+
+    <!-- Touchpad compatibility disabled by default -->
+    <bool name="config_hasTouchpad">false</bool>
+
 </resources>
