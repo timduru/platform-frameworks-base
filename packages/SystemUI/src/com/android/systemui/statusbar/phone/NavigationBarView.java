@@ -306,6 +306,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setMenuVisibility(final boolean show, final boolean force) {
+        if (mShowMenuPersist) return;
         if (!force && mShowMenu == show) return;
 
         mShowMenu = show;
