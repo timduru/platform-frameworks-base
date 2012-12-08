@@ -50,6 +50,7 @@
   <java-symbol type="bool" name="config_hideMobileSignalOnWifi" />
   <java-symbol type="bool" name="config_umtsEverestRadio" />
   <java-symbol type="bool" name="config_hasDockBattery" />
+  <java-symbol type="bool" name="config_hasTouchpad" />
   <java-symbol type="bool" name="config_reportsIncorrectLidStatus" />
   <java-symbol type="bool" name="config_keyboardDockEnablesAccelerometer" />
   <java-symbol type="bool" name="config_samsung_stk" />
