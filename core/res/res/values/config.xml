@@ -1036,6 +1036,9 @@
         wallpaper suggestion is too large for CPU to handle -->
     <integer name="config_wallpaperMaxWidth">-1</integer>
 
+    <!-- If this value is true, we handle Samsung CDMA's message ID method -->
+    <bool name="config_smsSamsungCdmaAlternateMessageIDEncoding">false</bool>
+
     <!-- Vibrator pattern to be used as the default for notifications
          that specify DEFAULT_VIBRATE.
      -->

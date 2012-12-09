@@ -55,6 +55,7 @@
   <java-symbol type="bool" name="config_keyboardDockEnablesAccelerometer" />
   <java-symbol type="bool" name="config_samsung_stk" />
   <java-symbol type="bool" name="config_isHybridUiDevice" />
+  <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
 
   <java-symbol type="integer" name="config_keyboardDockRotation" />
   <java-symbol type="integer" name="config_wallpaperMaxWidth" />
