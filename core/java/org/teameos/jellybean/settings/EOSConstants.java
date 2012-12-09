@@ -83,17 +83,17 @@ public final class EOSConstants {
 
     /**
      * @hide
-     */    
+     */
     public static final String SYSTEMUI_CLOCK_AMPM = "eos_systemui_clock_ampm";
 
     /**
      * @hide
-     */    
+     */
     public static final String SYSTEMUI_NAVBAR_DISABLE_GESTURE = "eos_systemui_navbar_disable_gesture";
 
     /**
      * @hide
-     */    
+     */
     public static final int SYSTEMUI_NAVBAR_DISABLE_GESTURE_DEF = 0;
 
     /**
@@ -190,7 +190,7 @@ public final class EOSConstants {
      * @hide
      */
     public static final String SYSTEMUI_SOFTKEY_MENU = "eos_systemui_softkey_menu";
-    
+
     /**
      * hide
      */
@@ -354,7 +354,7 @@ public final class EOSConstants {
 
     /**
      * Broadcast Action: Request to turn Eos Torch application off
-     * 
+     *
      * @hide
      */
     public static final String ACTION_TORCH_OFF = "android.intent.action.TORCH_OFF";
@@ -495,11 +495,6 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final String SYSTEMUI_INTERFACE_ROTATIONLOCK_TOGGLE = "eos_interface_rotationlock_toggle";
-
-    /**
-     * @hide
-     */
     public static final String SYSTEMUI_NAVRING_1 = "eos_systemui_navring_1";
 
     /**
@@ -556,4 +551,9 @@ public final class EOSConstants {
      * @hide
      */
     public static final String SYSTEMUI_TABLET_BIG_CLEAR_BUTTON = "eos_interface_big_clear_button";
+    
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_LOCKSCREEN_SHOW_ALL_WIDGETS = "eos_interface_lockscreen_show_all_widgets";
 }

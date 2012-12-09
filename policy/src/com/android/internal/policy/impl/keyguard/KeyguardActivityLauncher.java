@@ -32,13 +32,17 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.WindowManager;
 
 import com.android.internal.policy.impl.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.internal.widget.LockPatternUtils;
 
+import org.teameos.jellybean.settings.EOSConstants;
+
 import java.util.List;
+
 
 public abstract class KeyguardActivityLauncher {
     private static final String TAG = KeyguardActivityLauncher.class.getSimpleName();
@@ -120,8 +124,14 @@ public abstract class KeyguardActivityLauncher {
 
         pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         pickIntent.putExtra(AppWidgetManager.EXTRA_CUSTOM_SORT, false);
-        pickIntent.putExtra(AppWidgetManager.EXTRA_CATEGORY_FILTER,
-                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
+
+        if (Settings.System.getInt(getContext().getContentResolver(), EOSConstants.SYSTEMUI_LOCKSCREEN_SHOW_ALL_WIDGETS, 0) == 0) {
+            pickIntent.putExtra(AppWidgetManager.EXTRA_CATEGORY_FILTER,
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
+        } else {
+            pickIntent.putExtra(AppWidgetManager.EXTRA_CATEGORY_FILTER,
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD | AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
+        }
 
         Bundle options = new Bundle();
         options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
