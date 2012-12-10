@@ -145,6 +145,11 @@ public final class BatteryService extends Binder {
 
     private native void native_update();
 
+    private boolean mHasDockBattery;
+    private int mDockBatteryStatus;
+    private int mDockBatteryLevel;
+    private String mDockBatteryPresent;
+
     public BatteryService(Context context, LightsService lights) {
         mContext = context;
         mHandler = new Handler(true /*async*/);
@@ -159,6 +164,9 @@ public final class BatteryService extends Binder {
                 com.android.internal.R.integer.config_lowBatteryCloseWarningLevel);
         mShutdownBatteryTemperature = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shutdownBatteryTemperature);
+
+        mHasDockBattery = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_hasDockBattery);
 
         mPowerSupplyObserver.startObserving("SUBSYSTEM=power_supply");
 
@@ -478,6 +486,13 @@ public final class BatteryService extends Binder {
         intent.putExtra(BatteryManager.EXTRA_TEMPERATURE, mBatteryTemperature);
         intent.putExtra(BatteryManager.EXTRA_TECHNOLOGY, mBatteryTechnology);
         intent.putExtra(BatteryManager.EXTRA_INVALID_CHARGER, mInvalidCharger);
+        if (mHasDockBattery){
+            intent.putExtra(BatteryManager.EXTRA_DOCK_STATUS, mDockBatteryStatus);
+            intent.putExtra(BatteryManager.EXTRA_DOCK_LEVEL, mDockBatteryLevel);
+            intent.putExtra(BatteryManager.EXTRA_DOCK_AC_ONLINE, false);
+        }
+
+
 
         if (DEBUG) {
             Slog.d(TAG, "Sending ACTION_BATTERY_CHANGED.  level:" + mBatteryLevel +
