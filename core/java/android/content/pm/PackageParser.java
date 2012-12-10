@@ -299,7 +299,6 @@ public class PackageParser {
         pi.versionName = p.mVersionName;
         pi.sharedUserId = p.mSharedUserId;
         pi.sharedUserLabel = p.mSharedUserLabel;
-        pi.applicationInfo = generateApplicationInfo(p, flags, state, userId);
         pi.isThemeApk = p.mIsThemeApk;
         pi.setDrmProtectedThemeApk(false);
         if (pi.isThemeApk) {
@@ -315,6 +314,7 @@ public class PackageParser {
                 }
             }
         }
+        pi.applicationInfo = generateApplicationInfo(p, flags, state, userId);
         pi.installLocation = p.installLocation;
         pi.firstInstallTime = firstInstallTime;
         pi.lastUpdateTime = lastUpdateTime;

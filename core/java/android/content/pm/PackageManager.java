@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 The Android Open Source Project
  * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  *
@@ -1539,7 +1539,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract List<PackageInfo> getInstalledPackages(int flags, int userId);
-    
+
     /**
      * Return a List of all theme packages that are installed
      * on the device.

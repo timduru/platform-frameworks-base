@@ -29,11 +29,16 @@ LOCAL_SRC_FILES := \
     $(common_src_files)
 
 LOCAL_SHARED_LIBRARIES := \
-    libcutils \
-    libselinux
+    libcutils
 
 LOCAL_STATIC_LIBRARIES := \
     libdiskusage
+
+ifeq ($(HAVE_SELINUX),true)
+LOCAL_C_INCLUDES += external/libselinux/include
+LOCAL_SHARED_LIBRARIES += libselinux
+LOCAL_CFLAGS := -DHAVE_SELINUX
+endif # HAVE_SELINUX
 
 LOCAL_MODULE := installd
 

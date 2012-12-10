@@ -65,6 +65,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 
 import com.android.internal.R;
+import com.android.internal.app.ThemeUtils;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.keyguard.KeyguardViewManager;
 import com.android.internal.policy.impl.keyguard.KeyguardViewMediator;
@@ -4062,12 +4063,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     };
 
     BroadcastReceiver mThemeChangeReceiver = new BroadcastReceiver() {
-    	@Override
         public void onReceive(Context context, Intent intent) {
             mUiContext = null;
         }
     };
 
+    @Override
     public void screenTurnedOff(int why) {
         EventLog.writeEvent(70000, 0);
         synchronized (mLock) {
