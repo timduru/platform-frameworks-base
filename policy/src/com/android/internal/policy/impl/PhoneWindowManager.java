@@ -48,7 +48,6 @@ import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IPowerManager;
 import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
@@ -3904,20 +3903,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     private void setBrightness(int level)
     {
-//FIXME
-/*        try {
-            android.provider.Settings.System.putInt(mContext.getContentResolver(),
-                    Settings.System.SCREEN_BRIGHTNESS, level);
-            IPowerManager ipowermanager =
-                    IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
-            if(ipowermanager != null) {
-                ipowermanager.setBacklightBrightness(level);
-            }
-        } catch (RemoteException e) {;
-        Log.e(TAG, "Couldn't set brightness level. ", e);
-        }
+        android.provider.Settings.System.putInt(mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, level);
+        if(mPowerManager != null) mPowerManager.setBacklightBrightness(level);
         return;
-*/
     }
 
     private void setBrightnessMode(int mode)
