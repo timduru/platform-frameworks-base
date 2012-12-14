@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.policy;
 
 import java.util.Arrays;
 
+import android.animation.Animator.AnimatorListener;
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -191,6 +193,8 @@ public class KeyButtonView extends ImageView {
                 EOSConstants.SYSTEMUI_NAVKEY_COLOR), mKeyIndex);
         mGlowFilterColor = parseColorString(Settings.System.getString(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_NAVGLOW_COLOR), mKeyIndex);
+	updateKeyFilter();
+	updateGlowFilter();
     }
 
 	private void updateKeyFilter() {
@@ -202,17 +206,14 @@ public class KeyButtonView extends ImageView {
 			mKeyFilterColor = Color.argb(0xFF, Color.red(color),
 					Color.green(color), Color.blue(color));
 		}
-		applyKeyFilter(mKeyFilterColor);
+		applyKeyFilter();
 	}
 
-	private void applyKeyFilter(int color) {
-		if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
+	private void applyKeyFilter() {
+		if (mKeyFilterColor == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF)
 			getDrawable().clearColorFilter();
-			invalidate();
-			return;
-		} else {
-			getDrawable().setColorFilter(color, mMode);
-		}
+		else
+			getDrawable().setColorFilter(mKeyFilterColor, mMode);
 	}
 
 	private void updateGlowFilter() {
@@ -224,23 +225,21 @@ public class KeyButtonView extends ImageView {
 			mGlowFilterColor = Color.argb(0xFF, Color.red(color),
 					Color.green(color), Color.blue(color));
 		}
+		applyGlowFilter();
 	}
 
-	private void applyGlowFilter(int color) {
-		if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
+	private void applyGlowFilter() {
+		if (mGlowFilterColor == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF)
 			mGlowBG.clearColorFilter();
-			invalidate();
-			return;
-		} else {
-			mGlowBG.setColorFilter(color, mMode);
-		}
+                else
+			mGlowBG.setColorFilter(mGlowFilterColor, mMode);
 	}
 
     @Override
     protected void onDraw(Canvas canvas) {
         if (mGlowBG != null) {
             canvas.save();
-            applyGlowFilter(mGlowFilterColor);
+            applyGlowFilter();
             final int w = getWidth();
             final int h = getHeight();
             final float aspect = (float)mGlowWidth / mGlowHeight;
@@ -255,7 +254,7 @@ public class KeyButtonView extends ImageView {
             mRect.right = w;
             mRect.bottom = h;
         }
-        applyKeyFilter(mKeyFilterColor);
+        applyKeyFilter();
         super.onDraw(canvas);
     }
 
@@ -336,6 +335,15 @@ public class KeyButtonView extends ImageView {
                     mPressedAnim.cancel();
                 }
                 final AnimatorSet as = mPressedAnim = new AnimatorSet();
+		        as.addListener( new AnimatorListener() { 
+					public void onAnimationEnd(Animator animation){	
+						applyKeyFilter(); 
+						applyGlowFilter(); 
+					} 
+					public void onAnimationCancel(Animator animation){;}
+					public void onAnimationRepeat(Animator animation){;}
+					public void onAnimationStart(Animator animation){;}
+				});
                 if (pressed) {
                     if (mGlowScale < GLOW_MAX_SCALE_FACTOR) 
                         mGlowScale = GLOW_MAX_SCALE_FACTOR;
