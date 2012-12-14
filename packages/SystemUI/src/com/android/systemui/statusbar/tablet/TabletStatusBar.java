@@ -689,11 +689,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        context.registerReceiver(mBroadcastReceiver, filter);        
-
-        // initialize the NavAreaController here
-        // after all the dust has settled
-        setNavControllerParent(mStatusBarView, getSystemBarWindowParams());
+        context.registerReceiver(mBroadcastReceiver, filter);
 
         return sb;
     }

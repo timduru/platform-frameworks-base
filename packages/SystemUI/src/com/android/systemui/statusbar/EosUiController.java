@@ -1,13 +1,8 @@
 
 package com.android.systemui.statusbar;
 
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -24,15 +19,12 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
-import android.view.WindowManagerImpl;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.phone.NavigationBarView;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
 import org.teameos.jellybean.settings.EOSConstants;
@@ -44,6 +36,8 @@ import java.util.Arrays;
 public class EosUiController extends ActionHandler {
     static final String TAG = "NavigationAreaController";
 
+    static final int STOCK_NAV_BAR = com.android.systemui.R.layout.navigation_bar;
+    static final int EOS_NAV_BAR = com.android.systemui.R.layout.eos_navigation_bar;
     static final int BACK_KEY = com.android.systemui.R.id.back;
     static final int HOME_KEY = com.android.systemui.R.id.home;
     static final int RECENT_KEY = com.android.systemui.R.id.recent_apps;
@@ -69,21 +63,19 @@ public class EosUiController extends ActionHandler {
     private ArrayList<SoftKeyObject> mSoftKeyObjects;
 
     private Context mContext;
-    private View mStatusBarView;
+    private PhoneStatusBarView mStatusBarView;
+    private PhoneStatusBar mService;
     private View mStatusBarContainer;
-    private View mRootView;
+    private NavigationBarView mNavigationBarView;
     private ContentResolver mResolver;
     private SettingsObserver mObserver;
     private ContentObserver mHideBarObserver;
     private ContentObserver mBatterySettingsObserver;
     private IWindowManager wm;
     private WindowManager mWindowManager;
-    private WindowManager.LayoutParams mSystemBarParams;
+    private WindowManager.LayoutParams mNavigationBarParams;
     private WindowManager.LayoutParams mStatusBarParams;
     private boolean mHasNavBar = false;
-    private boolean mHasStatusBar = false;
-    private boolean mHasSystemBar = false;
-    private boolean mIsHybridUiDevice = false;
 
     public EosUiController(Context context) {
         super(context);
@@ -95,8 +87,6 @@ public class EosUiController extends ActionHandler {
 
         try {
             mHasNavBar = wm.hasNavigationBar();
-            mHasSystemBar = wm.hasSystemNavBar();
-            mHasStatusBar = !mHasSystemBar;
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -135,41 +125,55 @@ public class EosUiController extends ActionHandler {
         mResolver.registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_HIDE_BARS), false,
                 mHideBarObserver);
-
-        mIsHybridUiDevice = mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_isHybridUiDevice);
-        if (mIsHybridUiDevice) {
-            // only initialize if hybrid ui
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(EOSConstants.INTENT_SETTINGS_RESTART_INTERFACE_SETTINGS);
-            EosInterfaceReceiver mEosInterfaceReceiver = new EosInterfaceReceiver();
-            mContext.registerReceiver(mEosInterfaceReceiver, filter);
-        }
     }
 
-    class EosInterfaceReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            // give a slight delay to ensure eos interface fragment is
-            // dead
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    // TODO Auto-generated method stub
-                    mContext.unregisterReceiver(EosInterfaceReceiver.this);
-                    Intent i = new Intent("android.settings.EOS_INTERFACE");
-                    i.addCategory(Intent.CATEGORY_DEFAULT);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(i);
-                }
-            }, 250);
-        }
+    public NavigationBarView setNavigationBarView(WindowManager.LayoutParams lp) {
+        mNavigationBarParams = lp;
+        int layout = Settings.System.getInt(mResolver,
+                EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR,
+                EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF)
+                == EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF
+                        ? STOCK_NAV_BAR
+                        : EOS_NAV_BAR;
+        mNavigationBarView = (NavigationBarView) View.inflate(mContext, layout, null);
+        startNavigationBarFeatures();
+        return mNavigationBarView;
+    }
+
+    private void startNavigationBarFeatures() {
+        // register here instead. Why register in constructor if device
+        // does not have systembar/navbar ie crespo
+        mResolver.registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVBAR_COLOR), false,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateNavigationBarColor();
+                    }
+                });
+
+        mResolver.registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR), false,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        processBarStyleChange();
+                    }
+                });
+
+        mSoftKeyObjects = new ArrayList<SoftKeyObject>();
+        mObserver = new SettingsObserver(H);
+
+        initSoftKeys();
+    }
+
+    public void setBar(PhoneStatusBar service) {
+        mService = service;
     }
 
     // we need this to be set when the theme engine creates new view
-    public void setStatusBar(View container) {
-        mStatusBarView = container;
+    public void setStatusBarView(PhoneStatusBarView bar) {
+        mStatusBarView = bar;
 
         // only register if device has statusbar
         mResolver.registerContentObserver(
@@ -199,41 +203,6 @@ public class EosUiController extends ActionHandler {
     public void setStatusBarContainer(View container, WindowManager.LayoutParams lp) {
         mStatusBarContainer = container;
         mStatusBarParams = lp;
-    }
-
-    public void setRootContainer(View container, WindowManager.LayoutParams lp) {
-        mRootView = container;
-        mSystemBarParams = lp;
-
-        // register here instead. Why register in constructor if device
-        // does not have systembar/navbar ie crespo
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVBAR_COLOR), false,
-                new ContentObserver(new Handler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateSystemBarColor();
-                    }
-                });
-
-        mSoftKeyObjects = new ArrayList<SoftKeyObject>();
-        mObserver = new SettingsObserver(H);
-
-        initSoftKeys();
-        updateSystemBarColor();
-        if (mHasSystemBar) {
-            // now we're sure we're getting the correct batteries
-            View text = mRootView
-                    .findViewById(R.id.signal_battery_cluster)
-                    .findViewById(R.id.battery_text);
-            text.setTag(EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG);
-            mBatteryList.add(text);
-
-            mBatteryList.add(mRootView
-                    .findViewById(R.id.signal_battery_cluster)
-                    .findViewById(R.id.battery));
-            processBatterySettingsChange();
-        }
     }
 
     static void log(String s) {
@@ -306,16 +275,37 @@ public class EosUiController extends ActionHandler {
     void initSoftKeys() {
         // softkey objects only need to the the parent view
         ArrayList<View> parent = new ArrayList<View>();
-        if (mHasNavBar) {
-            parent.add(mRootView.findViewById(NAVBAR_ROT_90));
-            parent.add(mRootView.findViewById(NAVBAR_ROT_0));
-        } else {
-            parent.add(mRootView);
-        }
+            parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_90));
+            parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_0));
         loadBackKey(parent);
 //        loadHomeKey(parent);
         loadRecentKey(parent);
         loadMenuKey(parent);
+
+        mResolver.registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE), false,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateNavigationLongPressState();
+                    }
+                });
+        updateNavigationLongPressState();
+    }
+
+    private void updateNavigationLongPressState() {
+        if (Settings.System.getInt(mResolver,
+                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE,
+                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE_DEF) == 1) {
+            loadActions();
+        } else {
+            unloadActions();
+        }
+    }
+
+    private void processBarStyleChange() {
+        // time to die, but i shall return again soon
+        System.exit(0);
     }
 
     public Handler getHandler() {
@@ -413,7 +403,7 @@ public class EosUiController extends ActionHandler {
     }
 
     // applies to Navigation Bar or Systembar
-    private void updateSystemBarColor() {
+    private void updateNavigationBarColor() {
         int color = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_NAVBAR_COLOR,
                 EOSConstants.SYSTEMUI_NAVBAR_COLOR_DEF);
@@ -421,7 +411,7 @@ public class EosUiController extends ActionHandler {
             color = EOSConstants.SYSTEMUI_NAVBAR_COLOR_DEF;
         // we don't want alpha here
         color = Color.rgb(Color.red(color), Color.green(color), Color.blue(color));
-        mRootView.setBackgroundColor(color);
+        mNavigationBarView.setBackgroundColor(color);
     }    
 
     // applies to Statusbar only 
@@ -439,30 +429,19 @@ public class EosUiController extends ActionHandler {
     private void updateBarVisibility() {
         boolean hideBar = (Settings.System.getInt(mResolver, EOSConstants.SYSTEMUI_HIDE_BARS,
                 EOSConstants.SYSTEMUI_HIDE_BARS_DEF) == 1) ? true : false;
-        // device must have either a systembar or statusbar but only maybe have
-        // a navbar eg. crespo
-        if (mHasStatusBar) {
-            if(hideBar) {
-                mWindowManager.removeView(mStatusBarContainer);
-            } else {
-                mWindowManager.addView(mStatusBarContainer, mStatusBarParams);
-            }
+        // all devices have a status bar but may not have a navbar
+        if (hideBar) {
+            mWindowManager.removeView(mStatusBarContainer);
+        } else {
+            mWindowManager.addView(mStatusBarContainer, mStatusBarParams);
         }
         if (mHasNavBar) {
             if (hideBar) {
-            	mWindowManager.removeView(mRootView);
+                mWindowManager.removeView(mNavigationBarView);
             } else {
-            	mWindowManager.addView(mRootView, mSystemBarParams);
+                mWindowManager.addView(mNavigationBarView, mNavigationBarParams);
             }
         }
-        if (mHasSystemBar) {
-            View root = (FrameLayout)mRootView.getParent();
-            if (hideBar) {
-            	mWindowManager.removeView(root);
-            } else {
-            	mWindowManager.addView(root, mSystemBarParams);
-            }
-        }  
     }
 
     private void processBatterySettingsChange() {

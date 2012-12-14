@@ -478,6 +478,17 @@ public final class EOSConstants {
     public static final int SYSTEMUI_USE_TABLET_UI_DEF = 0;
 
     /**
+    * Use a modified eos style navigation bar to help tablet users adjust to new ui
+    * @hide
+    */
+   public static final String SYSTEMUI_USE_HYBRID_STATBAR = "eos_systemui_use_hybrid_statbar";
+
+   /**
+    * @hide
+    */
+   public static final int SYSTEMUI_USE_HYBRID_STATBAR_DEF = 0;
+
+    /**
      * @hide
      */
     public static final String SYSTEM_VOLUME_KEYS_SWITCH_ON_ROTATION = "eos_system_volume_keys_switch_on_rotation";

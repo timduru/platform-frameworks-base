@@ -84,6 +84,7 @@ import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
@@ -335,6 +336,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
     EosSettings mEosSettings;
+    EosUiController mEosController;
     ContentObserver mEosSettingsContentObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
@@ -377,6 +379,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     // ================================================================================
     protected PhoneStatusBarView makeStatusBarView() {
         final Context context = mContext;
+        mEosController = new EosUiController(context);
 
         Resources res = context.getResources();
 
@@ -401,6 +404,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
         mStatusBarView.setBar(this);
+        mEosController.setBar(this);
+        mEosController.setStatusBarView(mStatusBarView);
         
 
         PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
@@ -441,12 +446,9 @@ public class PhoneStatusBar extends BaseStatusBar {
             boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Slog.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
-                mNavigationBarView =
-                    (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
-
+                mNavigationBarView = mEosController.setNavigationBarView(getNavigationBarLayoutParams());
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
-                setNavControllerParent(mNavigationBarView, getNavigationBarLayoutParams());
             }
         } catch (RemoteException ex) {
             // no window manager? good luck with that
@@ -650,12 +652,19 @@ public class PhoneStatusBar extends BaseStatusBar {
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT), false,
                 mEosQsObserver);
         processEosSettingsChange();
-        setStatusBar(mStatusBarView);
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
 
         return mStatusBarView;
+    }
+
+    // let the EosUIController see this
+    public void updateNavigationBarView(NavigationBarView view) {
+        mNavigationBarView = view;
+        mNavigationBarView.setDisabledFlags(mDisabled);
+        mNavigationBarView.setBar(this);
+        addNavigationBar();
     }
 
     @Override
@@ -2120,7 +2129,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private void addStatusBarWindow() {
         makeStatusBarView();
         mStatusBarContainer.addView(mStatusBarWindow);
-        setStatusBarContainer(mStatusBarContainer, getStatusBarWindowParams());
+        mEosController.setStatusBarContainer(mStatusBarContainer, getStatusBarWindowParams());
         mWindowManager.addView(mStatusBarContainer, getStatusBarWindowParams());
 //        mContext.sendBroadcast(new Intent().setAction(EOSConstants.INTENT_SYSTEMUI_BAR_RESTORED));
     }

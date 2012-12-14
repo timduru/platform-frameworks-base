@@ -145,7 +145,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
-    private boolean isLongPressFeatureEnabled = false;
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -154,41 +153,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
     }
-
-    protected boolean isLongPressFeatureEnabled() {
-        return isLongPressFeatureEnabled;
-    }
-    
-    protected void setNavControllerParent(View v, WindowManager.LayoutParams lp) {
-        mEosUiController.setRootContainer(v, lp);
-        updateNavControllerState();
-    }
-
-    protected void setStatusBar(View v) {
-        mEosUiController.setStatusBar(v);
-    }
-
-    protected void setStatusBarContainer(View v, WindowManager.LayoutParams lp) {
-        mEosUiController.setStatusBarContainer(v, lp);
-    }
-
-    protected void updateNavControllerState() {
-        isLongPressFeatureEnabled = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE,
-                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE_DEF) == 1;
-        if(isLongPressFeatureEnabled) {
-            mEosUiController.loadActions();
-        } else {
-            mEosUiController.unloadActions();
-        }
-    }
-
-    private ContentObserver mNavigationAreaObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            updateNavControllerState();
-        }
-    };
 
     private ContentObserver mProvisioningObserver = new ContentObserver(new Handler()) {
         @Override
@@ -256,17 +220,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_COLOR), false,
                 mClockSettingsObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE), false,
-                mNavigationAreaObserver);
-        isLongPressFeatureEnabled = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE,
-                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE_DEF) == 1;
-
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mStatusBarContainer = new FrameLayout(mContext);
-        mEosUiController = new EosUiController(mContext);
 
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
