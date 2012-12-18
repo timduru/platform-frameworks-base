@@ -43,6 +43,7 @@ public class BatteryController extends BroadcastReceiver {
     private ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
 
     private int mLastPercentage = 0;
+    private boolean mPlugged = false;
 
     private ArrayList<BatteryStateChangeCallback> mChangeCallbacks =
             new ArrayList<BatteryStateChangeCallback>();
@@ -108,6 +109,8 @@ public class BatteryController extends BroadcastReceiver {
     }
 
     public void addStateChangedCallback(BatteryStateChangeCallback cb) {
+        // refresh values immediately
+        cb.onBatteryLevelChanged(mLastPercentage, mPlugged);
         mChangeCallbacks.add(cb);
     }
 
@@ -125,6 +128,7 @@ public class BatteryController extends BroadcastReceiver {
             final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
             final boolean plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
             mLastPercentage = level;
+            mPlugged = plugged;
             final int icon = plugged ? R.drawable.stat_sys_battery_charge 
                                      : R.drawable.stat_sys_battery;
             int N = mIconViews.size();

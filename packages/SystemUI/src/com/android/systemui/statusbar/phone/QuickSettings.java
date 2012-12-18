@@ -320,7 +320,6 @@ class QuickSettings {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mUserEnabled = mModel.isToggleEnabled(AVATAR);
 
-        if (mUserEnabled) addUserTiles(mContainerView, inflater);
         addSystemTiles(mContainerView, inflater);
         addTemporaryTiles(mContainerView, inflater);
 
@@ -388,7 +387,7 @@ class QuickSettings {
 			}
 		});
 		parent.addView(userTile);
-		mDynamicSpannedTiles.add(userTile);
+		// mDynamicSpannedTiles.add(userTile);
 
         // Time tile
         /*
@@ -670,8 +669,9 @@ class QuickSettings {
     }
 	
 	private void loadTile(String tile, ViewGroup parent, LayoutInflater inflater) {
-
-		if (tile.equals(SETTINGS)) {
+        if (tile.equals(AVATAR)) {
+            if (mUserEnabled) addUserTiles(mContainerView, inflater);
+        } else if (tile.equals(SETTINGS)) {
 		// Settings
 			QuickSettingsTileView settingsTile = (QuickSettingsTileView)
 					inflater.inflate(R.layout.quick_settings_tile, parent, false);
@@ -702,7 +702,7 @@ class QuickSettings {
 				}
 			});
 			parent.addView(settingsTile);
-			mDynamicSpannedTiles.add(settingsTile);
+			// mDynamicSpannedTiles.add(settingsTile);
 		} else if (tile.equals(RINGER)) {
 		// Ringer
 			QuickSettingsTileView ringerTile = (QuickSettingsTileView)
@@ -756,7 +756,7 @@ class QuickSettings {
 				}
 			});
 			parent.addView(ringerTile);
-			mDynamicSpannedTiles.add(ringerTile);
+			// mDynamicSpannedTiles.add(ringerTile);
 		} else if (tile.equals(BRIGHTNESS)) {
 		// Brightness
 			QuickSettingsTileView brightnessTile = (QuickSettingsTileView)
