@@ -458,8 +458,14 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Provide SearchPanel with a temporary parent to allow layout params to work.
         LinearLayout tmpRoot = new LinearLayout(mContext);
+        int currentSearchView = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR,
+                EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF)
+                == EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF
+                ? R.layout.status_bar_search_panel
+                : R.layout.status_bar_search_panel_tablet;
         mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
-                 R.layout.status_bar_search_panel, tmpRoot, false);
+                 currentSearchView, tmpRoot, false);
         mSearchPanelView.setOnTouchListener(
                  new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
         mSearchPanelView.setVisibility(View.GONE);
