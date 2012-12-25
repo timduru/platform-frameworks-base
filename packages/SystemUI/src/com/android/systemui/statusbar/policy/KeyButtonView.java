@@ -197,43 +197,41 @@ public class KeyButtonView extends ImageView {
 	updateGlowFilter();
     }
 
-	private void updateKeyFilter() {
-		int color = parseColorString(Settings.System.getString(mContext.getContentResolver(),
+    private void updateKeyFilter() {
+        int color = parseColorString(Settings.System.getString(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_NAVKEY_COLOR), mKeyIndex);
-		if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
-			mKeyFilterColor = EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF;
-		} else {
-			mKeyFilterColor = Color.argb(0xFF, Color.red(color),
-					Color.green(color), Color.blue(color));
-		}
-		applyKeyFilter();
-	}
+        if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
+            mKeyFilterColor = EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF;
+            getDrawable().clearColorFilter();
+        } else {
+            mKeyFilterColor = Color.argb(0xFF, Color.red(color),
+                    Color.green(color), Color.blue(color));
+        }
+        applyKeyFilter();
+    }
 
-	private void applyKeyFilter() {
-		if (mKeyFilterColor == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF)
-			getDrawable().clearColorFilter();
-		else
-			getDrawable().setColorFilter(mKeyFilterColor, mMode);
-	}
+    private void applyKeyFilter() {
+        if (mKeyFilterColor != EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF)
+            getDrawable().setColorFilter(mKeyFilterColor, mMode);
+    }
 
-	private void updateGlowFilter() {
-		int color = parseColorString(Settings.System.getString(mContext.getContentResolver(),
+    private void updateGlowFilter() {
+        int color = parseColorString(Settings.System.getString(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_NAVGLOW_COLOR), mKeyIndex);
-		if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
-			mGlowFilterColor = EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF;
-		} else {
-			mGlowFilterColor = Color.argb(0xFF, Color.red(color),
-					Color.green(color), Color.blue(color));
-		}
-		applyGlowFilter();
-	}
+        if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
+            mGlowFilterColor = EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF;
+            mGlowBG.clearColorFilter();
+        } else {
+            mGlowFilterColor = Color.argb(0xFF, Color.red(color),
+                    Color.green(color), Color.blue(color));
+        }
+        applyGlowFilter();
+    }
 
-	private void applyGlowFilter() {
-		if (mGlowFilterColor == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF)
-			mGlowBG.clearColorFilter();
-                else
-			mGlowBG.setColorFilter(mGlowFilterColor, mMode);
-	}
+    private void applyGlowFilter() {
+        if (mGlowFilterColor != EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF)
+            mGlowBG.setColorFilter(mGlowFilterColor, mMode);
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
