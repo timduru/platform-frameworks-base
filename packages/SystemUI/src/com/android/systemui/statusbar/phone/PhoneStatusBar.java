@@ -1586,11 +1586,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mNotificationPanel.expand();
         if (mHasFlipSettings) {
-            if (mNotificationIcons.getChildCount() < 1) {
-                flipToSettings();
-            } else if (mScrollView.getVisibility() != View.VISIBLE) {
-                flipToNotifications();
-            }
+            flipToNotifications();
         }
 
         if (false)
@@ -1598,28 +1594,26 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void flipToNotifications() {
-        if (mFlipSettingsViewAnim != null)
-            mFlipSettingsViewAnim.cancel();
-        if (mScrollViewAnim != null)
-            mScrollViewAnim.cancel();
-        if (mSettingsButtonAnim != null)
-            mSettingsButtonAnim.cancel();
-        if (mNotificationButtonAnim != null)
-            mNotificationButtonAnim.cancel();
-        if (mClearButtonAnim != null)
-            mClearButtonAnim.cancel();
+        if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
+        if (mScrollViewAnim != null) mScrollViewAnim.cancel();
+        if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
+        if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
+        if (mClearButtonAnim != null) mClearButtonAnim.cancel();
+
+        final boolean halfWayDone = mScrollView.getVisibility() == View.VISIBLE;
+        final int zeroOutDelays = halfWayDone ? 0 : 1;
 
         mScrollView.setVisibility(View.VISIBLE);
         mScrollViewAnim = start(
-                startDelay(FLIP_DURATION_OUT,
-                        interpolator(mDecelerateInterpolator,
-                                ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 0f, 1f)
-                                        .setDuration(FLIP_DURATION_IN)
-                        )));
+            startDelay(FLIP_DURATION_OUT * zeroOutDelays,
+                interpolator(mDecelerateInterpolator,
+                    ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 1f)
+                        .setDuration(FLIP_DURATION_IN)
+                    )));
         mFlipSettingsViewAnim = start(
-                setVisibilityWhenDone(
-                        interpolator(mAccelerateInterpolator,
-                                ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 1f, 0f)
+            setVisibilityWhenDone(
+                interpolator(mAccelerateInterpolator,
+                        ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 0f)
                         )
                                 .setDuration(FLIP_DURATION_OUT),
                         mFlipSettingsView, View.INVISIBLE));
@@ -1670,9 +1664,49 @@ public class PhoneStatusBar extends BaseStatusBar {
         mSettingsButton.setVisibility(View.GONE);
         mScrollView.setVisibility(View.GONE);
         mScrollView.setScaleX(0f);
-        if (mNotificationIcons.getChildCount() > 0) {
+        mNotificationButton.setVisibility(View.VISIBLE);
+        mNotificationButton.setAlpha(1f);
+        mClearButton.setVisibility(View.GONE);
+    }
+
+    public boolean isShowingSettings() {
+        return mHasFlipSettings && mFlipSettingsView.getVisibility() == View.VISIBLE;
+    }
+
+    public void completePartialFlip() {
+        if (mHasFlipSettings) {
+            if (mFlipSettingsView.getVisibility() == View.VISIBLE) {
+                flipToSettings();
+            } else {
+                flipToNotifications();
+            }
+        }
+    }
+
+    public void partialFlip(float progress) {
+        if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
+        if (mScrollViewAnim != null) mScrollViewAnim.cancel();
+        if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
+        if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
+        if (mClearButtonAnim != null) mClearButtonAnim.cancel();
+
+        progress = Math.min(Math.max(progress, -1f), 1f);
+        if (progress < 0f) { // notifications side
+            mFlipSettingsView.setScaleX(0f);
+            mFlipSettingsView.setVisibility(View.GONE);
+            mSettingsButton.setVisibility(View.VISIBLE);
+            mSettingsButton.setAlpha(-progress);
+            mScrollView.setVisibility(View.VISIBLE);
+            mScrollView.setScaleX(-progress);
+            mNotificationButton.setVisibility(View.GONE);
+        } else { // settings side
+            mFlipSettingsView.setScaleX(progress);
+            mFlipSettingsView.setVisibility(View.VISIBLE);
+            mSettingsButton.setVisibility(View.GONE);
+            mScrollView.setVisibility(View.GONE);
+            mScrollView.setScaleX(0f);
             mNotificationButton.setVisibility(View.VISIBLE);
-            mNotificationButton.setAlpha(1f);
+            mNotificationButton.setAlpha(progress);
         }
         mClearButton.setVisibility(View.GONE);
     }
@@ -1689,18 +1723,20 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mClearButtonAnim != null)
             mClearButtonAnim.cancel();
 
+        final boolean halfWayDone = mFlipSettingsView.getVisibility() == View.VISIBLE;
+        final int zeroOutDelays = halfWayDone ? 0 : 1;
+
         mFlipSettingsView.setVisibility(View.VISIBLE);
-        mFlipSettingsView.setScaleX(0f);
         mFlipSettingsViewAnim = start(
-                startDelay(FLIP_DURATION_OUT,
-                        interpolator(mDecelerateInterpolator,
-                                ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 0f, 1f)
-                                        .setDuration(FLIP_DURATION_IN)
-                        )));
+            startDelay(FLIP_DURATION_OUT * zeroOutDelays,
+                interpolator(mDecelerateInterpolator,
+                    ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 1f)
+                        .setDuration(FLIP_DURATION_IN)
+                    )));
         mScrollViewAnim = start(
-                setVisibilityWhenDone(
-                        interpolator(mAccelerateInterpolator,
-                                ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 1f, 0f)
+            setVisibilityWhenDone(
+                interpolator(mAccelerateInterpolator,
+                        ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 0f)
                         )
                                 .setDuration(FLIP_DURATION_OUT),
                         mScrollView, View.INVISIBLE));
@@ -1709,12 +1745,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                         ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 0f)
                                 .setDuration(FLIP_DURATION),
                         mScrollView, View.INVISIBLE));
-        if (mNotificationIcons.getChildCount() > 0) {
             mNotificationButton.setVisibility(View.VISIBLE);
             mNotificationButtonAnim = start(
                     ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 1f)
                             .setDuration(FLIP_DURATION));
-        }
         mClearButtonAnim = start(
                 setVisibilityWhenDone(
                         ObjectAnimator.ofFloat(mClearButton, View.ALPHA, 0f)
