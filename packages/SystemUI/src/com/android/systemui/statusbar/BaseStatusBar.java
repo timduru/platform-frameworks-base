@@ -69,6 +69,7 @@ import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -490,6 +491,20 @@ public abstract class BaseStatusBar extends SystemUI implements
                     "com.android.systemui.recent.RecentsActivity");
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    
+            boolean autoRotate = Settings.System.getInt(mContext.getContentResolver(),                                    
+                    Settings.System.ACCELEROMETER_ROTATION, 1) == 1; 
+            if (!autoRotate) {
+                WindowManager mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+                Display mDisplay = mWindowManager.getDefaultDisplay();
+                int rotation = mDisplay.getRotation();
+                
+                if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
+                    intent.putExtra("Portrait", 2);
+                } else {
+                    intent.putExtra("Portrait", 1);
+                }              
+            }
 
             if (firstTask == null) {
                 if (RecentsActivity.forceOpaqueBackground(mContext)) {

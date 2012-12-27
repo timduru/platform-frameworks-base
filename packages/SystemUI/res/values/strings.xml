@@ -516,10 +516,8 @@
     <string name="status_bar_help_title">Notifications appear here</string>
     <!-- Body of help text shown when the notification panel is pulled down for the very first time. [CHAR LIMIT=NONE] -->
     <string name="status_bar_help_text">Access them anytime by swiping down.\nSwipe down again for system controls.</string>
-        <!-- Eos Standard Setting volume controller mute button label -->
+    <!-- Eos Standard Setting volume controller mute button label -->
     <string name="statusbar_eos_volume_slider_label">MUTE</string>
-        <!-- Eos Recents Panel Kill All Button Text -->
-    <string name="recents_kill_all_button_text">Stop All</string>
     <!-- Eos signal cluster clock tag Helps with only applying custom settings only to desired clock views -->
     <string name="eos_statusbar_clock_signal_cluster_tag">eos_systemui_clock_cluster_tag</string>
 </resources>

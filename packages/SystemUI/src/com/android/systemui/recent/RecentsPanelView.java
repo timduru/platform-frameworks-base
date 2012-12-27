@@ -105,7 +105,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private int mRecentItemLayoutId;
     private boolean mHighEndGfx;
 
-    private Button mRecentsKillAllButton;
+    private ImageView mRecentsKillAllButton;
     private ContentObserver mRecentsKillAllButtonObserver;
     private Timer updateMemDisplayTimer;
 
@@ -817,7 +817,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         boolean enableKillallButton = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_RECENTS_KILLALL_BUTTON, 0) == 1;
 
-        mRecentsKillAllButton = (Button) findViewById(R.id.recents_kill_all_button);
+        mRecentsKillAllButton = (ImageView) findViewById(R.id.recents_kill_all_button);
         if (mRecentsKillAllButton != null) {
             if (enableKillallButton) {
                 mRecentsKillAllButton.setVisibility(View.VISIBLE);
@@ -835,39 +835,28 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     private void killAllRecentApps() {
-        final ActivityManager am = (ActivityManager) mContext
-                .getSystemService(Context.ACTIVITY_SERVICE);
-        if (!mRecentTaskDescriptions.isEmpty()) {
-            for (TaskDescription ad : mRecentTaskDescriptions) {
-                am.removeTask(ad.persistentTaskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
-                // Accessibility feedback
-                setContentDescription(mContext.getString(
-                        R.string.accessibility_recents_item_dismissed, ad.getLabel()));
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-                setContentDescription(null);
-            }
-            mRecentTaskDescriptions.clear();
-        }
-        dismiss();
+        mRecentsContainer.removeAllViewsInLayout();
     }
 
     private boolean showMemDisplay(boolean show) {
-        boolean enableMemDisplay = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_RECENTS_MEM_DISPLAY, 0) == 1;
-
-        final TextView memText = (TextView) findViewById(R.id.recents_memory_text);
-        final ProgressBar memBar = (ProgressBar) findViewById(R.id.recents_memory_bar);
-
-        if (!enableMemDisplay) {
-            memText.setVisibility(View.GONE);
-            memBar.setVisibility(View.GONE);
-            return false;
-        }
-
-        memText.setVisibility(View.VISIBLE);
-        memBar.setVisibility(View.VISIBLE);
-
         if (show) {
+            final TextView memText = (TextView) findViewById(R.id.recents_memory_text);
+            final ProgressBar memBar = (ProgressBar) findViewById(R.id.recents_memory_bar);
+            if (memText == null || memBar == null) {
+                return false;
+            }
+            
+            boolean enableMemDisplay = Settings.System.getInt(mContext.getContentResolver(),
+                    EOSConstants.SYSTEMUI_RECENTS_MEM_DISPLAY, 0) == 1;
+            if (!enableMemDisplay) {
+                memText.setVisibility(View.GONE);
+                memBar.setVisibility(View.GONE);
+                return false;
+            }
+
+            memText.setVisibility(View.VISIBLE);
+            memBar.setVisibility(View.VISIBLE);
+        
             final int totalMem = getTotalMemory();
             memBar.setMax(totalMem);
 
@@ -886,7 +875,9 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 }
             }, 0, 2000);
         } else {
-            updateMemDisplayTimer.cancel();
+            if (updateMemDisplayTimer != null) {
+                updateMemDisplayTimer.cancel();
+            }
         }
         return true;
     }
