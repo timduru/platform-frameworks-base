@@ -221,8 +221,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     View mClearButton;
     ImageView mSettingsButton, mNotificationButton;
 
-    // boolean to help with the public method
-    private boolean mIsClockVisible = true;
     // carrier/wifi label
     private TextView mCarrierLabel;
     private boolean mCarrierLabelVisible = false;
@@ -533,7 +531,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         mBatteryController = new BatteryController(mContext);
 		mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));
 		mBatteryController.addLabelView((TextView)mStatusBarView.findViewById(R.id.battery_text));
-		processClockSettingsChange();
         mNetworkController = new NetworkController(mContext);
         mBluetoothController = new BluetoothController(mContext);
         final SignalClusterView signalCluster =
@@ -1202,15 +1199,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void showClock(boolean show) {
-        if (mStatusBarView == null) return;
-        View clock = mStatusBarView.findViewById(R.id.clock);
-        if (clock != null) {
-            if (mIsClockVisible) {
-                clock.setVisibility(show ? View.VISIBLE : View.GONE);
-            } else {
-                clock.setVisibility(View.GONE);
-            }
-        }
+        if (mStatusBarView == null || mEosController == null) return;
+        mEosController.showClock(show);
     }
 
     /**
@@ -2606,24 +2596,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         @Override
         public void setBounds(Rect bounds) {
         }
-    }
-
-    protected void processClockSettingsChange() {
-        if (mStatusBarView == null) return;
-        TextView clock = (TextView) mStatusBarView.findViewById(R.id.clock);
-
-        mIsClockVisible = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_CLOCK_VISIBLE,
-                EOSConstants.SYSTEMUI_CLOCK_VISIBLE_DEF) == 1 ? true : false;
-        showClock(true);
-        int color = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_CLOCK_COLOR,
-                EOSConstants.SYSTEMUI_CLOCK_COLOR_DEF);
-        if (color == -1) {
-            color = mContext.getResources()
-                    .getColor(android.R.color.holo_blue_light);
-        }
-        clock.setTextColor(color);
     }
 
     private void processEosQsChange() {

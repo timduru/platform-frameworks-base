@@ -125,7 +125,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     // Search panel
     protected SearchPanelView mSearchPanelView;
 
-    private EosUiController mEosUiController;
     protected PopupMenu mNotificationBlamePopup;
 
     protected int mCurrentUserId = 0;
@@ -163,13 +162,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mDeviceProvisioned = provisioned;
                 updateNotificationIcons();
             }
-        }
-    };
-
-    private ContentObserver mClockSettingsObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            processClockSettingsChange();
         }
     };
 
@@ -214,12 +206,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mProvisioningObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_VISIBLE), false,
-                mClockSettingsObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_COLOR), false,
-                mClockSettingsObserver);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mStatusBarContainer = new FrameLayout(mContext);
@@ -1011,7 +997,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract void updateExpandedViewPos(int expandedPosition);
     protected abstract int getExpandedViewMaxHeight();
     protected abstract boolean shouldDisableNavbarGestures();
-    protected abstract void processClockSettingsChange();
 
     protected boolean isTopNotification(ViewGroup parent, NotificationData.Entry entry) {
         return parent != null && parent.indexOfChild(entry.row) == 0;

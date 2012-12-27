@@ -76,12 +76,14 @@ public class EosUiController extends ActionHandler {
     private ContentObserver mHideBarObserver;
     private ContentObserver mBatterySettingsObserver;
     private ContentObserver mEosSettingsContentObserver;
+    private ContentObserver mClockSettingsObserver;
     private EosSettings mEosSettings;
     private IWindowManager wm;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams mNavigationBarParams;
     private WindowManager.LayoutParams mStatusBarParams;
     private boolean mHasNavBar = false;
+    private boolean mIsClockVisible = true;
 
     public EosUiController(Context context) {
         super(context);
@@ -98,13 +100,6 @@ public class EosUiController extends ActionHandler {
             e.printStackTrace();
         }
 
-        mEosSettingsContentObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                processEosSettingsChange();
-            }
-        };
-
         // no matter what, we set make bar visibility true on boot
         Settings.System.putInt(mResolver, EOSConstants.SYSTEMUI_HIDE_BARS,
                 EOSConstants.SYSTEMUI_HIDE_BARS_DEF);
@@ -114,7 +109,14 @@ public class EosUiController extends ActionHandler {
             public void onChange(boolean selfChange) {
                 updateBarVisibility();
             }
-        };     
+        };
+
+        mClockSettingsObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                processClockSettingsChange();
+            }
+        };
 
         mBatterySettingsObserver = new ContentObserver(new Handler()) {
             @Override
@@ -122,7 +124,14 @@ public class EosUiController extends ActionHandler {
                 processBatterySettingsChange();
             }
         };
-        
+
+        mEosSettingsContentObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                processEosSettingsChange();
+            }
+        };
+
         mResolver.registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE), false,
                 mBatterySettingsObserver);
@@ -135,6 +144,12 @@ public class EosUiController extends ActionHandler {
         mResolver.registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE), false,
                 mBatterySettingsObserver);
+        mResolver.registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_VISIBLE), false,
+                mClockSettingsObserver);
+        mResolver.registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_COLOR), false,
+                mClockSettingsObserver);
         mResolver.registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_HIDE_BARS), false,
                 mHideBarObserver);
@@ -219,6 +234,7 @@ public class EosUiController extends ActionHandler {
                 .findViewById(R.id.signal_battery_cluster)
                 .findViewById(R.id.battery));
         processBatterySettingsChange();
+        processClockSettingsChange();
     }
 
     // we need this to add and remove the view from the windowmanager
@@ -498,6 +514,35 @@ public class EosUiController extends ActionHandler {
                 v.setVisibility(icon_visible);
             }
         }
+    }
+
+    public void showClock(boolean show) {
+        View clock = mStatusBarView.findViewById(R.id.clock);
+        if (clock != null) {
+            if (mIsClockVisible) {
+                clock.setVisibility(show ? View.VISIBLE : View.GONE);
+            } else {
+                clock.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void processClockSettingsChange() {
+        if (mStatusBarView == null) return;
+        TextView clock = (TextView) mStatusBarView.findViewById(R.id.clock);
+
+        mIsClockVisible = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_CLOCK_VISIBLE,
+                EOSConstants.SYSTEMUI_CLOCK_VISIBLE_DEF) == 1 ? true : false;
+        showClock(true);
+        int color = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_CLOCK_COLOR,
+                EOSConstants.SYSTEMUI_CLOCK_COLOR_DEF);
+        if (color == -1) {
+            color = mContext.getResources()
+                    .getColor(android.R.color.holo_blue_light);
+        }
+        clock.setTextColor(color);
     }
 
     private void processEosSettingsChange() {
