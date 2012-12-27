@@ -86,15 +86,15 @@ public final class EOSConstants {
      */
     public static final String SYSTEMUI_CLOCK_AMPM = "eos_systemui_clock_ampm";
 
-    /**
-     * @hide
-     */
-    public static final String SYSTEMUI_CLOCK_SIGNAL_CLUSTER_TAG = "eos_systemui_clock_cluster_tag";
+    /**		
+     * @hide		
+     */	
+    public static final String SYSTEMUI_CLOCK_SIGNAL_CLUSTER_TAG = "eos_systemui_clock_cluster_tag";		
 
-    /**
-     * @hide
-     */
-    public static final String SYSTEMUI_CLOCK_CENTER_TAG = "eos_systemui_clock_center_tag";
+    /**		
+     * @hide		
+     */		
+    public static final String SYSTEMUI_CLOCK_CENTER_TAG = "eos_systemui_clock_center_tag";		
 
     /**
      * @hide
@@ -596,12 +596,12 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final String SYSTEMUI_PANEL_BRIGHTNESS_TILE = "QS_Brightness";
-
+    public static final String SYSTEMUI_PANEL_SEEKBAR_TILE = "QS_Seekbar";
+    
     /**
      * @hide
      */
-    public static final String SYSTEMUI_PANEL_VOLUME_TILE = "QS_Volume";
+    public static final String SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT = "QuickSettingsMod.UPDATE_VOLUME_OBSERVER_STREAM";
 
     /**
      * @hide
@@ -693,10 +693,9 @@ public final class EOSConstants {
      */
     public static final String[] SYSTEMUI_PANEL_DEFAULTS = {
             SYSTEMUI_PANEL_USER_TILE,
-            SYSTEMUI_PANEL_SETTINGS_TILE,
-            SYSTEMUI_PANEL_BRIGHTNESS_TILE,
-            SYSTEMUI_PANEL_VOLUME_TILE,
+            SYSTEMUI_PANEL_SETTINGS_TILE,            
             SYSTEMUI_PANEL_BATTERY_TILE,
+            SYSTEMUI_PANEL_SEEKBAR_TILE,
             SYSTEMUI_PANEL_ROTATION_TILE,
             SYSTEMUI_PANEL_WIFI_TILE,
             SYSTEMUI_PANEL_DATA_TILE,
@@ -709,10 +708,9 @@ public final class EOSConstants {
     public static final Map<String, Boolean> getEosSystemUIPanelMap() {
         LinkedHashMap<String, Boolean> map = new LinkedHashMap<String, Boolean>();
         map.put(SYSTEMUI_PANEL_USER_TILE, true);
-        map.put(SYSTEMUI_PANEL_SETTINGS_TILE, true);
-        map.put(SYSTEMUI_PANEL_BRIGHTNESS_TILE, true);
-        map.put(SYSTEMUI_PANEL_VOLUME_TILE, true);
+        map.put(SYSTEMUI_PANEL_SETTINGS_TILE, true);        
         map.put(SYSTEMUI_PANEL_BATTERY_TILE, true);
+        map.put(SYSTEMUI_PANEL_SEEKBAR_TILE, true);
         map.put(SYSTEMUI_PANEL_ROTATION_TILE, true);
         map.put(SYSTEMUI_PANEL_AIRPLANE_TILE, false);
         map.put(SYSTEMUI_PANEL_WIFI_TILE, true);

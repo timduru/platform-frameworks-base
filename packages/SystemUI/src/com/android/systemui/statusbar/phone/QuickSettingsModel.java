@@ -90,9 +90,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     static class UserState extends State {
         Drawable avatar;
     }
-    static class BrightnessState extends State {
-        boolean autoBrightness;
-    }
     public static class BluetoothState extends State {
         boolean connected = false;
         String stateContentDescription;
@@ -193,9 +190,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 	private RefreshCallback mRingerCallback;
 	private State mRingerState = new State();
 	
-	private QuickSettingsTileView mVolumeTile;
-	private RefreshCallback mVolumeCallback;
-	private State mVolumeState = new State();
+	private QuickSettingsTileView mSeekbarTile;
+	private RefreshCallback mSeekbarCallback;
+	private State mSeekbarState = new State();
 	
 	private QuickSettingsTileView mScreenTile;
 	private RefreshCallback mScreenCallback;
@@ -249,10 +246,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mRotationLockCallback;
     private State mRotationLockState = new State();
 
-    private QuickSettingsTileView mBrightnessTile;
-    private RefreshCallback mBrightnessCallback;
-    private BrightnessState mBrightnessState = new BrightnessState();
-
     private QuickSettingsTileView mBugreportTile;
     private RefreshCallback mBugreportCallback;
     private State mBugreportState = new State();
@@ -262,8 +255,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private State mSettingsState = new State();
 	
     private String SETTINGS = EOSConstants.SYSTEMUI_PANEL_SETTINGS_TILE;
-    private String BRIGHTNESS = EOSConstants.SYSTEMUI_PANEL_BRIGHTNESS_TILE;
-    private String VOLUME = EOSConstants.SYSTEMUI_PANEL_VOLUME_TILE;
+    private String SEEKBAR = EOSConstants.SYSTEMUI_PANEL_SEEKBAR_TILE;
     private String BATTERY = EOSConstants.SYSTEMUI_PANEL_BATTERY_TILE;
     private String ROTATION = EOSConstants.SYSTEMUI_PANEL_ROTATION_TILE;
     private String AIRPLANE = EOSConstants.SYSTEMUI_PANEL_AIRPLANE_TILE;
@@ -276,6 +268,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private String WIFIAP = EOSConstants.SYSTEMUI_PANEL_WIFIAP_TILE;
     private String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
     private String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
+    private String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
 
 	private VolumeObserver mVolumeObserver;
 
@@ -319,6 +312,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 		tileFilter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
 		tileFilter.addAction(INTENT_UPDATE_TORCH_TILE);
 		tileFilter.addAction(Intent.ACTION_HEADSET_PLUG);
+        tileFilter.addAction(INTENT_UPDATE_VOLUME_OBSERVER_STREAM);
         context.registerReceiver(tileReceiver, tileFilter);
 		
         mVolumeObserver = new VolumeObserver(new Handler());
@@ -334,7 +328,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshSettingsTile();
         refreshBatteryTile();
         refreshBluetoothTile();
-        refreshBrightnessTile();
         refreshRotationLockTile();
     }
 
@@ -363,11 +356,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 		mRingerCallback.refreshView(mRingerTile, mRingerState);
     }
 	
-	// Volume
-	void addVolumeTile(QuickSettingsTileView view, RefreshCallback cb) {
-        mVolumeTile = view;
-        mVolumeCallback = cb;
-		mVolumeCallback.refreshView(mVolumeTile, mVolumeState);
+	// Seekbar
+	void addSeekbarTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mSeekbarTile = view;
+        mSeekbarCallback = cb;
+		mSeekbarCallback.refreshView(mSeekbarTile, mSeekbarState);
     }
 	
 	// Screen
@@ -794,28 +787,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             onRotationLockChanged();
         }
     }
-
-    // Brightness
-    void addBrightnessTile(QuickSettingsTileView view, RefreshCallback cb) {
-        mBrightnessTile = view;
-        mBrightnessCallback = cb;
-        onBrightnessLevelChanged();
-    }
+    
     @Override
     public void onBrightnessLevelChanged() {
-        Resources r = mContext.getResources();
-        int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                mUserTracker.getCurrentUserId());
-        mBrightnessState.autoBrightness =
-                (mode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
-        mBrightnessState.iconId = mBrightnessState.autoBrightness
-                ? R.drawable.ic_qs_brightness_auto_on
-                : R.drawable.ic_qs_brightness_auto_off;
-        mBrightnessState.label = r.getString(R.string.quick_settings_brightness_label);
-		if (isToggleEnabled(BRIGHTNESS)) {
-			mBrightnessCallback.refreshView(mBrightnessTile, mBrightnessState);
+		if (isToggleEnabled(SEEKBAR)) {
+			mSeekbarCallback.refreshView(mSeekbarTile, mSeekbarState);
 		}
     }
     void refreshBrightnessTile() {
@@ -867,9 +843,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 				if (isToggleEnabled(TORCH)) {
 					mTorchCallback.refreshView(mTorchTile, mTorchState);
 				}
-			} else if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
-				if (isToggleEnabled(VOLUME)) {
-					mVolumeCallback.refreshView(mVolumeTile, mVolumeState);
+			} else if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG) || intent.getAction().equals(INTENT_UPDATE_VOLUME_OBSERVER_STREAM)) {
+				if (isToggleEnabled(SEEKBAR)) {
+					mSeekbarCallback.refreshView(mSeekbarTile, mSeekbarState);
 					mContext.getContentResolver().unregisterContentObserver(mVolumeObserver);
 					mContext.getContentResolver().registerContentObserver(volumeStreamUri(QuickSettings.mVolumeStream), true, mVolumeObserver);
 				}
@@ -891,8 +867,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
-			if (isToggleEnabled(VOLUME)) {
-				mVolumeCallback.refreshView(mVolumeTile, mVolumeState);
+			if (isToggleEnabled(SEEKBAR)) {
+				mSeekbarCallback.refreshView(mSeekbarTile, mSeekbarState);
 			}
         }
     }
