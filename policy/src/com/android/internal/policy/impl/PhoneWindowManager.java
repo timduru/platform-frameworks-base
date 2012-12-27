@@ -496,6 +496,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
     private static final int MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK = 4;
+    
+    private boolean mVolumeLongPress;
+    private boolean mVolumeUpPress;
+    private boolean mVolumeDownPress;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -3435,6 +3439,47 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
     }
+    
+    Runnable mVolumeUpLongPress = new Runnable() {
+        public void run() {
+            mVolumeLongPress = true;
+            sendMediaButtonEvent(KeyEvent.KEYCODE_MEDIA_NEXT);
+        };
+    };
+
+    Runnable mVolumeDownLongPress = new Runnable() {
+        public void run() {
+            mVolumeLongPress = true;
+            sendMediaButtonEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+        };
+    };
+    
+    Runnable mVolumeUpDownPress = new Runnable() {
+        public void run() {
+            sendMediaButtonEvent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+        };
+    };
+
+    private void sendMediaButtonEvent(int code) {
+        long eventtime = SystemClock.uptimeMillis();
+        Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+        KeyEvent keyEvent = new KeyEvent(eventtime, eventtime, KeyEvent.ACTION_DOWN, code, 0);
+        keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+        mContext.sendOrderedBroadcast(keyIntent, null);
+        keyEvent = KeyEvent.changeAction(keyEvent, KeyEvent.ACTION_UP);
+        keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+        mContext.sendOrderedBroadcast(keyIntent, null);
+    }
+
+    void handleVolumeLongPress(int keycode) {
+        mHandler.postDelayed(keycode == KeyEvent.KEYCODE_VOLUME_UP ? mVolumeUpLongPress :
+            mVolumeDownLongPress, ViewConfiguration.getLongPressTimeout());
+    }
+
+    void handleVolumeLongPressAbort() {
+        mHandler.removeCallbacks(mVolumeUpLongPress);
+        mHandler.removeCallbacks(mVolumeDownLongPress);
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -3509,6 +3554,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
+                boolean controlMusic = Settings.System.getInt(mContext.getContentResolver(), EOSConstants.SYSTEM_VOLUME_KEYS_MUSIC_CONTROL, 1) == 1;
+
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
                     if (down) {
                         if (isScreenOn && !mVolumeDownKeyTriggered
@@ -3519,9 +3566,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             cancelPendingPowerKeyAction();
                             interceptScreenshotChord();
                         }
+                        
+                        if (controlMusic) {
+                            if ((result & ACTION_PASS_TO_USER) == 0) {
+                                if (isMusicActive()) {
+                                    mVolumeLongPress = false;
+                                    handleVolumeLongPress(keyCode);
+                                }
+                                
+                                mVolumeDownPress = true;
+                                if (mVolumeUpPress) {
+                                    handleVolumeLongPressAbort();
+                                    mHandler.removeCallbacks(mVolumeUpDownPress);
+                                    mHandler.postDelayed(mVolumeUpDownPress, ViewConfiguration.getLongPressTimeout() / 2);
+                                }
+                            }
+                        }
                     } else {
                         mVolumeDownKeyTriggered = false;
                         cancelPendingScreenshotChordAction();
+                        
+                        if ((result & ACTION_PASS_TO_USER) == 0) {
+                            if (controlMusic) {
+                                if (isMusicActive()) {
+                                    handleVolumeLongPressAbort();
+                                    if (!mVolumeLongPress) {
+                                        handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
+                                    }
+                                }
+                                mVolumeDownPress = false;
+                            } else {
+                                handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
+                            }
+                        }
                     }
                 } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                     if (down) {
@@ -3531,9 +3608,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             cancelPendingPowerKeyAction();
                             cancelPendingScreenshotChordAction();
                         }
+                        
+                        if (controlMusic) {
+                            if ((result & ACTION_PASS_TO_USER) == 0) {
+                                if (isMusicActive()) {
+                                    mVolumeLongPress = false;
+                                    handleVolumeLongPress(keyCode);
+                                }
+                                
+                                mVolumeUpPress = true;
+                                if (mVolumeDownPress) {
+                                    handleVolumeLongPressAbort();
+                                    mHandler.removeCallbacks(mVolumeUpDownPress);
+                                    mHandler.postDelayed(mVolumeUpDownPress, ViewConfiguration.getLongPressTimeout() / 2);
+                                }
+                            }
+                        }
                     } else {
                         mVolumeUpKeyTriggered = false;
                         cancelPendingScreenshotChordAction();
+                        
+                        if ((result & ACTION_PASS_TO_USER) == 0) {
+                            if (controlMusic) {
+                                if (isMusicActive()) {
+                                    handleVolumeLongPressAbort();
+                                    if (!mVolumeLongPress) {
+                                        handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
+                                    }
+                                }
+                                mVolumeUpPress = false;
+                            } else {
+                                handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
+                            }
+                        }
                     }
                 } else if (keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
                     if (down) {
@@ -3574,13 +3681,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         } catch (RemoteException ex) {
                             Log.w(TAG, "ITelephony threw RemoteException", ex);
                         }
-                    }
-
-                    if (isMusicActive() && (result & ACTION_PASS_TO_USER) == 0) {
-                        // If music is playing but we decided not to pass the key to the
-                        // application, handle the volume change here.
-                        handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
-                        break;
                     }
                 }
                 break;

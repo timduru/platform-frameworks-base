@@ -512,6 +512,11 @@ public final class EOSConstants {
      * @hide
      */
     public static final String SYSTEM_DEFAULT_VOLUME_STREAM = "eos_system_default_volume_stream";
+    
+    /**
+     * @hide
+     */
+    public static final String SYSTEM_VOLUME_KEYS_MUSIC_CONTROL = "eos_system_volume_keys_music_control";
 
     /**
      * @hide
