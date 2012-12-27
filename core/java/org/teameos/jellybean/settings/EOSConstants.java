@@ -89,6 +89,16 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final String SYSTEMUI_CLOCK_SIGNAL_CLUSTER_TAG = "eos_systemui_clock_cluster_tag";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_CLOCK_CENTER_TAG = "eos_systemui_clock_center_tag";
+
+    /**
+     * @hide
+     */
     public static final String SYSTEMUI_NAVBAR_DISABLE_GESTURE = "eos_systemui_navbar_disable_gesture";
 
     /**

@@ -20,25 +20,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.database.ContentObserver;
-import android.graphics.Canvas;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
 import android.util.AttributeSet;
-import android.util.Slog;
-import android.view.View;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -62,9 +52,16 @@ public class Clock extends TextView {
     private static final int AM_PM_STYLE_NORMAL  = 0;
     private static final int AM_PM_STYLE_SMALL   = 1;
     private static final int AM_PM_STYLE_GONE    = 2;
-    
-    private static int AM_PM_STYLE = AM_PM_STYLE_GONE;
+    // no longer static each instance different style
+    private int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
+    // tags to recognize different views
+    private static final String TAG_SIGNAL_CLUSTER = EOSConstants.SYSTEMUI_CLOCK_SIGNAL_CLUSTER_TAG;
+    private static final String TAG_CENTER_VIEW = EOSConstants.SYSTEMUI_CLOCK_CENTER_TAG;
+    // set bools at init for easy management
+    private boolean mIsSignalView = false;
+    private boolean mIsCenterView = false;
+    
     public Clock(Context context) {
         this(context, null);
     }
@@ -75,6 +72,13 @@ public class Clock extends TextView {
 
     public Clock(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        if(getTag() != null) {
+            if (TAG_SIGNAL_CLUSTER.equals(getTag())) {
+                mIsSignalView = true;
+            } else if (TAG_CENTER_VIEW.equals(getTag())) {
+                mIsCenterView = true;
+            }
+        }
     }
 
     @Override
@@ -92,9 +96,11 @@ public class Clock extends TextView {
 
             getContext().registerReceiver(mIntentReceiver, filter, null, getHandler());
 
-            getContext().getContentResolver().registerContentObserver(
-                    Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_AMPM), false,
-                    mClockAmPmObserver);
+            if (mIsSignalView || mIsCenterView) {
+                getContext().getContentResolver().registerContentObserver(
+                        Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_AMPM), false,
+                        mClockAmPmObserver);
+            }
         }
 
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
@@ -104,7 +110,11 @@ public class Clock extends TextView {
         mCalendar = Calendar.getInstance(TimeZone.getDefault());
 
         // Make sure we update to the current time
-        updateAmPm();
+        if (mIsSignalView || mIsCenterView) {
+            updateAmPmStyle();
+        } else {
+            updateAmPm();
+        }
     }
 
     @Override
@@ -112,7 +122,9 @@ public class Clock extends TextView {
         super.onDetachedFromWindow();
         if (mAttached) {
             getContext().unregisterReceiver(mIntentReceiver);
-            getContext().getContentResolver().unregisterContentObserver(mClockAmPmObserver);
+            if (mIsSignalView || mIsCenterView) {
+                getContext().getContentResolver().unregisterContentObserver(mClockAmPmObserver);
+            }
             mAttached = false;
         }
     }
@@ -216,17 +228,23 @@ public class Clock extends TextView {
     }
 
     private void updateAmPm() {
+        if (mIsSignalView || mIsCenterView) {
+            mClockFormatString = null;
+        }
+        updateClock();
+    }
+
+    private void updateAmPmStyle() {
         AM_PM_STYLE = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_CLOCK_AMPM,
                 EOSConstants.SYSTEMUI_CLOCK_AMPM_DEF);
-        mClockFormatString = null;
-        updateClock();
+        updateAmPm();
     }
-    
+
     private ContentObserver mClockAmPmObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
-            updateAmPm();
+            updateAmPmStyle();
         }
     };
 }

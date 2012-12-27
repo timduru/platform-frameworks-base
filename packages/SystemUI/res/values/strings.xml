@@ -520,4 +520,6 @@
     <string name="statusbar_eos_volume_slider_label">MUTE</string>
         <!-- Eos Recents Panel Kill All Button Text -->
     <string name="recents_kill_all_button_text">Stop All</string>
+    <!-- Eos signal cluster clock tag Helps with only applying custom settings only to desired clock views -->
+    <string name="eos_statusbar_clock_signal_cluster_tag">eos_systemui_clock_cluster_tag</string>
 </resources>
