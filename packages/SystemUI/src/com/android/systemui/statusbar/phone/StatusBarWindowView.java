@@ -32,6 +32,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
+import com.android.systemui.statusbar.preferences.EosSettings;
 
 
 public class StatusBarWindowView extends FrameLayout
@@ -43,6 +44,7 @@ public class StatusBarWindowView extends FrameLayout
     private NotificationRowLayout latestItems;
     private NotificationPanelView mNotificationPanel;
     private ScrollView mScrollView;
+    private EosSettings mEosSettings;
 
     PhoneStatusBar mService;
 
@@ -119,9 +121,9 @@ public class StatusBarWindowView extends FrameLayout
         // TODO Auto-generated method stub
         super.onWindowVisibilityChanged(visibility);
         if (visibility == View.VISIBLE) {
-            if (mService.mEosSettings != null) mService.mEosSettings.attach();
+            if (mEosSettings != null) mEosSettings.attach();
         } else {
-            if (mService.mEosSettings != null) mService.mEosSettings.detach();
+            if (mEosSettings != null) mEosSettings.detach();
         }
     }
 
@@ -141,6 +143,10 @@ public class StatusBarWindowView extends FrameLayout
         if (mExpandHelper != null) {
             mExpandHelper.cancel();
         }
+    }
+
+    public void setEosSettings(EosSettings settings) {
+        mEosSettings = settings;
     }
 }
 

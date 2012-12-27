@@ -18,6 +18,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -25,7 +26,9 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
+import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.policy.KeyButtonView;
+import com.android.systemui.statusbar.preferences.EosSettings;
 
 import org.teameos.jellybean.settings.EOSConstants;
 import org.teameos.jellybean.settings.ActionHandler;
@@ -67,10 +70,13 @@ public class EosUiController extends ActionHandler {
     private PhoneStatusBar mService;
     private View mStatusBarContainer;
     private NavigationBarView mNavigationBarView;
+    private StatusBarWindowView mStatusBarWindow;
     private ContentResolver mResolver;
     private SettingsObserver mObserver;
     private ContentObserver mHideBarObserver;
     private ContentObserver mBatterySettingsObserver;
+    private ContentObserver mEosSettingsContentObserver;
+    private EosSettings mEosSettings;
     private IWindowManager wm;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams mNavigationBarParams;
@@ -91,6 +97,13 @@ public class EosUiController extends ActionHandler {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        mEosSettingsContentObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                processEosSettingsChange();
+            }
+        };
 
         // no matter what, we set make bar visibility true on boot
         Settings.System.putInt(mResolver, EOSConstants.SYSTEMUI_HIDE_BARS,
@@ -125,6 +138,9 @@ public class EosUiController extends ActionHandler {
         mResolver.registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_HIDE_BARS), false,
                 mHideBarObserver);
+        mResolver.registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_ENABLED), false,
+                mEosSettingsContentObserver);
     }
 
     public NavigationBarView setNavigationBarView(WindowManager.LayoutParams lp) {
@@ -169,6 +185,12 @@ public class EosUiController extends ActionHandler {
 
     public void setBar(PhoneStatusBar service) {
         mService = service;
+    }
+
+    public void setBarWindow(StatusBarWindowView window) {
+        mStatusBarWindow = window;
+        mStatusBarWindow.setEosSettings(mEosSettings);
+        processEosSettingsChange();
     }
 
     // we need this to be set when the theme engine creates new view
@@ -270,6 +292,10 @@ public class EosUiController extends ActionHandler {
         for (SoftKeyObject s : mSoftKeyObjects) {
             s.unloadListener();
         }
+    }
+
+    public EosSettings getEosSettings() {
+        return mEosSettings;
     }
 
     void initSoftKeys() {
@@ -471,6 +497,25 @@ public class EosUiController extends ActionHandler {
                 // two views at any time
                 v.setVisibility(icon_visible);
             }
+        }
+    }
+
+    private void processEosSettingsChange() {
+        ContentResolver resolver = mContext.getContentResolver();
+        ViewGroup toggles = (ViewGroup) mStatusBarWindow.findViewById(R.id.eos_toggles);
+        boolean eosSettingsEnabled = Settings.System.getInt(resolver,
+                EOSConstants.SYSTEMUI_SETTINGS_ENABLED,
+                EOSConstants.SYSTEMUI_SETTINGS_ENABLED_DEF) == 1;
+        if (eosSettingsEnabled) {
+            mEosSettings = new EosSettings(toggles, mContext);
+            toggles.setVisibility(View.VISIBLE);
+        } else {
+            if (mEosSettings != null) {
+                mEosSettings.detach();
+                mEosSettings = null;
+            }
+            toggles.setVisibility(View.GONE);
+            toggles.removeAllViews();
         }
     }
 

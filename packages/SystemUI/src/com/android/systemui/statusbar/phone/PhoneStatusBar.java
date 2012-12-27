@@ -335,15 +335,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
     };
-    EosSettings mEosSettings;
-    EosUiController mEosController;
-    ContentObserver mEosSettingsContentObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            processEosSettingsChange();
-        }
-    };
 
+    EosUiController mEosController;
     ContentObserver mEosQsObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
@@ -401,7 +394,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
                 return mStatusBarWindow.onTouchEvent(event);
             }});
-
+        mEosController.setBarWindow(mStatusBarWindow);
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
         mStatusBarView.setBar(this);
         mEosController.setBar(this);
@@ -639,9 +632,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_SCREEN_ON);
         context.registerReceiver(mBroadcastReceiver, filter);
 
-		context.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_ENABLED), false,
-                mEosSettingsContentObserver);
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_DISABLED), false,
                 mEosQsObserver);
@@ -651,20 +641,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT), false,
                 mEosQsObserver);
-        processEosSettingsChange();
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
 
         return mStatusBarView;
-    }
-
-    // let the EosUIController see this
-    public void updateNavigationBarView(NavigationBarView view) {
-        mNavigationBarView = view;
-        mNavigationBarView.setDisabledFlags(mDisabled);
-        mNavigationBarView.setBar(this);
-        addNavigationBar();
     }
 
     @Override
@@ -2645,25 +2626,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         clock.setTextColor(color);
     }
 
-    private void processEosSettingsChange() {
-        ContentResolver resolver = mContext.getContentResolver();
-        ViewGroup toggles = (ViewGroup) mStatusBarWindow.findViewById(R.id.eos_toggles);
-        boolean eosSettingsEnabled = Settings.System.getInt(resolver,
-                EOSConstants.SYSTEMUI_SETTINGS_ENABLED,
-                EOSConstants.SYSTEMUI_SETTINGS_ENABLED_DEF) == 1;
-        if (eosSettingsEnabled) {
-            mEosSettings = new EosSettings(toggles, mContext);
-            toggles.setVisibility(View.VISIBLE);
-        } else {
-            if (mEosSettings != null) {
-                mEosSettings.detach();
-                mEosSettings = null;
-            }
-            toggles.setVisibility(View.GONE);
-            toggles.removeAllViews();
-        }
-    }
-    
     private void processEosQsChange() {
         // get updated tile list
         List<String> tiles;
