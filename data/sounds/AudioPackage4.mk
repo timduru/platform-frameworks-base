@@ -48,7 +48,6 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/Ring_Digital_02.ogg:system/media/audio/ringtones/Ring_Digital_02.ogg \
 	$(LOCAL_PATH)/Ring_Synth_04.ogg:system/media/audio/ringtones/Ring_Synth_04.ogg \
 	$(LOCAL_PATH)/Ring_Synth_02.ogg:system/media/audio/ringtones/Ring_Synth_02.ogg \
-	$(LOCAL_PATH)/ringtones/FreeFlight.ogg:system/media/audio/ringtones/FreeFlight.ogg \
 	$(LOCAL_PATH)/newwavelabs/Backroad.ogg:system/media/audio/ringtones/Backroad.ogg \
 	$(LOCAL_PATH)/newwavelabs/CaffeineSnake.ogg:system/media/audio/notifications/CaffeineSnake.ogg
 
