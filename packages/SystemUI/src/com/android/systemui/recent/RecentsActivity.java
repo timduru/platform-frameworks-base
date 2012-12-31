@@ -21,6 +21,7 @@ import android.app.ActivityManager;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.os.UserHandle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
@@ -48,6 +50,8 @@ public class RecentsActivity extends Activity {
     private IntentFilter mIntentFilter;
     private boolean mShowing;
     private boolean mForeground;
+    
+    public static boolean mHomeForeground = false;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -92,6 +96,7 @@ public class RecentsActivity extends Activity {
                 R.anim.recents_return_to_launcher_enter,
                 R.anim.recents_return_to_launcher_exit);
         mForeground = false;
+        mHomeForeground = false;
         super.onPause();
     }
 
@@ -136,6 +141,16 @@ public class RecentsActivity extends Activity {
     public void onResume() {
         mForeground = true;
         super.onResume();
+        
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            int portrait = extras.getInt("Portrait");
+            if (portrait == 1) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            } else if (portrait == 2){
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            }
+        }
     }
 
     @Override
@@ -175,6 +190,7 @@ public class RecentsActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.status_bar_recent_panel);
+        
         mRecentsPanel = (RecentsPanelView) findViewById(R.id.recents_root);
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(mRecentsPanel));
 
@@ -190,7 +206,7 @@ public class RecentsActivity extends Activity {
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(CLOSE_RECENTS_INTENT);
         mIntentFilter.addAction(WINDOW_ANIMATION_START_INTENT);
-        registerReceiver(mIntentReceiver, mIntentFilter);
+        registerReceiver(mIntentReceiver, mIntentFilter);          
         super.onCreate(savedInstanceState);
     }
 
@@ -209,6 +225,7 @@ public class RecentsActivity extends Activity {
     @Override
     protected void onNewIntent(Intent intent) {
         handleIntent(intent, true);
+        setIntent(intent);
     }
 
     private void handleIntent(Intent intent, boolean checkWaitingForAnimationParam) {

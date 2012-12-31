@@ -51,14 +51,13 @@
 
         </com.android.systemui.recent.RecentsHorizontalScrollView>
 
-        <Button android:id="@+id/recents_kill_all_button"
+        <ImageView android:id="@+id/recents_kill_all_button"
             android:layout_gravity="bottom|left"
             android:layout_marginTop="5dp"
             android:layout_marginRight="5dp"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:textColor="@android:color/holo_blue_dark"
-            android:text="@string/recents_kill_all_button_text" />
+            android:src="@drawable/ic_notify_clear_pressed" />
 
         <ProgressBar android:id="@+id/recents_memory_bar" 
             style="?android:attr/progressBarStyleHorizontal" 
