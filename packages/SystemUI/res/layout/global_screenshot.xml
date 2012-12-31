@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2011 The Android Open Source Project
+<!--
+     Copyright (C) 2011 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,22 +16,29 @@
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <ImageView android:id="@+id/global_screenshot_background"
+    android:layout_height="match_parent" >
+
+    <ImageView
+        android:id="@+id/global_screenshot_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@android:color/black"
         android:visibility="gone" />
-    <ImageView android:id="@+id/global_screenshot"
+
+    <ImageView
+        android:id="@+id/global_screenshot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:adjustViewBounds="true"
         android:background="@drawable/screenshot_panel"
-        android:visibility="gone"
-        android:adjustViewBounds="true" />
-    <ImageView android:id="@+id/global_screenshot_flash"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/global_screenshot_flash"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@android:color/white"
         android:visibility="gone" />
+
 </FrameLayout>

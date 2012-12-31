@@ -16,59 +16,53 @@
 -->
 
 <!-- notification icons & panel access -->
-<com.android.systemui.statusbar.tablet.NotificationArea
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.statusbar.tablet.NotificationArea xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/notificationArea"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_alignParentRight="true"
-    android:orientation="horizontal"
     android:background="?android:attr/listChoiceBackgroundIndicator"
     android:clickable="true"
-    >
+    android:orientation="horizontal" >
 
     <LinearLayout
         android:id="@+id/feedbackIconArea"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        >
+        android:orientation="horizontal" >
 
         <com.android.systemui.statusbar.tablet.InputMethodButton
             android:id="@+id/imeSwitchButton"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="8dip"
-            android:src="@drawable/ic_sysbar_ime_default"
-            android:visibility="gone"
             android:contentDescription="@string/accessibility_ime_switch_button"
-            />
+            android:src="@drawable/ic_sysbar_ime_default"
+            android:visibility="gone" />
 
         <com.android.systemui.statusbar.policy.CompatModeButton
             android:id="@+id/compatModeButton"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="8dip"
-            android:src="@drawable/ic_sysbar_zoom"
-            android:visibility="gone"
             android:contentDescription="@string/accessibility_compatibility_zoom_button"
-            />
+            android:src="@drawable/ic_sysbar_zoom"
+            android:visibility="gone" />
 
         <com.android.systemui.statusbar.tablet.NotificationIconArea
             android:id="@+id/notificationIcons"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            >
+            android:layout_height="match_parent" >
+
             <view
-                class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
                 android:id="@+id/icons"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="8dp"
-                android:alpha="0.4"
-                />
+                class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
+                android:alpha="0.4" />
         </com.android.systemui.statusbar.tablet.NotificationIconArea>
     </LinearLayout>
 
@@ -76,67 +70,66 @@
         android:id="@+id/notificationTrigger"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:gravity="center"
-        >
+        android:gravity="center" >
+
         <com.android.systemui.statusbar.policy.Clock
             android:id="@+id/clock"
-            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:singleLine="true"
-            android:paddingLeft="6dip"
             android:layout_marginRight="8dip"
             android:gravity="center_vertical|left"
-            />
+            android:paddingLeft="6dip"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.StatusBar.Clock" />
 
         <TextView
             android:id="@+id/network_text"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginRight="6dip"
             android:layout_marginLeft="6dip"
+            android:layout_marginRight="6dip"
             android:gravity="center"
             android:singleLine="true"
-            android:visibility="gone"
-            android:textSize="16sp"
             android:textColor="#606060"
-            />
+            android:textSize="16sp"
+            android:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/signal_battery_cluster"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginRight="16dp"
-            android:orientation="horizontal"
             android:gravity="center"
-            >
-            <include layout="@layout/signal_cluster_view" 
+            android:orientation="horizontal" >
+
+            <include
                 android:id="@+id/signal_cluster"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                />
+                layout="@layout/signal_cluster_view" />
+
             <ImageView
                 android:id="@+id/bluetooth"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:paddingLeft="4dip"
-                android:visibility="gone"
-                />
+                android:visibility="gone" />
+
             <ImageView
                 android:id="@+id/battery"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:paddingLeft="4dip"
-                />
+                android:layout_height="wrap_content"
+                android:paddingLeft="4dip" />
+
             <TextView
                 android:id="@+id/battery_text"
-                android:gravity="center_vertical|left"
-                android:textAppearance="@style/TextAppearance.StatusBar.BatteryText"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="2dip"
-                android:visibility="gone"
-            />
+                android:gravity="center_vertical|left"
+                android:textAppearance="@style/TextAppearance.StatusBar.BatteryText"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
+
 </com.android.systemui.statusbar.tablet.NotificationArea>

@@ -16,10 +16,12 @@
  * limitations under the License.
  */
 -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <gradient name="status_bar_recents_background"
-        android:startColor="#E0000000"
-        android:endColor="#99000000"
+<shape xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <gradient
+        name="status_bar_recents_background"
         android:angle="@integer/status_bar_recents_bg_gradient_degrees"
-        />
+        android:endColor="#99000000"
+        android:startColor="#E0000000" />
+
 </shape>

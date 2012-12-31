@@ -34,11 +34,10 @@ import java.lang.Thread;
 import java.util.LinkedList;
 
 /**
- * @hide
- * This class is provides the same interface and functionality as android.media.AsyncPlayer
- * with the following differences:
- * - whenever audio is played, audio focus is requested,
- * - whenever audio playback is stopped or the playback completed, audio focus is abandoned.
+ * @hide This class is provides the same interface and functionality as
+ *       android.media.AsyncPlayer with the following differences: - whenever
+ *       audio is played, audio focus is requested, - whenever audio playback is
+ *       stopped or the playback completed, audio focus is abandoned.
  */
 public class NotificationPlayer implements OnCompletionListener {
     private static final int PLAY = 1;
@@ -64,13 +63,15 @@ public class NotificationPlayer implements OnCompletionListener {
     private Looper mLooper;
 
     /*
-     * Besides the use of audio focus, the only implementation difference between AsyncPlayer and
-     * NotificationPlayer resides in the creation of the MediaPlayer. For the completion callback,
-     * OnCompletionListener, to be called at the end of the playback, the MediaPlayer needs to
-     * be created with a looper running so its event handler is not null.
+     * Besides the use of audio focus, the only implementation difference
+     * between AsyncPlayer and NotificationPlayer resides in the creation of the
+     * MediaPlayer. For the completion callback, OnCompletionListener, to be
+     * called at the end of the playback, the MediaPlayer needs to be created
+     * with a looper running so its event handler is not null.
      */
     private final class CreationAndCompletionThread extends Thread {
         public Command mCmd;
+
         public CreationAndCompletionThread(Command cmd) {
             super();
             mCmd = cmd;
@@ -79,9 +80,9 @@ public class NotificationPlayer implements OnCompletionListener {
         public void run() {
             Looper.prepare();
             mLooper = Looper.myLooper();
-            synchronized(this) {
+            synchronized (this) {
                 AudioManager audioManager =
-                    (AudioManager) mCmd.context.getSystemService(Context.AUDIO_SERVICE);
+                        (AudioManager) mCmd.context.getSystemService(Context.AUDIO_SERVICE);
                 try {
                     MediaPlayer player = new MediaPlayer();
                     player.setAudioStreamType(mCmd.stream);
@@ -104,8 +105,7 @@ public class NotificationPlayer implements OnCompletionListener {
                         mPlayer.release();
                     }
                     mPlayer = player;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     Log.w(mTag, "error loading sound for " + mCmd.uri, e);
                 }
                 mAudioManager = audioManager;
@@ -120,32 +120,35 @@ public class NotificationPlayer implements OnCompletionListener {
         // is playing, let it continue until we're done, so there
         // is less of a glitch.
         try {
-            if (mDebug) Log.d(mTag, "Starting playback");
-            //-----------------------------------
-            // This is were we deviate from the AsyncPlayer implementation and create the
+            if (mDebug)
+                Log.d(mTag, "Starting playback");
+            // -----------------------------------
+            // This is were we deviate from the AsyncPlayer implementation and
+            // create the
             // MediaPlayer in a new thread with which we're synchronized
-            synchronized(mCompletionHandlingLock) {
-                // if another sound was already playing, it doesn't matter we won't get notified
-                // of the completion, since only the completion notification of the last sound
+            synchronized (mCompletionHandlingLock) {
+                // if another sound was already playing, it doesn't matter we
+                // won't get notified
+                // of the completion, since only the completion notification of
+                // the last sound
                 // matters
-                if((mLooper != null)
+                if ((mLooper != null)
                         && (mLooper.getThread().getState() != Thread.State.TERMINATED)) {
                     mLooper.quit();
                 }
                 mCompletionThread = new CreationAndCompletionThread(cmd);
-                synchronized(mCompletionThread) {
+                synchronized (mCompletionThread) {
                     mCompletionThread.start();
                     mCompletionThread.wait();
                 }
             }
-            //-----------------------------------
+            // -----------------------------------
 
             long delay = SystemClock.uptimeMillis() - cmd.requestTime;
             if (delay > 1000) {
                 Log.w(mTag, "Notification sound delayed by " + delay + "msecs");
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.w(mTag, "error loading sound for " + cmd.uri, e);
         }
     }
@@ -160,42 +163,47 @@ public class NotificationPlayer implements OnCompletionListener {
                 Command cmd = null;
 
                 synchronized (mCmdQueue) {
-                    if (mDebug) Log.d(mTag, "RemoveFirst");
+                    if (mDebug)
+                        Log.d(mTag, "RemoveFirst");
                     cmd = mCmdQueue.removeFirst();
                 }
 
                 switch (cmd.code) {
-                case PLAY:
-                    if (mDebug) Log.d(mTag, "PLAY");
-                    startSound(cmd);
-                    break;
-                case STOP:
-                    if (mDebug) Log.d(mTag, "STOP");
-                    if (mPlayer != null) {
-                        long delay = SystemClock.uptimeMillis() - cmd.requestTime;
-                        if (delay > 1000) {
-                            Log.w(mTag, "Notification stop delayed by " + delay + "msecs");
+                    case PLAY:
+                        if (mDebug)
+                            Log.d(mTag, "PLAY");
+                        startSound(cmd);
+                        break;
+                    case STOP:
+                        if (mDebug)
+                            Log.d(mTag, "STOP");
+                        if (mPlayer != null) {
+                            long delay = SystemClock.uptimeMillis() - cmd.requestTime;
+                            if (delay > 1000) {
+                                Log.w(mTag, "Notification stop delayed by " + delay + "msecs");
+                            }
+                            mPlayer.stop();
+                            mPlayer.release();
+                            mPlayer = null;
+                            mAudioManager.abandonAudioFocus(null);
+                            mAudioManager = null;
+                            if ((mLooper != null)
+                                    && (mLooper.getThread().getState() != Thread.State.TERMINATED)) {
+                                mLooper.quit();
+                            }
+                        } else {
+                            Log.w(mTag, "STOP command without a player");
                         }
-                        mPlayer.stop();
-                        mPlayer.release();
-                        mPlayer = null;
-                        mAudioManager.abandonAudioFocus(null);
-                        mAudioManager = null;
-                        if((mLooper != null)
-                                && (mLooper.getThread().getState() != Thread.State.TERMINATED)) {
-                            mLooper.quit();
-                        }
-                    } else {
-                        Log.w(mTag, "STOP command without a player");
-                    }
-                    break;
+                        break;
                 }
 
                 synchronized (mCmdQueue) {
                     if (mCmdQueue.size() == 0) {
                         // nothing left to do, quit
-                        // doing this check after we're done prevents the case where they
-                        // added it during the operation from spawning two threads and
+                        // doing this check after we're done prevents the case
+                        // where they
+                        // added it during the operation from spawning two
+                        // threads and
                         // trying to do them in parallel.
                         mThread = null;
                         releaseWakeLock();
@@ -210,11 +218,12 @@ public class NotificationPlayer implements OnCompletionListener {
         if (mAudioManager != null) {
             mAudioManager.abandonAudioFocus(null);
         }
-        // if there are no more sounds to play, end the Looper to listen for media completion
+        // if there are no more sounds to play, end the Looper to listen for
+        // media completion
         synchronized (mCmdQueue) {
             if (mCmdQueue.size() == 0) {
-                synchronized(mCompletionHandlingLock) {
-                    if(mLooper != null) {
+                synchronized (mCompletionHandlingLock) {
+                    if (mLooper != null) {
                         mLooper.quit();
                     }
                     mCompletionThread = null;
@@ -231,13 +240,13 @@ public class NotificationPlayer implements OnCompletionListener {
     private PowerManager.WakeLock mWakeLock;
     private AudioManager mAudioManager;
 
-    // The current state according to the caller.  Reality lags behind
+    // The current state according to the caller. Reality lags behind
     // because of the asynchronous nature of this class.
     private int mState = STOP;
 
     /**
      * Construct a NotificationPlayer object.
-     *
+     * 
      * @param tag a string to use for debugging
      */
     public NotificationPlayer(String tag) {
@@ -249,17 +258,18 @@ public class NotificationPlayer implements OnCompletionListener {
     }
 
     /**
-     * Start playing the sound.  It will actually start playing at some
-     * point in the future.  There are no guarantees about latency here.
-     * Calling this before another audio file is done playing will stop
-     * that one and start the new one.
-     *
+     * Start playing the sound. It will actually start playing at some point in
+     * the future. There are no guarantees about latency here. Calling this
+     * before another audio file is done playing will stop that one and start
+     * the new one.
+     * 
      * @param context Your application's context.
-     * @param uri The URI to play.  (see {@link MediaPlayer#setDataSource(Context, Uri)})
-     * @param looping Whether the audio should loop forever.
-     *          (see {@link MediaPlayer#setLooping(boolean)})
-     * @param stream the AudioStream to use.
-     *          (see {@link MediaPlayer#setAudioStreamType(int)})
+     * @param uri The URI to play. (see
+     *            {@link MediaPlayer#setDataSource(Context, Uri)})
+     * @param looping Whether the audio should loop forever. (see
+     *            {@link MediaPlayer#setLooping(boolean)})
+     * @param stream the AudioStream to use. (see
+     *            {@link MediaPlayer#setAudioStreamType(int)})
      */
     public void play(Context context, Uri uri, boolean looping, int stream) {
         Command cmd = new Command();
@@ -276,12 +286,13 @@ public class NotificationPlayer implements OnCompletionListener {
     }
 
     /**
-     * Stop a previously played sound.  It can't be played again or unpaused
-     * at this point.  Calling this multiple times has no ill effects.
+     * Stop a previously played sound. It can't be played again or unpaused at
+     * this point. Calling this multiple times has no ill effects.
      */
     public void stop() {
         synchronized (mCmdQueue) {
-            // This check allows stop to be called multiple times without starting
+            // This check allows stop to be called multiple times without
+            // starting
             // a thread that ends up doing nothing.
             if (mState != STOP) {
                 Command cmd = new Command();
@@ -303,16 +314,16 @@ public class NotificationPlayer implements OnCompletionListener {
     }
 
     /**
-     * We want to hold a wake lock while we do the prepare and play.  The stop probably is
-     * optional, but it won't hurt to have it too.  The problem is that if you start a sound
-     * while you're holding a wake lock (e.g. an alarm starting a notification), you want the
-     * sound to play, but if the CPU turns off before mThread gets to work, it won't.  The
-     * simplest way to deal with this is to make it so there is a wake lock held while the
-     * thread is starting or running.  You're going to need the WAKE_LOCK permission if you're
-     * going to call this.
-     *
-     * This must be called before the first time play is called.
-     *
+     * We want to hold a wake lock while we do the prepare and play. The stop
+     * probably is optional, but it won't hurt to have it too. The problem is
+     * that if you start a sound while you're holding a wake lock (e.g. an alarm
+     * starting a notification), you want the sound to play, but if the CPU
+     * turns off before mThread gets to work, it won't. The simplest way to deal
+     * with this is to make it so there is a wake lock held while the thread is
+     * starting or running. You're going to need the WAKE_LOCK permission if
+     * you're going to call this. This must be called before the first time play
+     * is called.
+     * 
      * @hide
      */
     public void setUsesWakeLock(Context context) {
@@ -322,7 +333,7 @@ public class NotificationPlayer implements OnCompletionListener {
             throw new RuntimeException("assertion failed mWakeLock=" + mWakeLock
                     + " mThread=" + mThread);
         }
-        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
     }
 

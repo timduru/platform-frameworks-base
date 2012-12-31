@@ -17,13 +17,31 @@
 */
 -->
 
-<level-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:maxLevel="4" android:drawable="@drawable/ic_qs_battery_charge_0" />
-    <item android:maxLevel="15" android:drawable="@drawable/ic_qs_battery_charge_15" />
-    <item android:maxLevel="35" android:drawable="@drawable/ic_qs_battery_charge_28" />
-    <item android:maxLevel="49" android:drawable="@drawable/ic_qs_battery_charge_43" />
-    <item android:maxLevel="60" android:drawable="@drawable/ic_qs_battery_charge_57" />
-    <item android:maxLevel="75" android:drawable="@drawable/ic_qs_battery_charge_71" />
-    <item android:maxLevel="90" android:drawable="@drawable/ic_qs_battery_charge_85" />
-    <item android:maxLevel="100" android:drawable="@drawable/ic_qs_battery_charge_100" />
+<level-list xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:drawable="@drawable/ic_qs_battery_charge_0"
+        android:maxLevel="4"/>
+    <item
+        android:drawable="@drawable/ic_qs_battery_charge_15"
+        android:maxLevel="15"/>
+    <item
+        android:drawable="@drawable/ic_qs_battery_charge_28"
+        android:maxLevel="35"/>
+    <item
+        android:drawable="@drawable/ic_qs_battery_charge_43"
+        android:maxLevel="49"/>
+    <item
+        android:drawable="@drawable/ic_qs_battery_charge_57"
+        android:maxLevel="60"/>
+    <item
+        android:drawable="@drawable/ic_qs_battery_charge_71"
+        android:maxLevel="75"/>
+    <item
+        android:drawable="@drawable/ic_qs_battery_charge_85"
+        android:maxLevel="90"/>
+    <item
+        android:drawable="@drawable/ic_qs_battery_charge_100"
+        android:maxLevel="100"/>
+
 </level-list>

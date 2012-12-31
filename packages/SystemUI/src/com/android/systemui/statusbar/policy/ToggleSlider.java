@@ -31,12 +31,13 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 
-public class ToggleSlider extends RelativeLayout 
+public class ToggleSlider extends RelativeLayout
         implements CompoundButton.OnCheckedChangeListener, SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "StatusBar.ToggleSlider";
 
     public interface Listener {
         public void onInit(ToggleSlider v);
+
         public void onChanged(ToggleSlider v, boolean tracking, boolean checked, int value);
     }
 
@@ -63,14 +64,14 @@ public class ToggleSlider extends RelativeLayout
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ToggleSlider,
                 defStyle, 0);
 
-        mToggle = (CompoundButton)findViewById(R.id.toggle);
+        mToggle = (CompoundButton) findViewById(R.id.toggle);
         mToggle.setOnCheckedChangeListener(this);
         mToggle.setBackgroundDrawable(res.getDrawable(R.drawable.status_bar_toggle_button));
 
-        mSlider = (SeekBar)findViewById(R.id.slider);
+        mSlider = (SeekBar) findViewById(R.id.slider);
         mSlider.setOnSeekBarChangeListener(this);
 
-        mLabel = (TextView)findViewById(R.id.label);
+        mLabel = (TextView) findViewById(R.id.label);
         mLabel.setText(a.getString(R.styleable.ToggleSlider_text));
 
         a.recycle();
@@ -148,4 +149,3 @@ public class ToggleSlider extends RelativeLayout
         mSlider.setProgress(value);
     }
 }
-

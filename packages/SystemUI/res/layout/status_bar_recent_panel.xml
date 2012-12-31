@@ -18,75 +18,78 @@
 */
 -->
 
-<com.android.systemui.recent.RecentsPanelView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.recent.RecentsPanelView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/recents_root"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    systemui:recentItemLayout="@layout/status_bar_recent_item"
-    >
+    android:layout_height="match_parent"
+    systemui:recentItemLayout="@layout/status_bar_recent_item" >
+
     <FrameLayout
         android:id="@+id/recents_bg_protect"
-        android:background="@drawable/status_bar_recents_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/status_bar_recents_background" >
 
         <com.android.systemui.recent.RecentsVerticalScrollView
             android:id="@+id/recents_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="0dp"
-            android:divider="@null"
-            android:stackFromBottom="true"
-            android:fadingEdge="vertical"
-            android:scrollbars="none"
-            android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length"
             android:layout_gravity="bottom|left"
+            android:layout_marginRight="0dp"
+            android:clipChildren="false"
             android:clipToPadding="false"
-            android:clipChildren="false">
+            android:divider="@null"
+            android:fadingEdge="vertical"
+            android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length"
+            android:scrollbars="none"
+            android:stackFromBottom="true" >
 
-            <LinearLayout android:id="@+id/recents_linear_layout"
+            <LinearLayout
+                android:id="@+id/recents_linear_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:clipChildren="false"
                 android:clipToPadding="false"
-                android:clipChildren="false">
+                android:orientation="vertical" >
             </LinearLayout>
-
         </com.android.systemui.recent.RecentsVerticalScrollView>
 
-        <ImageView android:id="@+id/recents_kill_all_button"
-            android:layout_gravity="bottom|left"
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:id="@+id/recents_kill_all_button"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|left"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
             android:src="@drawable/ic_notify_clear_pressed" />
 
-        <ProgressBar android:id="@+id/recents_memory_bar" 
-            style="?android:attr/progressBarStyleHorizontal" 
-            android:layout_width="match_parent" 
+        <ProgressBar
+            android:id="@+id/recents_memory_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top|left"
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="5dp" />
-
-        <TextView android:id="@+id/recents_memory_text" 
-            android:textColor="@android:color/holo_blue_dark"
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|left"
-            android:layout_marginTop="15dp"
             android:layout_marginRight="5dp"
-            android:layout_marginLeft="5dp" />
+            android:layout_marginTop="5dp" />
+
+        <TextView
+            android:id="@+id/recents_memory_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|left"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="15dp"
+            android:textColor="@android:color/holo_blue_dark" />
     </FrameLayout>
 
-    <include layout="@layout/status_bar_no_recent_apps"
+    <include
         android:id="@+id/recents_no_apps"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        layout="@layout/status_bar_no_recent_apps"
         android:visibility="invisible" />
 
 </com.android.systemui.recent.RecentsPanelView>

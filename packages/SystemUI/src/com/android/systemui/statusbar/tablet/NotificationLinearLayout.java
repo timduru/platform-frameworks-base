@@ -79,7 +79,7 @@ public class NotificationLinearLayout extends LinearLayout {
         final int insetLeft = mInsetLeft;
 
         final int N = getChildCount();
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             final View child = getChildAt(i);
 
             final int childBottom = child.getBottom();

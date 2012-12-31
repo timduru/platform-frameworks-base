@@ -62,13 +62,13 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
         final Context context = getContext();
 
         mAirplane = new AirplaneModeController(context,
-                (CompoundButton)findViewById(R.id.airplane_checkbox));
+                (CompoundButton) findViewById(R.id.airplane_checkbox));
         findViewById(R.id.network).setOnClickListener(this);
 
         mRotationLockContainer = findViewById(R.id.rotate);
         mRotationLockSeparator = findViewById(R.id.rotate_separator);
         mRotate = new AutoRotateController(context,
-                (CompoundButton)findViewById(R.id.rotate_checkbox),
+                (CompoundButton) findViewById(R.id.rotate_checkbox),
                 new AutoRotateController.RotationLockCallbacks() {
                     @Override
                     public void setRotationLockControlVisibility(boolean show) {
@@ -78,10 +78,10 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
                 });
 
         mBrightness = new BrightnessController(context,
-                (ImageView)findViewById(R.id.brightness_icon),
-                (ToggleSlider)findViewById(R.id.brightness));
+                (ImageView) findViewById(R.id.brightness_icon),
+                (ToggleSlider) findViewById(R.id.brightness));
         mDoNotDisturb = new DoNotDisturbController(context,
-                (CompoundButton)findViewById(R.id.do_not_disturb_checkbox));
+                (CompoundButton) findViewById(R.id.do_not_disturb_checkbox));
         findViewById(R.id.settings).setOnClickListener(this);
     }
 
@@ -105,7 +105,7 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
     }
 
     private StatusBarManager getStatusBarManager() {
-        return (StatusBarManager)getContext().getSystemService(Context.STATUS_BAR_SERVICE);
+        return (StatusBarManager) getContext().getSystemService(Context.STATUS_BAR_SERVICE);
     }
 
     // Network
@@ -125,4 +125,3 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
         getStatusBarManager().collapsePanels();
     }
 }
-

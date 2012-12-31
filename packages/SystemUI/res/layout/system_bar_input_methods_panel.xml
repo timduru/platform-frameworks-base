@@ -17,55 +17,62 @@
 */
 -->
 
-<com.android.systemui.statusbar.tablet.InputMethodsPanel
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
+<com.android.systemui.statusbar.tablet.InputMethodsPanel xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:paddingBottom="7dip"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:visibility="gone">
+    android:paddingBottom="7dip"
+    android:visibility="gone" >
+
     <View
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1" />
+
     <FrameLayout
         android:id="@+id/glow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/recents_blue_glow">
+        android:background="@drawable/recents_blue_glow" >
+
         <LinearLayout
             android:layout_width="450dip"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dip"
-            android:orientation="vertical"
-            android:background="@drawable/notify_panel_clock_bg">
+            android:background="@drawable/notify_panel_clock_bg"
+            android:orientation="vertical" >
+
             <!-- Hard keyboard switch -->
+
             <LinearLayout
                 android:id="@+id/hard_keyboard_section"
-                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
                 <LinearLayout
-                    android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
                     <TextView
                         android:id="@+id/use_physical_keyboard_label"
                         android:layout_width="0dip"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:minHeight="?android:attr/listPreferredItemHeight"
                         android:background="?android:attr/selectableItemBackground"
-                        android:orientation="vertical"
-                        android:paddingRight="6dip"
-                        android:paddingLeft="30dip"
-                        android:paddingTop="5dip"
-                        android:paddingBottom="5dip"
+                        android:ellipsize="marquee"
                         android:gravity="center_vertical"
+                        android:minHeight="?android:attr/listPreferredItemHeight"
+                        android:orientation="vertical"
+                        android:paddingBottom="5dip"
+                        android:paddingLeft="30dip"
+                        android:paddingRight="6dip"
+                        android:paddingTop="5dip"
                         android:singleLine="true"
                         android:text="@string/status_bar_use_physical_keyboard"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:ellipsize="marquee" />
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+
                     <Switch
                         android:id="@+id/hard_keyboard_switch"
                         android:layout_width="wrap_content"
@@ -73,6 +80,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginRight="16dip" />
                 </LinearLayout>
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dip"
@@ -80,14 +88,16 @@
             </LinearLayout>
 
             <!-- Input method list -->
+
             <ScrollView
                 android:layout_width="wrap_content"
                 android:layout_height="0dip"
-                android:overScrollMode="ifContentScrolls"
                 android:layout_marginTop="3dip"
                 android:layout_weight="1"
+                android:overScrollMode="ifContentScrolls"
                 android:scrollbarAlwaysDrawVerticalTrack="true"
-                android:scrollbarDefaultDelayBeforeFade="75000">
+                android:scrollbarDefaultDelayBeforeFade="75000" >
+
                 <LinearLayout
                     android:id="@+id/input_method_menu_list"
                     android:layout_width="wrap_content"
@@ -96,22 +106,24 @@
             </ScrollView>
 
             <!-- Configure input methods -->
+
             <TextView
                 android:id="@+id/ime_settings_shortcut"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="?android:attr/listPreferredItemHeight"
                 android:background="?android:attr/selectableItemBackground"
-                android:orientation="vertical"
-                android:paddingRight="6dip"
-                android:paddingLeft="30dip"
-                android:paddingTop="5dip"
-                android:paddingBottom="5dip"
+                android:ellipsize="marquee"
                 android:gravity="center_vertical"
+                android:minHeight="?android:attr/listPreferredItemHeight"
+                android:orientation="vertical"
+                android:paddingBottom="5dip"
+                android:paddingLeft="30dip"
+                android:paddingRight="6dip"
+                android:paddingTop="5dip"
                 android:singleLine="true"
                 android:text="@string/status_bar_input_method_settings_configure_input_methods"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:ellipsize="marquee" />
+                android:textAppearance="?android:attr/textAppearanceMedium" />
         </LinearLayout>
     </FrameLayout>
+
 </com.android.systemui.statusbar.tablet.InputMethodsPanel>

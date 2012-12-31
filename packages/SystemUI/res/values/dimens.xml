@@ -16,6 +16,7 @@
 */
 -->
 <resources>
+
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
 
@@ -50,8 +51,10 @@
     <dimen name="status_bar_recents_app_label_left_margin">0dip</dimen>
     <!-- Padding between recents items -->
     <dimen name="status_bar_recents_item_padding">0dip</dimen>
-    <!-- When recents first appears, how far the icon and label of the primary activity
-         travel -->
+    <!--
+         When recents first appears, how far the icon and label of the primary activity
+         travel
+    -->
     <dimen name="status_bar_recents_app_icon_translate_distance">35dip</dimen>
 
     <!-- Where to place the app icon over the thumbnail -->
@@ -64,8 +67,10 @@
     <!-- thickness (height) of the navigation bar on phones that require it -->
     <dimen name="navigation_bar_size">@*android:dimen/navigation_bar_height</dimen>
 
-    <!-- thickness (height) of the dead zone at the top of the navigation bar,
-         reducing false presses on navbar buttons; approx 2mm -->
+    <!--
+         thickness (height) of the dead zone at the top of the navigation bar,
+         reducing false presses on navbar buttons; approx 2mm
+    -->
     <dimen name="navigation_bar_deadzone_size">12dp</dimen>
     <!-- size of the dead zone when touches have recently occurred elsewhere on screen -->
     <dimen name="navigation_bar_deadzone_size_max">32dp</dimen>
@@ -89,7 +94,7 @@
     <dimen name="status_bar_icon_drawing_size">18dip</dimen>
 
     <!-- opacity at which Notification icons will be drawn in the status bar -->
-    <item type="dimen" name="status_bar_icon_drawing_alpha">65%</item>
+    <item name="status_bar_icon_drawing_alpha" type="dimen">65%</item>
 
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">0dp</dimen>
@@ -114,11 +119,13 @@
     <!-- Minimum distance a fling must travel (anti-jitter) -->
     <dimen name="fling_gesture_min_dist">20dp</dimen>
 
-    <!-- Minimum fraction of the display a gesture must travel, at any velocity, to qualify as a
-         collapse request -->
-    <item type="dimen" name="collapse_min_display_fraction">10%</item>
+    <!--
+         Minimum fraction of the display a gesture must travel, at any velocity, to qualify as a
+         collapse request
+    -->
+    <item name="collapse_min_display_fraction" type="dimen">10%</item>
     <!-- Minimum fraction of the display a gesture must travel to qualify as an expand request -->
-    <item type="dimen" name="expand_min_display_fraction">50%</item>
+    <item name="expand_min_display_fraction" type="dimen">50%</item>
 
     <!-- Initial acceleration of an expand animation after fling -->
     <dimen name="expand_accel">2000dp</dimen>
@@ -137,7 +144,7 @@
     <!-- Default distance beyond which snaps to the matching target -->
     <dimen name="navbar_search_snap_margin">40dip</dimen>
 
-    <!-- Diameter of outer shape drawable shown in navbar search-->
+    <!-- Diameter of outer shape drawable shown in navbar search -->
     <dimen name="navbar_search_outerring_diameter">340dp</dimen>
 
     <!-- Diameter of outer shape drawable shown in navbar search. Should be 1/2 of above value -->
@@ -173,10 +180,12 @@
     <integer name="notification_panel_layout_gravity">0x37</integer>
     <integer name="settings_panel_layout_gravity">0x37</integer>
 
-    <!-- Fraction of the status bar that, when dragged, will produce the quick settings panel
+    <!--
+         Fraction of the status bar that, when dragged, will produce the quick settings panel
          instead of the notification panel. See also @dimen/settings_panel_dragzone_min.
-         If zero, the settings panel will not be directly draggable from the status bar. -->
-    <item type="dimen" name="settings_panel_dragzone_fraction">0%</item>
+         If zero, the settings panel will not be directly draggable from the status bar.
+    -->
+    <item name="settings_panel_dragzone_fraction" type="dimen">0%</item>
 
     <!-- Quick settings dragzone, if used, should be at least this big (may be zero). -->
     <dimen name="settings_panel_dragzone_min">100dp</dimen>
@@ -193,9 +202,11 @@
     <!-- The padding between each tile within the QuickSettings layout -->
     <dimen name="quick_settings_cell_gap">4dp</dimen>
 
-    <!-- Minimum fraction of the screen that should be taken up by the notification panel.
-         Not used at this screen size. -->
-    <item type="dimen" name="notification_panel_min_height_frac">0%</item>
+    <!--
+         Minimum fraction of the screen that should be taken up by the notification panel.
+         Not used at this screen size.
+    -->
+    <item name="notification_panel_min_height_frac" type="dimen">0%</item>
 
     <dimen name="blinds_pop_threshold">32dp</dimen>
 
@@ -205,4 +216,5 @@
     <!-- How far to slide the panel out when you touch it -->
     <!-- For phones, this is close_handle_height + header_height -->
     <dimen name="peek_height">84dp</dimen>
+
 </resources>

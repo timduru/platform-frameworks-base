@@ -59,7 +59,7 @@ public class DateView extends TextView {
         mAttachedToWindow = true;
         setUpdates();
     }
-    
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
@@ -99,7 +99,7 @@ public class DateView extends TextView {
             }
             final ViewParent parent = v.getParent();
             if (parent instanceof View) {
-                v = (View)parent;
+                v = (View) parent;
             } else {
                 return true;
             }

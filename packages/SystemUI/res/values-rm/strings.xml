@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 /**
  * Copyright (c) 2009, The Android Open Source Project
  *
@@ -15,12 +15,13 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
- -->
+-->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
     <!-- no translation found for app_label (7164937344850004466) -->
     <skip />
+
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Stizzar"</string>
     <!-- no translation found for status_bar_do_not_disturb_button (5812628897510997853) -->
     <skip />
@@ -47,6 +48,7 @@
     <skip />
     <!-- no translation found for invalid_charger (4549105996740522523) -->
     <skip />
+
     <string name="battery_low_why" msgid="7279169609518386372">"Consum dad accu"</string>
     <!-- no translation found for status_bar_settings_settings_button (3023889916699270224) -->
     <skip />
@@ -376,4 +378,5 @@
     <skip />
     <!-- no translation found for status_bar_help_text (7874607155052076323) -->
     <skip />
+
 </resources>

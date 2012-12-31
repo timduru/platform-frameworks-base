@@ -79,14 +79,11 @@ public class PowerUI extends SystemUI {
     }
 
     /**
-     * Buckets the battery level.
-     *
-     * The code in this function is a little weird because I couldn't comprehend
-     * the bucket going up when the battery level was going down. --joeo
-     *
-     * 1 means that the battery is "ok"
-     * 0 means that the battery is between "ok" and what we should warn about.
-     * less than 0 means that the battery is low
+     * Buckets the battery level. The code in this function is a little weird
+     * because I couldn't comprehend the bucket going up when the battery level
+     * was going down. --joeo 1 means that the battery is "ok" 0 means that the
+     * battery is between "ok" and what we should warn about. less than 0 means
+     * that the battery is low
      */
     private int findBatteryLevelBucket(int level) {
         if (level >= mLowBatteryAlertCloseLevel) {
@@ -96,9 +93,9 @@ public class PowerUI extends SystemUI {
             return 0;
         }
         final int N = mLowBatteryReminderLevels.length;
-        for (int i=N-1; i>=0; i--) {
+        for (int i = N - 1; i >= 0; i--) {
             if (level <= mLowBatteryReminderLevels[i]) {
-                return -1-i;
+                return -1 - i;
             }
         }
         throw new RuntimeException("not possible!");
@@ -154,7 +151,8 @@ public class PowerUI extends SystemUI {
                         && bucket < 0) {
                     showLowBatteryWarning();
 
-                    // only play SFX when the dialog comes up or the bucket changes
+                    // only play SFX when the dialog comes up or the bucket
+                    // changes
                     if (bucket != oldBucket || oldPlugged) {
                         playLowBatterySound();
                     }
@@ -179,8 +177,8 @@ public class PowerUI extends SystemUI {
     void showLowBatteryWarning() {
         Slog.i(TAG,
                 ((mBatteryLevelTextView == null) ? "showing" : "updating")
-                + " low battery warning: level=" + mBatteryLevel
-                + " [" + findBatteryLevelBucket(mBatteryLevel) + "]");
+                        + " low battery warning: level=" + mBatteryLevel
+                        + " [" + findBatteryLevelBucket(mBatteryLevel) + "]");
 
         CharSequence levelText = mContext.getString(
                 R.string.battery_low_percent_format, mBatteryLevel);
@@ -189,16 +187,16 @@ public class PowerUI extends SystemUI {
             mBatteryLevelTextView.setText(levelText);
         } else {
             View v = View.inflate(mContext, R.layout.battery_low, null);
-            mBatteryLevelTextView = (TextView)v.findViewById(R.id.level_percent);
+            mBatteryLevelTextView = (TextView) v.findViewById(R.id.level_percent);
 
             mBatteryLevelTextView.setText(levelText);
 
             AlertDialog.Builder b = new AlertDialog.Builder(mContext);
-                b.setCancelable(true);
-                b.setTitle(R.string.battery_low_title);
-                b.setView(v);
-                b.setIconAttribute(android.R.attr.alertDialogIcon);
-                b.setPositiveButton(android.R.string.ok, null);
+            b.setCancelable(true);
+            b.setTitle(R.string.battery_low_title);
+            b.setView(v);
+            b.setIconAttribute(android.R.attr.alertDialogIcon);
+            b.setPositiveButton(android.R.string.ok, null);
 
             final Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -208,22 +206,22 @@ public class PowerUI extends SystemUI {
             if (intent.resolveActivity(mContext.getPackageManager()) != null) {
                 b.setNegativeButton(R.string.battery_low_why,
                         new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-                        dismissLowBatteryWarning();
-                    }
-                });
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                                dismissLowBatteryWarning();
+                            }
+                        });
             }
 
             AlertDialog d = b.create();
             d.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        mLowBatteryDialog = null;
-                        mBatteryLevelTextView = null;
-                    }
-                });
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    mLowBatteryDialog = null;
+                    mBatteryLevelTextView = null;
+                }
+            });
             d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
             d.getWindow().getAttributes().privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
@@ -266,24 +264,24 @@ public class PowerUI extends SystemUI {
         dismissLowBatteryWarning();
 
         AlertDialog.Builder b = new AlertDialog.Builder(mContext);
-            b.setCancelable(true);
-            b.setMessage(R.string.invalid_charger);
-            b.setIconAttribute(android.R.attr.alertDialogIcon);
-            b.setPositiveButton(android.R.string.ok, null);
+        b.setCancelable(true);
+        b.setMessage(R.string.invalid_charger);
+        b.setIconAttribute(android.R.attr.alertDialogIcon);
+        b.setPositiveButton(android.R.string.ok, null);
 
         AlertDialog d = b.create();
-            d.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    public void onDismiss(DialogInterface dialog) {
-                        mInvalidChargerDialog = null;
-                        mBatteryLevelTextView = null;
-                    }
-                });
+        d.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            public void onDismiss(DialogInterface dialog) {
+                mInvalidChargerDialog = null;
+                mBatteryLevelTextView = null;
+            }
+        });
 
         d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         d.show();
         mInvalidChargerDialog = d;
     }
-    
+
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mLowBatteryAlertCloseLevel=");
         pw.println(mLowBatteryAlertCloseLevel);
@@ -305,4 +303,3 @@ public class PowerUI extends SystemUI {
         pw.println(Integer.toString(findBatteryLevelBucket(mBatteryLevel)));
     }
 }
-

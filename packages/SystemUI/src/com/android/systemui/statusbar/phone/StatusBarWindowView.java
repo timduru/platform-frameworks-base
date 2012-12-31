@@ -34,7 +34,6 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.preferences.EosSettings;
 
-
 public class StatusBarWindowView extends FrameLayout
 {
     public static final String TAG = "StatusBarWindowView";
@@ -55,7 +54,7 @@ public class StatusBarWindowView extends FrameLayout
     }
 
     @Override
-    protected void onAttachedToWindow () {
+    protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         latestItems = (NotificationRowLayout) findViewById(R.id.latestItems);
         mScrollView = (ScrollView) findViewById(R.id.scroll);
@@ -77,11 +76,11 @@ public class StatusBarWindowView extends FrameLayout
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         switch (event.getKeyCode()) {
-        case KeyEvent.KEYCODE_BACK:
-            if (!down) {
-                mService.animateCollapsePanels();
-            }
-            return true;
+            case KeyEvent.KEYCODE_BACK:
+                if (!down) {
+                    mService.animateCollapsePanels();
+                }
+                return true;
         }
         return super.dispatchKeyEvent(event);
     }
@@ -116,14 +115,16 @@ public class StatusBarWindowView extends FrameLayout
         return handled;
     }
 
-	@Override
+    @Override
     protected void onWindowVisibilityChanged(int visibility) {
         // TODO Auto-generated method stub
         super.onWindowVisibilityChanged(visibility);
         if (visibility == View.VISIBLE) {
-            if (mEosSettings != null) mEosSettings.attach();
+            if (mEosSettings != null)
+                mEosSettings.attach();
         } else {
-            if (mEosSettings != null) mEosSettings.detach();
+            if (mEosSettings != null)
+                mEosSettings.detach();
         }
     }
 
@@ -149,4 +150,3 @@ public class StatusBarWindowView extends FrameLayout
         mEosSettings = settings;
     }
 }
-

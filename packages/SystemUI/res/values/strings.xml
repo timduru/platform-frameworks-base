@@ -17,22 +17,29 @@
  */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
     <!-- Name of the status bar as seen in the applications info settings page. [CHAR LIMIT=12] -->
     <string name="app_label">System UI</string>
 
-    <!-- The text for the button in the notification window-shade that clears
-         all of the currently visible notifications. [CHAR LIMIT=10]-->
+    <!--
+         The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]
+    -->
     <string name="status_bar_clear_all_button">Clear</string>
 
-    <!-- The text for the button in the notification window-shade that turns
+    <!--
+         The text for the button in the notification window-shade that turns
          on do not disturb mode, where notifications no longer show their ticker,
          no sound plays, and no icons are visible.  The windowshade continues to show
-         the notifications. [CHAR LIMIT=25]-->
+         the notifications. [CHAR LIMIT=25]
+    -->
     <string name="status_bar_do_not_disturb_button">Do not disturb</string>
 
-    <!-- The text for the button in the notification window-shade that turns
+    <!--
+         The text for the button in the notification window-shade that turns
          off do not disturb mode.  After clicking this, notifications will be
-         shown again. [CHAR LIMIT=25] -->
+         shown again. [CHAR LIMIT=25]
+    -->
     <string name="status_bar_please_disturb_button">Show notifications</string>
 
     <!-- Title shown in recents popup for removing an application from the list -->
@@ -41,12 +48,16 @@
     <!-- Title shown in recents popup for inspecting an application's properties -->
     <string name="status_bar_recent_inspect_item_title">App info</string>
 
-    <!-- Message shown in the middle of the screen after clicking on the recent apps button
-         when there are no recent apps to show. Also used for accessibility. [CHAR LIMIT=45]-->
+    <!--
+         Message shown in the middle of the screen after clicking on the recent apps button
+         when there are no recent apps to show. Also used for accessibility. [CHAR LIMIT=45]
+    -->
     <string name="status_bar_no_recent_apps">No recent apps</string>
 
-    <!-- Content description for the button to dismiss Recent Apps (only present on large
-         devices) -->
+    <!--
+         Content description for the button to dismiss Recent Apps (only present on large
+         devices)
+    -->
     <string name="status_bar_accessibility_dismiss_recents">Dismiss recent apps</string>
 
     <!-- Message that is read when you enter recent apps in TalkBack -->
@@ -55,39 +66,51 @@
         <item quantity="other">%d recent apps</item>
     </plurals>
 
-    <!-- The label in the bar at the top of the status bar when there are no notifications
-         showing.  [CHAR LIMIT=40]-->
+    <!--
+         The label in the bar at the top of the status bar when there are no notifications
+         showing.  [CHAR LIMIT=40]
+    -->
     <string name="status_bar_no_notifications_title">No notifications</string>
 
-    <!-- The label for the group of notifications for ongoing events in the opened version of
+    <!--
+         The label for the group of notifications for ongoing events in the opened version of
          the status bar.  An ongoing call is the prime example of this.  The MP3 music player
-         might be another example.   [CHAR LIMIT=40] -->
+         might be another example.   [CHAR LIMIT=40]
+    -->
     <string name="status_bar_ongoing_events_title">Ongoing</string>
 
-    <!-- The label for the group of notifications for recent events in the opened version of
+    <!--
+         The label for the group of notifications for recent events in the opened version of
          the status bar.  Recently received text messsages (SMS), emails, calendar alerts, etc.
-         [CHAR LIMIT=40] -->
+         [CHAR LIMIT=40]
+    -->
     <string name="status_bar_latest_events_title">Notifications</string>
 
-    <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert.  [CHAR LIMIT=NONE]-->
+    <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert.  [CHAR LIMIT=NONE] -->
     <string name="battery_low_title">Connect charger</string>
 
     <!-- When the battery is low, this is displayed to the user in a dialog. The subtitle of the low battery alert. [CHAR LIMIT=NONE] -->
     <string name="battery_low_subtitle">The battery is getting low.</string>
 
-    <!-- A message that appears when the battery level is getting low in a dialog.  This is
+    <!--
+         A message that appears when the battery level is getting low in a dialog.  This is
         appened to the subtitle of the low battery alert.  "number" is the percentage of battery
-        remaining [CHAR LIMIT=none]-->
+        remaining [CHAR LIMIT=none]
+    -->
     <string name="battery_low_percent_format"><xliff:g id="number">%d%%</xliff:g> remaining</string>
 
-    <!-- A message that appears when a USB charger is plugged in and the device does not
+    <!--
+    A message that appears when a USB charger is plugged in and the device does not
     support charging on it.  That is, a charger that fits into the USB port and goes into
     a wall socket, not into a computer. (This happens because some devices require more
-    current than the USB spec allows.  [CHAR LIMIT=NONE] -->
+    current than the USB spec allows.  [CHAR LIMIT=NONE]
+    -->
     <string name="invalid_charger">USB charging not supported.\nUse only the supplied charger.</string>
 
-    <!-- When the battery is low, this is the label of the button to go to the
-         power usage activity to find out what drained the battery.  [CHAR LIMIT=30] -->
+    <!--
+         When the battery is low, this is the label of the button to go to the
+         power usage activity to find out what drained the battery.  [CHAR LIMIT=30]
+    -->
     <string name="battery_low_why">Battery use</string>
 
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
@@ -112,9 +135,7 @@
     <string name="status_bar_settings_notifications">Notifications</string>
 
     <!-- Text to display next to the graphical battery meter.  [CHAR LIMIT=3] -->
-    <string name="status_bar_settings_battery_meter_format" translatable="false">
-        <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>
-    </string>
+    <string name="status_bar_settings_battery_meter_format" translatable="false"><xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
 
     <!-- Separator for PLMN and SPN in network name. -->
     <string name="status_bar_network_name_separator" translatable="false">|</string>
@@ -163,12 +184,16 @@
     <!-- Option to always allow USB debugging from the attached computer -->
     <string name="usb_debugging_always">Always allow from this computer</string>
 
-    <!-- Checkbox label for application compatibility mode ON (zooming app to look like it's running
-         on a phone).  [CHAR LIMIT=25] -->
+    <!--
+         Checkbox label for application compatibility mode ON (zooming app to look like it's running
+         on a phone).  [CHAR LIMIT=25]
+    -->
     <string name="compat_mode_on">Zoom to fill screen</string>
 
-    <!-- Checkbox label for application compatibility mode OFF (normal mode on tablets).
-         [CHAR LIMIT=25] -->
+    <!--
+         Checkbox label for application compatibility mode OFF (normal mode on tablets).
+         [CHAR LIMIT=25]
+    -->
     <string name="compat_mode_off">Stretch to fill screen</string>
 
     <!-- Compatibility mode help screen: header text. [CHAR LIMIT=50] -->
@@ -229,7 +254,7 @@
     <string name="accessibility_battery_one_bar">Battery one bar.</string>
     <!-- Content description of the battery when it is two bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_two_bars">Battery two bars.</string>
-     <!-- Content description of the battery when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- Content description of the battery when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_three_bars">Battery three bars.</string>
     <!-- Content description of the battery when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_full">Battery full.</string>
@@ -408,16 +433,18 @@
     <!-- Dialog button indicating that data connection should be re-enabled. [CHAR LIMIT=28] -->
     <string name="data_usage_disabled_dialog_enable">Re-enable data</string>
 
-    <!-- Text to display underneath the graphical signal strength meter when
-         no connection is available. [CHAR LIMIT=20] -->
-    <string name="status_bar_settings_signal_meter_disconnected">
-        No Internet connection
-    </string>
+    <!--
+         Text to display underneath the graphical signal strength meter when
+         no connection is available. [CHAR LIMIT=20]
+    -->
+    <string name="status_bar_settings_signal_meter_disconnected">        No Internet connection</string>
 
-    <!-- Text to display underneath the graphical signal strength meter when
+    <!--
+         Text to display underneath the graphical signal strength meter when
          it is displaying Wi-Fi status and Wi-Fi is connected to a network
          whose SSID is not available.
-         [CHAR LIMIT=20] -->
+         [CHAR LIMIT=20]
+    -->
     <string name="status_bar_settings_signal_meter_wifi_nossid">Wi-Fi connected</string>
 
     <!-- Notification text: when GPS is getting a fix [CHAR LIMIT=50] -->
@@ -429,15 +456,19 @@
     <!-- Content description of the clear button in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_clear_all">Clear all notifications.</string>
 
-    <!-- Title shown in notification popup for inspecting the responsible
-         application -->
+    <!--
+         Title shown in notification popup for inspecting the responsible
+         application
+    -->
     <string name="status_bar_notification_inspect_item_title">App info</string>
 
     <!-- [CHAR LIMIT=NONE] -->
     <string name="close_universe">Close</string>
 
-    <!-- Title for the pseudo-notification shown when notifications are disabled (do-not-disturb
-         mode) -->
+    <!--
+         Title for the pseudo-notification shown when notifications are disabled (do-not-disturb
+         mode)
+    -->
     <string name="notifications_off_title">Notifications off</string>
 
     <!-- Content text for do-not-disturb mode notification -->
@@ -520,4 +551,5 @@
     <string name="statusbar_eos_volume_slider_label">MUTE</string>
     <!-- Eos signal cluster clock tag Helps with only applying custom settings only to desired clock views -->
     <string name="eos_statusbar_clock_signal_cluster_tag">eos_systemui_clock_cluster_tag</string>
+
 </resources>

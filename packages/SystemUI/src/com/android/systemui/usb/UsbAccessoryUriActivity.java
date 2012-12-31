@@ -35,10 +35,10 @@ import com.android.internal.app.AlertController;
 import com.android.systemui.R;
 
 /**
- * If the attached USB accessory has a URL associated with it, and that URL is valid,
- * show this dialog to the user to allow them to optionally visit that URL for more
- * information or software downloads.
- * Otherwise (no valid URL) this activity does nothing at all, finishing immediately.
+ * If the attached USB accessory has a URL associated with it, and that URL is
+ * valid, show this dialog to the user to allow them to optionally visit that
+ * URL for more information or software downloads. Otherwise (no valid URL) this
+ * activity does nothing at all, finishing immediately.
  */
 public class UsbAccessoryUriActivity extends AlertActivity
         implements DialogInterface.OnClickListener {
@@ -50,10 +50,10 @@ public class UsbAccessoryUriActivity extends AlertActivity
 
     @Override
     public void onCreate(Bundle icicle) {
-       super.onCreate(icicle);
+        super.onCreate(icicle);
 
-       Intent intent = getIntent();
-        mAccessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+        Intent intent = getIntent();
+        mAccessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
         String uriString = intent.getStringExtra("uri");
         mUri = (uriString == null ? null : Uri.parse(uriString));
 

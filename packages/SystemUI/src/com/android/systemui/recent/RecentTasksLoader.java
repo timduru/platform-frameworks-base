@@ -49,7 +49,8 @@ public class RecentTasksLoader implements View.OnTouchListener {
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
 
     private static final int DISPLAY_TASKS = 20;
-    private static final int MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for non-apps
+    private static final int MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for
+                                                            // non-apps
 
     private Context mContext;
     private RecentsPanelView mRecentsPanel;
@@ -70,11 +71,14 @@ public class RecentTasksLoader implements View.OnTouchListener {
     private boolean mFirstScreenful;
     private ArrayList<TaskDescription> mLoadedTasks;
 
-    private enum State { LOADING, LOADED, CANCELLED };
+    private enum State {
+        LOADING, LOADED, CANCELLED
+    };
+
     private State mState = State.CANCELLED;
 
-
     private static RecentTasksLoader sInstance;
+
     public static RecentTasksLoader getInstance(Context context) {
         if (sInstance == null) {
             sInstance = new RecentTasksLoader(context);
@@ -117,7 +121,8 @@ public class RecentTasksLoader implements View.OnTouchListener {
     }
 
     public void setRecentsPanel(RecentsPanelView newRecentsPanel, RecentsPanelView caller) {
-        // Only allow clearing mRecentsPanel if the caller is the current recentsPanel
+        // Only allow clearing mRecentsPanel if the caller is the current
+        // recentsPanel
         if (newRecentsPanel != null || mRecentsPanel == caller) {
             mRecentsPanel = newRecentsPanel;
             if (mRecentsPanel != null) {
@@ -146,11 +151,11 @@ public class RecentTasksLoader implements View.OnTouchListener {
         if (homeInfo == null) {
             final PackageManager pm = mContext.getPackageManager();
             homeInfo = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
-                .resolveActivityInfo(pm, 0);
+                    .resolveActivityInfo(pm, 0);
         }
         return homeInfo != null
-            && homeInfo.packageName.equals(component.getPackageName())
-            && homeInfo.name.equals(component.getClassName());
+                && homeInfo.packageName.equals(component.getPackageName())
+                && homeInfo.name.equals(component.getClassName());
     }
 
     // Create an TaskDescription, returning null if the title or icon is null
@@ -161,7 +166,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
             intent.setComponent(origActivity);
         }
         final PackageManager pm = mContext.getPackageManager();
-        intent.setFlags((intent.getFlags()&~Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
+        intent.setFlags((intent.getFlags() & ~Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
                 | Intent.FLAG_ACTIVITY_NEW_TASK);
         final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
         if (resolveInfo != null) {
@@ -169,8 +174,9 @@ public class RecentTasksLoader implements View.OnTouchListener {
             final String title = info.loadLabel(pm).toString();
 
             if (title != null && title.length() > 0) {
-                if (DEBUG) Log.v(TAG, "creating activity desc for id="
-                        + persistentTaskId + ", label=" + title);
+                if (DEBUG)
+                    Log.v(TAG, "creating activity desc for id="
+                            + persistentTaskId + ", label=" + title);
 
                 TaskDescription item = new TaskDescription(taskId,
                         persistentTaskId, resolveInfo, baseIntent, info.packageName,
@@ -179,7 +185,8 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
                 return item;
             } else {
-                if (DEBUG) Log.v(TAG, "SKIPPING item " + persistentTaskId);
+                if (DEBUG)
+                    Log.v(TAG, "SKIPPING item " + persistentTaskId);
             }
         }
         return null;
@@ -192,8 +199,9 @@ public class RecentTasksLoader implements View.OnTouchListener {
         Bitmap thumbnail = am.getTaskTopThumbnail(td.persistentTaskId);
         Drawable icon = getFullResIcon(td.resolveInfo, pm);
 
-        if (DEBUG) Log.v(TAG, "Loaded bitmap for task "
-                + td + ": " + thumbnail);
+        if (DEBUG)
+            Log.v(TAG, "Loaded bitmap for task "
+                    + td + ": " + thumbnail);
         synchronized (td) {
             if (thumbnail != null) {
                 td.setThumbnail(thumbnail);
@@ -238,12 +246,13 @@ public class RecentTasksLoader implements View.OnTouchListener {
     }
 
     Runnable mPreloadTasksRunnable = new Runnable() {
-            public void run() {
-                loadTasksInBackground();
-            }
-        };
+        public void run() {
+            loadTasksInBackground();
+        }
+    };
 
-    // additional optimization when we have software system buttons - start loading the recent
+    // additional optimization when we have software system buttons - start
+    // loading the recent
     // tasks on touch down
     @Override
     public boolean onTouch(View v, MotionEvent ev) {
@@ -280,7 +289,6 @@ public class RecentTasksLoader implements View.OnTouchListener {
         }
     }
 
-
     private void cancelLoadingThumbnailsAndIcons() {
         if (mTaskLoader != null) {
             mTaskLoader.cancel(false);
@@ -309,7 +317,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
         Thread bgLoad = new Thread() {
             public void run() {
                 TaskDescription first = loadFirstTask();
-                synchronized(mFirstTaskLock) {
+                synchronized (mFirstTaskLock) {
                     if (mCancelPreloadingFirstTask) {
                         clearFirstTask();
                     } else {
@@ -320,7 +328,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
                 }
             }
         };
-        synchronized(mFirstTaskLock) {
+        synchronized (mFirstTaskLock) {
             if (!mPreloadingFirstTask) {
                 clearFirstTask();
                 mPreloadingFirstTask = true;
@@ -330,7 +338,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
     }
 
     public void cancelPreloadingFirstTask() {
-        synchronized(mFirstTaskLock) {
+        synchronized (mFirstTaskLock) {
             if (mPreloadingFirstTask) {
                 mCancelPreloadingFirstTask = true;
             } else {
@@ -341,9 +349,10 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
     boolean mPreloadingFirstTask;
     boolean mCancelPreloadingFirstTask;
+
     public TaskDescription getFirstTask() {
-        while(true) {
-            synchronized(mFirstTaskLock) {
+        while (true) {
+            synchronized (mFirstTaskLock) {
                 if (mFirstTaskLoaded) {
                     return mFirstTask;
                 } else if (!mFirstTaskLoaded && !mPreloadingFirstTask) {
@@ -360,7 +369,8 @@ public class RecentTasksLoader implements View.OnTouchListener {
     }
 
     public TaskDescription loadFirstTask() {
-        final ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        final ActivityManager am = (ActivityManager) mContext
+                .getSystemService(Context.ACTIVITY_SERVICE);
 
         final List<ActivityManager.RecentTaskInfo> recentTasks = am.getRecentTasksForUser(
                 1, ActivityManager.RECENT_IGNORE_UNAVAILABLE, UserHandle.CURRENT.getIdentifier());
@@ -398,6 +408,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
     public void loadTasksInBackground() {
         loadTasksInBackground(false);
     }
+
     public void loadTasksInBackground(final boolean zeroeth) {
         if (mState != State.CANCELLED) {
             return;
@@ -412,8 +423,10 @@ public class RecentTasksLoader implements View.OnTouchListener {
             protected void onProgressUpdate(ArrayList<TaskDescription>... values) {
                 if (!isCancelled()) {
                     ArrayList<TaskDescription> newTasks = values[0];
-                    // do a callback to RecentsPanelView to let it know we have more values
-                    // how do we let it know we're all done? just always call back twice
+                    // do a callback to RecentsPanelView to let it know we have
+                    // more values
+                    // how do we let it know we're all done? just always call
+                    // back twice
                     if (mRecentsPanel != null) {
                         mRecentsPanel.onTasksLoaded(newTasks, mFirstScreenful);
                     }
@@ -424,15 +437,17 @@ public class RecentTasksLoader implements View.OnTouchListener {
                     mFirstScreenful = false;
                 }
             }
+
             @Override
             protected Void doInBackground(Void... params) {
-                // We load in two stages: first, we update progress with just the first screenful
+                // We load in two stages: first, we update progress with just
+                // the first screenful
                 // of items. Then, we update with the rest of the items
                 final int origPri = Process.getThreadPriority(Process.myTid());
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 final PackageManager pm = mContext.getPackageManager();
                 final ActivityManager am = (ActivityManager)
-                mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                        mContext.getSystemService(Context.ACTIVITY_SERVICE);
 
                 final List<ActivityManager.RecentTaskInfo> recentTasks =
                         am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
@@ -443,7 +458,8 @@ public class RecentTasksLoader implements View.OnTouchListener {
                 boolean firstScreenful = true;
                 ArrayList<TaskDescription> tasks = new ArrayList<TaskDescription>();
 
-                // skip the first task - assume it's either the home screen or the current activity.
+                // skip the first task - assume it's either the home screen or
+                // the current activity.
                 final int first = 0;
                 for (int i = first, index = 0; i < numTasks && (index < MAX_TASKS); ++i) {
                     if (isCancelled()) {
@@ -483,7 +499,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
                             publishProgress(tasks);
                             tasks = new ArrayList<TaskDescription>();
                             firstScreenful = false;
-                            //break;
+                            // break;
                         }
                         ++index;
                     }
@@ -532,6 +548,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
                     }
                 }
             }
+
             @Override
             protected Void doInBackground(Void... params) {
                 final int origPri = Process.getThreadPriority(Process.myTid());

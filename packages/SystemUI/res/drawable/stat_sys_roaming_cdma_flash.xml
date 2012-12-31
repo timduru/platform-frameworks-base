@@ -17,9 +17,14 @@
 ** limitations under the License.
 */
 -->
-<animation-list
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:oneshot="false">
-    <item android:drawable="@drawable/stat_sys_roaming_cdma_flash_anim0" android:duration="800" />
-    <item android:drawable="@drawable/stat_sys_roaming_cdma_flash_anim1" android:duration="1200" />
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false" >
+
+    <item
+        android:drawable="@drawable/stat_sys_roaming_cdma_flash_anim0"
+        android:duration="800"/>
+    <item
+        android:drawable="@drawable/stat_sys_roaming_cdma_flash_anim1"
+        android:duration="1200"/>
+
 </animation-list>

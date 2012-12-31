@@ -24,5 +24,6 @@ class WimaxIcons {
 
     static final int WIMAX_DISCONNECTED = WIMAX_SIGNAL_STRENGTH[0][0];
 
-    static final int WIMAX_IDLE = WIMAX_DISCONNECTED; // XXX: unclear if we need a different icon
+    static final int WIMAX_IDLE = WIMAX_DISCONNECTED; // XXX: unclear if we need
+                                                      // a different icon
 }

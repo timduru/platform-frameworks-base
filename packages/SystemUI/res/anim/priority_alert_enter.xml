@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-        >
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+
     <scale
+        android:duration="@android:integer/config_shortAnimTime"
+        android:fromXScale="0.7"
+        android:fromYScale="0.7"
         android:interpolator="@android:interpolator/overshoot"
-        android:fromXScale="0.7" android:toXScale="1.0"
-        android:fromYScale="0.7" android:toYScale="1.0"
-        android:pivotX="50%" android:pivotY="50%"
-        android:duration="@android:integer/config_shortAnimTime" />
-    <alpha 
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:toXScale="1.0"
+        android:toYScale="1.0" />
+
+    <alpha
+        android:duration="@android:integer/config_shortAnimTime"
+        android:fromAlpha="0.0"
         android:interpolator="@android:interpolator/decelerate_quad"
-        android:fromAlpha="0.0" android:toAlpha="1.0"
-        android:duration="@android:integer/config_shortAnimTime" />
+        android:toAlpha="1.0" />
+
 </set>

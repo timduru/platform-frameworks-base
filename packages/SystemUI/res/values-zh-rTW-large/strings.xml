@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 /**
  * Copyright (c) 2010, The Android Open Source Project
  *
@@ -15,11 +15,12 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
- -->
+-->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
     <string name="status_bar_clear_all_button" msgid="4661583896803349732">"全部清除"</string>
     <string name="notifications_off_title" msgid="1860117696034775851">"關閉通知"</string>
     <string name="notifications_off_text" msgid="1439152806320786912">"輕按這裡即可重新開啟通知。"</string>
+
 </resources>

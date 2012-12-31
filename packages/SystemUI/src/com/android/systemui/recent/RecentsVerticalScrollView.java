@@ -53,7 +53,7 @@ public class RecentsVerticalScrollView extends ScrollView
     private RecentsScrollViewPerformanceHelper mPerformanceHelper;
     private HashSet<View> mRecycledViews;
     private int mNumItemsInOneScreenful;
-    
+
     private Handler mHandler;
 
     public RecentsVerticalScrollView(Context context, AttributeSet attrs) {
@@ -64,7 +64,7 @@ public class RecentsVerticalScrollView extends ScrollView
 
         mPerformanceHelper = RecentsScrollViewPerformanceHelper.create(context, attrs, this, true);
         mRecycledViews = new HashSet<View>();
-        
+
         mHandler = new Handler();
     }
 
@@ -155,9 +155,11 @@ public class RecentsVerticalScrollView extends ScrollView
             thumbnailView.setOnClickListener(launchAppListener);
             thumbnailView.setOnLongClickListener(longClickListener);
 
-            // We don't want to dismiss recents if a user clicks on the app title
+            // We don't want to dismiss recents if a user clicks on the app
+            // title
             // (we also don't want to launch the app either, though, because the
-            // app title is a small target and doesn't have great click feedback)
+            // app title is a small target and doesn't have great click
+            // feedback)
             final View appTitle = view.findViewById(R.id.app_label);
             appTitle.setContentDescription(" ");
             appTitle.setOnTouchListener(noOpListener);
@@ -172,15 +174,15 @@ public class RecentsVerticalScrollView extends ScrollView
 
         // Scroll to end after initial layout.
         final OnGlobalLayoutListener updateScroll = new OnGlobalLayoutListener() {
-                public void onGlobalLayout() {
-                    mLastScrollPosition = scrollPositionOfMostRecent();
-                    scrollTo(0, mLastScrollPosition);
-                    final ViewTreeObserver observer = getViewTreeObserver();
-                    if (observer.isAlive()) {
-                        observer.removeOnGlobalLayoutListener(this);
-                    }
+            public void onGlobalLayout() {
+                mLastScrollPosition = scrollPositionOfMostRecent();
+                scrollTo(0, mLastScrollPosition);
+                final ViewTreeObserver observer = getViewTreeObserver();
+                if (observer.isAlive()) {
+                    observer.removeOnGlobalLayoutListener(this);
                 }
-            };
+            }
+        };
         getViewTreeObserver().addOnGlobalLayoutListener(updateScroll);
     }
 
@@ -188,7 +190,7 @@ public class RecentsVerticalScrollView extends ScrollView
     public void removeViewInLayout(final View view) {
         dismissChild(view);
     }
-    
+
     @Override
     public void removeAllViewsInLayout() {
         smoothScrollTo(0, 0);
@@ -199,7 +201,7 @@ public class RecentsVerticalScrollView extends ScrollView
                 if (!RecentsActivity.mHomeForeground) {
                     count--;
                 }
-                
+
                 View[] refView = new View[count];
                 for (int i = 0; i < count; i++) {
                     refView[i] = mLinearLayout.getChildAt(i);
@@ -223,15 +225,16 @@ public class RecentsVerticalScrollView extends ScrollView
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
+        if (DEBUG)
+            Log.v(TAG, "onInterceptTouchEvent()");
         return mSwipeHelper.onInterceptTouchEvent(ev) ||
-            super.onInterceptTouchEvent(ev);
+                super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         return mSwipeHelper.onTouchEvent(ev) ||
-            super.onTouchEvent(ev);
+                super.onTouchEvent(ev);
     }
 
     public boolean canChildBeDismissed(View v) {
@@ -246,7 +249,8 @@ public class RecentsVerticalScrollView extends ScrollView
         addToRecycledViews(v);
         mLinearLayout.removeView(v);
         mCallback.handleSwipe(v);
-        // Restore the alpha/translation parameters to what they were before swiping
+        // Restore the alpha/translation parameters to what they were before
+        // swiping
         // (for when these items are recycled)
         View contentView = getChildContentView(v);
         contentView.setAlpha(1f);
@@ -331,7 +335,7 @@ public class RecentsVerticalScrollView extends ScrollView
         setScrollbarFadingEnabled(true);
         mLinearLayout = (LinearLayout) findViewById(R.id.recents_linear_layout);
         final int leftPadding = mContext.getResources()
-            .getDimensionPixelOffset(R.dimen.status_bar_recents_thumbnail_left_margin);
+                .getDimensionPixelOffset(R.dimen.status_bar_recents_thumbnail_left_margin);
         setOverScrollEffectPadding(leftPadding, 0);
     }
 
@@ -360,7 +364,8 @@ public class RecentsVerticalScrollView extends ScrollView
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        // Skip this work if a transition is running; it sets the scroll values independently
+        // Skip this work if a transition is running; it sets the scroll values
+        // independently
         // and should not have those animated values clobbered by this logic
         LayoutTransition transition = mLinearLayout.getLayoutTransition();
         if (transition != null && transition.isRunning()) {
@@ -373,7 +378,8 @@ public class RecentsVerticalScrollView extends ScrollView
         // This has to happen post-layout, so run it "in the future"
         post(new Runnable() {
             public void run() {
-                // Make sure we're still not clobbering the transition-set values, since this
+                // Make sure we're still not clobbering the transition-set
+                // values, since this
                 // runnable launches asynchronously
                 LayoutTransition transition = mLinearLayout.getLayoutTransition();
                 if (transition == null || !transition.isRunning()) {

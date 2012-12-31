@@ -17,10 +17,10 @@
 */
 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true">
-	<color android:color="#212121" />
+
+    <item android:state_pressed="true"><color android:color="#212121" />
     </item>
-    <item>
-        <color android:color="#161616" />
+    <item><color android:color="#161616" />
     </item>
+
 </selector>

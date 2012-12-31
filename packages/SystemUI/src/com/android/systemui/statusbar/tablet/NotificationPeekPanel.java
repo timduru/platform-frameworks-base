@@ -44,7 +44,8 @@ public class NotificationPeekPanel extends RelativeLayout implements StatusBarPa
         mBar = bar;
     }
 
-    // We don't really want to intercept the touch event, but we *do* want to reset the fade timer
+    // We don't really want to intercept the touch event, but we *do* want to
+    // reset the fade timer
     // in case the user is interacting with some custom controls or something.
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {

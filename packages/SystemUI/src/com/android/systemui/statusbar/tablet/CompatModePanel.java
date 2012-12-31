@@ -43,7 +43,8 @@ public class CompatModePanel extends FrameLayout implements StatusBarPanel,
     private RadioButton mOnButton, mOffButton;
 
     private View mTrigger;
-//    private InputMethodButton mInputMethodSwitchButton;
+
+    // private InputMethodButton mInputMethodSwitchButton;
 
     public CompatModePanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -53,7 +54,7 @@ public class CompatModePanel extends FrameLayout implements StatusBarPanel,
 
     @Override
     public void onFinishInflate() {
-        mOnButton  = (RadioButton) findViewById(R.id.compat_mode_on_radio);
+        mOnButton = (RadioButton) findViewById(R.id.compat_mode_on_radio);
         mOffButton = (RadioButton) findViewById(R.id.compat_mode_off_radio);
         mOnButton.setOnClickListener(this);
         mOffButton.setOnClickListener(this);
@@ -110,13 +111,15 @@ public class CompatModePanel extends FrameLayout implements StatusBarPanel,
 
     public void openPanel() {
         setVisibility(View.VISIBLE);
-        if (mTrigger != null) mTrigger.setSelected(true);
+        if (mTrigger != null)
+            mTrigger.setSelected(true);
         refresh();
     }
 
     public void closePanel() {
         setVisibility(View.GONE);
-        if (mTrigger != null) mTrigger.setSelected(false);
+        if (mTrigger != null)
+            mTrigger.setSelected(false);
     }
 
     private void refresh() {

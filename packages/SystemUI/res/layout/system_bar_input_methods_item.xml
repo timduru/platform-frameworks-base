@@ -17,89 +17,99 @@
 */
 -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="?android:attr/listPreferredItemHeight"
     android:background="@drawable/status_bar_item_background"
+    android:gravity="center_vertical"
+    android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="vertical"
-    android:paddingRight="6dip"
-    android:paddingLeft="6dip"
-    android:paddingTop="5dip"
     android:paddingBottom="5dip"
-    android:gravity="center_vertical">
+    android:paddingLeft="6dip"
+    android:paddingRight="6dip"
+    android:paddingTop="5dip" >
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal" >
+
         <LinearLayout
             android:id="@+id/item_subtype"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:background="?android:attr/selectableItemBackground">
+            android:orientation="horizontal" >
+
             <RadioButton
                 android:id="@+id/item_radio"
                 android:layout_width="30dip"
                 android:layout_height="wrap_content"
-                android:focusable="false"
-                android:clickable="false" />
+                android:clickable="false"
+                android:focusable="false" />
+
             <ImageView
                 android:id="@+id/item_icon"
                 android:layout_width="@android:dimen/app_icon_size"
                 android:layout_height="wrap_content"
-                android:scaleType="fitCenter"
-                android:contentDescription="@null" />
+                android:contentDescription="@null"
+                android:scaleType="fitCenter" />
+
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="0px"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_height="wrap_content">
+                android:orientation="vertical" >
+
                 <TextView
                     android:id="@+id/item_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:singleLine="true"
+                    android:layout_marginBottom="2dip"
                     android:ellipsize="marquee"
-                    android:layout_marginBottom="2dip" />
+                    android:singleLine="true"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
                 <TextView
                     android:id="@+id/item_subtitle"
-                    android:layout_marginTop="-4dip"
-                    android:layout_gravity="center_vertical|left"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|left"
+                    android:layout_marginTop="-4dip"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
             </LinearLayout>
         </LinearLayout>
+
         <View
             android:id="@+id/item_vertical_separator"
             android:layout_width="2dip"
             android:layout_height="match_parent"
             android:layout_marginBottom="5dip"
             android:background="@android:drawable/divider_horizontal_dark" />
+
         <ImageView
             android:id="@+id/item_settings_icon"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="5dip"
             android:layout_gravity="center_vertical"
-            android:paddingRight="10dip"
-            android:paddingLeft="10dip"
-            android:src="@drawable/ic_sysbar_quicksettings"
-            android:visibility="visible"
-            android:clickable="true"
-            android:focusable="true"
+            android:layout_marginLeft="5dip"
             android:background="?android:attr/selectableItemBackground"
-            android:contentDescription="@string/accessibility_settings_button" />
+            android:clickable="true"
+            android:contentDescription="@string/accessibility_settings_button"
+            android:focusable="true"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:src="@drawable/ic_sysbar_quicksettings"
+            android:visibility="visible" />
     </LinearLayout>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dip"
         android:background="@android:drawable/divider_horizontal_dark" />
+
 </LinearLayout>

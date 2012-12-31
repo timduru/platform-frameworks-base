@@ -1,3 +1,4 @@
+
 package com.android.systemui.statusbar.preferences;
 
 import android.content.*;
@@ -18,17 +19,19 @@ public class WifiTetherController extends MultipleStateController {
     private static final int STATE_ON = 2;
     private static final int STATE_TURNING_OFF = 3;
 
-    public static int stateTransitions[] = { STATE_TURNING_ON, STATE_ON, STATE_TURNING_OFF,
-            STATE_OFF };
-    
+    public static int stateTransitions[] = {
+            STATE_TURNING_ON, STATE_ON, STATE_TURNING_OFF,
+            STATE_OFF
+    };
+
     private WifiManager mWifiManager;
     ConnectivityManager mCm;
-    
+
     public WifiTetherController(Context context, View button) {
         super(context, button);
         mContext = context;
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        mCm = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mCm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         getIcons(R.drawable.toggle_wifi_ap_off, R.drawable.toggle_wifi_ap);
         updateController();
     }
@@ -51,7 +54,7 @@ public class WifiTetherController extends MultipleStateController {
                 return STATE_OFF;
         }
     }
-    
+
     protected void setPreferenceStatus(final int status) {
         if (status == STATE_ON || status == STATE_OFF)
             return;
@@ -74,7 +77,7 @@ public class WifiTetherController extends MultipleStateController {
                     WifiConfiguration wifiConfig = mWifiManager.getWifiApConfiguration();
                     mWifiManager.setWifiApEnabled(wifiConfig, true);
                 } else if (status == STATE_TURNING_OFF) {
-                    mWifiManager.setWifiApEnabled(null,  false);
+                    mWifiManager.setWifiApEnabled(null, false);
                     setSoftapEnabled(false);
                 }
                 return null;
@@ -99,35 +102,36 @@ public class WifiTetherController extends MultipleStateController {
 
     @Override
     protected int getStateType(int state) {
-        switch (state){
-        case STATE_ON:
-            return STATE_TYPE_ENABLED;
-        case STATE_OFF:
-            return STATE_TYPE_DISABLED;
-        default:
-            return STATE_TYPE_TRANSITION;
+        switch (state) {
+            case STATE_ON:
+                return STATE_TYPE_ENABLED;
+            case STATE_OFF:
+                return STATE_TYPE_DISABLED;
+            default:
+                return STATE_TYPE_TRANSITION;
         }
     }
-    
+
     public void setSoftapEnabled(boolean enable) {
         ContentResolver mResolver = mContext.getContentResolver();
         /**
          * Disable Wifi if enabling tethering
          */
         int wifiState = mWifiManager.getWifiState();
-        
+
         if (enable && ((wifiState == WifiManager.WIFI_STATE_ENABLING) ||
-                    (wifiState == WifiManager.WIFI_STATE_ENABLED))) {
+                (wifiState == WifiManager.WIFI_STATE_ENABLED))) {
             mWifiManager.setWifiEnabled(false);
             Settings.Secure.putInt(mResolver, Settings.Global.WIFI_SAVED_STATE, 1);
         }
         /**
-         *  If needed, restore Wifi on tether disable
+         * If needed, restore Wifi on tether disable
          */
         if (!enable) {
             int wifiSavedState = 0;
             try {
-                wifiSavedState = Settings.Secure.getInt(mResolver, Settings.Global.WIFI_SAVED_STATE);
+                wifiSavedState = Settings.Secure
+                        .getInt(mResolver, Settings.Global.WIFI_SAVED_STATE);
             } catch (Settings.SettingNotFoundException e) {
                 ;
             }

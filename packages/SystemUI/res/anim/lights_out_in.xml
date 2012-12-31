@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010 The Android Open Source Project
+<!--
+     Copyright (C) 2010 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,13 +15,17 @@
      limitations under the License.
 -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    >
-    <translate android:fromYDelta="-100%p" android:toYDelta="0"
-        android:duration="@android:integer/config_mediumAnimTime" 
+<set xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <translate
+        android:duration="@android:integer/config_mediumAnimTime"
+        android:fromYDelta="-100%p"
         android:interpolator="@anim/hydraulic_brake_interpolator"
-        />
-    <alpha android:fromAlpha="0.5" android:toAlpha="1.0"
-        android:duration="@android:integer/config_longAnimTime" 
-        />
+        android:toYDelta="0" />
+
+    <alpha
+        android:duration="@android:integer/config_longAnimTime"
+        android:fromAlpha="0.5"
+        android:toAlpha="1.0" />
+
 </set>

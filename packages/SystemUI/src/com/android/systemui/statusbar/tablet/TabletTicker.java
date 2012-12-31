@@ -54,7 +54,8 @@ public class TabletTicker
 
     private static final boolean CLICKABLE_TICKER = true;
 
-    // 3 is enough to let us see most cases, but not get so far behind that it's too annoying.
+    // 3 is enough to let us see most cases, but not get so far behind that it's
+    // too annoying.
     private static final int QUEUE_LENGTH = 3;
 
     private static final int MSG_ADVANCE = 1;
@@ -83,7 +84,7 @@ public class TabletTicker
     public TabletTicker(TabletStatusBar bar) {
         mBar = bar;
         mContext = bar.getContext();
-        mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         final Resources res = mContext.getResources();
         mLargeIconHeight = res.getDimensionPixelSize(
                 android.R.dimen.notification_large_icon_height);
@@ -95,7 +96,8 @@ public class TabletTicker
                     + " mQueuePos=" + mQueuePos + " mQueue=" + Arrays.toString(mQueue));
         }
 
-        // If it's already in here, remove whatever's in there and put the new one at the end.
+        // If it's already in here, remove whatever's in there and put the new
+        // one at the end.
         remove(key, false);
 
         mKeys[mQueuePos] = key;
@@ -124,14 +126,14 @@ public class TabletTicker
             }
         } else {
             // In the queue
-            for (int i=0; i<QUEUE_LENGTH; i++) {
+            for (int i = 0; i < QUEUE_LENGTH; i++) {
                 if (mKeys[i] == key) {
-                    for (; i<QUEUE_LENGTH-1; i++) {
-                        mKeys[i] = mKeys[i+1];
-                        mQueue[i] = mQueue[i+1];
+                    for (; i < QUEUE_LENGTH - 1; i++) {
+                        mKeys[i] = mKeys[i + 1];
+                        mQueue[i] = mQueue[i + 1];
                     }
-                    mKeys[QUEUE_LENGTH-1] = null;
-                    mQueue[QUEUE_LENGTH-1] = null;
+                    mKeys[QUEUE_LENGTH - 1] = null;
+                    mQueue[QUEUE_LENGTH - 1] = null;
                     if (mQueuePos > 0) {
                         mQueuePos--;
                     }
@@ -144,7 +146,7 @@ public class TabletTicker
     public void halt() {
         removeMessages(MSG_ADVANCE);
         if (mCurrentView != null || mQueuePos != 0) {
-            for (int i=0; i<QUEUE_LENGTH; i++) {
+            for (int i = 0; i < QUEUE_LENGTH; i++) {
                 mKeys[i] = null;
                 mQueue[i] = null;
             }
@@ -200,9 +202,9 @@ public class TabletTicker
             Slog.d(TAG, "dequeue mQueuePos=" + mQueuePos + " mQueue=" + Arrays.toString(mQueue));
         }
         final int N = mQueuePos;
-        for (int i=0; i<N; i++) {
-            mKeys[i] = mKeys[i+1];
-            mQueue[i] = mQueue[i+1];
+        for (int i = 0; i < N; i++) {
+            mKeys[i] = mKeys[i + 1];
+            mQueue[i] = mQueue[i + 1];
         }
         mKeys[N] = null;
         mQueue[N] = null;
@@ -216,8 +218,8 @@ public class TabletTicker
         final FrameLayout view = new FrameLayout(mContext);
         final int width = res.getDimensionPixelSize(R.dimen.notification_ticker_width);
         int windowFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
         if (CLICKABLE_TICKER) {
             windowFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         } else {
@@ -227,7 +229,7 @@ public class TabletTicker
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL, windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-//        lp.windowAnimations = com.android.internal.R.style.Animation_Toast;
+        // lp.windowAnimations = com.android.internal.R.style.Animation_Toast;
 
         mLayoutTransition = new LayoutTransition();
         mLayoutTransition.addTransitionListener(this);
@@ -238,7 +240,8 @@ public class TabletTicker
     }
 
     public void startTransition(LayoutTransition transition, ViewGroup container,
-            View view, int transitionType) {}
+            View view, int transitionType) {
+    }
 
     public void endTransition(LayoutTransition transition, ViewGroup container,
             View view, int transitionType) {
@@ -253,7 +256,7 @@ public class TabletTicker
     private View makeTickerView(StatusBarNotification notification) {
         final Notification n = notification.notification;
 
-        LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
 
         ViewGroup group;
@@ -265,14 +268,13 @@ public class TabletTicker
             iconId = R.id.left_icon;
         }
         if (n.tickerView != null) {
-            group = (ViewGroup)inflater.inflate(R.layout.system_bar_ticker_panel, null, false);
+            group = (ViewGroup) inflater.inflate(R.layout.system_bar_ticker_panel, null, false);
             ViewGroup content = (FrameLayout) group.findViewById(R.id.ticker_expanded);
             View expanded = null;
             Exception exception = null;
             try {
                 expanded = n.tickerView.apply(mContext, content);
-            }
-            catch (RuntimeException e) {
+            } catch (RuntimeException e) {
                 exception = e;
             }
             if (expanded == null) {
@@ -282,31 +284,33 @@ public class TabletTicker
                 return null;
             }
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, 
+                    ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
             content.addView(expanded, lp);
         } else if (n.tickerText != null) {
-            group = (ViewGroup)inflater.inflate(R.layout.system_bar_ticker_compat, mWindow, false);
+            group = (ViewGroup) inflater.inflate(R.layout.system_bar_ticker_compat, mWindow, false);
             final Drawable icon = StatusBarIconView.getIcon(mContext,
                     new StatusBarIcon(notification.pkg, notification.user, n.icon, n.iconLevel, 0,
                             n.tickerText));
-            ImageView iv = (ImageView)group.findViewById(iconId);
+            ImageView iv = (ImageView) group.findViewById(iconId);
             iv.setImageDrawable(icon);
             iv.setVisibility(View.VISIBLE);
-            TextView tv = (TextView)group.findViewById(R.id.text);
+            TextView tv = (TextView) group.findViewById(R.id.text);
             tv.setText(n.tickerText);
         } else {
             throw new RuntimeException("tickerView==null && tickerText==null");
         }
-        ImageView largeIcon = (ImageView)group.findViewById(R.id.large_icon);
+        ImageView largeIcon = (ImageView) group.findViewById(R.id.large_icon);
         if (n.largeIcon != null) {
             largeIcon.setImageBitmap(n.largeIcon);
             largeIcon.setVisibility(View.VISIBLE);
             final ViewGroup.LayoutParams lp = largeIcon.getLayoutParams();
             final int statusBarHeight = mBar.getStatusBarHeight();
             if (n.largeIcon.getHeight() <= statusBarHeight) {
-                // for smallish largeIcons, it looks a little odd to have them floating halfway up
-                // the ticker, so we vertically center them in the status bar area instead
+                // for smallish largeIcons, it looks a little odd to have them
+                // floating halfway up
+                // the ticker, so we vertically center them in the status bar
+                // area instead
                 lp.height = statusBarHeight;
             } else {
                 lp.height = mLargeIconHeight;
@@ -317,10 +321,11 @@ public class TabletTicker
         if (CLICKABLE_TICKER) {
             PendingIntent contentIntent = notification.notification.contentIntent;
             if (contentIntent != null) {
-                // create the usual notification clicker, but chain it together with a halt() call
+                // create the usual notification clicker, but chain it together
+                // with a halt() call
                 // to abort the ticker too
                 final View.OnClickListener clicker = mBar.makeClicker(contentIntent,
-                                            notification.pkg, notification.tag, notification.id);
+                        notification.pkg, notification.tag, notification.id);
                 group.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         halt();
@@ -335,4 +340,3 @@ public class TabletTicker
         return group;
     }
 }
-

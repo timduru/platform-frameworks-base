@@ -1,3 +1,4 @@
+
 package com.android.systemui.statusbar.preferences;
 
 import android.content.*;
@@ -18,7 +19,8 @@ public class WifiController extends MultipleStateController {
             STATE_TURNING_ON, // Move from disconnected to connecting
             STATE_ON, // Move from turning on to on
             STATE_TURNING_OFF, // Move from on to turning off
-            STATE_OFF // Move from turning off to off
+            STATE_OFF
+    // Move from turning off to off
     };
 
     private WifiManager mWifiManager;

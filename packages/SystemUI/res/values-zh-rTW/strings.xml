@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 /**
  * Copyright (c) 2009, The Android Open Source Project
  *
@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
- -->
+-->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
     <string name="app_label" msgid="7164937344850004466">"系統 UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"勿干擾"</string>
@@ -27,10 +27,12 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"應用程式資訊"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"沒有最近使用的應用程式"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"關閉最近使用的應用程式"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="5854176083865845541">"1 個最近使用的應用程式"</item>
-    <item quantity="other" msgid="1040784359794890744">"%d 個最近使用的應用程式"</item>
-  </plurals>
+
+    <plurals name="status_bar_accessibility_recent_apps">
+        <item msgid="5854176083865845541" quantity="one">"1 個最近使用的應用程式"</item>
+        <item msgid="1040784359794890744" quantity="other">"%d 個最近使用的應用程式"</item>
+    </plurals>
+
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"沒有通知"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"進行中"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
@@ -137,6 +139,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
+
     <string name="accessibility_settings_button" msgid="799583911231893380">"系統設定"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"通知。"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"清除通知。"</string>
@@ -205,4 +208,5 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"系統會在這裡顯示通知"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"向下滑動即可隨時存取通知。"\n"再次向下滑動即可使用系統控制項。"</string>
+
 </resources>

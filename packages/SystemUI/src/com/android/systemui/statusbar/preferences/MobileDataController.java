@@ -1,3 +1,4 @@
+
 package com.android.systemui.statusbar.preferences;
 
 import android.content.*;
@@ -7,7 +8,7 @@ import android.net.ConnectivityManager;
 import com.android.systemui.R;
 
 public class MobileDataController extends SettingsController {
-    
+
     private ConnectivityManager mConnService;
 
     public MobileDataController(Context context, View button) {
@@ -16,17 +17,17 @@ public class MobileDataController extends SettingsController {
         getIcons(R.drawable.toggle_data_off, R.drawable.toggle_data);
         updateController();
     }
-    
+
     protected int getPreferenceStatus() {
-            return (mConnService.getMobileDataEnabled() ? 1 : 0);
+        return (mConnService.getMobileDataEnabled() ? 1 : 0);
     }
-             
+
     protected void setPreferenceStatus(int status) {
         if (status == 1) {
-          mConnService.setMobileDataEnabled(true);
+            mConnService.setMobileDataEnabled(true);
         }
         else {
-          mConnService.setMobileDataEnabled(false);
+            mConnService.setMobileDataEnabled(false);
         }
-    } 
+    }
 }

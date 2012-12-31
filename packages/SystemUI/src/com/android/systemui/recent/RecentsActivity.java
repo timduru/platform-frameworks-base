@@ -50,7 +50,7 @@ public class RecentsActivity extends Activity {
     private IntentFilter mIntentFilter;
     private boolean mShowing;
     private boolean mForeground;
-    
+
     public static boolean mHomeForeground = false;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
@@ -59,7 +59,8 @@ public class RecentsActivity extends Activity {
             if (CLOSE_RECENTS_INTENT.equals(intent.getAction())) {
                 if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
                     if (mShowing && !mForeground) {
-                        // Captures the case right before we transition to another activity
+                        // Captures the case right before we transition to
+                        // another activity
                         mRecentsPanel.show(false);
                     }
                 }
@@ -141,13 +142,13 @@ public class RecentsActivity extends Activity {
     public void onResume() {
         mForeground = true;
         super.onResume();
-        
+
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             int portrait = extras.getInt("Portrait");
             if (portrait == 1) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            } else if (portrait == 2){
+            } else if (portrait == 2) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             }
         }
@@ -176,10 +177,11 @@ public class RecentsActivity extends Activity {
             final List<ActivityManager.RecentTaskInfo> recentTasks =
                     am.getRecentTasks(2,
                             ActivityManager.RECENT_WITH_EXCLUDED |
-                            ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+                                    ActivityManager.RECENT_IGNORE_UNAVAILABLE);
             if (recentTasks.size() > 1 &&
                     mRecentsPanel.simulateClick(recentTasks.get(1).persistentId)) {
-                // recents panel will take care of calling show(false) through simulateClick
+                // recents panel will take care of calling show(false) through
+                // simulateClick
                 return;
             }
             mRecentsPanel.show(false);
@@ -190,7 +192,7 @@ public class RecentsActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.status_bar_recent_panel);
-        
+
         mRecentsPanel = (RecentsPanelView) findViewById(R.id.recents_root);
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(mRecentsPanel));
 
@@ -206,7 +208,7 @@ public class RecentsActivity extends Activity {
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(CLOSE_RECENTS_INTENT);
         mIntentFilter.addAction(WINDOW_ANIMATION_START_INTENT);
-        registerReceiver(mIntentReceiver, mIntentFilter);          
+        registerReceiver(mIntentReceiver, mIntentFilter);
         super.onCreate(savedInstanceState);
     }
 
@@ -251,6 +253,6 @@ public class RecentsActivity extends Activity {
     }
 
     boolean isActivityShowing() {
-         return mShowing;
+        return mShowing;
     }
 }

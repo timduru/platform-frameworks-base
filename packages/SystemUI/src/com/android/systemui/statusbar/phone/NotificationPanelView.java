@@ -62,13 +62,14 @@ public class NotificationPanelView extends PanelView {
         GestureRecorder gr = ((PhoneStatusBarView) mBar).mBar.getGestureRecorder();
         if (gr != null) {
             gr.tag(
-                "fling " + ((vel > 0) ? "open" : "closed"),
-                "notifications,v=" + vel);
+                    "fling " + ((vel > 0) ? "open" : "closed"),
+                    "notifications,v=" + vel);
         }
         super.fling(vel, always);
     }
 
-    // We draw the handle ourselves so that it's always glued to the bottom of the window.
+    // We draw the handle ourselves so that it's always glued to the bottom of
+    // the window.
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -100,10 +101,12 @@ public class NotificationPanelView extends PanelView {
                     if (mOkToFlip) {
                         float miny = event.getY(0);
                         float maxy = miny;
-                        for (int i=1; i<event.getPointerCount(); i++) {
+                        for (int i = 1; i < event.getPointerCount(); i++) {
                             final float y = event.getY(i);
-                            if (y < miny) miny = y;
-                            if (y > maxy) maxy = y;
+                            if (y < miny)
+                                miny = y;
+                            if (y > maxy)
+                                maxy = y;
                         }
                         if (maxy - miny < mHandleBarHeight) {
                             if (getMeasuredHeight() < mHandleBarHeight) {

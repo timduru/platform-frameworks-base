@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!--
+     Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,25 +16,41 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
-    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true" android:layout_alignParentTop="true"
-        android:src="@drawable/bugdroid" android:scaleType="center" />
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
-    <Button android:id="@+id/close"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" android:layout_alignParentRight="true"
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:scaleType="center"
+        android:src="@drawable/bugdroid" />
+
+    <Button
+        android:id="@+id/close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
         android:text="@string/close_universe" />
 
-    <TextView android:id="@+id/title"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_below="@id/close" android:layout_centerHorizontal="true"
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/close"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
         android:paddingBottom="16dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:gravity="center" />
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <ImageView android:id="@+id/bottom"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_below="@id/title" android:layout_centerHorizontal="true"
+    <ImageView
+        android:id="@+id/bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
+
 </RelativeLayout>

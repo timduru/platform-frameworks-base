@@ -17,7 +17,13 @@
 ** limitations under the License.
 */
 -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/recent_remove_item" android:title="@string/status_bar_recent_remove_item_title" />
-    <item android:id="@+id/recent_inspect_item" android:title="@string/status_bar_recent_inspect_item_title" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/recent_remove_item"
+        android:title="@string/status_bar_recent_remove_item_title"/>
+    <item
+        android:id="@+id/recent_inspect_item"
+        android:title="@string/status_bar_recent_inspect_item_title"/>
+
 </menu>

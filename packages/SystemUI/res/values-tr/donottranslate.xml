@@ -17,8 +17,11 @@
  */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- For formatting day of week and date in DateView.  Day of week precedes date by default,
-         but this may be overridden on a per-locale basis if necessary. -->
+
+    <!--
+         For formatting day of week and date in DateView.  Day of week precedes date by default,
+         but this may be overridden on a per-locale basis if necessary.
+    -->
     <string name="status_bar_date_formatter">%2$s\n%1$s</string>
 
 </resources>

@@ -42,7 +42,7 @@ import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChang
 public class LocationController extends BroadcastReceiver {
     private static final String TAG = "StatusBar.LocationController";
 
-    private static final int GPS_NOTIFICATION_ID = 374203-122084;
+    private static final int GPS_NOTIFICATION_ID = 374203 - 122084;
 
     private Context mContext;
 
@@ -63,7 +63,7 @@ public class LocationController extends BroadcastReceiver {
         filter.addAction(LocationManager.GPS_FIX_CHANGE_ACTION);
         context.registerReceiver(this, filter);
 
-        NotificationManager nm = (NotificationManager)context.getSystemService(
+        NotificationManager nm = (NotificationManager) context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         mNotificationService = nm.getService();
     }
@@ -95,7 +95,7 @@ public class LocationController extends BroadcastReceiver {
             textResId = R.string.gps_notification_searching_text;
             visible = true;
         }
-        
+
         try {
             if (visible) {
                 Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -106,23 +106,24 @@ public class LocationController extends BroadcastReceiver {
                 String text = mContext.getText(textResId).toString();
 
                 Notification n = new Notification.Builder(mContext)
-                    .setSmallIcon(iconId)
-                    .setContentTitle(text)
-                    .setOngoing(true)
-                    .setContentIntent(pendingIntent)
-                    .getNotification();
+                        .setSmallIcon(iconId)
+                        .setContentTitle(text)
+                        .setOngoing(true)
+                        .setContentIntent(pendingIntent)
+                        .getNotification();
 
-                // Notification.Builder will helpfully fill these out for you no matter what you do
+                // Notification.Builder will helpfully fill these out for you no
+                // matter what you do
                 n.tickerView = null;
                 n.tickerText = null;
-                
+
                 n.priority = Notification.PRIORITY_HIGH;
 
                 int[] idOut = new int[1];
                 mNotificationService.enqueueNotificationWithTag(
                         mContext.getPackageName(),
-                        null, 
-                        GPS_NOTIFICATION_ID, 
+                        null,
+                        GPS_NOTIFICATION_ID,
                         n,
                         idOut,
                         UserHandle.USER_ALL);
@@ -144,4 +145,3 @@ public class LocationController extends BroadcastReceiver {
         }
     }
 }
-

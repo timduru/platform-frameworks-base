@@ -43,7 +43,7 @@ import com.android.systemui.statusbar.StatusBarIconView;
 
 public abstract class Ticker {
     private static final int TICKER_SEGMENT_DELAY = 3000;
-    
+
     private Context mContext;
     private Handler mHandler = new Handler();
     private ArrayList<Segment> mSegments = new ArrayList();
@@ -55,7 +55,7 @@ public abstract class Ticker {
 
     public static boolean isGraphicOrEmoji(char c) {
         int gc = Character.getType(c);
-        return     gc != Character.CONTROL
+        return gc != Character.CONTROL
                 && gc != Character.FORMAT
                 && gc != Character.UNASSIGNED
                 && gc != Character.LINE_SEPARATOR
@@ -78,7 +78,7 @@ public abstract class Ticker {
         }
 
         CharSequence rtrim(CharSequence substr, int start, int end) {
-            while (end > start && !isGraphicOrEmoji(substr.charAt(end-1))) {
+            while (end > start && !isGraphicOrEmoji(substr.charAt(end - 1))) {
                 end--;
             }
             if (end > start) {
@@ -122,13 +122,13 @@ public abstract class Ticker {
             StaticLayout l = getLayout(substr);
             final int lineCount = l.getLineCount();
             int i;
-            for (i=0; i<lineCount; i++) {
+            for (i = 0; i < lineCount; i++) {
                 int start = l.getLineStart(i);
                 int end = l.getLineEnd(i);
-                if (i == lineCount-1) {
+                if (i == lineCount - 1) {
                     this.next = len;
                 } else {
-                    this.next = index + l.getLineStart(i+1);
+                    this.next = index + l.getLineStart(i + 1);
                 }
                 CharSequence result = rtrim(substr, start, end);
                 if (result != null) {
@@ -160,29 +160,29 @@ public abstract class Ticker {
         final Resources res = context.getResources();
         final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
         final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
-        mIconScale = (float)imageBounds / (float)outerBounds;
+        mIconScale = (float) imageBounds / (float) outerBounds;
 
         mTickerView = sb.findViewById(R.id.ticker);
 
-        mIconSwitcher = (ImageSwitcher)sb.findViewById(R.id.tickerIcon);
+        mIconSwitcher = (ImageSwitcher) sb.findViewById(R.id.tickerIcon);
         mIconSwitcher.setInAnimation(
-                    AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_in));
+                AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_in));
         mIconSwitcher.setOutAnimation(
-                    AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_out));
+                AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_out));
         mIconSwitcher.setScaleX(mIconScale);
         mIconSwitcher.setScaleY(mIconScale);
 
-        mTextSwitcher = (TextSwitcher)sb.findViewById(R.id.tickerText);
+        mTextSwitcher = (TextSwitcher) sb.findViewById(R.id.tickerText);
         mTextSwitcher.setInAnimation(
-                    AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_in));
+                AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_in));
         mTextSwitcher.setOutAnimation(
-                    AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_out));
+                AnimationUtils.loadAnimation(context, com.android.internal.R.anim.push_up_out));
 
-        // Copy the paint style of one of the TextSwitchers children to use later for measuring
-        TextView text = (TextView)mTextSwitcher.getChildAt(0);
+        // Copy the paint style of one of the TextSwitchers children to use
+        // later for measuring
+        TextView text = (TextView) mTextSwitcher.getChildAt(0);
         mPaint = text.getPaint();
     }
-
 
     public void addEntry(StatusBarNotification n) {
         int initialCount = mSegments.size();
@@ -196,7 +196,7 @@ public abstract class Ticker {
                     && n.notification.icon == seg.notification.notification.icon
                     && n.notification.iconLevel == seg.notification.notification.iconLevel
                     && CharSequences.equals(seg.notification.notification.tickerText,
-                        n.notification.tickerText)) {
+                            n.notification.tickerText)) {
                 return;
             }
         }
@@ -207,8 +207,9 @@ public abstract class Ticker {
         final CharSequence text = n.notification.tickerText;
         final Segment newSegment = new Segment(n, icon, text);
 
-        // If there's already a notification schedule for this package and id, remove it.
-        for (int i=0; i<mSegments.size(); i++) {
+        // If there's already a notification schedule for this package and id,
+        // remove it.
+        for (int i = 0; i < mSegments.size(); i++) {
             Segment seg = mSegments.get(i);
             if (n.id == seg.notification.id && n.pkg.equals(seg.notification.pkg)) {
                 // just update that one to use this new data instead
@@ -221,22 +222,22 @@ public abstract class Ticker {
         if (initialCount == 0 && mSegments.size() > 0) {
             Segment seg = mSegments.get(0);
             seg.first = false;
-            
+
             mIconSwitcher.setAnimateFirstView(false);
             mIconSwitcher.reset();
             mIconSwitcher.setImageDrawable(seg.icon);
-            
+
             mTextSwitcher.setAnimateFirstView(false);
             mTextSwitcher.reset();
             mTextSwitcher.setText(seg.getText());
-            
+
             tickerStarting();
             scheduleAdvance();
         }
     }
 
     public void removeEntry(StatusBarNotification n) {
-        for (int i=mSegments.size()-1; i>=0; i--) {
+        for (int i = mSegments.size() - 1; i >= 0; i--) {
             Segment seg = mSegments.get(i);
             if (n.id == seg.notification.id && n.pkg.equals(seg.notification.pkg)) {
                 mSegments.remove(i);
@@ -264,7 +265,8 @@ public abstract class Ticker {
                 Segment seg = mSegments.get(0);
 
                 if (seg.first) {
-                    // this makes the icon slide in for the first one for a given
+                    // this makes the icon slide in for the first one for a
+                    // given
                     // notification even if there are two notifications with the
                     // same icon in a row
                     mIconSwitcher.setImageDrawable(seg.icon);
@@ -290,7 +292,8 @@ public abstract class Ticker {
     }
 
     public abstract void tickerStarting();
+
     public abstract void tickerDone();
+
     public abstract void tickerHalting();
 }
-

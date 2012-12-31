@@ -40,39 +40,35 @@ public class StorageNotification extends StorageEventListener {
      * Binder context for this service
      */
     private Context mContext;
-    
+
     /**
-     * The notification that is shown when a USB mass storage host
-     * is connected. 
+     * The notification that is shown when a USB mass storage host is connected.
      * <p>
      * This is lazily created, so use {@link #setUsbStorageNotification()}.
      */
     private Notification mUsbStorageNotification;
 
     /**
-     * The notification that is shown when the following media events occur:
-     *     - Media is being checked
-     *     - Media is blank (or unknown filesystem)
-     *     - Media is corrupt
-     *     - Media is safe to unmount
-     *     - Media is missing
+     * The notification that is shown when the following media events occur: -
+     * Media is being checked - Media is blank (or unknown filesystem) - Media
+     * is corrupt - Media is safe to unmount - Media is missing
      * <p>
      * This is lazily created, so use {@link #setMediaStorageNotification()}.
      */
-    private Notification   mMediaStorageNotification;
-    private boolean        mUmsAvailable;
+    private Notification mMediaStorageNotification;
+    private boolean mUmsAvailable;
     private StorageManager mStorageManager;
 
-    private Handler        mAsyncEventHandler;
+    private Handler mAsyncEventHandler;
 
     public StorageNotification(Context context) {
         mContext = context;
 
         mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
         final boolean connected = mStorageManager.isUsbMassStorageConnected();
-        Slog.d(TAG, String.format( "Startup with UMS connection %s (media state %s)", mUmsAvailable,
+        Slog.d(TAG, String.format("Startup with UMS connection %s (media state %s)", mUmsAvailable,
                 Environment.getExternalStorageState()));
-        
+
         HandlerThread thr = new HandlerThread("SystemUI StorageNotification");
         thr.start();
         mAsyncEventHandler = new Handler(thr.getLooper());
@@ -96,8 +92,8 @@ public class StorageNotification extends StorageEventListener {
     private void onUsbMassStorageConnectionChangedAsync(boolean connected) {
         mUmsAvailable = connected;
         /*
-         * Even though we may have a UMS host connected, we the SD card
-         * may not be in a state for export.
+         * Even though we may have a UMS host connected, we the SD card may not
+         * be in a state for export.
          */
         String st = Environment.getExternalStorageState();
 
@@ -117,7 +113,8 @@ public class StorageNotification extends StorageEventListener {
      * @override com.android.os.storage.StorageEventListener
      */
     @Override
-    public void onStorageStateChanged(final String path, final String oldState, final String newState) {
+    public void onStorageStateChanged(final String path, final String oldState,
+            final String newState) {
         mAsyncEventHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -131,8 +128,8 @@ public class StorageNotification extends StorageEventListener {
                 "Media {%s} state changed from {%s} -> {%s}", path, oldState, newState));
         if (newState.equals(Environment.MEDIA_SHARED)) {
             /*
-             * Storage is now shared. Modify the UMS notification
-             * for stopping UMS.
+             * Storage is now shared. Modify the UMS notification for stopping
+             * UMS.
              */
             Intent intent = new Intent();
             intent.setClass(mContext, com.android.systemui.usb.UsbStorageActivity.class);
@@ -153,22 +150,23 @@ public class StorageNotification extends StorageEventListener {
             updateUsbMassStorageNotification(false);
         } else if (newState.equals(Environment.MEDIA_MOUNTED)) {
             /*
-             * Storage is now mounted. Dismiss any media notifications,
-             * and enable UMS notification if connected.
+             * Storage is now mounted. Dismiss any media notifications, and
+             * enable UMS notification if connected.
              */
             setMediaStorageNotification(0, 0, 0, false, false, null);
             updateUsbMassStorageNotification(mUmsAvailable);
         } else if (newState.equals(Environment.MEDIA_UNMOUNTED)) {
             /*
-             * Storage is now unmounted. We may have been unmounted
-             * because the user is enabling/disabling UMS, in which case we don't
-             * want to display the 'safe to unmount' notification.
+             * Storage is now unmounted. We may have been unmounted because the
+             * user is enabling/disabling UMS, in which case we don't want to
+             * display the 'safe to unmount' notification.
              */
             if (!mStorageManager.isUsbMassStorageEnabled()) {
                 if (oldState.equals(Environment.MEDIA_SHARED)) {
                     /*
                      * The unmount was due to UMS being enabled. Dismiss any
-                     * media notifications, and enable UMS notification if connected
+                     * media notifications, and enable UMS notification if
+                     * connected
                      */
                     setMediaStorageNotification(0, 0, 0, false, false, null);
                     updateUsbMassStorageNotification(mUmsAvailable);
@@ -181,7 +179,8 @@ public class StorageNotification extends StorageEventListener {
                         setMediaStorageNotification(
                                 com.android.internal.R.string.ext_media_safe_unmount_notification_title,
                                 com.android.internal.R.string.ext_media_safe_unmount_notification_message,
-                                com.android.internal.R.drawable.stat_notify_sdcard, true, true, null);
+                                com.android.internal.R.drawable.stat_notify_sdcard, true, true,
+                                null);
                     } else {
                         // This device does not have removable storage, so
                         // don't tell the user they can remove it.
@@ -191,16 +190,16 @@ public class StorageNotification extends StorageEventListener {
                 }
             } else {
                 /*
-                 * The unmount was due to UMS being enabled. Dismiss any
-                 * media notifications, and disable the UMS notification
+                 * The unmount was due to UMS being enabled. Dismiss any media
+                 * notifications, and disable the UMS notification
                  */
                 setMediaStorageNotification(0, 0, 0, false, false, null);
                 updateUsbMassStorageNotification(false);
             }
         } else if (newState.equals(Environment.MEDIA_NOFS)) {
             /*
-             * Storage has no filesystem. Show blank media notification,
-             * and enable UMS notification if connected.
+             * Storage has no filesystem. Show blank media notification, and
+             * enable UMS notification if connected.
              */
             Intent intent = new Intent();
             intent.setClass(mContext, com.android.internal.app.ExternalMediaFormatActivity.class);
@@ -213,8 +212,8 @@ public class StorageNotification extends StorageEventListener {
             updateUsbMassStorageNotification(mUmsAvailable);
         } else if (newState.equals(Environment.MEDIA_UNMOUNTABLE)) {
             /*
-             * Storage is corrupt. Show corrupt media notification,
-             * and enable UMS notification if connected.
+             * Storage is corrupt. Show corrupt media notification, and enable
+             * UMS notification if connected.
              */
             Intent intent = new Intent();
             intent.setClass(mContext, com.android.internal.app.ExternalMediaFormatActivity.class);
@@ -223,12 +222,12 @@ public class StorageNotification extends StorageEventListener {
             setMediaStorageNotification(
                     com.android.internal.R.string.ext_media_unmountable_notification_title,
                     com.android.internal.R.string.ext_media_unmountable_notification_message,
-                    com.android.internal.R.drawable.stat_notify_sdcard_usb, true, false, pi); 
+                    com.android.internal.R.drawable.stat_notify_sdcard_usb, true, false, pi);
             updateUsbMassStorageNotification(mUmsAvailable);
         } else if (newState.equals(Environment.MEDIA_REMOVED)) {
             /*
-             * Storage has been removed. Show nomedia media notification,
-             * and disable UMS notification regardless of connection state.
+             * Storage has been removed. Show nomedia media notification, and
+             * disable UMS notification regardless of connection state.
              */
             setMediaStorageNotification(
                     com.android.internal.R.string.ext_media_nomedia_notification_title,
@@ -238,8 +237,9 @@ public class StorageNotification extends StorageEventListener {
             updateUsbMassStorageNotification(false);
         } else if (newState.equals(Environment.MEDIA_BAD_REMOVAL)) {
             /*
-             * Storage has been removed unsafely. Show bad removal media notification,
-             * and disable UMS notification regardless of connection state.
+             * Storage has been removed unsafely. Show bad removal media
+             * notification, and disable UMS notification regardless of
+             * connection state.
              */
             setMediaStorageNotification(
                     com.android.internal.R.string.ext_media_badremoval_notification_title,
@@ -289,7 +289,7 @@ public class StorageNotification extends StorageEventListener {
         if (notificationManager == null) {
             return;
         }
-        
+
         if (visible) {
             Resources r = Resources.getSystem();
             CharSequence title = r.getText(titleId);
@@ -306,7 +306,7 @@ public class StorageNotification extends StorageEventListener {
             } else {
                 mUsbStorageNotification.defaults &= ~Notification.DEFAULT_SOUND;
             }
-                
+
             mUsbStorageNotification.flags = Notification.FLAG_ONGOING_EVENT;
 
             mUsbStorageNotification.tickerText = title;
@@ -318,24 +318,30 @@ public class StorageNotification extends StorageEventListener {
 
             mUsbStorageNotification.setLatestEventInfo(mContext, title, message, pi);
             final boolean adbOn = 1 == Settings.Global.getInt(
-                mContext.getContentResolver(),
-                Settings.Global.ADB_ENABLED,
-                0);
+                    mContext.getContentResolver(),
+                    Settings.Global.ADB_ENABLED,
+                    0);
 
             if (POP_UMS_ACTIVITY_ON_CONNECT && !adbOn) {
-                // Pop up a full-screen alert to coach the user through enabling UMS. The average
-                // user has attached the device to USB either to charge the phone (in which case
-                // this is harmless) or transfer files, and in the latter case this alert saves
-                // several steps (as well as subtly indicates that you shouldn't mix UMS with other
+                // Pop up a full-screen alert to coach the user through enabling
+                // UMS. The average
+                // user has attached the device to USB either to charge the
+                // phone (in which case
+                // this is harmless) or transfer files, and in the latter case
+                // this alert saves
+                // several steps (as well as subtly indicates that you shouldn't
+                // mix UMS with other
                 // activities on the device).
                 //
-                // If ADB is enabled, however, we suppress this dialog (under the assumption that a
-                // developer (a) knows how to enable UMS, and (b) is probably using USB to install
+                // If ADB is enabled, however, we suppress this dialog (under
+                // the assumption that a
+                // developer (a) knows how to enable UMS, and (b) is probably
+                // using USB to install
                 // builds or use adb commands.
                 mUsbStorageNotification.fullScreenIntent = pi;
             }
         }
-    
+
         final int notificationId = mUsbStorageNotification.icon;
         if (visible) {
             notificationManager.notifyAsUser(null, notificationId, mUsbStorageNotification,
@@ -347,8 +353,8 @@ public class StorageNotification extends StorageEventListener {
 
     private synchronized boolean getMediaStorageNotificationDismissable() {
         if ((mMediaStorageNotification != null) &&
-            ((mMediaStorageNotification.flags & Notification.FLAG_AUTO_CANCEL) ==
-                    Notification.FLAG_AUTO_CANCEL))
+                ((mMediaStorageNotification.flags & Notification.FLAG_AUTO_CANCEL) ==
+                Notification.FLAG_AUTO_CANCEL))
             return true;
 
         return false;
@@ -357,8 +363,9 @@ public class StorageNotification extends StorageEventListener {
     /**
      * Sets the media storage notification.
      */
-    private synchronized void setMediaStorageNotification(int titleId, int messageId, int icon, boolean visible,
-                                                          boolean dismissable, PendingIntent pi) {
+    private synchronized void setMediaStorageNotification(int titleId, int messageId, int icon,
+            boolean visible,
+            boolean dismissable, PendingIntent pi) {
 
         if (!visible && mMediaStorageNotification == null) {
             return;
@@ -373,13 +380,12 @@ public class StorageNotification extends StorageEventListener {
 
         if (mMediaStorageNotification != null && visible) {
             /*
-             * Dismiss the previous notification - we're about to
-             * re-use it.
+             * Dismiss the previous notification - we're about to re-use it.
              */
             final int notificationId = mMediaStorageNotification.icon;
             notificationManager.cancel(notificationId);
         }
-        
+
         if (visible) {
             Resources r = Resources.getSystem();
             CharSequence title = r.getText(titleId);
@@ -408,7 +414,7 @@ public class StorageNotification extends StorageEventListener {
             mMediaStorageNotification.icon = icon;
             mMediaStorageNotification.setLatestEventInfo(mContext, title, message, pi);
         }
-    
+
         final int notificationId = mMediaStorageNotification.icon;
         if (visible) {
             notificationManager.notifyAsUser(null, notificationId,

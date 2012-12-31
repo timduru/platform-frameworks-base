@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 /**
  * Copyright (c) 2009, The Android Open Source Project
  *
@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
- -->
+-->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
     <string name="app_label" msgid="7164937344850004466">"시스템 UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"지우기"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"응답 거부"</string>
@@ -27,10 +27,12 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"앱 정보"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"최근에 사용한 앱 없음"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"최근에 사용한 앱 숨기기"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="5854176083865845541">"최근에 사용한 앱 1개"</item>
-    <item quantity="other" msgid="1040784359794890744">"최근에 사용한 앱 %d개"</item>
-  </plurals>
+
+    <plurals name="status_bar_accessibility_recent_apps">
+        <item msgid="5854176083865845541" quantity="one">"최근에 사용한 앱 1개"</item>
+        <item msgid="1040784359794890744" quantity="other">"최근에 사용한 앱 %d개"</item>
+    </plurals>
+
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"알림 없음"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"진행 중"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"알림"</string>
@@ -203,4 +205,5 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"자동"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"알림이 여기에 표시됨"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"아래로 스와이프하여 언제든 액세스하세요."\n"한 번 더 아래로 스와이프하면 시스템 관리로 이동합니다."</string>
+
 </resources>

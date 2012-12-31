@@ -1,3 +1,4 @@
+
 package com.android.systemui.statusbar.preferences;
 
 import android.content.*;
@@ -14,8 +15,10 @@ public class BluetoothController extends MultipleStateController {
     private static final int STATE_ON = 2;
     private static final int STATE_TURNING_OFF = 3;
 
-    public static int stateTransitions[] = { STATE_TURNING_ON, STATE_ON, STATE_TURNING_OFF,
-            STATE_OFF };
+    public static int stateTransitions[] = {
+            STATE_TURNING_ON, STATE_ON, STATE_TURNING_OFF,
+            STATE_OFF
+    };
 
     private BluetoothAdapter mBluetoothAdapter;
 
@@ -79,13 +82,13 @@ public class BluetoothController extends MultipleStateController {
 
     @Override
     protected int getStateType(int state) {
-        switch (state){
-        case STATE_ON:
-            return STATE_TYPE_ENABLED;
-        case STATE_OFF:
-            return STATE_TYPE_DISABLED;
-        default:
-            return STATE_TYPE_TRANSITION;
+        switch (state) {
+            case STATE_ON:
+                return STATE_TYPE_ENABLED;
+            case STATE_OFF:
+                return STATE_TYPE_DISABLED;
+            default:
+                return STATE_TYPE_TRANSITION;
         }
     }
 }

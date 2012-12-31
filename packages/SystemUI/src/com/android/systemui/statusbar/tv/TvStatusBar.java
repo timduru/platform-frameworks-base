@@ -88,7 +88,8 @@ public class TvStatusBar extends BaseStatusBar {
     public void toggleRecentApps() {
     }
 
-    @Override // CommandQueue
+    @Override
+    // CommandQueue
     public void setNavigationIconHints(int hints) {
     }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 /**
  * Copyright (c) 2009, The Android Open Source Project
  *
@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
- -->
+-->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
     <string name="app_label" msgid="7164937344850004466">"Sistemos NS"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Išvalyti"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Netrukdyti"</string>
@@ -27,10 +27,12 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Programos informacija"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Nėra naujausių programų"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Atsisakyti naujausių programų"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="5854176083865845541">"1 naujausia programa"</item>
-    <item quantity="other" msgid="1040784359794890744">"%d naujausios programos"</item>
-  </plurals>
+
+    <plurals name="status_bar_accessibility_recent_apps">
+        <item msgid="5854176083865845541" quantity="one">"1 naujausia programa"</item>
+        <item msgid="1040784359794890744" quantity="other">"%d naujausios programos"</item>
+    </plurals>
+
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nėra įspėjimų"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Vykstantys"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Įspėjimai"</string>
@@ -177,7 +179,7 @@
     <string name="start_dreams" msgid="7219575858348719790">"Svajonė"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Eternetas"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Lėktuvo režimas"</string>
-    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Įkraunama, <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Įkraunama, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Įkrauta"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"„Bluetooth“ (<xliff:g id="NUMBER">%d</xliff:g> įreng.)"</string>
@@ -203,4 +205,5 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATINIS"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Pranešimai rodomi čia"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Perbraukę žemyn bet kuriuo metu pasieksite pranešimus."\n"Jei norite naudoti sistemos valdiklius, perbraukite žemyn dar kartą."</string>
+
 </resources>

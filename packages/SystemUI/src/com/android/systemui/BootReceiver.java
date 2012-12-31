@@ -24,8 +24,8 @@ import android.provider.Settings;
 import android.util.Slog;
 
 /**
- * Performs a number of miscellaneous, non-system-critical actions
- * after the system has finished booting.
+ * Performs a number of miscellaneous, non-system-critical actions after the
+ * system has finished booting.
  */
 public class BootReceiver extends BroadcastReceiver {
     private static final String TAG = "SystemUIBootReceiver";

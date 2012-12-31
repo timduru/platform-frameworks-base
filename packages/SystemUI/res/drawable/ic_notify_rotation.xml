@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!--
+     Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,23 +15,15 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:constantSize="true">
-    <item android:state_checked="true" android:state_pressed="true">
-        <bitmap android:src="@drawable/ic_notify_rotation_on_pressed"
-                android:gravity="center" />
-    </item>
-    <item android:state_checked="true">
-        <bitmap android:src="@drawable/ic_notify_rotation_on_normal"
-                android:gravity="center" />
-    </item>
-    <item android:state_pressed="true">
-        <bitmap android:src="@drawable/ic_notify_rotation_off_pressed"
-                android:gravity="center" />
-    </item>
-    <item>
-        <bitmap android:src="@drawable/ic_notify_rotation_off_normal"
-                android:gravity="center" />
-    </item>
-</selector>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" android:constantSize="true">
 
+    <item android:state_checked="true" android:state_pressed="true"><bitmap android:gravity="center" android:src="@drawable/ic_notify_rotation_on_pressed" />
+    </item>
+    <item android:state_checked="true"><bitmap android:gravity="center" android:src="@drawable/ic_notify_rotation_on_normal" />
+    </item>
+    <item android:state_pressed="true"><bitmap android:gravity="center" android:src="@drawable/ic_notify_rotation_off_pressed" />
+    </item>
+    <item><bitmap android:gravity="center" android:src="@drawable/ic_notify_rotation_off_normal" />
+    </item>
+
+</selector>

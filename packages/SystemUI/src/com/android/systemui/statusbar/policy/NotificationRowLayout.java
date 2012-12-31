@@ -42,8 +42,8 @@ import com.android.systemui.statusbar.NotificationData;
 
 import java.util.HashMap;
 
-public class NotificationRowLayout 
-        extends LinearLayout 
+public class NotificationRowLayout
+        extends LinearLayout
         implements SwipeHelper.Callback, ExpandHelper.Callback
 {
     private static final String TAG = "NotificationRowLayout";
@@ -61,10 +61,11 @@ public class NotificationRowLayout
     HashMap<View, ValueAnimator> mDisappearingViews = new HashMap<View, ValueAnimator>();
 
     private SwipeHelper mSwipeHelper;
-    
+
     private OnSizeChangedListener mOnSizeChangedListener;
 
-    // Flag set during notification removal animation to avoid causing too much work until
+    // Flag set during notification removal animation to avoid causing too much
+    // work until
     // animation is done
     boolean mRemoveViews = true;
 
@@ -80,7 +81,7 @@ public class NotificationRowLayout
         mRealLayoutTransition = new LayoutTransition();
         mRealLayoutTransition.setAnimateParentHierarchy(true);
         setLayoutTransitionsEnabled(true);
-        
+
         setOrientation(LinearLayout.VERTICAL);
 
         if (DEBUG) {
@@ -89,6 +90,7 @@ public class NotificationRowLayout
                 public void onChildViewAdded(View parent, View child) {
                     Slog.d(TAG, "view added: " + child + "; new count: " + getChildCount());
                 }
+
                 @Override
                 public void onChildViewRemoved(View parent, View child) {
                     Slog.d(TAG, "view removed: " + child + "; new count: " + (getChildCount() - 1));
@@ -125,16 +127,18 @@ public class NotificationRowLayout
 
     private void logLayoutTransition() {
         Log.v(TAG, "layout " +
-              (mRealLayoutTransition.isChangingLayout() ? "is " : "is not ") +
-              "in transition and animations " +
-              (mRealLayoutTransition.isRunning() ? "are " : "are not ") +
-              "running.");
+                (mRealLayoutTransition.isChangingLayout() ? "is " : "is not ") +
+                "in transition and animations " +
+                (mRealLayoutTransition.isRunning() ? "are " : "are not ") +
+                "running.");
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
-        if (DEBUG) logLayoutTransition();
+        if (DEBUG)
+            Log.v(TAG, "onInterceptTouchEvent()");
+        if (DEBUG)
+            logLayoutTransition();
 
         return mSwipeHelper.onInterceptTouchEvent(ev) ||
                 super.onInterceptTouchEvent(ev);
@@ -142,8 +146,10 @@ public class NotificationRowLayout
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (DEBUG) Log.v(TAG, "onTouchEvent()");
-        if (DEBUG) logLayoutTransition();
+        if (DEBUG)
+            Log.v(TAG, "onTouchEvent()");
+        if (DEBUG)
+            logLayoutTransition();
 
         return mSwipeHelper.onTouchEvent(ev) ||
                 super.onTouchEvent(ev);
@@ -167,7 +173,8 @@ public class NotificationRowLayout
     }
 
     public void onChildDismissed(View v) {
-        if (DEBUG) Slog.v(TAG, "onChildDismissed: " + v + " mRemoveViews=" + mRemoveViews);
+        if (DEBUG)
+            Slog.v(TAG, "onChildDismissed: " + v + " mRemoveViews=" + mRemoveViews);
         final View veto = v.findViewById(R.id.veto);
         if (veto != null && veto.getVisibility() != View.GONE && mRemoveViews) {
             veto.performClick();
@@ -175,7 +182,8 @@ public class NotificationRowLayout
     }
 
     public void onBeginDrag(View v) {
-        // We need to prevent the surrounding ScrollView from intercepting us now;
+        // We need to prevent the surrounding ScrollView from intercepting us
+        // now;
         // the scroll position will be locked while we swipe
         requestDisallowInterceptTouchEvent(true);
     }
@@ -205,7 +213,8 @@ public class NotificationRowLayout
                 continue;
             }
             y += slidingChild.getMeasuredHeight();
-            if (touchY < y) return slidingChild;
+            if (touchY < y)
+                return slidingChild;
         }
         return null;
     }
@@ -223,15 +232,16 @@ public class NotificationRowLayout
         mSwipeHelper.setPagingTouchSlop(pagingTouchSlop);
     }
 
-
     /**
-     * Sets a flag to tell us whether to actually remove views. Removal is delayed by setting this
-     * to false during some animations to smooth out performance. Callers should restore the
-     * flag to true after the animation is done, and then they should make sure that the views
-     * get removed properly.
+     * Sets a flag to tell us whether to actually remove views. Removal is
+     * delayed by setting this to false during some animations to smooth out
+     * performance. Callers should restore the flag to true after the animation
+     * is done, and then they should make sure that the views get removed
+     * properly.
      */
     public void setViewRemoval(boolean removeViews) {
-        if (DEBUG) Slog.v(TAG, "setViewRemoval: " + removeViews);
+        if (DEBUG)
+            Slog.v(TAG, "setViewRemoval: " + removeViews);
         mRemoveViews = removeViews;
     }
 
@@ -258,16 +268,19 @@ public class NotificationRowLayout
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        if (DEBUG) setWillNotDraw(false);
+        if (DEBUG)
+            setWillNotDraw(false);
     }
 
     @Override
     public void onDraw(android.graphics.Canvas c) {
         super.onDraw(c);
-        if (DEBUG) logLayoutTransition();
+        if (DEBUG)
+            logLayoutTransition();
         if (DEBUG) {
-            //Slog.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
-            //        + getMeasuredHeight() + "px");
+            // Slog.d(TAG, "onDraw: canvas height: " + c.getHeight() +
+            // "px; measured height: "
+            // + getMeasuredHeight() + "px");
             c.save();
             c.clipRect(6, 6, c.getWidth() - 6, getMeasuredHeight() - 6,
                     android.graphics.Region.Op.DIFFERENCE);

@@ -14,62 +14,58 @@
   limitations under the License.
 -->
 
-<!--    android:background="@drawable/system_bar_closed_default_background" -->
-<com.android.systemui.statusbar.tablet.NotificationPanel
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- android:background="@drawable/system_bar_closed_default_background" -->
+<com.android.systemui.statusbar.tablet.NotificationPanel xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/content_parent"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:gravity="right"
-    >
+    android:layout_height="match_parent"
+    android:gravity="right" >
 
     <!-- lift the panel up off the status bar while leaving a touchable are -->
+
     <Space
         android:id="@+id/system_bar_notification_panel_bottom_space"
-        android:layout_height="56dp"
         android:layout_width="478dp"
-        android:layout_alignParentRight="true"
+        android:layout_height="56dp"
         android:layout_alignParentBottom="true"
-        />
+        android:layout_alignParentRight="true" />
 
     <LinearLayout
         android:id="@+id/content_frame"
-        android:background="@drawable/notification_panel_bg"
-        android:layout_height="wrap_content"
         android:layout_width="478dp"
-        android:orientation="vertical"
-        android:layout_alignParentRight="true"
+        android:layout_height="wrap_content"
         android:layout_above="@id/system_bar_notification_panel_bottom_space"
-        android:paddingBottom="8dp"
-        >
+        android:layout_alignParentRight="true"
+        android:background="@drawable/notification_panel_bg"
+        android:orientation="vertical"
+        android:paddingBottom="8dp" >
 
-        <include layout="@layout/system_bar_notification_panel_title"
+        <include
             android:layout_width="match_parent"
             android:layout_height="130dp"
             android:layout_above="@id/content_frame"
             android:layout_alignParentRight="true"
             android:layout_weight="0"
-            />
+            layout="@layout/system_bar_notification_panel_title" />
 
         <ScrollView
-
             android:id="@+id/notification_scroller"
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:overScrollMode="ifContentScrolls"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            >
+            android:overScrollMode="ifContentScrolls" >
+
             <com.android.systemui.statusbar.policy.NotificationRowLayout
                 android:id="@+id/content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal|bottom"
                 android:clickable="true"
-                android:focusable="true"
                 android:descendantFocusability="afterDescendants"
-                systemui:rowHeight="@dimen/notification_row_min_height"
-                />
+                android:focusable="true"
+                android:gravity="center_horizontal|bottom"
+                systemui:rowHeight="@dimen/notification_row_min_height" />
         </ScrollView>
     </LinearLayout>
+
 </com.android.systemui.statusbar.tablet.NotificationPanel>

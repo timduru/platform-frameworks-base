@@ -64,7 +64,8 @@ public class SignalClusterView
     }
 
     public void setNetworkController(NetworkController nc) {
-        if (DEBUG) Slog.d(TAG, "NetworkController=" + nc);
+        if (DEBUG)
+            Slog.d(TAG, "NetworkController=" + nc);
         mNC = nc;
     }
 
@@ -72,30 +73,30 @@ public class SignalClusterView
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mWifiGroup      = (ViewGroup) findViewById(R.id.wifi_combo);
-        mWifi           = (ImageView) findViewById(R.id.wifi_signal);
-        mWifiActivity   = (ImageView) findViewById(R.id.wifi_inout);
-        mMobileGroup    = (ViewGroup) findViewById(R.id.mobile_combo);
-        mMobile         = (ImageView) findViewById(R.id.mobile_signal);
+        mWifiGroup = (ViewGroup) findViewById(R.id.wifi_combo);
+        mWifi = (ImageView) findViewById(R.id.wifi_signal);
+        mWifiActivity = (ImageView) findViewById(R.id.wifi_inout);
+        mMobileGroup = (ViewGroup) findViewById(R.id.mobile_combo);
+        mMobile = (ImageView) findViewById(R.id.mobile_signal);
         mMobileActivity = (ImageView) findViewById(R.id.mobile_inout);
-        mMobileType     = (ImageView) findViewById(R.id.mobile_type);
-        mSpacer         =             findViewById(R.id.spacer);
-        mAirplane       = (ImageView) findViewById(R.id.airplane);
+        mMobileType = (ImageView) findViewById(R.id.mobile_type);
+        mSpacer = findViewById(R.id.spacer);
+        mAirplane = (ImageView) findViewById(R.id.airplane);
 
         apply();
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        mWifiGroup      = null;
-        mWifi           = null;
-        mWifiActivity   = null;
-        mMobileGroup    = null;
-        mMobile         = null;
+        mWifiGroup = null;
+        mWifi = null;
+        mWifiActivity = null;
+        mMobileGroup = null;
+        mMobile = null;
         mMobileActivity = null;
-        mMobileType     = null;
-        mSpacer         = null;
-        mAirplane       = null;
+        mMobileType = null;
+        mSpacer = null;
+        mAirplane = null;
 
         super.onDetachedFromWindow();
     }
@@ -145,7 +146,8 @@ public class SignalClusterView
 
     // Run after each indicator change.
     private void apply() {
-        if (mWifiGroup == null) return;
+        if (mWifiGroup == null)
+            return;
 
         if (mWifiVisible) {
             mWifiGroup.setVisibility(View.VISIBLE);
@@ -156,10 +158,11 @@ public class SignalClusterView
             mWifiGroup.setVisibility(View.GONE);
         }
 
-        if (DEBUG) Slog.d(TAG,
-                String.format("wifi: %s sig=%d act=%d",
-                    (mWifiVisible ? "VISIBLE" : "GONE"),
-                    mWifiStrengthId, mWifiActivityId));
+        if (DEBUG)
+            Slog.d(TAG,
+                    String.format("wifi: %s sig=%d act=%d",
+                            (mWifiVisible ? "VISIBLE" : "GONE"),
+                            mWifiStrengthId, mWifiActivityId));
 
         if (mMobileVisible && !mIsAirplaneMode) {
             mMobileGroup.setVisibility(View.VISIBLE);
@@ -184,13 +187,13 @@ public class SignalClusterView
             mSpacer.setVisibility(View.GONE);
         }
 
-        if (DEBUG) Slog.d(TAG,
-                String.format("mobile: %s sig=%d act=%d typ=%d",
-                    (mMobileVisible ? "VISIBLE" : "GONE"),
-                    mMobileStrengthId, mMobileActivityId, mMobileTypeId));
+        if (DEBUG)
+            Slog.d(TAG,
+                    String.format("mobile: %s sig=%d act=%d typ=%d",
+                            (mMobileVisible ? "VISIBLE" : "GONE"),
+                            mMobileStrengthId, mMobileActivityId, mMobileTypeId));
 
         mMobileType.setVisibility(
                 !mWifiVisible ? View.VISIBLE : View.GONE);
     }
 }
-

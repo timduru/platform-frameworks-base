@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 /**
  * Copyright (c) 2009, The Android Open Source Project
  *
@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
- -->
+-->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
     <string name="app_label" msgid="7164937344850004466">"UI ya Mfumo"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Futa"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Usisumbue"</string>
@@ -201,4 +201,5 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"KIOTOMATIKI"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Arifa zitaonekana hapa"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Wafikie wakati wowote kwa kupapasa chini."\n"Papasa chini tena kupata vidhibiti vya mfumo."</string>
+
 </resources>

@@ -83,7 +83,8 @@ class QuickSettingsContainerView extends FrameLayout {
             // Update the child's width
             QuickSettingsTileView v = (QuickSettingsTileView) getChildAt(i);
             if (v.getVisibility() != View.GONE) {
-                ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v
+                        .getLayoutParams();
                 int colSpan = v.getColumnSpan();
                 lp.width = (int) ((colSpan * cellWidth) + (colSpan - 1) * mCellGap);
 
@@ -100,7 +101,8 @@ class QuickSettingsContainerView extends FrameLayout {
             }
         }
 
-        // Set the measured dimensions.  We always fill the tray width, but wrap to the height of
+        // Set the measured dimensions. We always fill the tray width, but wrap
+        // to the height of
         // all the tiles.
         int numRows = (int) Math.ceil((float) cursor / mNumColumns);
         int newHeight = (int) ((numRows * cellHeight) + ((numRows - 1) * mCellGap)) +
@@ -132,7 +134,8 @@ class QuickSettingsContainerView extends FrameLayout {
                 // Layout the container
                 v.layout(x, y, x + lp.width, y + lp.height);
 
-                // Offset the position by the cell gap or reset the position and cursor when we
+                // Offset the position by the cell gap or reset the position and
+                // cursor when we
                 // reach the end of the row
                 cursor += v.getColumnSpan();
                 if (cursor < (((row + 1) * mNumColumns))) {

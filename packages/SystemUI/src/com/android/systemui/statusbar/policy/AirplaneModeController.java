@@ -81,17 +81,16 @@ public class AirplaneModeController extends BroadcastReceiver
     // ConnectivityService.
     private void unsafe(final boolean enabled) {
         AsyncTask.execute(new Runnable() {
-                public void run() {
-                    Settings.Global.putInt(
-                            mContext.getContentResolver(),
-                            Settings.Global.AIRPLANE_MODE_ON,
-                            enabled ? 1 : 0);
-                    Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                    intent.putExtra("state", enabled);
-                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-                }
-            });
+            public void run() {
+                Settings.Global.putInt(
+                        mContext.getContentResolver(),
+                        Settings.Global.AIRPLANE_MODE_ON,
+                        enabled ? 1 : 0);
+                Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+                intent.putExtra("state", enabled);
+                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            }
+        });
     }
 }
-

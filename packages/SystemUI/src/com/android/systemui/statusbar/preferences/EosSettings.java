@@ -1,3 +1,4 @@
+
 package com.android.systemui.statusbar.preferences;
 
 import android.view.LayoutInflater;
@@ -21,18 +22,18 @@ import org.teameos.jellybean.settings.EOSConstants;
 
 public class EosSettings {
 
-    private static String            APP_TAG = "EOS Settings";
-    private static final int         MSG_EOS_UPDATE_SETTINGS = 2012;
-    private static final int         MSG_EOS_UPDATE_INDICATOR = 2013;
+    private static String APP_TAG = "EOS Settings";
+    private static final int MSG_EOS_UPDATE_SETTINGS = 2012;
+    private static final int MSG_EOS_UPDATE_INDICATOR = 2013;
 
-    private Context                  mContext;
-    private ContentResolver          mContentResolver;
-    private ViewGroup                mParent;
+    private Context mContext;
+    private ContentResolver mContentResolver;
+    private ViewGroup mParent;
     private List<SettingsController> visibleControllers;
-    private List<View>               mIndicatorViews;
-    private SettingsObserver         mSettingsObserver;
-    private SettingsObserver         mIndicatorObserver;
-    private H                        mHandler;
+    private List<View> mIndicatorViews;
+    private SettingsObserver mSettingsObserver;
+    private SettingsObserver mIndicatorObserver;
+    private H mHandler;
 
     public EosSettings(ViewGroup parent, Context context) {
         if (parent == null) {
@@ -109,7 +110,7 @@ public class EosSettings {
                     visibleControllers.add(new UsbTetherController(mContext, child));
                 } else if (i.equals(EOSConstants.SYSTEMUI_SETTINGS_LTE)) {
                     visibleControllers.add(new LteController(mContext, child));
-            }
+                }
 
             }
         }
@@ -130,7 +131,7 @@ public class EosSettings {
         }
     }
 
-    public void attach() {    
+    public void attach() {
         for (SettingsController i : visibleControllers)
             i.attach();
     }

@@ -16,6 +16,8 @@
 */
 -->
 <resources>
+
     <!-- Recent Applications parameters -->
     <dimen name="status_bar_recents_app_label_width">140dip</dimen>
+
 </resources>

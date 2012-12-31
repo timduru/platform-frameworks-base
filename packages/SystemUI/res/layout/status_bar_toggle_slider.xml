@@ -15,30 +15,29 @@
  * limitations under the License.
 -->
 
-<!--    android:background="@drawable/status_bar_closed_default_background" -->
-<merge
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
-    >
+<!-- android:background="@drawable/status_bar_closed_default_background" -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui" >
+
     <CheckBox
         android:id="@+id/toggle"
         android:layout_width="48dp"
         android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:button="@null"
-        />
+        android:button="@null" />
+
     <SeekBar
         android:id="@+id/slider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/toggle"
-        android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/toggle"
         android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        />
+        android:paddingRight="20dp" />
+
     <TextView
         android:id="@+id/label"
         android:layout_width="0dp"
@@ -49,6 +48,6 @@
         android:gravity="center"
         android:paddingTop="26dp"
         android:textColor="#666666"
-        android:textSize="12sp"
-        />
+        android:textSize="12sp" />
+
 </merge>

@@ -1,3 +1,4 @@
+
 package com.android.systemui.statusbar.preferences;
 
 import android.content.*;
@@ -10,13 +11,13 @@ import com.android.systemui.R;
 
 public class AudioController extends MultipleStateController {
 
-    AudioManager             mAudioManager;
-    private ImageView        mIcon;
-    private boolean          mHasVibrate = false;
+    AudioManager mAudioManager;
+    private ImageView mIcon;
+    private boolean mHasVibrate = false;
 
     private static final int STATE_VIBRATE = 0;
-    private static final int STATE_SILENT  = 1;
-    private static final int STATE_NORMAL  = 2;
+    private static final int STATE_SILENT = 1;
+    private static final int STATE_NORMAL = 2;
 
     public AudioController(Context context, View button) {
         super(context, button);
@@ -37,16 +38,16 @@ public class AudioController extends MultipleStateController {
     }
 
     protected void setPreferenceStatus(final int status) {
-        switch (status){
-        case STATE_VIBRATE:
-            mAudioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-            break;
-        case STATE_SILENT:
-            mAudioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-            break;
-        case STATE_NORMAL:
-            mAudioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-            break;
+        switch (status) {
+            case STATE_VIBRATE:
+                mAudioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
+                break;
+            case STATE_SILENT:
+                mAudioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                break;
+            case STATE_NORMAL:
+                mAudioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                break;
         }
     }
 
@@ -73,9 +74,13 @@ public class AudioController extends MultipleStateController {
     @Override
     public int[] getStateTransitions() {
         if (mHasVibrate) {
-            return new int[] { 1, 2, 0 };
+            return new int[] {
+                    1, 2, 0
+            };
         } else {
-            return new int[] { 0, 2, 1 };
+            return new int[] {
+                    0, 2, 1
+            };
         }
     }
 
@@ -89,14 +94,14 @@ public class AudioController extends MultipleStateController {
 
     private void updateControllerImage(int preferenceState) {
         switch (preferenceState) {
-        case STATE_VIBRATE:
-            mIcon.setImageResource(R.drawable.toggle_vibrate);
-            break;
-        case STATE_SILENT:
-            mIcon.setImageResource(R.drawable.toggle_silence);
-            break;
-        case STATE_NORMAL:
-            mIcon.setImageResource(R.drawable.toggle_silence_off);
+            case STATE_VIBRATE:
+                mIcon.setImageResource(R.drawable.toggle_vibrate);
+                break;
+            case STATE_SILENT:
+                mIcon.setImageResource(R.drawable.toggle_silence);
+                break;
+            case STATE_NORMAL:
+                mIcon.setImageResource(R.drawable.toggle_silence_off);
         }
     }
 }

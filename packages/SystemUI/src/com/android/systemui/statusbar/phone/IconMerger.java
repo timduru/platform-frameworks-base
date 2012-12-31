@@ -65,16 +65,20 @@ public class IconMerger extends LinearLayout {
     }
 
     private void checkOverflow(int width) {
-        if (mMoreView == null) return;
+        if (mMoreView == null)
+            return;
 
         final int N = getChildCount();
         int visibleChildren = 0;
-        for (int i=0; i<N; i++) {
-            if (getChildAt(i).getVisibility() != GONE) visibleChildren++;
+        for (int i = 0; i < N; i++) {
+            if (getChildAt(i).getVisibility() != GONE)
+                visibleChildren++;
         }
         final boolean overflowShown = (mMoreView.getVisibility() == View.VISIBLE);
-        // let's assume we have one more slot if the more icon is already showing
-        if (overflowShown) visibleChildren --;
+        // let's assume we have one more slot if the more icon is already
+        // showing
+        if (overflowShown)
+            visibleChildren--;
         final boolean moreRequired = visibleChildren * mIconSize > width;
         if (moreRequired != overflowShown) {
             post(new Runnable() {

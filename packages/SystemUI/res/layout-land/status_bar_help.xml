@@ -22,19 +22,18 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/status_bar_cling"
-    android:paddingLeft="40dp"
-    android:paddingRight="40dp"
     android:background="#DD000000"
     android:focusable="true"
-    android:orientation="horizontal" 
     android:gravity="top|left"
-    >
+    android:orientation="horizontal"
+    android:paddingLeft="40dp"
+    android:paddingRight="40dp" >
 
     <ImageView
         android:layout_width="wrap_content"
-        android:layout_weight="0"
         android:layout_height="wrap_content"
         android:layout_marginRight="50dp"
+        android:layout_weight="0"
         android:gravity="center"
         android:src="@drawable/arrow_dashed"
         tools:ignore="ContentDescription" />
@@ -42,10 +41,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
         android:layout_marginTop="40dp"
-        >
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
         <TextView
             style="@style/ClingTitleText"
             android:layout_width="match_parent"
@@ -68,4 +67,5 @@
             android:paddingRight="50dp"
             android:text="@android:string/ok" />
     </LinearLayout>
+
 </LinearLayout>

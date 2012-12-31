@@ -29,7 +29,6 @@ import android.view.MotionEvent;
 
 import com.android.systemui.R;
 
-
 public class NotificationIconArea extends RelativeLayout {
     private static final String TAG = "NotificationIconArea";
 
@@ -38,7 +37,7 @@ public class NotificationIconArea extends RelativeLayout {
     public NotificationIconArea(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mIconLayout = (IconLayout)findViewById(R.id.icons);
+        mIconLayout = (IconLayout) findViewById(R.id.icons);
     }
 
     static class IconLayout extends LinearLayout {
@@ -51,6 +50,3 @@ public class NotificationIconArea extends RelativeLayout {
         }
     }
 }
-
-
-

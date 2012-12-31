@@ -1,3 +1,4 @@
+
 package com.android.systemui.statusbar.preferences;
 
 import android.content.Context;
@@ -18,9 +19,12 @@ public abstract class MultipleStateController extends SettingsController {
     public MultipleStateController(Context context, View controlWidget) {
         super(context, controlWidget);
         mIndicatorController = new EosIndicatorController(mContext);
-        mIndicators[STATE_OFF] = mIndicatorController.getIndicator(EosIndicatorController.STATE_UNPRESSED);
-        mIndicators[STATE_ON] = mIndicatorController.getIndicator(EosIndicatorController.STATE_PRESSED);
-        mIndicators[STATE_TYPE_TRANSITION] = mIndicatorController.getIndicator(EosIndicatorController.STATE_TRANS);
+        mIndicators[STATE_OFF] = mIndicatorController
+                .getIndicator(EosIndicatorController.STATE_UNPRESSED);
+        mIndicators[STATE_ON] = mIndicatorController
+                .getIndicator(EosIndicatorController.STATE_PRESSED);
+        mIndicators[STATE_TYPE_TRANSITION] = mIndicatorController
+                .getIndicator(EosIndicatorController.STATE_TRANS);
     }
 
     abstract protected int getStateType(int state);
@@ -29,19 +33,22 @@ public abstract class MultipleStateController extends SettingsController {
 
     public void updateControllerDrawable(int state) {
         if (getStateType(state) == STATE_TYPE_DISABLED) {
-            controlWidget.findViewById(R.id.eos_settings_status).setBackgroundDrawable(mIndicators[STATE_OFF]);
+            controlWidget.findViewById(R.id.eos_settings_status).setBackgroundDrawable(
+                    mIndicators[STATE_OFF]);
             controlWidget.findViewById(R.id.eos_settings_main).setBackgroundResource(
                     R.drawable.eos_settings_widget_main_unpressed);
             controlWidget.findViewById(R.id.eos_settings_icon).setBackgroundDrawable(
                     mIcons[STATE_OFF]);
         } else if (getStateType(state) == STATE_TYPE_ENABLED) {
-            controlWidget.findViewById(R.id.eos_settings_status).setBackgroundDrawable(mIndicators[STATE_ON]);
+            controlWidget.findViewById(R.id.eos_settings_status).setBackgroundDrawable(
+                    mIndicators[STATE_ON]);
             controlWidget.findViewById(R.id.eos_settings_main).setBackgroundResource(
                     R.drawable.eos_settings_widget_main_pressed);
             controlWidget.findViewById(R.id.eos_settings_icon).setBackgroundDrawable(
-                    mIcons[STATE_ON]);            
+                    mIcons[STATE_ON]);
         } else if (getStateType(state) == STATE_TYPE_TRANSITION) {
-            controlWidget.findViewById(R.id.eos_settings_status).setBackgroundDrawable(mIndicators[STATE_TYPE_TRANSITION]);
+            controlWidget.findViewById(R.id.eos_settings_status).setBackgroundDrawable(
+                    mIndicators[STATE_TYPE_TRANSITION]);
         }
 
         controlWidget.invalidate();
@@ -49,9 +56,12 @@ public abstract class MultipleStateController extends SettingsController {
 
     public void updateIndicator(int color) {
         mIndicatorController.setColor(color);
-        mIndicators[STATE_OFF] = mIndicatorController.getIndicator(EosIndicatorController.STATE_UNPRESSED);
-        mIndicators[STATE_ON] = mIndicatorController.getIndicator(EosIndicatorController.STATE_PRESSED);
-        mIndicators[STATE_TYPE_TRANSITION] = mIndicatorController.getIndicator(EosIndicatorController.STATE_TRANS);
+        mIndicators[STATE_OFF] = mIndicatorController
+                .getIndicator(EosIndicatorController.STATE_UNPRESSED);
+        mIndicators[STATE_ON] = mIndicatorController
+                .getIndicator(EosIndicatorController.STATE_PRESSED);
+        mIndicators[STATE_TYPE_TRANSITION] = mIndicatorController
+                .getIndicator(EosIndicatorController.STATE_TRANS);
         updateController();
     }
 
@@ -64,7 +74,8 @@ public abstract class MultipleStateController extends SettingsController {
             if (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.HAPTIC_FEEDBACK_ENABLED) == 1) {
                 Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
-                if (vibrator.hasVibrator()) vibrator.vibrate(10);
+                if (vibrator.hasVibrator())
+                    vibrator.vibrate(10);
             }
         } catch (android.provider.Settings.SettingNotFoundException e) {
         }

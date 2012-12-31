@@ -34,7 +34,7 @@ public class DoNotDisturb implements SharedPreferences.OnSharedPreferenceChangeL
 
     public DoNotDisturb(Context context) {
         mContext = context;
-        mStatusBar = (StatusBarManager)context.getSystemService(Context.STATUS_BAR_SERVICE);
+        mStatusBar = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
         mPrefs = Prefs.read(context);
         mPrefs.registerOnSharedPreferenceChangeListener(this);
         mDoNotDisturb = mPrefs.getBoolean(Prefs.DO_NOT_DISTURB_PREF, Prefs.DO_NOT_DISTURB_DEFAULT);
@@ -57,4 +57,3 @@ public class DoNotDisturb implements SharedPreferences.OnSharedPreferenceChangeL
         mStatusBar.disable(mDoNotDisturb ? disabled : 0);
     }
 }
-

@@ -40,8 +40,7 @@ import com.android.internal.R;
 import org.teameos.jellybean.settings.EOSConstants;
 
 /**
- * This widget display an analogic clock with two hands for hours and
- * minutes.
+ * This widget display an analogic clock with two hands for hours and minutes.
  */
 public class Clock extends TextView {
     private boolean mAttached;
@@ -49,9 +48,9 @@ public class Clock extends TextView {
     private String mClockFormatString;
     private SimpleDateFormat mClockFormat;
 
-    private static final int AM_PM_STYLE_NORMAL  = 0;
-    private static final int AM_PM_STYLE_SMALL   = 1;
-    private static final int AM_PM_STYLE_GONE    = 2;
+    private static final int AM_PM_STYLE_NORMAL = 0;
+    private static final int AM_PM_STYLE_SMALL = 1;
+    private static final int AM_PM_STYLE_GONE = 2;
     // no longer static each instance different style
     private int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
@@ -61,7 +60,7 @@ public class Clock extends TextView {
     // set bools at init for easy management
     private boolean mIsSignalView = false;
     private boolean mIsCenterView = false;
-    
+
     public Clock(Context context) {
         this(context, null);
     }
@@ -72,7 +71,7 @@ public class Clock extends TextView {
 
     public Clock(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        if(getTag() != null) {
+        if (getTag() != null) {
             if (TAG_SIGNAL_CLUSTER.equals(getTag())) {
                 mIsSignalView = true;
             } else if (TAG_CENTER_VIEW.equals(getTag())) {
@@ -103,10 +102,13 @@ public class Clock extends TextView {
             }
         }
 
-        // NOTE: It's safe to do these after registering the receiver since the receiver always runs
-        // in the main thread, therefore the receiver can't run before this method returns.
+        // NOTE: It's safe to do these after registering the receiver since the
+        // receiver always runs
+        // in the main thread, therefore the receiver can't run before this
+        // method returns.
 
-        // The time zone may have changed while the receiver wasn't registered, so update the Time
+        // The time zone may have changed while the receiver wasn't registered,
+        // so update the Time
         mCalendar = Calendar.getInstance(TimeZone.getDefault());
 
         // Make sure we update to the current time
@@ -167,8 +169,8 @@ public class Clock extends TextView {
         String format = context.getString(res);
         if (!format.equals(mClockFormatString)) {
             /*
-             * Search for an unquoted "a" in the format string, so we can
-             * add dummy characters around it to let us find it again after
+             * Search for an unquoted "a" in the format string, so we can add
+             * dummy characters around it to let us find it again after
              * formatting and change its size.
              */
             if (AM_PM_STYLE != AM_PM_STYLE_NORMAL) {
@@ -187,13 +189,14 @@ public class Clock extends TextView {
                 }
 
                 if (a >= 0) {
-                    // Move a back so any whitespace before AM/PM is also in the alternate size.
+                    // Move a back so any whitespace before AM/PM is also in the
+                    // alternate size.
                     final int b = a;
-                    while (a > 0 && Character.isWhitespace(format.charAt(a-1))) {
+                    while (a > 0 && Character.isWhitespace(format.charAt(a - 1))) {
                         a--;
                     }
                     format = format.substring(0, a) + MAGIC1 + format.substring(a, b)
-                        + "a" + MAGIC2 + format.substring(b + 1);
+                            + "a" + MAGIC2 + format.substring(b + 1);
                 }
             }
             mClockFormat = sdf = new SimpleDateFormat(format);
@@ -209,12 +212,12 @@ public class Clock extends TextView {
             if (magic1 >= 0 && magic2 > magic1) {
                 SpannableStringBuilder formatted = new SpannableStringBuilder(result);
                 if (AM_PM_STYLE == AM_PM_STYLE_GONE) {
-                    formatted.delete(magic1, magic2+1);
+                    formatted.delete(magic1, magic2 + 1);
                 } else {
                     if (AM_PM_STYLE == AM_PM_STYLE_SMALL) {
                         CharacterStyle style = new RelativeSizeSpan(0.7f);
                         formatted.setSpan(style, magic1, magic2,
-                                          Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                                Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
                     }
                     formatted.delete(magic2, magic2 + 1);
                     formatted.delete(magic1, magic1 + 1);
@@ -222,7 +225,7 @@ public class Clock extends TextView {
                 return formatted;
             }
         }
- 
+
         return result;
 
     }
@@ -248,4 +251,3 @@ public class Clock extends TextView {
         }
     };
 }
-

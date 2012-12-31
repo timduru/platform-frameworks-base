@@ -32,7 +32,7 @@ import java.util.List;
 
 public class InputMethodButton extends ImageView {
 
-    private static final String  TAG = "StatusBar/InputMethodButton";
+    private static final String TAG = "StatusBar/InputMethodButton";
     private static final boolean DEBUG = false;
 
     // These values are defined in Settings application.
@@ -49,13 +49,15 @@ public class InputMethodButton extends ImageView {
     private boolean mScreenLocked = false;
     private boolean mHardKeyboardAvailable;
 
-    // Please refer to InputMethodManagerService.TAG_TRY_SUPPRESSING_IME_SWITCHER
+    // Please refer to
+    // InputMethodManagerService.TAG_TRY_SUPPRESSING_IME_SWITCHER
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
 
     public InputMethodButton(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        // Resource Id of the input method button. This id is defined in status_bar.xml
+        // Resource Id of the input method button. This id is defined in
+        // status_bar.xml
         mId = getId();
         // IME hookup
         mImm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -68,17 +70,20 @@ public class InputMethodButton extends ImageView {
         refreshStatusIcon();
     }
 
-    // Refer to InputMethodManagerService.needsToShowImeSwitchOngoingNotification()
+    // Refer to
+    // InputMethodManagerService.needsToShowImeSwitchOngoingNotification()
     private boolean needsToShowIMEButtonWhenVisibilityAuto() {
         List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
         final int N = imis.size();
-        if (N > 2) return true;
-        if (N < 1) return false;
+        if (N > 2)
+            return true;
+        if (N < 1)
+            return false;
         int nonAuxCount = 0;
         int auxCount = 0;
         InputMethodSubtype nonAuxSubtype = null;
         InputMethodSubtype auxSubtype = null;
-        for(int i = 0; i < N; ++i) {
+        for (int i = 0; i < N; ++i) {
             final InputMethodInfo imi = imis.get(i);
             final List<InputMethodSubtype> subtypes = mImm.getEnabledInputMethodSubtypeList(
                     imi, true);
@@ -114,7 +119,8 @@ public class InputMethodButton extends ImageView {
     }
 
     private boolean needsToShowIMEButton() {
-        if (!mShowButton || mScreenLocked) return false;
+        if (!mShowButton || mScreenLocked)
+            return false;
 
         if (mHardKeyboardAvailable) {
             return true;

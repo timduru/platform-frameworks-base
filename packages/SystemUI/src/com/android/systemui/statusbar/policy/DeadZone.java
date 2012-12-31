@@ -35,7 +35,8 @@ public class DeadZone extends View {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
 
-    private static final boolean CHATTY = true; // print to logcat when we eat a click
+    private static final boolean CHATTY = true; // print to logcat when we eat a
+                                                // click
 
     private boolean mShouldFlash;
     private float mFlashFrac = 0f;
@@ -119,7 +120,8 @@ public class DeadZone extends View {
             int size = (int) getSize(event.getEventTime());
             if ((mVertical && event.getX() < size) || event.getY() < size) {
                 if (CHATTY) {
-                    Slog.v(TAG, "consuming errant click: (" + event.getX() + "," + event.getY() + ")");
+                    Slog.v(TAG, "consuming errant click: (" + event.getX() + "," + event.getY()
+                            + ")");
                 }
                 if (mShouldFlash) {
                     post(mDebugFlash);

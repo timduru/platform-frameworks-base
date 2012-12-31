@@ -47,9 +47,9 @@ import com.android.server.am.BatteryStatsService;
 import com.android.systemui.R;
 
 /**
- * This class contains all of the policy about which icons are installed in the status
- * bar at boot time.  It goes through the normal API for icons, even though it probably
- * strictly doesn't need to.
+ * This class contains all of the policy about which icons are installed in the
+ * status bar at boot time. It goes through the normal API for icons, even
+ * though it probably strictly doesn't need to.
  */
 public class PhoneStatusBarPolicy {
     private static final String TAG = "PhoneStatusBarPolicy";
@@ -57,9 +57,9 @@ public class PhoneStatusBarPolicy {
     // message codes for the handler
     private static final int EVENT_BATTERY_CLOSE = 4;
 
-    private static final int AM_PM_STYLE_NORMAL  = 0;
-    private static final int AM_PM_STYLE_SMALL   = 1;
-    private static final int AM_PM_STYLE_GONE    = 2;
+    private static final int AM_PM_STYLE_NORMAL = 0;
+    private static final int AM_PM_STYLE_SMALL = 1;
+    private static final int AM_PM_STYLE_GONE = 2;
 
     private static final int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
@@ -74,8 +74,7 @@ public class PhoneStatusBarPolicy {
     // storage
     private StorageManager mStorageManager;
 
-
-    // Assume it's all good unless we hear otherwise.  We don't always seem
+    // Assume it's all good unless we hear otherwise. We don't always seem
     // to get broadcasts that it *is* there.
     IccCardConstants.State mSimState = IccCardConstants.State.READY;
 
@@ -87,15 +86,19 @@ public class PhoneStatusBarPolicy {
 
     // wifi
     private static final int[][] sWifiSignalImages = {
-            { R.drawable.stat_sys_wifi_signal_1,
-              R.drawable.stat_sys_wifi_signal_2,
-              R.drawable.stat_sys_wifi_signal_3,
-              R.drawable.stat_sys_wifi_signal_4 },
-            { R.drawable.stat_sys_wifi_signal_1_fully,
-              R.drawable.stat_sys_wifi_signal_2_fully,
-              R.drawable.stat_sys_wifi_signal_3_fully,
-              R.drawable.stat_sys_wifi_signal_4_fully }
-        };
+            {
+                    R.drawable.stat_sys_wifi_signal_1,
+                    R.drawable.stat_sys_wifi_signal_2,
+                    R.drawable.stat_sys_wifi_signal_3,
+                    R.drawable.stat_sys_wifi_signal_4
+            },
+            {
+                    R.drawable.stat_sys_wifi_signal_1_fully,
+                    R.drawable.stat_sys_wifi_signal_2_fully,
+                    R.drawable.stat_sys_wifi_signal_3_fully,
+                    R.drawable.stat_sys_wifi_signal_4_fully
+            }
+    };
     private static final int sWifiTemporarilyNotConnectedImage =
             R.drawable.stat_sys_wifi_signal_0;
 
@@ -106,8 +109,10 @@ public class PhoneStatusBarPolicy {
     private int mInetCondition = 0;
 
     // sync state
-    // If sync is active the SyncActive icon is displayed. If sync is not active but
-    // sync is failing the SyncFailing icon is displayed. Otherwise neither are displayed.
+    // If sync is active the SyncActive icon is displayed. If sync is not active
+    // but
+    // sync is failing the SyncFailing icon is displayed. Otherwise neither are
+    // displayed.
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -137,7 +142,7 @@ public class PhoneStatusBarPolicy {
 
     public PhoneStatusBarPolicy(Context context) {
         mContext = context;
-        mService = (StatusBarManager)context.getSystemService(Context.STATUS_BAR_SERVICE);
+        mService = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -156,7 +161,7 @@ public class PhoneStatusBarPolicy {
                 new com.android.systemui.usb.StorageNotification(context));
 
         // TTY status
-        mService.setIcon("tty",  R.drawable.stat_sys_tty_mode, 0, null);
+        mService.setIcon("tty", R.drawable.stat_sys_tty_mode, 0, null);
         mService.setIconVisibility("tty", false);
 
         // Cdma Roaming Indicator, ERI
@@ -197,12 +202,14 @@ public class PhoneStatusBarPolicy {
     }
 
     private final void updateSyncState(Intent intent) {
-        if (!SHOW_SYNC_ICON) return;
+        if (!SHOW_SYNC_ICON)
+            return;
         boolean isActive = intent.getBooleanExtra("active", false);
         boolean isFailing = intent.getBooleanExtra("failing", false);
         mService.setIconVisibility("sync_active", isActive);
-        // Don't display sync failing icon: BUG 1297963 Set sync error timeout to "never"
-        //mService.setIconVisibility("sync_failing", isFailing && !isActive);
+        // Don't display sync failing icon: BUG 1297963 Set sync error timeout
+        // to "never"
+        // mService.setIconVisibility("sync_failing", isFailing && !isActive);
     }
 
     private final void updateSimState(Intent intent) {
@@ -242,7 +249,7 @@ public class PhoneStatusBarPolicy {
             iconId = R.drawable.stat_sys_ringer_vibrate;
             contentDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
         } else {
-            iconId =  R.drawable.stat_sys_ringer_silent;
+            iconId = R.drawable.stat_sys_ringer_silent;
             contentDescription = mContext.getString(R.string.accessibility_ringer_silent);
         }
 
@@ -264,7 +271,7 @@ public class PhoneStatusBarPolicy {
             mBluetoothEnabled = state == BluetoothAdapter.STATE_ON;
         } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
-                BluetoothAdapter.STATE_DISCONNECTED);
+                    BluetoothAdapter.STATE_DISCONNECTED);
             if (state == BluetoothAdapter.STATE_CONNECTED) {
                 iconId = R.drawable.stat_sys_data_bluetooth_connected;
                 contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
@@ -284,17 +291,20 @@ public class PhoneStatusBarPolicy {
         final String action = intent.getAction();
         final boolean enabled = intent.getBooleanExtra(TtyIntent.TTY_ENABLED, false);
 
-        if (false) Slog.v(TAG, "updateTTY: enabled: " + enabled);
+        if (false)
+            Slog.v(TAG, "updateTTY: enabled: " + enabled);
 
         if (enabled) {
             // TTY is on
-            if (false) Slog.v(TAG, "updateTTY: set TTY on");
+            if (false)
+                Slog.v(TAG, "updateTTY: set TTY on");
             mService.setIcon("tty", R.drawable.stat_sys_tty_mode, 0,
                     mContext.getString(R.string.accessibility_tty_enabled));
             mService.setIconVisibility("tty", true);
         } else {
             // TTY is off
-            if (false) Slog.v(TAG, "updateTTY: set TTY off");
+            if (false)
+                Slog.v(TAG, "updateTTY: set TTY off");
             mService.setIconVisibility("tty", false);
         }
     }

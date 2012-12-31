@@ -18,18 +18,25 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-     android:shareInterpolator="false"
-     android:zAdjustment="normal">
-  <!--scale android:fromXScale="2.0" android:toXScale="1.0"
+    android:shareInterpolator="false"
+    android:zAdjustment="normal" >
+
+    <!--
+      scale android:fromXScale="2.0" android:toXScale="1.0"
          android:fromYScale="2.0" android:toYScale="1.0"
          android:interpolator="@android:interpolator/decelerate_cubic"
          android:fillEnabled="true"
          android:fillBefore="true" android:fillAfter="true"
          android:pivotX="50%p" android:pivotY="50%p"
-         android:duration="250" /-->
-  <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
-         android:fillEnabled="true"
-         android:fillBefore="true" android:fillAfter="true"
-         android:interpolator="@android:interpolator/decelerate_cubic"
-         android:duration="250"/>
+         android:duration="250" /
+    -->
+    <alpha
+        android:duration="250"
+        android:fillAfter="true"
+        android:fillBefore="true"
+        android:fillEnabled="true"
+        android:fromAlpha="0.0"
+        android:interpolator="@android:interpolator/decelerate_cubic"
+        android:toAlpha="1.0" />
+
 </set>

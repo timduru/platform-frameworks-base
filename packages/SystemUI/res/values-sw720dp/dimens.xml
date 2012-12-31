@@ -16,11 +16,12 @@
 */
 -->
 <resources>
+
     <!-- size at which Notification icons will be drawn in the status bar -->
     <dimen name="system_bar_icon_drawing_size">24dip</dimen>
 
     <!-- opacity at which Notification icons will be drawn in the status bar -->
-    <item type="dimen" name="system_bar_icon_drawing_alpha">100%</item>
+    <item name="system_bar_icon_drawing_alpha" type="dimen">100%</item>
 
     <!-- The width of the view containing non-menu status bar icons -->
     <dimen name="system_bar_navigation_key_width">80dip</dimen>
@@ -29,10 +30,13 @@
     <dimen name="system_bar_navigation_menu_key_width">80dip</dimen>
 
     <!-- ======================================== -->
-    <!-- The following resources were recently moved from sw600dp; there may
+    <!--
+         The following resources were recently moved from sw600dp; there may
          be situations where they don't sync up perfectly with
-         PhoneStatusBar/TabletStatusBar. -->
+         PhoneStatusBar/TabletStatusBar.
+    -->
     <!-- ======================================== -->
+
 
     <!-- The width of the ticker, including the icon -->
     <dimen name="notification_ticker_width">360dp</dimen>
@@ -79,5 +83,5 @@
     <!-- Where to place the app icon over the thumbnail -->
     <dimen name="status_bar_recents_app_icon_left_margin">0dp</dimen>
     <dimen name="status_bar_recents_app_icon_top_margin">8dp</dimen>
-</resources>
 
+</resources>

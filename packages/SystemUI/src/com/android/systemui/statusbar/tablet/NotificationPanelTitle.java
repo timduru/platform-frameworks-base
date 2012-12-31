@@ -28,7 +28,6 @@ import android.widget.RelativeLayout;
 
 import com.android.systemui.R;
 
-
 public class NotificationPanelTitle extends RelativeLayout implements View.OnClickListener {
     private NotificationPanel mPanel;
     private ArrayList<View> buttons;

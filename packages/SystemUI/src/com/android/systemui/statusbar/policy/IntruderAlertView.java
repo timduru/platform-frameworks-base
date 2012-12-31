@@ -50,10 +50,10 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
     Rect mTmpRect = new Rect();
 
     private SwipeHelper mSwipeHelper;
-    
+
     BaseStatusBar mBar;
     private ViewGroup mContentHolder;
-    
+
     private RemoteViews mIntruderRemoteViews;
     private OnClickListener mOnClickListener;
 
@@ -72,29 +72,30 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
-        
+
         mContentHolder = (ViewGroup) findViewById(R.id.contentHolder);
         if (mIntruderRemoteViews != null) {
             // whoops, we're on already!
             applyIntruderContent(mIntruderRemoteViews, mOnClickListener);
         }
     }
-    
+
     public void setBar(BaseStatusBar bar) {
         mBar = bar;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
+        if (DEBUG)
+            Log.v(TAG, "onInterceptTouchEvent()");
         return mSwipeHelper.onInterceptTouchEvent(ev) ||
-            super.onInterceptTouchEvent(ev);
+                super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         return mSwipeHelper.onTouchEvent(ev) ||
-            super.onTouchEvent(ev);
+                super.onTouchEvent(ev);
     }
 
     public boolean canChildBeDismissed(View v) {
@@ -134,8 +135,9 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
     public void onDraw(android.graphics.Canvas c) {
         super.onDraw(c);
         if (DEBUG) {
-            //Slog.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
-            //        + getMeasuredHeight() + "px");
+            // Slog.d(TAG, "onDraw: canvas height: " + c.getHeight() +
+            // "px; measured height: "
+            // + getMeasuredHeight() + "px");
             c.save();
             c.clipRect(6, 6, c.getWidth() - 6, getMeasuredHeight() - 6,
                     android.graphics.Region.Op.DIFFERENCE);
@@ -150,7 +152,7 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
         }
         mIntruderRemoteViews = intruderView;
         mOnClickListener = listener;
-        if (mContentHolder == null) { 
+        if (mContentHolder == null) {
             // too soon!
             return;
         }
@@ -161,16 +163,17 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
         final View content = intruderView.apply(getContext(), mContentHolder);
         if (listener != null) {
             content.setOnClickListener(listener);
-            
-            //content.setBackgroundResource(R.drawable.intruder_row_bg);
+
+            // content.setBackgroundResource(R.drawable.intruder_row_bg);
             Drawable bg = getResources().getDrawable(R.drawable.intruder_row_bg);
             if (bg == null) {
-                Log.e(TAG, String.format("Can't find background drawable id=0x%08x", R.drawable.intruder_row_bg));
+                Log.e(TAG, String.format("Can't find background drawable id=0x%08x",
+                        R.drawable.intruder_row_bg));
             } else {
                 content.setBackgroundDrawable(bg);
             }
         }
         mContentHolder.addView(content);
-        
+
     }
 }

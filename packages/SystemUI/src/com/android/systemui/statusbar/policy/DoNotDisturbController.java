@@ -49,10 +49,12 @@ public class DoNotDisturbController implements CompoundButton.OnCheckedChangeLis
         checkbox.setChecked(!mDoNotDisturb);
     }
 
-    // The checkbox is ON for notifications coming in and OFF for Do not disturb, so we
+    // The checkbox is ON for notifications coming in and OFF for Do not
+    // disturb, so we
     // don't have a double negative.
     public void onCheckedChanged(CompoundButton view, boolean checked) {
-        //Slog.d(TAG, "onCheckedChanged checked=" + checked + " mDoNotDisturb=" + mDoNotDisturb);
+        // Slog.d(TAG, "onCheckedChanged checked=" + checked + " mDoNotDisturb="
+        // + mDoNotDisturb);
         final boolean value = !checked;
         if (value != mDoNotDisturb) {
             SharedPreferences.Editor editor = Prefs.edit(mContext);
@@ -60,7 +62,7 @@ public class DoNotDisturbController implements CompoundButton.OnCheckedChangeLis
             editor.apply();
         }
     }
-    
+
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
         final boolean val = prefs.getBoolean(Prefs.DO_NOT_DISTURB_PREF,
                 Prefs.DO_NOT_DISTURB_DEFAULT);
@@ -74,4 +76,3 @@ public class DoNotDisturbController implements CompoundButton.OnCheckedChangeLis
         mPrefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 }
-

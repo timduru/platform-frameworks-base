@@ -31,11 +31,11 @@ public final class AutoRotateController implements CompoundButton.OnCheckedChang
 
     private final RotationPolicy.RotationPolicyListener mRotationPolicyListener =
             new RotationPolicy.RotationPolicyListener() {
-        @Override
-        public void onChange() {
-            updateState();
-        }
-    };
+                @Override
+                public void onChange() {
+                    updateState();
+                }
+            };
 
     public AutoRotateController(Context context, CompoundButton checkbox,
             RotationLockCallbacks callbacks) {

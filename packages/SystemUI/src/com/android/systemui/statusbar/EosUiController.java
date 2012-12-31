@@ -89,7 +89,7 @@ public class EosUiController extends ActionHandler {
         super(context);
         mContext = context;
         mResolver = mContext.getContentResolver();
-        mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         wm = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
 
@@ -317,10 +317,10 @@ public class EosUiController extends ActionHandler {
     void initSoftKeys() {
         // softkey objects only need to the the parent view
         ArrayList<View> parent = new ArrayList<View>();
-            parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_90));
-            parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_0));
+        parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_90));
+        parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_0));
         loadBackKey(parent);
-//        loadHomeKey(parent);
+        // loadHomeKey(parent);
         loadRecentKey(parent);
         loadMenuKey(parent);
 
@@ -422,7 +422,8 @@ public class EosUiController extends ActionHandler {
                 key.setOnLongClickListener(mListener);
                 key.disableLongPressIntercept(true);
                 mSupportsLongPress = key.getSupportsLongPress();
-                if (!mSupportsLongPress) key.setSupportsLongPress(true);                
+                if (!mSupportsLongPress)
+                    key.setSupportsLongPress(true);
             }
         }
 
@@ -431,7 +432,8 @@ public class EosUiController extends ActionHandler {
                 KeyButtonView key = (KeyButtonView) v.findViewById(mId);
                 key.setOnLongClickListener(null);
                 key.disableLongPressIntercept(false);
-                if (key.getSupportsLongPress()) key.setSupportsLongPress(false);
+                if (key.getSupportsLongPress())
+                    key.setSupportsLongPress(false);
             }
         }
 
@@ -454,9 +456,9 @@ public class EosUiController extends ActionHandler {
         // we don't want alpha here
         color = Color.rgb(Color.red(color), Color.green(color), Color.blue(color));
         mNavigationBarView.setBackgroundColor(color);
-    }    
+    }
 
-    // applies to Statusbar only 
+    // applies to Statusbar only
     private void updateStatusBarColor() {
         int color = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_STATUSBAR_COLOR,
@@ -506,7 +508,7 @@ public class EosUiController extends ActionHandler {
             if (v.getTag() != null
                     && v.getTag().equals(EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
                 // this is our text view
-                ((TextView)v).setTextColor(color);
+                ((TextView) v).setTextColor(color);
                 v.setVisibility(text_visible);
             } else {
                 // this works for now as we are only controlling
@@ -528,7 +530,8 @@ public class EosUiController extends ActionHandler {
     }
 
     private void processClockSettingsChange() {
-        if (mStatusBarView == null) return;
+        if (mStatusBarView == null)
+            return;
         TextView clock = (TextView) mStatusBarView.findViewById(R.id.clock);
 
         mIsClockVisible = Settings.System.getInt(mContext.getContentResolver(),

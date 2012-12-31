@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010 The Android Open Source Project
+<!--
+     Copyright (C) 2010 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,7 +16,9 @@
 -->
 
 <resources>
+
     <declare-styleable name="KeyButtonView">
+
         <!-- key code to send when pressed; if absent or 0, no key is sent -->
         <attr name="keyCode" format="integer" />
         <!-- does this button generate longpress / repeat events? -->
@@ -52,5 +55,5 @@
         <enum name="horizontal" value="0" />
         <enum name="vertical" value="1" />
     </attr>
-</resources>
 
+</resources>

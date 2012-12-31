@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!--
+     Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,35 +14,36 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical" >
 
     <Switch
         android:id="@+id/view_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textOn="Volume"
-        android:textOff="Brightness" />
-    
+        android:textOff="Brightness"
+        android:textOn="Volume" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical">
-        
+        android:gravity="center_vertical" >
+
         <LinearLayout
             android:id="@+id/brightness_view"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
+
             <CheckBox
                 android:id="@+id/brightness_switch"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
+
             <SeekBar
                 android:id="@+id/brightness_seekbar"
                 android:layout_width="match_parent"
@@ -49,18 +51,20 @@
                 android:layout_marginLeft="7dp"
                 android:layout_marginRight="7dp" />
         </LinearLayout>
-            
+
         <LinearLayout
             android:id="@+id/volume_view"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:visibility="gone">
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
             <CheckBox
                 android:id="@+id/volume_switch"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
+
             <SeekBar
                 android:id="@+id/volume_seekbar"
                 android:layout_width="match_parent"
@@ -68,6 +72,6 @@
                 android:layout_marginLeft="7dp"
                 android:layout_marginRight="7dp" />
         </LinearLayout>
-    
-    </FrameLayout>   
+    </FrameLayout>
+
 </LinearLayout>

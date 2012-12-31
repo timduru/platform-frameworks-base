@@ -42,7 +42,7 @@ import com.android.systemui.R;
 
 public class ShirtPocket extends ImageView {
     private static final boolean DEBUG = false;
-    private static final String  TAG = "StatusBar/ShirtPocket";
+    private static final String TAG = "StatusBar/ShirtPocket";
 
     private ClipData mClipping = null;
 
@@ -50,9 +50,11 @@ public class ShirtPocket extends ImageView {
 
     public static class DropZone extends View {
         ShirtPocket mPocket;
+
         public DropZone(Context context, AttributeSet attrs) {
             super(context, attrs);
         }
+
         public void setPocket(ShirtPocket p) {
             mPocket = p;
         }
@@ -96,21 +98,26 @@ public class ShirtPocket extends ImageView {
 
         @Override
         public boolean onDragEvent(DragEvent event) {
-            if (DEBUG) Slog.d(TAG, "onDragEvent: " + event);
+            if (DEBUG)
+                Slog.d(TAG, "onDragEvent: " + event);
             switch (event.getAction()) {
-                // We want to appear whenever a potential drag takes off from anywhere in the UI.
+            // We want to appear whenever a potential drag takes off from
+            // anywhere in the UI.
                 case DragEvent.ACTION_DRAG_STARTED:
                     show(true);
                     break;
                 case DragEvent.ACTION_DRAG_ENTERED:
-                    if (DEBUG) Slog.d(TAG, "entered!");
+                    if (DEBUG)
+                        Slog.d(TAG, "entered!");
                     // XXX: TODO
                     break;
                 case DragEvent.ACTION_DRAG_EXITED:
-                    if (DEBUG) Slog.d(TAG, "exited!");
+                    if (DEBUG)
+                        Slog.d(TAG, "exited!");
                     break;
                 case DragEvent.ACTION_DROP:
-                    if (DEBUG) Slog.d(TAG, "dropped!");
+                    if (DEBUG)
+                        Slog.d(TAG, "dropped!");
                     mPocket.stash(event.getClipData());
                     break;
                 case DragEvent.ACTION_DRAG_ENDED:
@@ -127,7 +134,7 @@ public class ShirtPocket extends ImageView {
 
     // TODO: "pin area" panel, dragging things out
     ObjectAnimator mAnimHide, mAnimShow;
-    
+
     protected void onAttachedToWindow() {
     }
 
@@ -140,13 +147,13 @@ public class ShirtPocket extends ImageView {
         if (mClipping != null) {
             setVisibility(View.VISIBLE);
             Bitmap icon = mClipping.getIcon();
-//            mDescription.setText(mClipping.getDescription().getLabel());
+            // mDescription.setText(mClipping.getDescription().getLabel());
             if (icon != null) {
                 setImageBitmap(icon);
             } else {
                 if (mClipping.getItemCount() > 0) {
                     // TODO: figure out how to visualize every kind of ClipData!
-                    //mAltText.setText(mClipping.getItemAt(0).coerceToText(getContext()));
+                    // mAltText.setText(mClipping.getItemAt(0).coerceToText(getContext()));
                 }
             }
         } else {
@@ -168,6 +175,7 @@ public class ShirtPocket extends ImageView {
                             shadowSize.set(icon.getWidth(), icon.getHeight());
                             shadowTouchPoint.set(shadowSize.x / 2, shadowSize.y / 2);
                         }
+
                         public void onDrawShadow(Canvas canvas) {
                             canvas.drawBitmap(icon, 0, 0, new Paint());
                         }
@@ -189,53 +197,25 @@ public class ShirtPocket extends ImageView {
     }
 
     /*
-    private boolean isInViewContentArea(View v, int x, int y) {
-        final int l = v.getPaddingLeft();
-        final int r = v.getWidth() - v.getPaddingRight();
-        final int t = v.getPaddingTop();
-        final int b = v.getHeight() - v.getPaddingBottom();
-        return x >= l && x < r && y >= t && y < b;
-    }
-
-    View.OnTouchListener mWindowTouchListener = new View.OnTouchListener() {
-        public boolean onTouch(View v, MotionEvent ev) {
-            final int action = ev.getAction();
-            if (action == MotionEvent.ACTION_OUTSIDE
-                    || (action == MotionEvent.ACTION_DOWN
-                        && !isInViewContentArea(mWindow, (int)ev.getX(), (int)ev.getY()))) {
-                hideWindow();
-                return true;
-            } else if (action == MotionEvent.ACTION_DOWN) {
-                final ClipData clip = mClipping;
-                if (clip != null) {
-                    final Bitmap icon = clip.getIcon();
-                    DragShadowBuilder shadow;
-                    if (icon != null) {
-                        shadow = new DragShadowBuilder(v) {
-                            public void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint) {
-                                shadowSize.set(icon.getWidth(), icon.getHeight());
-                                shadowTouchPoint.set(shadowSize.x / 2, shadowSize.y / 2);
-                            }
-                            public void onDrawShadow(Canvas canvas) {
-                                canvas.drawBitmap(icon, 0, 0, new Paint());
-                            }
-                        };
-                    } else {
-                        // uhhh, what now?
-                        shadow = new DragShadowBuilder(mWindow.findViewById(R.id.preview));
-                    }
-
-                    v.startDrag(clip, shadow, null, 0);
-
-                    // TODO: only discard the clipping if it was accepted
-                    stash(null);
-
-                    return true;
-                }
-            }
-            return false;
-        }
-    };
-    */
+     * private boolean isInViewContentArea(View v, int x, int y) { final int l =
+     * v.getPaddingLeft(); final int r = v.getWidth() - v.getPaddingRight();
+     * final int t = v.getPaddingTop(); final int b = v.getHeight() -
+     * v.getPaddingBottom(); return x >= l && x < r && y >= t && y < b; }
+     * View.OnTouchListener mWindowTouchListener = new View.OnTouchListener() {
+     * public boolean onTouch(View v, MotionEvent ev) { final int action =
+     * ev.getAction(); if (action == MotionEvent.ACTION_OUTSIDE || (action ==
+     * MotionEvent.ACTION_DOWN && !isInViewContentArea(mWindow, (int)ev.getX(),
+     * (int)ev.getY()))) { hideWindow(); return true; } else if (action ==
+     * MotionEvent.ACTION_DOWN) { final ClipData clip = mClipping; if (clip !=
+     * null) { final Bitmap icon = clip.getIcon(); DragShadowBuilder shadow; if
+     * (icon != null) { shadow = new DragShadowBuilder(v) { public void
+     * onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint) {
+     * shadowSize.set(icon.getWidth(), icon.getHeight());
+     * shadowTouchPoint.set(shadowSize.x / 2, shadowSize.y / 2); } public void
+     * onDrawShadow(Canvas canvas) { canvas.drawBitmap(icon, 0, 0, new Paint());
+     * } }; } else { // uhhh, what now? shadow = new
+     * DragShadowBuilder(mWindow.findViewById(R.id.preview)); }
+     * v.startDrag(clip, shadow, null, 0); // TODO: only discard the clipping if
+     * it was accepted stash(null); return true; } } return false; } };
+     */
 }
-

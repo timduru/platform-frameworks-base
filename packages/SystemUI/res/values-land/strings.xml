@@ -17,7 +17,8 @@
  */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Rotation lock toast text: shown when rotation lock is turned on in landscape orientation.
-         -->
+
+<!--  Rotation lock toast text: shown when rotation lock is turned on in landscape orientation. -->
     <string name="toast_rotation_locked">Screen is now locked in landscape orientation.</string>
+
 </resources>

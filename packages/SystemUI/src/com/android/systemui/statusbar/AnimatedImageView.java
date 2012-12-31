@@ -44,7 +44,7 @@ public class AnimatedImageView extends ImageView {
             mAnim.stop();
         }
         if (drawable instanceof AnimationDrawable) {
-            mAnim = (AnimationDrawable)drawable;
+            mAnim = (AnimationDrawable) drawable;
             if (isShown()) {
                 mAnim.start();
             }
@@ -93,4 +93,3 @@ public class AnimatedImageView extends ImageView {
         }
     }
 }
-

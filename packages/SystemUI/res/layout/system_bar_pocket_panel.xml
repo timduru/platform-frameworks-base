@@ -18,44 +18,42 @@
 */
 -->
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:background="@*android:drawable/dialog_full_holo_dark"
-    >
+    android:layout_height="match_parent"
+    android:background="@*android:drawable/dialog_full_holo_dark" >
+
     <TextView
         android:id="@+id/description"
-        android:textAppearance="@android:style/TextAppearance.Small"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textStyle="bold"
-        android:maxLines="1"
         android:layout_alignParentBottom="true"
-        />
+        android:gravity="center"
+        android:maxLines="1"
+        android:textAppearance="@android:style/TextAppearance.Small"
+        android:textStyle="bold" />
 
     <FrameLayout
         android:id="@+id/preview"
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_above="@+id/description"
-        android:descendantFocusability="blocksDescendants"
-        >
+        android:descendantFocusability="blocksDescendants" >
+
         <ImageView
             android:id="@+id/icon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerInside"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/alt"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:textAppearance="@android:style/TextAppearance.Large"
             android:gravity="center"
-            android:visibility="gone"
-            />
+            android:textAppearance="@android:style/TextAppearance.Large"
+            android:visibility="gone" />
     </FrameLayout>
+
 </RelativeLayout>

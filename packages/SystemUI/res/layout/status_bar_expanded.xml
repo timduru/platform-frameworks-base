@@ -18,87 +18,81 @@
 */
 -->
 
-<com.android.systemui.statusbar.phone.NotificationPanelView 
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.statusbar.phone.NotificationPanelView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/notification_panel"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:background="@drawable/notification_panel_bg"
-    android:paddingTop="@dimen/notification_panel_padding_top"
     android:layout_marginLeft="@dimen/notification_panel_margin_left"
-    >
+    android:background="@drawable/notification_panel_bg"
+    android:paddingTop="@dimen/notification_panel_padding_top" >
 
     <View
         android:id="@+id/handle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/close_handle_height"
         android:background="@drawable/status_bar_close"
-        android:visibility="invisible"
-        />
+        android:visibility="invisible" />
 
     <include
-        layout="@layout/carrier_label"
-        android:layout_height="@dimen/carrier_label_height"
         android:layout_width="match_parent"
-        android:layout_marginBottom="@dimen/close_handle_height"
+        android:layout_height="@dimen/carrier_label_height"
         android:layout_gravity="bottom"
-        />
+        android:layout_marginBottom="@dimen/close_handle_height"
+        layout="@layout/carrier_label" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/close_handle_underlap"
-        android:orientation="vertical"
         android:animateLayoutChanges="false"
-        >
+        android:orientation="vertical" >
 
-        <include layout="@layout/status_bar_expanded_header"
+        <include
             android:layout_width="match_parent"
             android:layout_height="@dimen/notification_panel_header_height"
-            />
+            layout="@layout/status_bar_expanded_header" />
 
         <TextView
             android:id="@+id/emergency_calls_only"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network.EmergencyOnly"
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:padding="4dp"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            android:visibility="gone"
-            />
-	    
-	    <LinearLayout
-                android:id="@+id/eos_toggles"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
-                android:visibility="gone" />
+            android:padding="4dp"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network.EmergencyOnly"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/eos_toggles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:visibility="gone" />
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <ViewStub android:id="@+id/flip_settings_stub"
-                android:layout="@layout/flip_settings"
+            android:layout_height="wrap_content" >
+
+            <ViewStub
+                android:id="@+id/flip_settings_stub"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
-    
+                android:layout="@layout/flip_settings" />
+
             <ScrollView
                 android:id="@+id/scroll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fadingEdge="none"
-                android:overScrollMode="ifContentScrolls"
-                >
+                android:overScrollMode="ifContentScrolls" >
+
                 <com.android.systemui.statusbar.policy.NotificationRowLayout
                     android:id="@+id/latestItems"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    systemui:rowHeight="@dimen/notification_row_min_height"
-                    />
+                    systemui:rowHeight="@dimen/notification_row_min_height" />
             </ScrollView>
         </FrameLayout>
     </LinearLayout>
-</com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->
+
+</com.android.systemui.statusbar.phone.NotificationPanelView> <!-- end of sliding panel -->

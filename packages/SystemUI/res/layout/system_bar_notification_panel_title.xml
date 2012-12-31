@@ -14,133 +14,126 @@
   limitations under the License.
 -->
 
-<com.android.systemui.statusbar.tablet.NotificationPanelTitle
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.statusbar.tablet.NotificationPanelTitle xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/title_area"
-    android:background="@drawable/system_bar_notification_header_bg"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:background="@drawable/system_bar_notification_header_bg"
     android:clickable="true"
     android:orientation="vertical"
     android:paddingLeft="26dp"
-    android:paddingTop="14dp"
     android:paddingRight="26dp"
-    >
+    android:paddingTop="14dp" >
 
     <TableLayout
         android:id="@+id/icons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginTop="16dp"
+        android:layout_alignParentLeft="true"
         android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
         android:shrinkColumns="2,4"
-        android:stretchColumns="7"
-        >
+        android:stretchColumns="7" >
+
         <TableRow>
 
-            <!-- to keep the column ids stable we wrap disappearing views in
-                 frames -->
+            <!--
+                 to keep the column ids stable we wrap disappearing views in
+                 frames
+            -->
+
             <FrameLayout
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_gravity="center_vertical"
-                >
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical" >
+
                 <ImageView
                     android:id="@+id/bluetooth"
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:paddingRight="16dp"
-                    android:visibility="gone"
-                    android:contentDescription="@null"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    />
+                    android:contentDescription="@null"
+                    android:paddingRight="16dp"
+                    android:visibility="gone" />
             </FrameLayout>
 
             <!-- mobile data -->
+
             <FrameLayout
                 android:id="@+id/mobile_icon"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:paddingRight="6dp"
-                >
+                android:paddingRight="6dp" >
 
                 <ImageView
                     android:id="@+id/mobile_signal"
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:contentDescription="@null"
-                    />
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@null" />
 
                 <ImageView
                     android:id="@+id/mobile_type"
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:contentDescription="@null"
-                    />
-
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@null" />
             </FrameLayout>
+
             <TextView
                 android:id="@+id/mobile_text"
                 style="@style/SystemBarNotificationText"
-                android:layout_gravity="left|center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:ellipsize="end"
                 android:paddingRight="12dp"
                 android:singleLine="true"
-                android:ellipsize="end"
-                android:text="@string/status_bar_settings_settings_button"
-                />
+                android:text="@string/status_bar_settings_settings_button" />
 
             <!-- wifi -->
+
             <FrameLayout
                 android:id="@+id/wifi_icon"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:paddingRight="6dp"
-                >
+                android:paddingRight="6dp" >
 
                 <ImageView
                     android:id="@+id/wifi_signal"
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:contentDescription="@null"
-                    />
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@null" />
 
                 <ImageView
                     android:id="@+id/wifi_direction"
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:contentDescription="@null"
-                    />
-
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@null" />
             </FrameLayout>
+
             <TextView
                 android:id="@+id/wifi_text"
                 style="@style/SystemBarNotificationText"
-                android:layout_gravity="left|center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:ellipsize="end"
                 android:paddingRight="12dp"
                 android:singleLine="true"
-                android:ellipsize="end"
-                android:text="@string/status_bar_settings_settings_button"
-                />
+                android:text="@string/status_bar_settings_settings_button" />
 
             <ImageView
                 android:id="@+id/battery"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:scaleType="centerInside"
-                android:layout_gravity="center_vertical"
+                android:layout_height="wrap_content"
                 android:layout_alignBaseline="@id/wifi_signal"
-                android:paddingRight="6dp"
+                android:layout_gravity="center_vertical"
                 android:contentDescription="@null"
-                />
+                android:paddingRight="6dp"
+                android:scaleType="centerInside" />
 
             <TextView
                 android:id="@+id/battery_text"
@@ -150,39 +143,34 @@
                 android:layout_gravity="left|center_vertical"
                 android:paddingRight="2dp"
                 android:singleLine="true"
-                android:text="@string/status_bar_settings_settings_button"
-                />
+                android:text="@string/status_bar_settings_settings_button" />
 
             <!-- this will stretch to eat up available space -->
+
             <View
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                />
+                android:layout_height="0dp" />
 
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                >
+                android:layout_gravity="center_vertical" >
 
                 <ImageView
                     android:id="@+id/settings_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_sysbar_quicksettings"
                     android:contentDescription="@string/accessibility_desc_quick_settings"
-                    />
+                    android:src="@drawable/ic_sysbar_quicksettings" />
 
                 <ImageView
                     android:id="@+id/notification_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_notification_open"
-                    android:visibility="invisible"
                     android:contentDescription="@string/accessibility_notifications_button"
-                    />
+                    android:src="@drawable/ic_notification_open"
+                    android:visibility="invisible" />
             </FrameLayout>
-
         </TableRow>
     </TableLayout>
 
@@ -191,41 +179,38 @@
         xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/notification_panel_header_padding_top"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
         android:baselineAligned="false"
-        >
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/notification_panel_header_padding_top" >
 
         <com.android.systemui.statusbar.policy.Clock
             android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.SystemBar.Expanded.Clock"
-            />
-    
+            android:textAppearance="@style/TextAppearance.SystemBar.Expanded.Clock" />
+
         <com.android.systemui.statusbar.policy.DateView
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
-            android:textAppearance="@style/TextAppearance.SystemBar.Expanded.Date"
-            />
+            android:textAppearance="@style/TextAppearance.SystemBar.Expanded.Date" />
 
         <Space
             android:layout_width="0dp"
             android:layout_height="48dp"
-            android:layout_weight="1"
-            />
+            android:layout_weight="1" />
 
-        <ImageView android:id="@+id/clear_all_button"
+        <ImageView
+            android:id="@+id/clear_all_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:scaleType="center"
-            android:src="@drawable/ic_notify_clear"
             android:contentDescription="@string/accessibility_clear_all"
-            />
+            android:scaleType="center"
+            android:src="@drawable/ic_notify_clear" />
     </LinearLayout>
+
 </com.android.systemui.statusbar.tablet.NotificationPanelTitle>

@@ -23,7 +23,7 @@ import android.service.dreams.Sandman;
 /**
  * A simple activity that launches a dream.
  * <p>
- * Note: This Activity is special.  If this class is moved to another package or
+ * Note: This Activity is special. If this class is moved to another package or
  * renamed, be sure to update the component name in {@link Sandman}.
  * </p>
  */

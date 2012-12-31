@@ -79,10 +79,10 @@ public class EventHole extends View implements ViewTreeObserver.OnComputeInterna
         final int r = l + getWidth();
         final int t = loc[1];
         final int b = t + getHeight();
-        
+
         View top = this;
         while (top.getParent() instanceof View) {
-            top = (View)top.getParent();
+            top = (View) top.getParent();
         }
 
         if (visible) {
@@ -96,4 +96,3 @@ public class EventHole extends View implements ViewTreeObserver.OnComputeInterna
         }
     }
 }
-

@@ -17,67 +17,66 @@
 */
 -->
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:background="@drawable/compat_mode_help_bg"
-    >
+    android:layout_height="match_parent"
+    android:background="@drawable/compat_mode_help_bg" >
+
     <TextView
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="80dp"
-        android:layout_marginTop="80dp"
         android:layout_marginRight="80dp"
-        android:textSize="60sp"
-        android:maxLines="1"
-        android:shadowRadius="8"
-        android:shadowColor="#FF000000"
-        android:text="@string/compat_mode_help_header"
+        android:layout_marginTop="80dp"
         android:background="@drawable/compat_mode_help_divider_top"
-        />
+        android:maxLines="1"
+        android:shadowColor="#FF000000"
+        android:shadowRadius="8"
+        android:text="@string/compat_mode_help_header"
+        android:textSize="60sp" />
+
     <ImageView
         android:id="@+id/diagram"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:src="@drawable/compat_mode_help_diagram"
         android:contentDescription="@string/accessibility_compatibility_zoom_example"
-        />
+        android:src="@drawable/compat_mode_help_diagram" />
+
     <RelativeLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="190dp"
-        android:background="@drawable/compat_mode_help_divider_bottom"
-        android:layout_marginBottom="55dp"
-        android:layout_marginRight="80dp"
         android:layout_alignLeft="@id/header"
         android:layout_alignParentBottom="true"
-        >
+        android:layout_marginBottom="55dp"
+        android:layout_marginRight="80dp"
+        android:background="@drawable/compat_mode_help_divider_bottom"
+        android:orientation="horizontal" >
+
         <ImageView
             android:id="@+id/icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:src="@drawable/compat_mode_help_icon"
             android:contentDescription="@string/accessibility_compatibility_zoom_button"
-            />
+            android:src="@drawable/compat_mode_help_icon" />
+
         <TextView
             android:id="@+id/explanation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_alignParentLeft="true"
-            android:layout_toLeftOf="@id/icon"
+            android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
-            android:shadowRadius="4"
+            android:layout_toLeftOf="@id/icon"
             android:shadowColor="#FF000000"
-            android:textSize="28sp"
+            android:shadowRadius="4"
             android:text="@string/compat_mode_help_body"
-            />
+            android:textSize="28sp" />
     </RelativeLayout>
+
     <Button
         android:id="@+id/button"
         android:layout_width="208dp"
@@ -85,8 +84,7 @@
         android:layout_alignLeft="@id/header"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="20dp"
-        android:textSize="28sp"
         android:text="@android:string/ok"
-        />
-</RelativeLayout>
+        android:textSize="28sp" />
 
+</RelativeLayout>

@@ -16,6 +16,7 @@
 */
 -->
 <resources>
+
     <!-- thickness (width) of the navigation bar on phones that require it -->
     <dimen name="navigation_bar_size">@*android:dimen/navigation_bar_width</dimen>
 
@@ -40,4 +41,5 @@
 
     <!-- The fixed height of each tile -->
     <dimen name="quick_settings_cell_height">100dp</dimen>
+
 </resources>

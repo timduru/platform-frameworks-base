@@ -2,28 +2,32 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="40dp"
     android:layout_height="wrap_content"
-    android:layout_weight="1"
     android:layout_gravity="fill_horizontal"
+    android:layout_weight="1"
     android:background="@*android:color/transparent"
     android:orientation="vertical" >
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/eos_settings_main"
         android:layout_width="match_parent"
         android:layout_height="54dp"
-        android:background="@*android:color/transparent"
-        android:id="@+id/eos_settings_main" >
+        android:background="@*android:color/transparent" >
+
         <ImageView
+            android:id="@+id/eos_settings_icon"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_centerInParent="true"
-            android:scaleType="fitCenter"
-            android:id="@+id/eos_settings_icon"
-            />
+            android:scaleType="fitCenter" />
     </RelativeLayout>
-        
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/eos_settings_status"
         android:layout_width="match_parent"
         android:layout_height="10dp"
         android:orientation="horizontal" >
     </LinearLayout>
+
 </LinearLayout>

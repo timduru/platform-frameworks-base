@@ -18,12 +18,11 @@
 */
 -->
 
-<com.android.systemui.SearchPanelView
-    xmlns:prvandroid="http://schemas.android.com/apk/prv/res/android"
+<com.android.systemui.SearchPanelView xmlns:prvandroid="http://schemas.android.com/apk/prv/res/android"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/search_panel_container"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <com.android.internal.widget.multiwaveview.GlowPadView
         android:id="@+id/glow_pad_view"
@@ -31,18 +30,17 @@
         android:layout_height="@dimen/navbar_search_panel_height"
         android:layout_gravity="center_horizontal|bottom"
         android:gravity="center_horizontal|top"
-
-        prvandroid:targetDrawables="@array/navbar_search_targets"
-        prvandroid:targetDescriptions="@array/navbar_search_target_descriptions"
-        prvandroid:directionDescriptions="@array/navbar_search_direction_descriptions"
-        prvandroid:outerRingDrawable="@drawable/navbar_search_outerring"
-        prvandroid:outerRadius="@dimen/navbar_search_outerring_radius"
-        prvandroid:innerRadius="@*android:dimen/glowpadview_inner_radius"
-        prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
-        prvandroid:feedbackCount="0"
-        prvandroid:vibrationDuration="@integer/config_vibration_duration"
         prvandroid:alwaysTrackFinger="true"
+        prvandroid:directionDescriptions="@array/navbar_search_direction_descriptions"
+        prvandroid:feedbackCount="0"
         prvandroid:glowRadius="@*android:dimen/glowpadview_glow_radius"
-        prvandroid:pointDrawable="@*android:drawable/ic_lockscreen_glowdot"/>
+        prvandroid:innerRadius="@*android:dimen/glowpadview_inner_radius"
+        prvandroid:outerRadius="@dimen/navbar_search_outerring_radius"
+        prvandroid:outerRingDrawable="@drawable/navbar_search_outerring"
+        prvandroid:pointDrawable="@*android:drawable/ic_lockscreen_glowdot"
+        prvandroid:snapMargin="@dimen/navbar_search_snap_margin"
+        prvandroid:targetDescriptions="@array/navbar_search_target_descriptions"
+        prvandroid:targetDrawables="@array/navbar_search_targets"
+        prvandroid:vibrationDuration="@integer/config_vibration_duration" />
 
 </com.android.systemui.SearchPanelView>

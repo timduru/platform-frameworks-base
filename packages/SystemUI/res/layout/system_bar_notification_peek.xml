@@ -18,26 +18,24 @@
 */
 -->
 
-<!--    android:background="@drawable/system_bar_closed_default_background" -->
-<com.android.systemui.statusbar.tablet.NotificationPeekPanel
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
+<!-- android:background="@drawable/system_bar_closed_default_background" -->
+<com.android.systemui.statusbar.tablet.NotificationPeekPanel xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:background="@*android:drawable/dialog_full_holo_dark"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical" >
 
-    <FrameLayout 
+    <FrameLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal|bottom"
         android:animationCache="false"
-        android:orientation="vertical"
         android:background="@drawable/system_bar_background"
         android:clickable="true"
-        android:focusable="true"
         android:descendantFocusability="afterDescendants"
-        >
+        android:focusable="true"
+        android:gravity="center_horizontal|bottom"
+        android:orientation="vertical" >
     </FrameLayout>
+
 </com.android.systemui.statusbar.tablet.NotificationPeekPanel>

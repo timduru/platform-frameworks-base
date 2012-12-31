@@ -67,7 +67,7 @@ public class BatteryController extends BroadcastReceiver {
                     }
                 });
     }
-    
+
     private void updateLabelPercent() {
         int N = mLabelViews.size();
         for (int i = 0; i < N; i++) {
@@ -100,7 +100,7 @@ public class BatteryController extends BroadcastReceiver {
                 if (Settings.System.getInt(mContext.getContentResolver(),
                         EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE,
                         EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
-                label = trimPercent(label);
+                    label = trimPercent(label);
                 }
             }
         }
@@ -129,10 +129,10 @@ public class BatteryController extends BroadcastReceiver {
             final boolean plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
             mLastPercentage = level;
             mPlugged = plugged;
-            final int icon = plugged ? R.drawable.stat_sys_battery_charge 
-                                     : R.drawable.stat_sys_battery;
+            final int icon = plugged ? R.drawable.stat_sys_battery_charge
+                    : R.drawable.stat_sys_battery;
             int N = mIconViews.size();
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < N; i++) {
                 ImageView v = mIconViews.get(i);
                 v.setImageResource(icon);
                 v.setImageLevel(level);

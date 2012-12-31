@@ -61,7 +61,7 @@ public class SettingsPanelView extends PanelView {
 
         setContentDescription(resources.getString(R.string.accessibility_desc_quick_settings));
     }
-    
+
     public void setQuickSettings(QuickSettings qs) {
         mQS = qs;
     }
@@ -104,8 +104,8 @@ public class SettingsPanelView extends PanelView {
         GestureRecorder gr = ((PhoneStatusBarView) mBar).mBar.getGestureRecorder();
         if (gr != null) {
             gr.tag(
-                "fling " + ((vel > 0) ? "open" : "closed"),
-                "settings,v=" + vel);
+                    "fling " + ((vel > 0) ? "open" : "closed"),
+                    "settings,v=" + vel);
         }
         super.fling(vel, always);
     }
@@ -116,7 +116,8 @@ public class SettingsPanelView extends PanelView {
         }
     }
 
-    // We draw the handle ourselves so that it's always glued to the bottom of the window.
+    // We draw the handle ourselves so that it's always glued to the bottom of
+    // the window.
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);

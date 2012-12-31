@@ -43,7 +43,8 @@ public class StatusBarIconView extends AnimatedImageView {
     private static final String TAG = "StatusBarIconView";
 
     private StatusBarIcon mIcon;
-    @ViewDebug.ExportedProperty private String mSlot;
+    @ViewDebug.ExportedProperty
+    private String mSlot;
     private Drawable mNumberBackground;
     private Paint mNumberPain;
     private int mNumberX;
@@ -62,12 +63,13 @@ public class StatusBarIconView extends AnimatedImageView {
         mNotification = notification;
         setContentDescription(notification);
 
-        // We do not resize and scale system icons (on the right), only notification icons (on the
+        // We do not resize and scale system icons (on the right), only
+        // notification icons (on the
         // left).
         if (notification != null) {
             final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
             final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
-            final float scale = (float)imageBounds / (float)outerBounds;
+            final float scale = (float) imageBounds / (float) outerBounds;
             setScaleX(scale);
             setScaleY(scale);
             final float alpha = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
@@ -82,7 +84,7 @@ public class StatusBarIconView extends AnimatedImageView {
         final Resources res = context.getResources();
         final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
         final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
-        final float scale = (float)imageBounds / (float)outerBounds;
+        final float scale = (float) imageBounds / (float) outerBounds;
         setScaleX(scale);
         setScaleY(scale);
         final float alpha = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
@@ -131,7 +133,7 @@ public class StatusBarIconView extends AnimatedImageView {
 
         if (!numberEquals) {
             if (icon.number > 0 && mContext.getResources().getBoolean(
-                        R.bool.config_statusBarShowNumber)) {
+                    R.bool.config_statusBarShowNumber)) {
                 if (mNumberBackground == null) {
                     mNumberBackground = getContext().getResources().getDrawable(
                             R.drawable.ic_notification_overlay);
@@ -183,13 +185,13 @@ public class StatusBarIconView extends AnimatedImageView {
         if (icon.iconId == 0) {
             return null;
         }
-        
+
         try {
             return r.getDrawable(icon.iconId);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Icon not found in "
-                  + (icon.iconPackage != null ? icon.iconId : "<system>")
-                  + ": " + Integer.toHexString(icon.iconId));
+                    + (icon.iconPackage != null ? icon.iconId : "<system>")
+                    + ": " + Integer.toHexString(icon.iconId));
         }
 
         return null;
@@ -242,7 +244,7 @@ public class StatusBarIconView extends AnimatedImageView {
                 android.R.integer.status_bar_notification_info_maxnum);
         if (mIcon.number > tooBig) {
             str = mContext.getResources().getString(
-                        android.R.string.status_bar_notification_info_overflow);
+                    android.R.string.status_bar_notification_info_overflow);
         } else {
             NumberFormat f = NumberFormat.getIntegerInstance();
             str = f.format(mIcon.number);
@@ -260,13 +262,13 @@ public class StatusBarIconView extends AnimatedImageView {
         if (dw < mNumberBackground.getMinimumWidth()) {
             dw = mNumberBackground.getMinimumWidth();
         }
-        mNumberX = w-r.right-((dw-r.right-r.left)/2);
+        mNumberX = w - r.right - ((dw - r.right - r.left) / 2);
         int dh = r.top + th + r.bottom;
         if (dh < mNumberBackground.getMinimumWidth()) {
             dh = mNumberBackground.getMinimumWidth();
         }
-        mNumberY = h-r.bottom-((dh-r.top-th-r.bottom)/2);
-        mNumberBackground.setBounds(w-dw, h-dh, w, h);
+        mNumberY = h - r.bottom - ((dh - r.top - th - r.bottom) / 2);
+        mNumberBackground.setBounds(w - dw, h - dh, w, h);
     }
 
     private void setContentDescription(Notification notification) {
@@ -279,7 +281,7 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     public String toString() {
-        return "StatusBarIconView(slot=" + mSlot + " icon=" + mIcon 
-            + " notification=" + mNotification + ")";
+        return "StatusBarIconView(slot=" + mSlot + " icon=" + mIcon
+                + " notification=" + mNotification + ")";
     }
 }

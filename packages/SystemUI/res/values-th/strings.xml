@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 /**
  * Copyright (c) 2009, The Android Open Source Project
  *
@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
- -->
+-->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
     <string name="app_label" msgid="7164937344850004466">"ส่วนติดต่อผู้ใช้ของระบบ"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ล้างข้อมูล"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"ห้ามรบกวน"</string>
@@ -27,10 +27,12 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ข้อมูลแอปพลิเคชัน"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"ไม่มีแอปพลิเคชันล่าสุด"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ปิดแอปพลิเคชันล่าสุด"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="5854176083865845541">"1 แอปพลิเคชันล่าสุด"</item>
-    <item quantity="other" msgid="1040784359794890744">"%d แอปพลิเคชันล่าสุด"</item>
-  </plurals>
+
+    <plurals name="status_bar_accessibility_recent_apps">
+        <item msgid="5854176083865845541" quantity="one">"1 แอปพลิเคชันล่าสุด"</item>
+        <item msgid="1040784359794890744" quantity="other">"%d แอปพลิเคชันล่าสุด"</item>
+    </plurals>
+
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ไม่มีการแจ้งเตือน"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ดำเนินอยู่"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"การแจ้งเตือน"</string>
@@ -149,8 +151,8 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"การตั้งค่าด่วน"</string>
     <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"แอปพลิเคชันล่าสุด"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ผู้ใช้ <xliff:g id="USER">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g> <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"มือถือ <xliff:g id="SIGNAL">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> <xliff:g id="NETWORK">%3$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g><xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"มือถือ <xliff:g id="SIGNAL">%1$s</xliff:g><xliff:g id="TYPE">%2$s</xliff:g><xliff:g id="NETWORK">%3$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"แบตเตอรี่ <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"โหมดใช้งานบนเครื่องบิน <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"บลูทูธ <xliff:g id="STATE">%s</xliff:g>"</string>
@@ -203,4 +205,5 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"อัตโนมัติ"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"การแจ้งเตือนจะแสดงขึ้นที่นี่"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"เข้าถึงได้ทุกเมื่อด้วยการกวาดนิ้วลง"\n"กวาดนิ้วลงอีกครั้งสำหรับการควบคุมระบบ"</string>
+
 </resources>

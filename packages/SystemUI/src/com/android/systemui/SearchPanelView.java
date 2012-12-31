@@ -95,25 +95,26 @@ public class SearchPanelView extends FrameLayout implements
     public SearchPanelView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
-		        mPackageManager = mContext.getPackageManager();
+        mPackageManager = mContext.getPackageManager();
         mResources = mContext.getResources();
 
         mContentResolver = mContext.getContentResolver();
         mTargetObserver = new TargetObserver(new Handler());
         mWm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
-		targetList = Arrays.asList(EOSConstants.SYSTEMUI_NAVRING_1, EOSConstants.SYSTEMUI_NAVRING_2, EOSConstants.SYSTEMUI_NAVRING_3);
-		        for (int i = 0; i < targetList.size(); i++) {
-            mContentResolver.registerContentObserver(Settings.System.getUriFor(targetList.get(i)), false, mTargetObserver);
+        targetList = Arrays.asList(EOSConstants.SYSTEMUI_NAVRING_1,
+                EOSConstants.SYSTEMUI_NAVRING_2, EOSConstants.SYSTEMUI_NAVRING_3);
+        for (int i = 0; i < targetList.size(); i++) {
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(targetList.get(i)),
+                    false, mTargetObserver);
         }
         mActionHandler = new MyActionHandler(mContext);
     }
 
-
-	    private boolean launchTarget(int target) {
+    private boolean launchTarget(int target) {
         String targetKey;
 
         int targetListOffset;
-        if (screenLayout() == Configuration.SCREENLAYOUT_SIZE_LARGE 
+        if (screenLayout() == Configuration.SCREENLAYOUT_SIZE_LARGE
                 || screenLayout() == Configuration.SCREENLAYOUT_SIZE_XLARGE) {
             targetListOffset = -1;
         } else {
@@ -123,9 +124,10 @@ public class SearchPanelView extends FrameLayout implements
                 targetListOffset = -3;
             }
         }
-      
+
         if (target <= targetList.size()) {
-            targetKey = Settings.System.getString(mContext.getContentResolver(), targetList.get(target + targetListOffset));
+            targetKey = Settings.System.getString(mContext.getContentResolver(),
+                    targetList.get(target + targetListOffset));
         } else {
             return false;
         }
@@ -160,6 +162,7 @@ public class SearchPanelView extends FrameLayout implements
         public void onFinishFinalAnimation() {
         }
     }
+
     final GlowPadTriggerListener mGlowPadViewListener = new GlowPadTriggerListener();
 
     @Override
@@ -186,9 +189,11 @@ public class SearchPanelView extends FrameLayout implements
     }
 
     private void setDrawables() {
-        String target2 = Settings.System.getString(mContext.getContentResolver(), EOSConstants.SYSTEMUI_NAVRING_2);
+        String target2 = Settings.System.getString(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_NAVRING_2);
         if (target2 == null || target2.equals("")) {
-            Settings.System.putString(mContext.getContentResolver(), EOSConstants.SYSTEMUI_NAVRING_2, "assist");
+            Settings.System.putString(mContext.getContentResolver(),
+                    EOSConstants.SYSTEMUI_NAVRING_2, "assist");
         }
 
         // Custom Targets
@@ -219,14 +224,15 @@ public class SearchPanelView extends FrameLayout implements
         }
 
         List<String> targetActivities = Arrays.asList(Settings.System.getString(
-                                                               mContext.getContentResolver(), targetList.get(0)), 
-                                                      Settings.System.getString(
-                                                               mContext.getContentResolver(), targetList.get(1)), 
-                                                      Settings.System.getString(
-                                                               mContext.getContentResolver(), targetList.get(2)));
+                mContext.getContentResolver(), targetList.get(0)),
+                Settings.System.getString(
+                        mContext.getContentResolver(), targetList.get(1)),
+                Settings.System.getString(
+                        mContext.getContentResolver(), targetList.get(2)));
 
         // Place Holder Targets
-        TargetDrawable cDrawable = new TargetDrawable(mResources, mResources.getDrawable(com.android.internal.R.drawable.ic_lockscreen_camera));
+        TargetDrawable cDrawable = new TargetDrawable(mResources,
+                mResources.getDrawable(com.android.internal.R.drawable.ic_lockscreen_camera));
         cDrawable.setEnabled(false);
 
         // Add Initial Place Holder Targets
@@ -234,42 +240,52 @@ public class SearchPanelView extends FrameLayout implements
             storedDraw.add(cDrawable);
         }
 
-        // Add User Targets      
+        // Add User Targets
         for (int i = 0; i < targetActivities.size(); i++)
-            if (targetActivities.get(i) == null || targetActivities.get(i).equals("") || targetActivities.get(i).equals("none")) {
+            if (targetActivities.get(i) == null || targetActivities.get(i).equals("")
+                    || targetActivities.get(i).equals("none")) {
                 storedDraw.add(cDrawable);
             } else if (targetActivities.get(i).equals(EOSConstants.SYSTEMUI_TASK_SCREENSHOT)) {
-                storedDraw.add(new TargetDrawable(mResources, mResources.getDrawable(com.android.internal.R.drawable.ic_menu_gallery)));
+                storedDraw.add(new TargetDrawable(mResources, mResources
+                        .getDrawable(com.android.internal.R.drawable.ic_menu_gallery)));
             } else if (targetActivities.get(i).equals(EOSConstants.SYSTEMUI_TASK_KILL_PROCESS)) {
-                storedDraw.add(new TargetDrawable(mResources, mResources.getDrawable(com.android.internal.R.drawable.ic_dialog_alert)));
+                storedDraw.add(new TargetDrawable(mResources, mResources
+                        .getDrawable(com.android.internal.R.drawable.ic_dialog_alert)));
             } else if (targetActivities.get(i).equals(EOSConstants.SYSTEMUI_TASK_POWER_MENU)) {
-                storedDraw.add(new TargetDrawable(mResources, mResources.getDrawable(com.android.internal.R.drawable.ic_lock_reboot)));
+                storedDraw.add(new TargetDrawable(mResources, mResources
+                        .getDrawable(com.android.internal.R.drawable.ic_lock_reboot)));
             } else if (targetActivities.get(i).equals(EOSConstants.SYSTEMUI_TASK_SCREENOFF)) {
-                storedDraw.add(new TargetDrawable(mResources, mResources.getDrawable(com.android.internal.R.drawable.ic_lock_power_off)));
+                storedDraw.add(new TargetDrawable(mResources, mResources
+                        .getDrawable(com.android.internal.R.drawable.ic_lock_power_off)));
             } else if (targetActivities.get(i).equals(EOSConstants.SYSTEMUI_TASK_ASSIST)) {
-                storedDraw.add(new TargetDrawable(mResources, com.android.internal.R.drawable.ic_action_assist_generic));
+                storedDraw.add(new TargetDrawable(mResources,
+                        com.android.internal.R.drawable.ic_action_assist_generic));
             } else if (targetActivities.get(i).equals(EOSConstants.SYSTEMUI_TASK_HIDE_BARS)) {
-                storedDraw.add(new TargetDrawable(mResources, com.android.internal.R.drawable.ic_dialog_info));
-            } else if (targetActivities.get(i).startsWith("app:")) {   
+                storedDraw.add(new TargetDrawable(mResources,
+                        com.android.internal.R.drawable.ic_dialog_info));
+            } else if (targetActivities.get(i).startsWith("app:")) {
                 try {
-                    ActivityInfo activityInfo= mPackageManager.getActivityInfo(
-                            ComponentName.unflattenFromString(targetActivities.get(i).substring(4)), 
-                            PackageManager.GET_RECEIVERS);
+                    ActivityInfo activityInfo = mPackageManager
+                            .getActivityInfo(
+                                    ComponentName.unflattenFromString(targetActivities.get(i)
+                                            .substring(4)),
+                                    PackageManager.GET_RECEIVERS);
                     Drawable activityIcon = activityInfo.loadIcon(mPackageManager);
 
                     storedDraw.add(new TargetDrawable(mResources, activityIcon));
-            } catch (NameNotFoundException e) {
+                } catch (NameNotFoundException e) {
                     storedDraw.add(cDrawable);
+                }
             }
-        }
 
         // Add End Place Holder Targets
         for (int i = 0; i < endPosOffset; i++) {
             storedDraw.add(cDrawable);
         }
 
-        mGlowPadView.setTargetResources(storedDraw);  
+        mGlowPadView.setTargetResources(storedDraw);
     }
+
     private void maybeSwapSearchIcon() {
         Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                 .getAssistIntent(mContext, UserHandle.USER_CURRENT);
@@ -278,7 +294,8 @@ public class SearchPanelView extends FrameLayout implements
             if (component == null || !mGlowPadView.replaceTargetDrawablesIfPresent(component,
                     ASSIST_ICON_METADATA_NAME,
                     com.android.internal.R.drawable.ic_action_assist_generic)) {
-                if (DEBUG) Slog.v(TAG, "Couldn't grab icon for component " + component);
+                if (DEBUG)
+                    Slog.v(TAG, "Couldn't grab icon for component " + component);
             }
         }
     }
@@ -330,7 +347,8 @@ public class SearchPanelView extends FrameLayout implements
             maybeSwapSearchIcon();
             if (getVisibility() != View.VISIBLE) {
                 setVisibility(View.VISIBLE);
-                // Don't start the animation until we've created the layer, which is done
+                // Don't start the animation until we've created the layer,
+                // which is done
                 // right before we are drawn
                 mGlowPadView.suspendAnimations();
                 mGlowPadView.ping();
@@ -355,8 +373,9 @@ public class SearchPanelView extends FrameLayout implements
     }
 
     /**
-     * We need to be aligned at the bottom.  LinearLayout can't do this, so instead,
-     * let LinearLayout do all the hard work, and then shift everything down to the bottom.
+     * We need to be aligned at the bottom. LinearLayout can't do this, so
+     * instead, let LinearLayout do all the hard work, and then shift everything
+     * down to the bottom.
      */
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -392,11 +411,11 @@ public class SearchPanelView extends FrameLayout implements
     public void setStatusBarView(final View statusBarView) {
         if (mStatusBarTouchProxy != null) {
             mStatusBarTouchProxy.setStatusBar(statusBarView);
-//            mGlowPadView.setOnTouchListener(new OnTouchListener() {
-//                public boolean onTouch(View v, MotionEvent event) {
-//                    return statusBarView.onTouchEvent(event);
-//                }
-//            });
+            // mGlowPadView.setOnTouchListener(new OnTouchListener() {
+            // public boolean onTouch(View v, MotionEvent event) {
+            // return statusBarView.onTouchEvent(event);
+            // }
+            // });
         }
     }
 
@@ -412,6 +431,7 @@ public class SearchPanelView extends FrameLayout implements
         return ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                 .getAssistIntent(mContext, UserHandle.USER_CURRENT) != null;
     }
+
     public int screenLayout() {
         final int screenSize = Resources.getSystem().getConfiguration().screenLayout &
                 Configuration.SCREENLAYOUT_SIZE_MASK;
@@ -422,7 +442,7 @@ public class SearchPanelView extends FrameLayout implements
         return mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
-    public class TargetObserver extends ContentObserver {	
+    public class TargetObserver extends ContentObserver {
         public TargetObserver(Handler handler) {
             super(handler);
         }
@@ -438,7 +458,7 @@ public class SearchPanelView extends FrameLayout implements
             setDrawables();
         }
     }
-    
+
     class MyActionHandler extends ActionHandler {
 
         public MyActionHandler(Context context) {
@@ -451,6 +471,6 @@ public class SearchPanelView extends FrameLayout implements
             // TODO Auto-generated method stub
             return false;
         }
-        
+
     }
 }
