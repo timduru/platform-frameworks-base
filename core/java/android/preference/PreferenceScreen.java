@@ -95,7 +95,7 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
     
     /**
      * Do NOT use this constructor, use {@link PreferenceManager#createPreferenceScreen(Context)}.
-     * @hide-
+     * 
      */
     public PreferenceScreen(Context context, AttributeSet attrs) {
         super(context, attrs, com.android.internal.R.attr.preferenceScreenStyle);
