@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
+import android.content.res.Configuration;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -26,6 +27,7 @@ import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+
 import com.android.systemui.R;
 
 public class PhoneStatusBarView extends PanelBar {
@@ -42,6 +44,8 @@ public class PhoneStatusBarView extends PanelBar {
     PanelView mLastFullyOpenedPanel = null;
     PanelView mNotificationPanel, mSettingsPanel;
     private boolean mShouldFade;
+    
+    private boolean mShowSettingsPanel = false;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -116,16 +120,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public PanelView selectPanelForTouch(MotionEvent touch) {
         final float x = touch.getX();
-
-        if (mFullWidthNotifications) {
-            // No double swiping. If either panel is open, nothing else can be
-            // pulled down.
-            return ((mSettingsPanel == null ? 0 : mSettingsPanel.getExpandedHeight())
-                    + mNotificationPanel.getExpandedHeight() > 0)
-                    ? null
-                    : mNotificationPanel;
-        }
-
+        
         // We split the status bar into thirds: the left 2/3 are for
         // notifications, and the
         // right 1/3 for quick settings. If you pull the status bar down a
@@ -143,7 +138,23 @@ public class PhoneStatusBarView extends PanelBar {
 
         if (region < mSettingsPanelDragzoneMin)
             region = mSettingsPanelDragzoneMin;
+            
+        int screenConfig = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+        if (screenConfig == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
+            region = w * 0.1f;
+        }
+            
+        mShowSettingsPanel = w - x < region;
 
+        if (mFullWidthNotifications) {
+            // No double swiping. If either panel is open, nothing else can be
+            // pulled down.
+            return ((mSettingsPanel == null ? 0 : mSettingsPanel.getExpandedHeight())
+                    + mNotificationPanel.getExpandedHeight() > 0)
+                    ? null
+                    : mNotificationPanel;
+        }
+        
         return (w - x < region) ? mSettingsPanel : mNotificationPanel;
     }
 
@@ -163,6 +174,10 @@ public class PhoneStatusBarView extends PanelBar {
             Slog.v(TAG, "start opening: " + panel + " shouldfade=" + mShouldFade);
         }
         mFadingPanel = panel;
+        
+        if (mFullWidthNotifications && (mShowSettingsPanel || mBar.mNotificationIcons.getChildCount() < 1)) {
+            mBar.switchToSettings();
+        }
     }
 
     @Override
