@@ -373,8 +373,7 @@ public class SystemSensorManager extends SensorManager {
                         for (Sensor s : l.getSensors()) {
                             disableSensorLocked(s);
                         }
-                    // Check if the ListenerDelegate has the sensor it is trying to unregister.
-                    } else if (l.hasSensor(sensor) && l.removeSensor(sensor) == 0) {
+                    } else if (l.removeSensor(sensor) == 0) {
                         // if we have no more sensors enabled on this listener,
                         // take it off the list.
                         sListeners.remove(i);

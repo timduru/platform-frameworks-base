@@ -331,6 +331,7 @@ public abstract class PreferenceFragment extends Fragment implements
         }
     }
 
+    /** @hide */
     public ListView getListView() {
         ensureList();
         return mList;
