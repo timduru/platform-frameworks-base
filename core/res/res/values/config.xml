@@ -1007,6 +1007,9 @@
     <!-- Umts Everest RIL hacks -->
     <bool name="config_umtsEverestRadio">false</bool>
 
+    <!-- Flag indicating if the speed up audio on mt call code should be executed -->
+    <bool name="config_speed_up_audio_on_mt_calls">false</bool>
+
     <!-- Dock battery compatibility disabled by default -->
     <bool name="config_hasDockBattery">false</bool>
 

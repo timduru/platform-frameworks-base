@@ -56,6 +56,7 @@
   <java-symbol type="bool" name="config_samsung_stk" />
   <java-symbol type="bool" name="config_isHybridUiDevice" />
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
+  <java-symbol type="bool" name="config_speed_up_audio_on_mt_calls" />
 
   <java-symbol type="integer" name="config_keyboardDockRotation" />
   <java-symbol type="integer" name="config_wallpaperMaxWidth" />
