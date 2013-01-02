@@ -334,7 +334,9 @@ class QuickSettings {
         // temporary ones)
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mUserEnabled = mModel.isToggleEnabled(AVATAR);
-
+        if (mModel.isToggleEnabled(SEEKBAR)) {
+            addSliderTile(mContainerView, inflater);
+        }
         addSystemTiles(mContainerView, inflater);
         addTemporaryTiles(mContainerView, inflater);
 
@@ -681,6 +683,223 @@ class QuickSettings {
         }
     }
 
+    private void addSliderTile(ViewGroup parent, LayoutInflater inflater) {
+        // Seekbar
+        QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+        seekbarTile.setContent(R.layout.quick_settings_tile_seekbar, inflater);
+        seekbarTile.setColumnSpan(mSeekbarSpan);
+
+        final Switch swView = (Switch) seekbarTile.findViewById(R.id.view_switch);
+        final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
+        final CheckBox cbVolume = (CheckBox) seekbarTile.findViewById(R.id.volume_switch);
+        final SeekBar sbBrightness = (SeekBar) seekbarTile
+                .findViewById(R.id.brightness_seekbar);
+        final CheckBox cbBrightness = (CheckBox) seekbarTile
+                .findViewById(R.id.brightness_switch);
+        final LinearLayout brightnessView = (LinearLayout) seekbarTile
+                .findViewById(R.id.brightness_view);
+        final LinearLayout volumeView = (LinearLayout) seekbarTile
+                .findViewById(R.id.volume_view);
+
+        final AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        final IPowerManager ipm = IPowerManager.Stub.asInterface(ServiceManager
+                .getService("power"));
+        final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        final int min = pm.getMinimumScreenBrightnessSetting();
+        final int max = pm.getMaximumScreenBrightnessSetting();
+
+        mModel.addSeekbarTile(seekbarTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView view, State state) {
+                sbVolume.setMax(am.getStreamMaxVolume(mVolumeStream));
+                sbVolume.setProgress(am.getStreamVolume(mVolumeStream));
+                if (mVolumeStream == AudioManager.STREAM_MUSIC) {
+                    cbVolume.setChecked(true);
+                    cbVolume.setText("Media");
+                } else {
+                    cbVolume.setChecked(false);
+                    cbVolume.setText("Ring");
+                }
+
+                int automatic = 0;
+                int value = max;
+                try {
+                    automatic = Settings.System.getInt(mContext.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS_MODE);
+                    value = Settings.System.getInt(mContext.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS);
+                } catch (Exception e) {
+                }
+
+                if (automatic == 1) {
+                    cbBrightness.setChecked(true);
+                    cbBrightness.setText("Auto");
+                    sbBrightness.setEnabled(false);
+                } else {
+                    cbBrightness.setChecked(false);
+                    cbBrightness.setText("Manual");
+                    sbBrightness.setEnabled(true);
+                }
+                sbBrightness.setMax(max - min);
+                sbBrightness.setProgress(value - min);
+            }
+        });
+        parent.addView(seekbarTile);
+
+        swView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    Animation slideInFromLeft = AnimationUtils.loadAnimation(mContext,
+                            R.anim.in_from_left);
+                    slideInFromLeft.setAnimationListener(new AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                            volumeView.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                        }
+                    });
+                    volumeView.startAnimation(slideInFromLeft);
+
+                    Animation slideOutToRight = AnimationUtils.loadAnimation(mContext,
+                            R.anim.out_to_right);
+                    slideOutToRight.setAnimationListener(new AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            brightnessView.setVisibility(View.GONE);
+                        }
+                    });
+                    brightnessView.startAnimation(slideOutToRight);
+                } else {
+                    Animation slideInFromRight = AnimationUtils.loadAnimation(mContext,
+                            R.anim.in_from_right);
+                    slideInFromRight.setAnimationListener(new AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                            brightnessView.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                        }
+                    });
+                    brightnessView.startAnimation(slideInFromRight);
+
+                    Animation slideOutToLeft = AnimationUtils.loadAnimation(mContext,
+                            R.anim.out_to_left);
+                    slideOutToLeft.setAnimationListener(new AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            volumeView.setVisibility(View.GONE);
+                        }
+                    });
+                    volumeView.startAnimation(slideOutToLeft);
+                }
+            }
+        });
+
+        cbVolume.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mVolumeStream = AudioManager.STREAM_MUSIC;
+                    cbVolume.setText("Media");
+                } else {
+                    mVolumeStream = AudioManager.STREAM_RING;
+                    cbVolume.setText("Ring");
+                }
+                mContext.sendBroadcast(new Intent(INTENT_UPDATE_VOLUME_OBSERVER_STREAM));
+            }
+        });
+
+        sbVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    am.setStreamVolume(mVolumeStream, progress, 0);
+                } else {
+                    sbVolume.setProgress(am.getStreamVolume(mVolumeStream));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+        cbBrightness.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                try {
+                    if (isChecked) {
+                        Settings.System.putInt(mContext.getContentResolver(),
+                                Settings.System.SCREEN_BRIGHTNESS_MODE, 1);
+                        sbBrightness.setEnabled(false);
+                        cbBrightness.setText("Auto");
+                    } else {
+                        Settings.System.putInt(mContext.getContentResolver(),
+                                Settings.System.SCREEN_BRIGHTNESS_MODE, 0);
+                        sbBrightness.setEnabled(true);
+                        cbBrightness.setText("Manual");
+                    }
+                } catch (Exception e) {
+                }
+            }
+        });
+
+        sbBrightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                try {
+                    ipm.setTemporaryScreenBrightnessSettingOverride(progress + min);
+                    Settings.System.putInt(mContext.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS, progress + min);
+                } catch (Exception e) {
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+    }
+
     private void loadTile(String tile, ViewGroup parent, LayoutInflater inflater) {
         if (tile.equals(AVATAR)) {
             if (mUserEnabled)
@@ -774,221 +993,6 @@ class QuickSettings {
             });
             parent.addView(ringerTile);
             // mDynamicSpannedTiles.add(ringerTile);
-        } else if (tile.equals(SEEKBAR)) {
-            // Seekbar
-            QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
-            seekbarTile.setContent(R.layout.quick_settings_tile_seekbar, inflater);
-            seekbarTile.setColumnSpan(mSeekbarSpan);
-
-            final Switch swView = (Switch) seekbarTile.findViewById(R.id.view_switch);
-            final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
-            final CheckBox cbVolume = (CheckBox) seekbarTile.findViewById(R.id.volume_switch);
-            final SeekBar sbBrightness = (SeekBar) seekbarTile
-                    .findViewById(R.id.brightness_seekbar);
-            final CheckBox cbBrightness = (CheckBox) seekbarTile
-                    .findViewById(R.id.brightness_switch);
-            final LinearLayout brightnessView = (LinearLayout) seekbarTile
-                    .findViewById(R.id.brightness_view);
-            final LinearLayout volumeView = (LinearLayout) seekbarTile
-                    .findViewById(R.id.volume_view);
-
-            final AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-            final IPowerManager ipm = IPowerManager.Stub.asInterface(ServiceManager
-                    .getService("power"));
-            final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-            final int min = pm.getMinimumScreenBrightnessSetting();
-            final int max = pm.getMaximumScreenBrightnessSetting();
-
-            mModel.addSeekbarTile(seekbarTile, new QuickSettingsModel.RefreshCallback() {
-                @Override
-                public void refreshView(QuickSettingsTileView view, State state) {
-                    sbVolume.setMax(am.getStreamMaxVolume(mVolumeStream));
-                    sbVolume.setProgress(am.getStreamVolume(mVolumeStream));
-                    if (mVolumeStream == AudioManager.STREAM_MUSIC) {
-                        cbVolume.setChecked(true);
-                        cbVolume.setText("Media");
-                    } else {
-                        cbVolume.setChecked(false);
-                        cbVolume.setText("Ring");
-                    }
-
-                    int automatic = 0;
-                    int value = max;
-                    try {
-                        automatic = Settings.System.getInt(mContext.getContentResolver(),
-                                Settings.System.SCREEN_BRIGHTNESS_MODE);
-                        value = Settings.System.getInt(mContext.getContentResolver(),
-                                Settings.System.SCREEN_BRIGHTNESS);
-                    } catch (Exception e) {
-                    }
-
-                    if (automatic == 1) {
-                        cbBrightness.setChecked(true);
-                        cbBrightness.setText("Auto");
-                        sbBrightness.setEnabled(false);
-                    } else {
-                        cbBrightness.setChecked(false);
-                        cbBrightness.setText("Manual");
-                        sbBrightness.setEnabled(true);
-                    }
-                    sbBrightness.setMax(max - min);
-                    sbBrightness.setProgress(value - min);
-                }
-            });
-            parent.addView(seekbarTile);
-
-            swView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        Animation slideInFromLeft = AnimationUtils.loadAnimation(mContext,
-                                R.anim.in_from_left);
-                        slideInFromLeft.setAnimationListener(new AnimationListener() {
-                            @Override
-                            public void onAnimationStart(Animation animation) {
-                                volumeView.setVisibility(View.VISIBLE);
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animation animation) {
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animation animation) {
-                            }
-                        });
-                        volumeView.startAnimation(slideInFromLeft);
-
-                        Animation slideOutToRight = AnimationUtils.loadAnimation(mContext,
-                                R.anim.out_to_right);
-                        slideOutToRight.setAnimationListener(new AnimationListener() {
-                            @Override
-                            public void onAnimationStart(Animation animation) {
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animation animation) {
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animation animation) {
-                                brightnessView.setVisibility(View.GONE);
-                            }
-                        });
-                        brightnessView.startAnimation(slideOutToRight);
-                    } else {
-                        Animation slideInFromRight = AnimationUtils.loadAnimation(mContext,
-                                R.anim.in_from_right);
-                        slideInFromRight.setAnimationListener(new AnimationListener() {
-                            @Override
-                            public void onAnimationStart(Animation animation) {
-                                brightnessView.setVisibility(View.VISIBLE);
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animation animation) {
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animation animation) {
-                            }
-                        });
-                        brightnessView.startAnimation(slideInFromRight);
-
-                        Animation slideOutToLeft = AnimationUtils.loadAnimation(mContext,
-                                R.anim.out_to_left);
-                        slideOutToLeft.setAnimationListener(new AnimationListener() {
-                            @Override
-                            public void onAnimationStart(Animation animation) {
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animation animation) {
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animation animation) {
-                                volumeView.setVisibility(View.GONE);
-                            }
-                        });
-                        volumeView.startAnimation(slideOutToLeft);
-                    }
-                }
-            });
-
-            cbVolume.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        mVolumeStream = AudioManager.STREAM_MUSIC;
-                        cbVolume.setText("Media");
-                    } else {
-                        mVolumeStream = AudioManager.STREAM_RING;
-                        cbVolume.setText("Ring");
-                    }
-                    mContext.sendBroadcast(new Intent(INTENT_UPDATE_VOLUME_OBSERVER_STREAM));
-                }
-            });
-
-            sbVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (fromUser) {
-                        am.setStreamVolume(mVolumeStream, progress, 0);
-                    } else {
-                        sbVolume.setProgress(am.getStreamVolume(mVolumeStream));
-                    }
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                }
-            });
-
-            cbBrightness.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    try {
-                        if (isChecked) {
-                            Settings.System.putInt(mContext.getContentResolver(),
-                                    Settings.System.SCREEN_BRIGHTNESS_MODE, 1);
-                            sbBrightness.setEnabled(false);
-                            cbBrightness.setText("Auto");
-                        } else {
-                            Settings.System.putInt(mContext.getContentResolver(),
-                                    Settings.System.SCREEN_BRIGHTNESS_MODE, 0);
-                            sbBrightness.setEnabled(true);
-                            cbBrightness.setText("Manual");
-                        }
-                    } catch (Exception e) {
-                    }
-                }
-            });
-
-            sbBrightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    try {
-                        ipm.setTemporaryScreenBrightnessSettingOverride(progress + min);
-                        Settings.System.putInt(mContext.getContentResolver(),
-                                Settings.System.SCREEN_BRIGHTNESS, progress + min);
-                    } catch (Exception e) {
-                    }
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                }
-            });
         } else if (tile.equals(BATTERY)) {
             // Battery
             QuickSettingsTileView batteryTile = (QuickSettingsTileView)
