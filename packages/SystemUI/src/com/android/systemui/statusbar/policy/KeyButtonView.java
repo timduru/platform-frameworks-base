@@ -75,6 +75,7 @@ public class KeyButtonView extends ImageView {
     boolean mIsLongPressing = false;
     boolean mIsSw600Device = false;
     boolean mIsTabletMode = false;
+    boolean mAnimRunning = false;
     float glowScaleWidth;
     float glowScaleHeight;
     IWindowManager mWindowManager;
@@ -238,7 +239,6 @@ public class KeyButtonView extends ImageView {
     protected void onDraw(Canvas canvas) {
         if (mGlowBG != null) {
             canvas.save();
-            applyGlowFilter();
             final int w = getWidth();
             final int h = getHeight();
             final float aspect = (float) mGlowWidth / mGlowHeight;
@@ -253,7 +253,7 @@ public class KeyButtonView extends ImageView {
             mRect.right = w;
             mRect.bottom = h;
         }
-        applyKeyFilter();
+        if (mAnimRunning) applyKeyFilter();
         super.onDraw(canvas);
     }
 
@@ -341,14 +341,16 @@ public class KeyButtonView extends ImageView {
                     mPressedAnim.cancel();
                 }
                 final AnimatorSet as = mPressedAnim = new AnimatorSet();
+                mAnimRunning = true;
                 as.addListener(new AnimatorListener() {
                     public void onAnimationEnd(Animator animation) {
                         applyKeyFilter();
                         applyGlowFilter();
+                        mAnimRunning = false;
                     }
 
                     public void onAnimationCancel(Animator animation) {
-                        ;
+                        mAnimRunning = false;
                     }
 
                     public void onAnimationRepeat(Animator animation) {
@@ -387,9 +389,6 @@ public class KeyButtonView extends ImageView {
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getAction();
         int x, y;
-        // update regardless of motion event
-        // applyColorFilter(mKeyFilterColor);
-
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 // Slog.d("KeyButtonView", "press");
