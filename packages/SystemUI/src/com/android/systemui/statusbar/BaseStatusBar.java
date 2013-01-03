@@ -498,8 +498,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 
-            boolean autoRotate = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.ACCELEROMETER_ROTATION, 1) == 1;
+            boolean isHybridUi = mContext.getResources().getBoolean(com.android.internal.R.bool.config_isHybridUiDevice);
+            boolean autoRotate = Settings.System.getInt(mContext.getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 1) == 1;
+
             if (!autoRotate) {
                 WindowManager mWindowManager = (WindowManager) mContext
                         .getSystemService(Context.WINDOW_SERVICE);
@@ -507,9 +508,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 int rotation = mDisplay.getRotation();
 
                 if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
-                    intent.putExtra("Portrait", 2);
+                    intent.putExtra("Portrait", isHybridUi?1:2);
                 } else {
-                    intent.putExtra("Portrait", 1);
+                    intent.putExtra("Portrait", isHybridUi?2:1);
                 }
             }
 
