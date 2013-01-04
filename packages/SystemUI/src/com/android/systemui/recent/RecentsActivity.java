@@ -122,6 +122,20 @@ public class RecentsActivity extends Activity {
     public static boolean forceOpaqueBackground(Context context) {
         return WallpaperManager.getInstance(context).getWallpaperInfo() != null;
     }
+    
+    private void setOrientation() {
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            int portrait = extras.getInt("Portrait");
+            if (portrait == 1) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            } else if (portrait == 2){
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            } else {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+            }
+        }
+    }
 
     @Override
     public void onStart() {
@@ -141,17 +155,9 @@ public class RecentsActivity extends Activity {
     @Override
     public void onResume() {
         mForeground = true;
+        setOrientation();
+        
         super.onResume();
-
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            int portrait = extras.getInt("Portrait");
-            if (portrait == 1) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            } else if (portrait == 2) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            }
-        }
     }
 
     @Override
@@ -209,6 +215,9 @@ public class RecentsActivity extends Activity {
         mIntentFilter.addAction(CLOSE_RECENTS_INTENT);
         mIntentFilter.addAction(WINDOW_ANIMATION_START_INTENT);
         registerReceiver(mIntentReceiver, mIntentFilter);
+        
+        setOrientation();
+        
         super.onCreate(savedInstanceState);
     }
 
