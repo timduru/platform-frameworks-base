@@ -219,6 +219,10 @@ public class RecentsVerticalScrollView extends ScrollView
                     } catch (InterruptedException e) {
                     }
                 }
+                
+                if (!RecentsActivity.mHomeForeground && mLinearLayout.getChildCount() > 1) {
+                    mCallback.handleOnClick(mLinearLayout.getChildAt(mLinearLayout.getChildCount() - 1));
+                }
             }
         });
         clearAll.start();
