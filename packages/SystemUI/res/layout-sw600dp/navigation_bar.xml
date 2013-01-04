@@ -62,7 +62,9 @@
                 android:src="@drawable/ic_sysbar_back"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="4"
-                systemui:keyIdentifier="0" />
+                systemui:keyIdentifier="0"
+                systemui:keyColorUri="eos_systemui_back_key_color"
+                systemui:keyGlowColorUri="eos_systemui_back_glow_color" />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
                 android:id="@+id/home"
@@ -76,7 +78,9 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="3"
                 systemui:keyIdentifier="1"
-                systemui:keyRepeat="true" />
+                systemui:keyRepeat="true"
+                systemui:keyColorUri="eos_systemui_home_key_color"
+                systemui:keyGlowColorUri="eos_systemui_home_glow_color" />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
                 android:id="@+id/recent_apps"
@@ -88,7 +92,9 @@
                 android:paddingRight="25dp"
                 android:src="@drawable/ic_sysbar_recent"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
-                systemui:keyIdentifier="2" />
+                systemui:keyIdentifier="2"
+                systemui:keyColorUri="eos_systemui_recent_key_color"
+                systemui:keyGlowColorUri="eos_systemui_recent_glow_color" />
 
             <Space
                 android:layout_width="match_parent"
@@ -106,7 +112,9 @@
                 android:visibility="invisible"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="82"
-                systemui:keyIdentifier="3" />
+                systemui:keyIdentifier="3"
+                systemui:keyColorUri="eos_systemui_menu_key_color"
+                systemui:keyGlowColorUri="eos_systemui_menu_glow_color" />
         </LinearLayout>
 
         <!-- lights out layout to match exactly -->
@@ -220,7 +228,9 @@
                 android:src="@drawable/ic_sysbar_back"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="4"
-                systemui:keyIdentifier="0" />
+                systemui:keyIdentifier="0"
+                systemui:keyColorUri="eos_systemui_back_key_color"
+                systemui:keyGlowColorUri="eos_systemui_back_glow_color" />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
                 android:id="@+id/home"
@@ -234,7 +244,9 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="3"
                 systemui:keyIdentifier="1"
-                systemui:keyRepeat="true" />
+                systemui:keyRepeat="true"
+                systemui:keyColorUri="eos_systemui_home_key_color"
+                systemui:keyGlowColorUri="eos_systemui_home_glow_color" />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
                 android:id="@+id/recent_apps"
@@ -246,7 +258,9 @@
                 android:paddingRight="42dp"
                 android:src="@drawable/ic_sysbar_recent"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
-                systemui:keyIdentifier="2" />
+                systemui:keyIdentifier="2"
+                systemui:keyColorUri="eos_systemui_recent_key_color"
+                systemui:keyGlowColorUri="eos_systemui_recent_glow_color" />
 
             <Space
                 android:layout_width="match_parent"
@@ -264,7 +278,9 @@
                 android:visibility="invisible"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="82"
-                systemui:keyIdentifier="3" />
+                systemui:keyIdentifier="3"
+                systemui:keyColorUri="eos_systemui_menu_key_color"
+                systemui:keyGlowColorUri="eos_systemui_menu_glow_color" />
         </LinearLayout>
 
         <!-- lights out layout to match exactly -->
