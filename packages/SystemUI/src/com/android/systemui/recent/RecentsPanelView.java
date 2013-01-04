@@ -850,6 +850,10 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     private void killAllRecentApps() {
         mRecentsContainer.removeAllViewsInLayout();
+        
+        if (!RecentsActivity.mHomeForeground && !mRecentTaskDescriptions.isEmpty()) {	
+            simulateClick(mRecentTaskDescriptions.get(0).persistentTaskId);
+	    }
     }
 
     private boolean showMemDisplay(boolean show) {
