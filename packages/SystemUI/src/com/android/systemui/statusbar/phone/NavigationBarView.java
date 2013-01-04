@@ -50,6 +50,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
 import com.android.systemui.statusbar.policy.DeadZone;
+import com.android.systemui.statusbar.policy.KeyButtonView;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -251,6 +252,8 @@ public class NavigationBarView extends LinearLayout {
                 (0 != (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT))
                         ? (mVertical ? mBackAltLandIcon : mBackAltIcon)
                         : (mVertical ? mBackLandIcon : mBackIcon));
+        // this is hacky, but works for now
+        ((KeyButtonView) mCurrentView.findViewById(R.id.back)).applyKeyFilter();
 
         setDisabledFlags(mDisabledFlags, true);
     }

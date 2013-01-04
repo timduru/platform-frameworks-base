@@ -149,12 +149,42 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final String SYSTEMUI_NAVKEY_COLOR = "eos_systemui_navkey_color";
+    public static final String SYSTEMUI_NAVKEY_BACK_KEY_COLOR = "eos_systemui_back_key_color";
 
     /**
      * @hide
      */
-    public static final String SYSTEMUI_NAVGLOW_COLOR = "eos_systemui_navglow_color";
+    public static final String SYSTEMUI_NAVKEY_HOME_KEY_COLOR = "eos_systemui_home_key_color";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_NAVKEY_RECENT_KEY_COLOR = "eos_systemui_recent_key_color";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_NAVKEY_MENU_KEY_COLOR = "eos_systemui_menu_key_color";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_NAVKEY_BACK_GLOW_COLOR = "eos_systemui_back_glow_color";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_NAVKEY_HOME_GLOW_COLOR = "eos_systemui_home_glow_color";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_NAVKEY_RECENT_GLOW_COLOR = "eos_systemui_recent_glow_color";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_NAVKEY_MENU_GLOW_COLOR = "eos_systemui_menu_glow_color";
 
     /**
      * @hide

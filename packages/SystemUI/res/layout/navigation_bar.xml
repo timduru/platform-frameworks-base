@@ -55,7 +55,9 @@
                 android:src="@drawable/ic_sysbar_back"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="4"
-                systemui:keyIdentifier="0" />
+                systemui:keyIdentifier="0"
+                systemui:keyColorUri="eos_systemui_back_key_color"
+                systemui:keyGlowColorUri="eos_systemui_back_glow_color" />
 
             <View
                 android:layout_width="match_parent"
@@ -73,7 +75,9 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="3"
                 systemui:keyIdentifier="1"
-                systemui:keyRepeat="false" />
+                systemui:keyRepeat="false"
+                systemui:keyColorUri="eos_systemui_home_key_color"
+                systemui:keyGlowColorUri="eos_systemui_home_glow_color" />
 
             <View
                 android:layout_width="match_parent"
@@ -89,7 +93,9 @@
                 android:contentDescription="@string/accessibility_recent"
                 android:src="@drawable/ic_sysbar_recent"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
-                systemui:keyIdentifier="2" />
+                systemui:keyIdentifier="2"
+                systemui:keyColorUri="eos_systemui_recent_key_color"
+                systemui:keyGlowColorUri="eos_systemui_recent_glow_color" />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
                 android:id="@+id/menu"
@@ -101,7 +107,9 @@
                 android:visibility="invisible"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="82"
-                systemui:keyIdentifier="3" />
+                systemui:keyIdentifier="3"
+                systemui:keyColorUri="eos_systemui_menu_key_color"
+                systemui:keyGlowColorUri="eos_systemui_menu_glow_color" />
         </LinearLayout>
 
         <!-- lights out layout to match exactly -->
@@ -198,7 +206,9 @@
                 android:visibility="invisible"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 systemui:keyCode="82"
-                systemui:keyIdentifier="3" />
+                systemui:keyIdentifier="3"
+                systemui:keyColorUri="eos_systemui_menu_key_color"
+                systemui:keyGlowColorUri="eos_systemui_menu_glow_color" />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
                 android:id="@+id/recent_apps"
@@ -208,7 +218,9 @@
                 android:contentDescription="@string/accessibility_recent"
                 android:src="@drawable/ic_sysbar_recent_land"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
-                systemui:keyIdentifier="2" />
+                systemui:keyIdentifier="2"
+                systemui:keyColorUri="eos_systemui_recent_key_color"
+                systemui:keyGlowColorUri="eos_systemui_recent_glow_color" />
 
             <View
                 android:layout_width="match_parent"
@@ -226,7 +238,9 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 systemui:keyCode="3"
                 systemui:keyIdentifier="1"
-                systemui:keyRepeat="false" />
+                systemui:keyRepeat="false"
+                systemui:keyColorUri="eos_systemui_home_key_color"
+                systemui:keyGlowColorUri="eos_systemui_home_glow_color" />
 
             <View
                 android:layout_width="match_parent"
@@ -243,7 +257,9 @@
                 android:src="@drawable/ic_sysbar_back_land"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 systemui:keyCode="4"
-                systemui:keyIdentifier="0" />
+                systemui:keyIdentifier="0"                
+                systemui:keyColorUri="eos_systemui_back_key_color"
+                systemui:keyGlowColorUri="eos_systemui_back_glow_color" />
 
             <View
                 android:layout_width="match_parent"

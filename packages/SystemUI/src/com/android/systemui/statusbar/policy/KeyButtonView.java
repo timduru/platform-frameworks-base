@@ -81,6 +81,8 @@ public class KeyButtonView extends ImageView {
     IWindowManager mWindowManager;
     int mKeyFilterColor;
     int mGlowFilterColor;
+    String mKeyColorUri;
+    String mGlowColorUri;
     int mKeyIndex;
 
     Runnable mCheckLongPress = new Runnable() {
@@ -102,20 +104,6 @@ public class KeyButtonView extends ImageView {
             }
         }
     };
-
-    private static int parseColorString(String colorString, int index) {
-        if (colorString == null || colorString.equals("") || colorString.equals(" ")) {
-            return -1;
-        }
-        String[] colors = colorString.split("\\|");
-        int color;
-        try {
-            color = Integer.parseInt(colors[index]);
-        } catch (NumberFormatException e) {
-            color = -1;
-        }
-        return color;
-    }
 
     public void disableLongPressIntercept(Boolean disable) {
         mDisabled = disable;
@@ -156,6 +144,8 @@ public class KeyButtonView extends ImageView {
         mKeyIndex = a.getInteger(R.styleable.KeyButtonView_keyIdentifier, 0);
         glowScaleWidth = a.getFloat(R.styleable.KeyButtonView_glowScaleFactorWidth, 1.0f);
         glowScaleHeight = a.getFloat(R.styleable.KeyButtonView_glowScaleFactorHeight, 1.0f);
+        mKeyColorUri = a.getString(R.styleable.KeyButtonView_keyColorUri);
+        mGlowColorUri = a.getString(R.styleable.KeyButtonView_keyGlowColorUri);
 
         mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
 
@@ -175,7 +165,7 @@ public class KeyButtonView extends ImageView {
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVKEY_COLOR), false,
+                Settings.System.getUriFor(mKeyColorUri), false,
                 new ContentObserver(new Handler()) {
                     @Override
                     public void onChange(boolean selfChange) {
@@ -183,25 +173,20 @@ public class KeyButtonView extends ImageView {
                     }
                 });
         mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVGLOW_COLOR), false,
+                Settings.System.getUriFor(mGlowColorUri), false,
                 new ContentObserver(new Handler()) {
                     @Override
                     public void onChange(boolean selfChange) {
                         updateGlowFilter();
                     }
                 });
-        mKeyFilterColor = parseColorString(Settings.System.getString(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_NAVKEY_COLOR), mKeyIndex);
-        mGlowFilterColor = parseColorString(
-                Settings.System.getString(mContext.getContentResolver(),
-                        EOSConstants.SYSTEMUI_NAVGLOW_COLOR), mKeyIndex);
         updateKeyFilter();
         updateGlowFilter();
     }
 
     private void updateKeyFilter() {
-        int color = parseColorString(Settings.System.getString(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_NAVKEY_COLOR), mKeyIndex);
+        int color = Settings.System.getInt(mContext.getContentResolver(),
+                mKeyColorUri, EOSConstants.SYSTEMUI_NAVBAR_SOFTKEY_DEFAULT);
         if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
             mKeyFilterColor = EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF;
             getDrawable().clearColorFilter();
@@ -212,14 +197,14 @@ public class KeyButtonView extends ImageView {
         applyKeyFilter();
     }
 
-    private void applyKeyFilter() {
+    public void applyKeyFilter() {
         if (mKeyFilterColor != EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF)
             getDrawable().setColorFilter(mKeyFilterColor, mMode);
     }
 
     private void updateGlowFilter() {
-        int color = parseColorString(Settings.System.getString(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_NAVGLOW_COLOR), mKeyIndex);
+        int color = mGlowFilterColor = Settings.System.getInt(mContext.getContentResolver(),
+                mGlowColorUri, EOSConstants.SYSTEMUI_NAVBAR_SOFTKEY_DEFAULT);
         if (color == EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF) {
             mGlowFilterColor = EOSConstants.SYSTEMUI_NAVKEY_COLOR_DEF;
             mGlowBG.clearColorFilter();
@@ -239,6 +224,7 @@ public class KeyButtonView extends ImageView {
     protected void onDraw(Canvas canvas) {
         if (mGlowBG != null) {
             canvas.save();
+            if (mAnimRunning) applyGlowFilter();
             final int w = getWidth();
             final int h = getHeight();
             final float aspect = (float) mGlowWidth / mGlowHeight;

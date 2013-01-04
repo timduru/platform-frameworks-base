@@ -30,6 +30,8 @@
         <attr name="glowScaleFactorHeight" format="float" />
         <!-- identifies for color controls and who knows what else -->
         <attr name="keyIdentifier" format="integer" />
+        <attr name="keyColorUri" format="string" />
+        <attr name="keyGlowColorUri" format="string" />
     </declare-styleable>
     <declare-styleable name="ToggleSlider">
         <attr name="text" format="string" />
