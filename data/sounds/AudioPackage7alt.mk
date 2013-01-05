@@ -6,12 +6,6 @@
 LOCAL_PATH:= frameworks/base/data/sounds
 
 PRODUCT_COPY_FILES += \
-	$(LOCAL_PATH)/alarms/ogg-jp/Argon.ogg:system/media/audio/alarms/Argon.ogg \
-	$(LOCAL_PATH)/alarms/ogg-jp/Carbon.ogg:system/media/audio/alarms/Carbon.ogg \
-	$(LOCAL_PATH)/alarms/ogg-jp/Helium.ogg:system/media/audio/alarms/Helium.ogg \
-	$(LOCAL_PATH)/alarms/ogg-jp/Krypton.ogg:system/media/audio/alarms/Krypton.ogg \
-	$(LOCAL_PATH)/alarms/ogg-jp/Neon.ogg:system/media/audio/alarms/Neon.ogg \
-	$(LOCAL_PATH)/alarms/ogg-jp/Oxygen.ogg:system/media/audio/alarms/Oxygen.ogg \
 	$(LOCAL_PATH)/effects/ogg/Effect_Tick.ogg:system/media/audio/ui/Effect_Tick.ogg \
 	$(LOCAL_PATH)/effects/ogg/KeypressStandard_120.ogg:system/media/audio/ui/KeypressStandard.ogg \
 	$(LOCAL_PATH)/effects/ogg/KeypressSpacebar_120.ogg:system/media/audio/ui/KeypressSpacebar.ogg \
