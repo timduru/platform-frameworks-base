@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.EosUiController;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -44,9 +45,21 @@ public class BatteryController extends BroadcastReceiver {
 
     private int mLastPercentage = 0;
     private boolean mPlugged = false;
+    private ContentObserver mPercentObserver;
 
     private ArrayList<BatteryStateChangeCallback> mChangeCallbacks =
             new ArrayList<BatteryStateChangeCallback>();
+
+    private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {        
+        @Override
+        public void observerStateChanged(boolean state) {
+            if(state == EosUiController.OBSERVERS_ON) {
+                registerObservers();
+            } else {
+                unregisterObservers();
+            }            
+        }
+    };
 
     public interface BatteryStateChangeCallback {
         public void onBatteryLevelChanged(int level, boolean pluggedIn);
@@ -58,14 +71,23 @@ public class BatteryController extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         context.registerReceiver(this, filter);
+        mPercentObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                updateLabelPercent();
+            }
+        };
+        EosUiController.registerObserverStateListener(mListener);
+    }
+
+    private void registerObservers() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE), false,
-                new ContentObserver(new Handler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateLabelPercent();
-                    }
-                });
+                mPercentObserver);
+    }
+
+    private void unregisterObservers() {
+        mContext.getContentResolver().unregisterContentObserver(mPercentObserver);
     }
 
     private void updateLabelPercent() {

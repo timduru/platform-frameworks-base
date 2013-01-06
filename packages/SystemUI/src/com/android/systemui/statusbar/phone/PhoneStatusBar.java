@@ -352,6 +352,16 @@ public class PhoneStatusBar extends BaseStatusBar {
     };
 
     EosUiController mEosController;
+    EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {        
+        @Override
+        public void observerStateChanged(boolean state) {
+            if(state == EosUiController.OBSERVERS_ON) {
+                registerObservers();
+            } else {
+                unregisterObservers();
+            }            
+        }
+    };
     ContentObserver mEosQsObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
@@ -416,6 +426,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mStatusBarView.setBar(this);
         mEosController.setBar(this);
         mEosController.setStatusBarView(mStatusBarView);
+        EosUiController.registerObserverStateListener(mListener);
 
         PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
         mStatusBarView.setPanelHolder(holder);
@@ -664,20 +675,26 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_SCREEN_ON);
         context.registerReceiver(mBroadcastReceiver, filter);
 
-        context.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_DISABLED), false,
-                mEosQsObserver);
-        context.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES), false,
-                mEosQsObserver);
-        context.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT), false,
-                mEosQsObserver);
-
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
 
         return mStatusBarView;
+    }
+
+    private void registerObservers() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_DISABLED), false,
+                mEosQsObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES), false,
+                mEosQsObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT), false,
+                mEosQsObserver);
+    }
+
+    private void unregisterObservers() {
+        mContext.getContentResolver().unregisterContentObserver(mEosQsObserver);
     }
 
     @Override

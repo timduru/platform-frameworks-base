@@ -400,6 +400,18 @@ public final class EOSConstants {
     public static final String ACTION_TORCH_OFF = "android.intent.action.TORCH_OFF";
 
     /**
+     * Broadcast Action: Notify listeners control center is running or stopped
+     *
+     * @hide
+     */
+    public static final String INTENT_EOS_CONTROL_CENTER = "org.teameos.intent.CONTROL_CENTER";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_EOS_CONTROL_CENTER_EXTRAS_STATE = "org.teameos.intent.CONTROL_CENTER_STATE";
+
+    /**
      * @hide
      */
     public static final String INTENT_TELEPHONY_LTE_TOGGLE = "org.teameos.intent.action.TOGGLE_LTE";
