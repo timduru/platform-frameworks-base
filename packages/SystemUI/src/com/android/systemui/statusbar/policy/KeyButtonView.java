@@ -52,6 +52,8 @@ import android.view.ViewConfiguration;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.EosUiController;
+import com.android.systemui.statusbar.EosUiController.OnObserverStateChangedListener;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -84,6 +86,18 @@ public class KeyButtonView extends ImageView {
     String mKeyColorUri;
     String mGlowColorUri;
     int mKeyIndex;
+    private ContentObserver mGlowColorObserver;
+    private ContentObserver mKeyColorObserver;
+    private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {        
+        @Override
+        public void observerStateChanged(boolean state) {
+            if(state == EosUiController.OBSERVERS_ON) {
+                registerObservers();
+            } else {
+                unregisterObservers();
+            }            
+        }
+    };
 
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -164,24 +178,33 @@ public class KeyButtonView extends ImageView {
 
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(mKeyColorUri), false,
-                new ContentObserver(new Handler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateKeyFilter();
-                    }
-                });
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(mGlowColorUri), false,
-                new ContentObserver(new Handler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateGlowFilter();
-                    }
-                });
+        mKeyColorObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                updateKeyFilter();
+            }
+        };
+        mGlowColorObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                updateGlowFilter();
+            }
+        };
+        EosUiController.registerObserverStateListener(mListener);
         updateKeyFilter();
         updateGlowFilter();
+    }
+
+    private void registerObservers() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(mKeyColorUri), false, mKeyColorObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(mGlowColorUri), false, mGlowColorObserver);
+    }
+
+    private void unregisterObservers() {
+        mContext.getContentResolver().unregisterContentObserver(mKeyColorObserver);
+        mContext.getContentResolver().unregisterContentObserver(mGlowColorObserver);
     }
 
     private void updateKeyFilter() {
@@ -330,8 +353,8 @@ public class KeyButtonView extends ImageView {
                 mAnimRunning = true;
                 as.addListener(new AnimatorListener() {
                     public void onAnimationEnd(Animator animation) {
-                        applyKeyFilter();
-                        applyGlowFilter();
+                        updateKeyFilter();
+                        updateGlowFilter();
                         mAnimRunning = false;
                     }
 
@@ -344,6 +367,8 @@ public class KeyButtonView extends ImageView {
                     }
 
                     public void onAnimationStart(Animator animation) {
+                        updateKeyFilter();
+                        updateGlowFilter();
                         ;
                     }
                 });

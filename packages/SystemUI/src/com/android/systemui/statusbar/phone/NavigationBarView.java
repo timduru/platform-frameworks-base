@@ -49,6 +49,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
+import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
@@ -94,6 +95,19 @@ public class NavigationBarView extends LinearLayout {
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
     final static int MSG_CHECK_INVALID_LAYOUT = 8686;
 
+    private ContentObserver mMenuPersistObserver;
+    private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {
+        @Override
+        public void observerStateChanged(boolean state) {
+            if (state == EosUiController.OBSERVERS_ON) {
+                registerObservers();
+            } else {
+                unregisterObservers();
+            }
+
+        }
+    };
+
     private class H extends Handler {
         public void handleMessage(Message m) {
             switch (m.what) {
@@ -115,6 +129,17 @@ public class NavigationBarView extends LinearLayout {
                     break;
             }
         }
+    }
+
+    private void registerObservers() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST), false,
+                mMenuPersistObserver);
+
+    }
+
+    private void unregisterObservers() {
+        mContext.getContentResolver().unregisterContentObserver(mMenuPersistObserver);
     }
 
     public void setDelegateView(View view) {
@@ -189,15 +214,13 @@ public class NavigationBarView extends LinearLayout {
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
         mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
         mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
-
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST), false,
-                new ContentObserver(new Handler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateMenuPersist();
-                    }
-                });
+        mMenuPersistObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                updateMenuPersist();
+            }
+        };
+        EosUiController.registerObserverStateListener(mListener);
     }
 
     public void notifyScreenOn(boolean screenOn) {

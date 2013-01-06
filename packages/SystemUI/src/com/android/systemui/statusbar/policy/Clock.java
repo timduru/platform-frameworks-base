@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 import com.android.internal.R;
+import com.android.systemui.statusbar.EosUiController;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -60,6 +61,22 @@ public class Clock extends TextView {
     // set bools at init for easy management
     private boolean mIsSignalView = false;
     private boolean mIsCenterView = false;
+    private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {
+        @Override
+        public void observerStateChanged(boolean state) {
+            if (state == EosUiController.OBSERVERS_ON) {
+                if (mIsSignalView || mIsCenterView) {
+                    getContext().getContentResolver().registerContentObserver(
+                            Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_AMPM), false,
+                            mClockAmPmObserver);
+                }
+            } else {
+                if (mIsSignalView || mIsCenterView) {
+                    getContext().getContentResolver().unregisterContentObserver(mClockAmPmObserver);
+                }
+            }
+        }
+    };
 
     public Clock(Context context) {
         this(context, null);
@@ -78,6 +95,7 @@ public class Clock extends TextView {
                 mIsCenterView = true;
             }
         }
+        EosUiController.registerObserverStateListener(mListener);
     }
 
     @Override
@@ -94,12 +112,6 @@ public class Clock extends TextView {
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
 
             getContext().registerReceiver(mIntentReceiver, filter, null, getHandler());
-
-            if (mIsSignalView || mIsCenterView) {
-                getContext().getContentResolver().registerContentObserver(
-                        Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_AMPM), false,
-                        mClockAmPmObserver);
-            }
         }
 
         // NOTE: It's safe to do these after registering the receiver since the
@@ -124,9 +136,6 @@ public class Clock extends TextView {
         super.onDetachedFromWindow();
         if (mAttached) {
             getContext().unregisterReceiver(mIntentReceiver);
-            if (mIsSignalView || mIsCenterView) {
-                getContext().getContentResolver().unregisterContentObserver(mClockAmPmObserver);
-            }
             mAttached = false;
         }
     }
