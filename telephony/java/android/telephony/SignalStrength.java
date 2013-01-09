@@ -465,17 +465,16 @@ public class SignalStrength implements Parcelable {
      * @hide
      */
     public int getLevel() {
-        int level = -1;
+        int level;
         String motoRILVer = SystemProperties.get("gsm.version.ril-impl", "");
         if (isGsm) {
+            level = getLteLevel();
             if (motoRILVer.indexOf("ver4RIL") != -1){
                 level = getGsmLevel();
            
             } else if (level == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
                 level = getGsmLevel();
-            } else {
-			level = getLteLevel();
-			}
+            }
         } else {
             int cdmaLevel = getCdmaLevel();
             int evdoLevel = getEvdoLevel();
