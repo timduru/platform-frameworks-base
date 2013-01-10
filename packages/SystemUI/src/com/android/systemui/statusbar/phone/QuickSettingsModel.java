@@ -43,6 +43,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
+import com.android.internal.telephony.Phone;
 import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -98,6 +99,15 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     public static class BluetoothState extends State {
         boolean connected = false;
         String stateContentDescription;
+    }
+    
+    public static class LteState extends State {
+        int settingsNetworkMode;
+        public static final int DEFAULT_MODE = Phone.PREFERRED_NT_MODE;
+        public static final int CDMA_ONLY = Phone.NT_MODE_CDMA;
+        public static final int LTE_CDMA = Phone.NT_MODE_GLOBAL;
+        public static final String EOS_TELEPHONY_INTENT = EOSConstants.INTENT_TELEPHONY_LTE_TOGGLE;
+        public static final String EOS_TELEPHONY_MODE_KEY = EOSConstants.INTENT_TELEPHONY_LTE_TOGGLE_KEY;
     }
 
     /** The callback to update a given tile. */
@@ -172,6 +182,24 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                     false, this, mUserTracker.getCurrentUserId());
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS),
+                    false, this, mUserTracker.getCurrentUserId());
+        }
+    }
+    
+    private class LteStateObserver extends ContentObserver {
+        public LteStateObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            refreshLteTile();
+        }
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Global.PREFERRED_NETWORK_MODE),
                     false, this, mUserTracker.getCurrentUserId());
         }
     }
@@ -261,6 +289,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mSettingsCallback;
     private State mSettingsState = new State();
 
+    private QuickSettingsTileView mLteTile;
+    private RefreshCallback mLteCallback;
+    private LteState mLteState = new LteState();
+
     private String SETTINGS = EOSConstants.SYSTEMUI_PANEL_SETTINGS_TILE;
     private String SEEKBAR = EOSConstants.SYSTEMUI_PANEL_SEEKBAR_TILE;
     private String BATTERY = EOSConstants.SYSTEMUI_PANEL_BATTERY_TILE;
@@ -274,10 +306,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private String RINGER = EOSConstants.SYSTEMUI_PANEL_RINGER_TILE;
     private String WIFIAP = EOSConstants.SYSTEMUI_PANEL_WIFIAP_TILE;
     private String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
+    private String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
     private String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
     private String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
 
     private VolumeObserver mVolumeObserver;
+    private LteStateObserver mLteObserver;
 
     // keep aosp constructor just in case
     public QuickSettingsModel(Context context) {
@@ -308,6 +342,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBugreportObserver.startObserving();
         mBrightnessObserver = new BrightnessObserver(mHandler);
         mBrightnessObserver.startObserving();
+        if (isToggleEnabled(LTE)) {
+            mLteObserver = new LteStateObserver(mHandler);
+            mLteObserver.startObserving();
+        }
 
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(Intent.ACTION_ALARM_CHANGED);
@@ -378,6 +416,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mScreenCallback.refreshView(mScreenTile, mScreenState);
     }
 
+    // LTE
+    void addLteTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mLteTile = view;
+        mLteCallback = cb;
+        refreshLteTile();
+    }
+
     // Settings
     void addSettingsTile(QuickSettingsTileView view, RefreshCallback cb) {
         mSettingsTile = view;
@@ -390,6 +435,15 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mSettingsState.label = r.getString(R.string.quick_settings_settings_label);
         if (isToggleEnabled(SETTINGS)) {
             mSettingsCallback.refreshView(mSettingsTile, mSettingsState);
+        }
+    }
+
+    void refreshLteTile() {
+        mLteState.settingsNetworkMode = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Global.PREFERRED_NETWORK_MODE,
+                Phone.PREFERRED_NT_MODE);
+        if (isToggleEnabled(LTE)) {
+            mLteCallback.refreshView(mLteTile, mLteState);
         }
     }
 

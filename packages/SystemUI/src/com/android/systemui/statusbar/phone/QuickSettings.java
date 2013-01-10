@@ -21,6 +21,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 
 import com.android.systemui.statusbar.phone.QuickSettingsModel.BluetoothState;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.LteState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
@@ -40,6 +41,7 @@ import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.app.StatusBarManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -165,6 +167,7 @@ class QuickSettings {
     private String RINGER = EOSConstants.SYSTEMUI_PANEL_RINGER_TILE;
     private String WIFIAP = EOSConstants.SYSTEMUI_PANEL_WIFIAP_TILE;
     private String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
+    private String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
     private String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
     private String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
 
@@ -992,7 +995,60 @@ class QuickSettings {
                 }
             });
             parent.addView(ringerTile);
-            // mDynamicSpannedTiles.add(ringerTile);
+        } else if (tile.equals(LTE)) {
+            QuickSettingsTileView lteTile = (QuickSettingsTileView)
+                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+            lteTile.setContent(R.layout.quick_settings_tile_lte, inflater);
+            lteTile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int currentMode = Settings.Secure.getInt(mContext.getContentResolver(),
+                            Settings.Global.PREFERRED_NETWORK_MODE,
+                            LteState.DEFAULT_MODE);
+                    int newMode = LteState.DEFAULT_MODE;
+                    switch (currentMode) {
+                        case LteState.LTE_CDMA:
+                            newMode = LteState.CDMA_ONLY;
+                            break;
+                        case LteState.CDMA_ONLY:
+                            newMode = LteState.LTE_CDMA;
+                            break;
+                    }
+                    Intent intent = new Intent(LteState.EOS_TELEPHONY_INTENT);
+                    intent.putExtra(LteState.EOS_TELEPHONY_MODE_KEY, newMode);
+                    mContext.sendBroadcast(intent);
+                }
+            });
+            lteTile.setOnLongClickListener(new View.OnLongClickListener() {                
+                @Override
+                public boolean onLongClick(View v) {
+                    Intent intent = new Intent("com.android.phone.MobileNetworkSettings");
+                    intent.addCategory(Intent.ACTION_MAIN);
+                    intent.setClassName("com.android.phone", "com.android.phone.MobileNetworkSettings");
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(intent);
+                    StatusBarManager statusbar = (StatusBarManager) mContext.getSystemService("statusbar");
+                    statusbar.collapsePanels();
+                    return true;
+                }
+            });
+            mModel.addLteTile(lteTile, new QuickSettingsModel.RefreshCallback() {                
+                @Override
+                public void refreshView(QuickSettingsTileView view, State state) {
+                    int newMode = ((LteState)state).settingsNetworkMode;
+                    TextView tv = (TextView) view.findViewById(R.id.lte_textview);
+                    ImageView iv = (ImageView) view.findViewById(R.id.lte_image);
+                    int stringRes = (newMode == LteState.LTE_CDMA
+                            ? R.string.quick_settings_lte_on_label
+                            : R.string.quick_settings_lte_off_label);
+                    int iconRes = (newMode == LteState.LTE_CDMA
+                            ? R.drawable.ic_qs_lte_on
+                            : R.drawable.ic_qs_lte_off);
+                    iv.setImageResource(iconRes);
+                    tv.setText(stringRes);                    
+                }
+            });
+            parent.addView(lteTile);
         } else if (tile.equals(BATTERY)) {
             // Battery
             QuickSettingsTileView batteryTile = (QuickSettingsTileView)

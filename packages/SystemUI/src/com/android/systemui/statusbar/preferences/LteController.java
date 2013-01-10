@@ -7,8 +7,9 @@ import android.app.StatusBarManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.wifi.WifiManager;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.View;
 
@@ -23,11 +24,14 @@ public class LteController extends SettingsController {
     private static final String EOS_TELEPHONY_MODE_KEY = EOSConstants.INTENT_TELEPHONY_LTE_TOGGLE_KEY;
     private Context mContext;
     private ContentResolver mResolver;
+    private LteStateObserver mLteObserver;
 
     public LteController(Context context, View button) {
         super(context, button);
         mContext = context;
         mResolver = mContext.getContentResolver();
+        mLteObserver = new LteStateObserver(new Handler());
+        mLteObserver.startObserving();
         getIcons(R.drawable.toggle_lte_off, R.drawable.toggle_lte);
         updateController();
     }
@@ -49,7 +53,7 @@ public class LteController extends SettingsController {
     }
 
     protected void setPreferenceStatus(int status) {
-        int newMode = 0;
+        int newMode = preferredNetworkMode;
         switch (status) {
             case STATE_ON:
                 newMode = LTE_CDMA;
@@ -73,5 +77,23 @@ public class LteController extends SettingsController {
         StatusBarManager statusbar = (StatusBarManager) mContext.getSystemService("statusbar");
         statusbar.collapsePanels();
         return true;
+    }
+
+    private class LteStateObserver extends ContentObserver {
+        public LteStateObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateController();
+        }
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Global.PREFERRED_NETWORK_MODE),
+                    false, this, UserHandle.USER_ALL);
+        }
     }
 }

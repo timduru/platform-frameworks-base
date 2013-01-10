@@ -703,6 +703,11 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final String SYSTEMUI_PANEL_LTE_TILE = "QS_LTE";
+
+    /**
+     * @hide
+     */
     public static final String SYSTEMUI_PANEL_TORCH_INTENT = "QuickSettingsMod.UPDATE_TORCH_TILE";
 
     /**
