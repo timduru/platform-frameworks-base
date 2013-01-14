@@ -304,6 +304,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
+    boolean mHardKeyboardEnabled;
+
     // XXX: gesture research
     private final GestureRecorder mGestureRec = DEBUG_GESTURES
             ? new GestureRecorder("/sdcard/statusbar_gestures.dat")
@@ -1942,7 +1944,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     // CommandQueue
     public void setNavigationIconHints(int hints) {
-        if (hints == mNavigationIconHints)
+        mHardKeyboardEnabled = mContext.getResources().getConfiguration().keyboard
+                == Configuration.KEYBOARD_QWERTY;
+        if ((hints == mNavigationIconHints ) || mHardKeyboardEnabled)
             return;
 
         mNavigationIconHints = hints;
