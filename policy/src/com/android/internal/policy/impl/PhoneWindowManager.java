@@ -3930,10 +3930,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean wifiState = wifiManager.isWifiEnabled();
         if (wifiState) {
             wifiManager.setWifiEnabled(false);
-            //Toast.makeText(mContext, "Wifi Disabled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Wifi Disabled", Toast.LENGTH_SHORT).show();
         } else {
             wifiManager.setWifiEnabled(true);
-            //Toast.makeText(mContext, "Wifi Enabled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Wifi Enabled", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -3942,10 +3942,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean btState = btAdapter.isEnabled();
         if (btState) {
             btAdapter.disable();
-            //Toast.makeText(mContext, "Bluetooth Disabled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Bluetooth Disabled", Toast.LENGTH_SHORT).show();
         } else {
             btAdapter.enable();
-            //Toast.makeText(mContext, "Bluetooth Enabled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Bluetooth Enabled", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -4033,7 +4033,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         android.provider.Settings.System.putInt(mContext.getContentResolver(),
                 EOSConstants.DEVICE_SETTINGS_TOUCHPAD_STATUS, touchpadStatus);
         String status = (touchpadStatus == EOSConstants.DEVICE_SETTINGS_TOUCHPAD_ENABLED) ? "Enabled" : "Disabled";
-        //Toast.makeText(mContext, "Touchpad " + status, Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext, "Touchpad " + status, Toast.LENGTH_SHORT).show();
     }
 
     /** {@inheritDoc} */

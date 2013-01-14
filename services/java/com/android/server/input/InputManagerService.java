@@ -134,7 +134,7 @@ public class InputManagerService extends IInputManager.Stub
             mTempFullKeyboards = new ArrayList<InputDevice>(); // handler thread only
     private boolean mKeyboardLayoutNotificationShown;
     private PendingIntent mKeyboardLayoutIntent;
-//    private Toast mSwitchedKeyboardLayoutToast;
+    private Toast mSwitchedKeyboardLayoutToast;
 
     // State for vibrator tokens.
     private Object mVibratorLock = new Object();
@@ -1043,7 +1043,7 @@ public class InputManagerService extends IInputManager.Stub
             }
 
             if (changed) {
-                /*if (mSwitchedKeyboardLayoutToast != null) {
+                if (mSwitchedKeyboardLayoutToast != null) {
                     mSwitchedKeyboardLayoutToast.cancel();
                     mSwitchedKeyboardLayoutToast = null;
                 }
@@ -1054,7 +1054,7 @@ public class InputManagerService extends IInputManager.Stub
                                 mContext, keyboardLayout.getLabel(), Toast.LENGTH_SHORT);
                         mSwitchedKeyboardLayoutToast.show();
                     }
-                }*/
+                }
 
                 reloadKeyboardLayouts();
             }
