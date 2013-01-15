@@ -535,11 +535,14 @@ public class EosUiController extends ActionHandler {
         int color = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_STATUSBAR_COLOR,
                 EOSConstants.SYSTEMUI_STATUSBAR_COLOR_DEF);
-        if (color == -1)
-            color = EOSConstants.SYSTEMUI_NAVBAR_COLOR_DEF;
-        // we don't want alpha here
-        color = Color.rgb(Color.red(color), Color.green(color), Color.blue(color));
-        mStatusBarView.setBackgroundColor(color);
+        //For themes
+        mStatusBarView.setBackground(mContext.getResources().getDrawable(R.drawable.status_bar_background));
+        if (color != -1) {
+            // we don't want alpha here
+            mStatusBarWindow.setBackground(null);
+            color = Color.rgb(Color.red(color), Color.green(color), Color.blue(color));
+            mStatusBarView.setBackgroundColor(color);
+        }
     }
 
     private void updateBarVisibility() {

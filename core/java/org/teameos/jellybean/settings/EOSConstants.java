@@ -144,7 +144,7 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final int SYSTEMUI_STATUSBAR_COLOR_DEF = 0xFF000000;
+    public static final int SYSTEMUI_STATUSBAR_COLOR_DEF = -1;
 
     /**
      * @hide
