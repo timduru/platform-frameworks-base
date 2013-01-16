@@ -1062,4 +1062,9 @@
         <item>250</item>
         <item>250</item>
     </integer-array>
+
+    <!-- don't allow a desiredWallpaper dimension bigger than these values -->
+    <integer name="config_desiredWallpaperSizeMaxWidth">-1</integer>
+    <integer name="config_desiredWallpaperSizeMaxHeight">-1</integer>
+
 </resources>

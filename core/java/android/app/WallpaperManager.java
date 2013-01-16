@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -686,6 +687,18 @@ public class WallpaperManager {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
             } else {
+                int maxW = -1;
+                int maxH = -1;
+                Resources res = mContext.getResources();
+                if(res != null) {
+                    maxW = res.getInteger(com.android.internal.R.integer.config_desiredWallpaperSizeMaxWidth);
+                    maxH = res.getInteger(com.android.internal.R.integer.config_desiredWallpaperSizeMaxHeight);
+                }
+
+                if (maxW > 0 && minimumWidth > maxW) minimumWidth = maxW;
+                if (maxH > 0 && minimumHeight > maxH) minimumHeight = maxH;
+
+                Log.w(TAG, "suggestDesiredDimensions:" + minimumWidth + "x" + minimumHeight);
                 sGlobals.mService.setDimensionHints(minimumWidth, minimumHeight);
             }
         } catch (RemoteException e) {
