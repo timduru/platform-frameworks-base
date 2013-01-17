@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/eos_dream_settings_title"
+    android:key="eos_dream_settings">
+    <CheckBoxPreference android:key="eos_dream_interactive"
+        android:id="@+id/eos_dream_interactive_pref"
+        android:title="@string/eos_dream_interactive_title"
+        android:defaultValue="false"
+        android:persistent="true"/>
+    <CheckBoxPreference android:key="eos_dream_rotation"
+        android:id="@+id/eos_dream_rotation_pref"
+        android:title="@string/eos_dream_rotation_title"
+        android:defaultValue="false"
+        android:persistent="true"/>
+    <EditTextPreference android:key="eos_dream_count"
+        android:id="@+id/eos_dream_count_pref"
+        android:title="@string/eos_dream_count_title"
+        android:persistent="true"
+        android:numeric="decimal"
+        android:enabled="true"
+        android:maxLength="2"/>
+    <CheckBoxPreference android:key="eos_dream_debug"
+        android:id="@+id/eos_dream_debug_pref"
+        android:title="@string/eos_dream_debug_title"
+        android:defaultValue="false"
+        android:persistent="true"/>
+</PreferenceScreen>

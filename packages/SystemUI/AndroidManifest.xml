@@ -261,6 +261,32 @@
             android:launchMode="singleTop"
             android:theme="@android:style/Theme.Holo.Panel" >
         </activity>
+        <!-- Dream (screensaver) implementation -->
+        <service
+            android:name=".eos.EosDream"
+            android:exported="true"
+            android:label="@string/eos_dream_title"
+            android:icon="@drawable/ic_eos_dream" >
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.dream"
+                android:resource="@xml/eos_dream_info" />
+        </service>
+        <!-- Settings activity for screensaver -->
+        <activity android:name=".eos.EosDreamSettings"
+                android:label="@string/eos_dream_title"
+                android:icon="@drawable/ic_eos_dream"
+                android:taskAffinity=""
+                android:excludeFromRecents="true"
+                android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
