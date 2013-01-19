@@ -771,4 +771,14 @@ public final class EOSConstants {
 
         return map;
     }
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEM_DISABLE_LOW_BATTERY_WARNING = "eos_system_disable_low_battery_warning";
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEM_DISABLE_LOW_BATTERY_WARNING_DEF = 0;
 }
