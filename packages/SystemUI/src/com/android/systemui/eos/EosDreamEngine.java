@@ -32,19 +32,22 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import java.util.Random;
+
 import com.android.systemui.R;
 
 public class EosDreamEngine extends Activity {
 
-    private static boolean DEBUG;
+    private static boolean mDebugMode;
     private static boolean mIsRotationEnabled;
     private static int mNumberOfMobs;
+    private static float mSpeedOfMobs;
+    private static boolean mIsTransparent;
 
     // set true if a settings change occurs
     // then we know to force dream reset
     private static boolean mShouldReset = false;
 
-    private Dream mBoard;
+    private Dream mDream;
 
     public static class Dream extends FrameLayout
     {
@@ -90,7 +93,7 @@ public class EosDreamEngine extends Activity {
             return array[sRNG.nextInt(array.length)];
         }
 
-        static float MIN_SCALE = 0.2f;
+        static float MIN_SCALE = 0.4f;
         static float MAX_SCALE = 1f;
 
         static int MAX_RADIUS = (int) (576 * MAX_SCALE);
@@ -131,8 +134,10 @@ public class EosDreamEngine extends Activity {
                 h = mobBits.getHeight();
                 w = mobBits.getWidth();
 
-                if (DEBUG) {
+                if (mDebugMode || mIsTransparent) {
                     mob.setAlpha(0x80);
+                } else {
+                    mob.setAlpha(0xFF);
                 }
                 this.setImageDrawable(mob);
 
@@ -213,9 +218,13 @@ public class EosDreamEngine extends Activity {
                     EosDreamSettings.COUNT, EosDreamSettings.DEFAULT_NUM_MOB);
             mIsRotationEnabled = Settings.System.getInt(context.getContentResolver(),
                     EosDreamSettings.ROTATION, 1) == 1 ? true : false;
-            DEBUG = (Settings.System.getInt(context.getContentResolver(),
-                    EosDreamSettings.DEBUG, 0) == 1 ? true : false);
-            setWillNotDraw(!DEBUG);
+            mDebugMode = (Settings.System.getInt(context.getContentResolver(),
+                    EosDreamSettings.DEBUG_MODE, 0) == 1 ? true : false);
+            mSpeedOfMobs = (float)Settings.System.getInt(context.getContentResolver(),
+                    EosDreamSettings.SPEED, EosDreamSettings.DEFAULT_SPEED);
+            mIsTransparent = Settings.System.getInt(context.getContentResolver(),
+                    EosDreamSettings.TRANSPARENT, 0) == 1 ? true : false;
+            setWillNotDraw(!mDebugMode);
         }
 
         private void reset() {
@@ -248,12 +257,13 @@ public class EosDreamEngine extends Activity {
                         if (!(v instanceof Mob))
                             continue;
                         Mob nv = (Mob) v;
-                        nv.update(deltaTime / 200f);
+                        nv.update(deltaTime / mSpeedOfMobs);
 
-                        if (mIsRotationEnabled)
+                        if (mIsRotationEnabled) {
                             nv.setRotation(nv.a);
-                        else
+                        } else {
                             nv.setRotation(0f);
+                        }
                         nv.setX(nv.x - nv.getPivotX());
                         nv.setY(nv.y - nv.getPivotY());
 
@@ -266,7 +276,7 @@ public class EosDreamEngine extends Activity {
                         }
                     }
 
-                    if (DEBUG)
+                    if (mDebugMode)
                         invalidate();
                 }
             });
@@ -310,7 +320,7 @@ public class EosDreamEngine extends Activity {
 
         @Override
         public void onDraw(Canvas c) {
-            if (DEBUG) {
+            if (mDebugMode) {
                 Paint pt = new Paint();
                 pt.setAntiAlias(true);
                 pt.setStyle(Paint.Style.STROKE);
@@ -326,8 +336,10 @@ public class EosDreamEngine extends Activity {
                     final float ty = b.getTranslationY();
                     c.drawCircle(b.x, b.y, b.r, pt);
                     c.drawCircle(tx, ty, 4, pt);
-                    c.drawLine(b.x, b.y, (float) (b.x + b.r * Math.sin(a)), (float) (b.y + b.r
-                            * Math.cos(a)), pt);
+                    if (mIsRotationEnabled) {
+                        c.drawLine(b.x, b.y, (float)(b.x + b.r * Math.sin(a)), (float)(b.y + b.r
+                                * Math.cos(a)), pt);
+                    }
                 }
             }
         }
@@ -340,14 +352,14 @@ public class EosDreamEngine extends Activity {
                 WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 );
-        mBoard = new Dream(this, null);
-        setContentView(mBoard);
+        mDream = new Dream(this, null);
+        setContentView(mDream);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mBoard.stopAnimation();
+        mDream.stopAnimation();
     }
 
     @Override
@@ -355,9 +367,9 @@ public class EosDreamEngine extends Activity {
         super.onResume();
         if (mShouldReset) {
             mShouldReset = false;
-            mBoard.clearAnimation();
+            mDream.clearAnimation();
         }
-        mBoard.startAnimation();
+        mDream.startAnimation();
     }
 
     public static void putRotation(boolean value) {
@@ -365,13 +377,23 @@ public class EosDreamEngine extends Activity {
         mShouldReset = true;
     }
 
-    public static void putMobs(int value) {
+    public static void putMobCount(int value) {
         mNumberOfMobs = value;
         mShouldReset = true;
     }
 
     public static void putDebugMode(boolean value) {
-        DEBUG = value;
+        mDebugMode = value;
+        mShouldReset = true;
+    }
+
+    public static void putMobSpeed(int value) {
+        mSpeedOfMobs = (float)value;
+        mShouldReset = true;
+    }
+
+    public static void putTransparent(boolean value) {
+        mIsTransparent = value;
         mShouldReset = true;
     }
 }

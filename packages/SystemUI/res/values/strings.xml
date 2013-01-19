@@ -561,13 +561,19 @@
     <!-- Eos dream interactive title -->
     <string name="eos_dream_interactive_title">Interactive mode</string>
     <!-- Eos dream rotation title -->
-    <string name="eos_dream_rotation_title">Rotating images</string>
+    <string name="eos_dream_rotation_title">Rotate images</string>
     <!-- Eos dream count title -->
     <string name="eos_dream_count_title">Number of images</string>
     <!-- Eos dream debug title -->
     <string name="eos_dream_debug_title">Debug Mode</string>
-    <!-- Eos dream Mob max count warning -->
-    <string name="eos_dream_mob_max_count_warning">Maximum Eos Mob size:</string>
+    <!-- Eos dream speed title -->
+    <string name="eos_dream_speed_title">Speed</string>
+    <!-- Eos dream speed dialog title -->
+    <string name="eos_dream_speed_dialog_title">Select the desired speed</string>
     <!-- Eos dream current mob count summary -->
-    <string name="eos_dream_current_mob_size">Current Mob size:</string>
+    <string name="eos_dream_current_mob_size">Current value:</string>
+    <!-- Eos dream Mob count bad value error -->
+    <string name="eos_dream_mob_bad_value">Value must be between 0 and 50</string>
+    <!-- Eos dream transparent title -->
+    <string name="eos_dream_transparent_title">Transparent images</string>
 </resources>
