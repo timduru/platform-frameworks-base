@@ -850,17 +850,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_DIALOG) {
             showOrHideRecentAppsDialog(RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS);
-        } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
-            try {
-                IStatusBarService statusbar = getStatusBarService();
-                if (statusbar != null) {
-                    statusbar.toggleRecentApps();
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "RemoteException when showing recent apps", e);
-                // re-acquire status bar service next time it is needed.
-                mStatusBarService = null;
-            }
+        } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) 
+            showRecentAppsSystemUI();
+    }
+
+    void showRecentAppsSystemUI() {
+        try {
+            IStatusBarService statusbar = getStatusBarService();
+            if (statusbar != null) statusbar.toggleRecentApps();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException when showing recent apps", e);
+            // re-acquire status bar service next time it is needed.
+            mStatusBarService = null;
         }
     }
 
@@ -1912,7 +1913,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // it handle it, because that gives us the correct 5 second
         // timeout.
         if (keyCode == KeyEvent.KEYCODE_HOME) {
-
             // If we have released the home key, and didn't do anything else
             // while it was pressed, then it is time to go home!
             if (!down) {
@@ -2026,6 +2026,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             res, Settings.Global.SHOW_PROCESSES, shown ? 0 : 1);
                     return -1;
                 }
+                if ((metaState & KeyEvent.META_CTRL_ON) == KeyEvent.META_CTRL_ON)
+                    showRecentAppsSystemUI();
             }
         } else if (keyCode == KeyEvent.KEYCODE_SEARCH) {
             if (down) {
