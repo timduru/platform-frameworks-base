@@ -573,7 +573,7 @@
     <!-- Eos dream current mob count summary -->
     <string name="eos_dream_current_mob_size">Current value:</string>
     <!-- Eos dream Mob count bad value error -->
-    <string name="eos_dream_mob_bad_value">Value must be between 0 and 50</string>
+    <string name="eos_dream_mob_bad_value">Value must be between 1 and 50</string>
     <!-- Eos dream transparent title -->
     <string name="eos_dream_transparent_title">Transparent images</string>
 </resources>
