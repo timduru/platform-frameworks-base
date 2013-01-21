@@ -563,6 +563,11 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final String SYSTEM_POWER_DONT_WAKE_DEVICE_PLUGGED = "eos_system_power_dont_wake_device_plugged";
+
+    /**
+     * @hide
+     */
     public static final String SYSTEMUI_NAVRING_1 = "eos_systemui_navring_1";
 
     /**

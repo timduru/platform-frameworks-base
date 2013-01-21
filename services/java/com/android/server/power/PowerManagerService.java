@@ -26,6 +26,8 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 
+import org.teameos.jellybean.settings.EOSConstants;
+
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -299,7 +301,10 @@ public final class PowerManagerService extends IPowerManager.Stub
     private boolean mDreamsActivateOnDockSetting;
 
     // The screen off timeout setting value in milliseconds.
-    private int mScreenOffTimeoutSetting;
+    private int mScreenOffTimeoutSetting;    
+
+    // Eos Setting - True if the device should wake up when plugged or unplugged.
+    private boolean mWakeUpWhenPluggedOrUnpluggedSetting;
 
     // The maximum allowable screen off timeout according to the device
     // administration policy.  Overrides other settings.
@@ -483,6 +488,9 @@ public final class PowerManagerService extends IPowerManager.Stub
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    EOSConstants.SYSTEM_POWER_DONT_WAKE_DEVICE_PLUGGED),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
 
             // Go.
             readConfigurationLocked();
@@ -527,6 +535,9 @@ public final class PowerManagerService extends IPowerManager.Stub
                 UserHandle.USER_CURRENT);
         mStayOnWhilePluggedInSetting = Settings.Global.getInt(resolver,
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
+        mWakeUpWhenPluggedOrUnpluggedSetting = Settings.System.getInt(resolver,
+                EOSConstants.SYSTEM_POWER_DONT_WAKE_DEVICE_PLUGGED,
+                mWakeUpWhenPluggedOrUnpluggedConfig ? 1 : 0) == 0;
 
         final int oldScreenBrightnessSetting = mScreenBrightnessSetting;
         mScreenBrightnessSetting = Settings.System.getIntForUser(resolver,
@@ -1145,13 +1156,13 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(boolean wasPowered, int oldPlugType) {
         // Don't wake when powered unless configured to do so.
-        if (!mWakeUpWhenPluggedOrUnpluggedConfig) {
+        if (!mWakeUpWhenPluggedOrUnpluggedSetting) {
             return false;
         }
 
         // FIXME: Need more accurate detection of wireless chargers.
         //
-        // We are unable to accurately detect whether the device is resting on the
+        // We are unable to accurately destect whether the device is resting on the
         // charger unless it is actually receiving power.  This causes us some grief
         // because the device might not appear to be plugged into the wireless charger
         // unless it actually charging.
