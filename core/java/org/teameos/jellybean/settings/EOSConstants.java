@@ -104,7 +104,7 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final int SYSTEMUI_NAVBAR_DISABLE_GESTURE_DEF = 0;
+    public static final int SYSTEMUI_NAVBAR_DISABLE_GESTURE_DEF = 1;
 
     /**
      * @hide
@@ -528,6 +528,13 @@ public final class EOSConstants {
      * @hide
      */
     public static final int SYSTEMUI_USE_TABLET_UI_DEF = 0;
+
+    public static final String SYSTEMUI_HIDE_NAVBAR = "eos_systemui_hide_navbar";
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_SYSTEMUI_HIDE_NAVBAR_DEF = 0;
+
 
     /**
     * Use a modified eos style navigation bar to help tablet users adjust to new ui

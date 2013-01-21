@@ -25,6 +25,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
+import org.teameos.jellybean.settings.EOSConstants;
 
 /**
  * Contains methods to standard constants used in the UI for timeouts, sizes, and distances.
@@ -287,6 +288,10 @@ public class ViewConfiguration {
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
+
+        // if we have hidden the navbar, don't use the sHasPermanentMenuKeySet logic below (consider that it has already been set)
+        // it seems wrong for recent android versions and the new inApp menu keys logic
+        sHasPermanentMenuKeySet = Settings.System.getInt(context.getContentResolver(), EOSConstants.SYSTEMUI_HIDE_NAVBAR, 0) ==1;
 
         if (!sHasPermanentMenuKeySet) {
             IWindowManager wm = WindowManagerGlobal.getWindowManagerService();

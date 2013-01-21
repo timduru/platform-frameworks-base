@@ -253,6 +253,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // on-screen navigation buttons
     private NavigationBarView mNavigationBarView = null;
+    private int mNavBarPreviouslyHiddenByConf = 0;
 
     // the tracker view
     int mTrackingPosition; // the position of the top of the tracking view.
@@ -400,6 +401,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     // ================================================================================
     protected PhoneStatusBarView makeStatusBarView() {
         final Context context = mContext;
+        mNavBarPreviouslyHiddenByConf = Settings.System.getInt(mContext.getContentResolver(), EOSConstants.SYSTEMUI_HIDE_NAVBAR, 0);
+
         mEosController = new EosUiController(context);
 
         Resources res = context.getResources();
@@ -2481,9 +2484,11 @@ public class PhoneStatusBar extends BaseStatusBar {
                 notifyNavigationBarScreenOn(false);
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                if (DEBUG) {
-                    Slog.v(TAG, "configuration changed: "
-                            + mContext.getResources().getConfiguration());
+                if (DEBUG) Slog.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
+                int navBarHiddenByConf = Settings.System.getInt(mContext.getContentResolver(), EOSConstants.SYSTEMUI_HIDE_NAVBAR, 0);
+                if(navBarHiddenByConf != mNavBarPreviouslyHiddenByConf) {
+                    mEosController.processBarStyleChange();
+                    mNavBarPreviouslyHiddenByConf = navBarHiddenByConf;
                 }
                 mDisplay.getSize(mCurrentDisplaySize);
 

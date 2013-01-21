@@ -438,7 +438,7 @@ public class EosUiController extends ActionHandler {
         }
     }
 
-    private void processBarStyleChange() {
+    public void processBarStyleChange() {
         // time to die, but i shall return again soon
         unregisterObservers();
         notifyObserverListeners(OBSERVERS_OFF);
