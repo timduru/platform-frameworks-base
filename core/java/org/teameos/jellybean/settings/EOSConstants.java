@@ -568,6 +568,16 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final String SYSTEM_POWER_ENABLE_CRT_OFF = "eos_system_power_enable_crt_off";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEM_POWER_ENABLE_CRT_ON = "eos_system_power_enable_crt_on";
+
+    /**
+     * @hide
+     */
     public static final String SYSTEMUI_NAVRING_1 = "eos_systemui_navring_1";
 
     /**
