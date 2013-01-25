@@ -96,10 +96,39 @@
                     android:layout_height="wrap_content"
                     />
                 <ImageView
+                    android:id="@+id/dock_battery"
+                    android:layout_height="18dp"
+                    android:layout_width="wrap_content"
+                    android:paddingLeft="4dip"
+                    />
+
+                <TextView
+                    android:id="@+id/dock_battery_text"
+                    android:textAppearance="@style/TextAppearance.StatusBar.BatteryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:singleLine="true"
+                    android:paddingLeft="1dp"
+                    android:paddingRight="1dp"
+                    android:gravity="center_vertical|left"
+                    />
+
+                <ImageView
                     android:id="@+id/battery"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:paddingStart="4dip"
+                    android:paddingLeft="4dip"
+                    />
+
+                <TextView
+                    android:id="@+id/battery_text"
+                    android:textAppearance="@style/TextAppearance.StatusBar.BatteryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:singleLine="true"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="1dp"
+                    android:gravity="left|center_vertical"
                     />
             </LinearLayout>
     

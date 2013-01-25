@@ -45,6 +45,12 @@
         <item name="android:textColor">#FF808080</item>
     </style>
 
+    <style name="TextAppearance.StatusBar.BatteryText" parent="@*android:style/TextAppearance.StatusBar">
+        <item name="android:textSize">16dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@android:color/holo_blue_light</item>
+    </style>
+
     <style name="TextAppearance.StatusBar.TextButton"
         parent="@*android:style/TextAppearance.StatusBar">
         <item name="android:textAppearance">?android:attr/textAppearance</item>
