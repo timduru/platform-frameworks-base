@@ -30,6 +30,7 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.EosUiController;
@@ -42,22 +43,24 @@ public class BatteryController extends BroadcastReceiver {
     private Context mContext;
     private ArrayList<ImageView> mIconViews = new ArrayList<ImageView>();
     private ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
+    protected int iconCharge, iconBattery;
+    protected String levelIntentParam, statusIntentParam;
 
     private int mLastPercentage = 0;
-    private boolean mPlugged = false;
+    private boolean mCharging = false;
+    protected boolean mVisibilityOverride = false;
+    protected boolean mVisibility = true;
     private ContentObserver mPercentObserver;
 
-    private ArrayList<BatteryStateChangeCallback> mChangeCallbacks =
-            new ArrayList<BatteryStateChangeCallback>();
+    private ArrayList<BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<BatteryStateChangeCallback>();
 
     private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {        
         @Override
         public void observerStateChanged(boolean state) {
-            if(state == EosUiController.OBSERVERS_ON) {
+            if(state == EosUiController.OBSERVERS_ON)
                 registerObservers();
-            } else {
+            else
                 unregisterObservers();
-            }            
         }
     };
 
@@ -66,6 +69,19 @@ public class BatteryController extends BroadcastReceiver {
     }
 
     public BatteryController(Context context) {
+        init(context);
+    }
+
+    protected void initResources() {
+        iconCharge = R.drawable.stat_sys_battery_charge;
+        iconBattery = R.drawable.stat_sys_battery;
+        levelIntentParam = BatteryManager.EXTRA_LEVEL;
+        statusIntentParam = BatteryManager.EXTRA_PLUGGED;
+    }
+
+    public void init(Context context) {
+        initResources();
+
         mContext = context;
 
         IntentFilter filter = new IntentFilter();
@@ -78,36 +94,16 @@ public class BatteryController extends BroadcastReceiver {
             }
         };
         EosUiController.registerObserverStateListener(mListener);
+
     }
 
     private void registerObservers() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE), false,
-                mPercentObserver);
+        mContext.getContentResolver().registerContentObserver( 
+            Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE), false, mPercentObserver);
     }
 
     private void unregisterObservers() {
         mContext.getContentResolver().unregisterContentObserver(mPercentObserver);
-    }
-
-    private void updateLabelPercent() {
-        int N = mLabelViews.size();
-        for (int i = 0; i < N; i++) {
-            TextView v = mLabelViews.get(i);
-            String label = mContext.getString(
-                    R.string.status_bar_settings_battery_meter_format,
-                    mLastPercentage);
-            if (v.getTag() != null
-                    && v.getTag().equals(
-                            EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
-                if (Settings.System.getInt(mContext.getContentResolver(),
-                        EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE,
-                        EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
-                    label = trimPercent(label);
-                }
-            }
-            v.setText(label);
-        }
     }
 
     public void addIconView(ImageView v) {
@@ -115,72 +111,67 @@ public class BatteryController extends BroadcastReceiver {
     }
 
     public void addLabelView(TextView v) {
-        String label = mContext.getString(R.string.status_bar_settings_battery_meter_format,
-                mLastPercentage);
-        if (v.getTag() != null) {
-            if (v.getTag().equals(EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
-                if (Settings.System.getInt(mContext.getContentResolver(),
-                        EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE,
-                        EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
+        updateLabelPercent();
+        mLabelViews.add(v);
+    }
+
+    protected void updateViews() {
+        final int icon = mCharging ? iconCharge : iconBattery;
+        int N = mIconViews.size();
+        for (int i = 0; i < N; i++) {
+            ImageView v = mIconViews.get(i);
+            v.setImageResource(icon);
+            v.setImageLevel(mLastPercentage);
+            v.setContentDescription(mContext.getString(R.string.accessibility_battery_level, mLastPercentage));
+            if(mVisibilityOverride) v.setVisibility(mVisibility? View.VISIBLE : View.GONE);
+        }
+    }
+
+    protected void updateLabelPercent() {
+        int N = mLabelViews.size();
+        for (int i = 0; i < N; i++) {
+            TextView v = mLabelViews.get(i);
+            String label = mContext.getString( R.string.status_bar_settings_battery_meter_format, mLastPercentage);
+            if (v.getTag() != null && v.getTag().equals( EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
+                if (Settings.System.getInt(mContext.getContentResolver(), EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE, EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
                     label = trimPercent(label);
                 }
             }
+            v.setText(label);
+            if(mVisibilityOverride) v.setVisibility(mVisibility? View.VISIBLE : View.GONE);
         }
-        v.setText(label);
-        mLabelViews.add(v);
     }
 
     public void addStateChangedCallback(BatteryStateChangeCallback cb) {
         // refresh values immediately
-        cb.onBatteryLevelChanged(mLastPercentage, mPlugged);
+        cb.onBatteryLevelChanged(mLastPercentage, mCharging);
         mChangeCallbacks.add(cb);
     }
 
     private String trimPercent(String s) {
-        if (s.contains("%")) {
+        if (s.contains("%"))
             return s.substring(0, s.indexOf("%"));
-        } else {
+        else
             return s;
-        }
+    }
+
+    protected boolean isCharging(int status) {
+        return (status != 0);
     }
 
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-            final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-            final boolean plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
-            mLastPercentage = level;
-            mPlugged = plugged;
-            final int icon = plugged ? R.drawable.stat_sys_battery_charge
-                    : R.drawable.stat_sys_battery;
-            int N = mIconViews.size();
-            for (int i = 0; i < N; i++) {
-                ImageView v = mIconViews.get(i);
-                v.setImageResource(icon);
-                v.setImageLevel(level);
-                v.setContentDescription(mContext.getString(R.string.accessibility_battery_level,
-                        level));
-            }
-            N = mLabelViews.size();
-            for (int i = 0; i < N; i++) {
-                TextView v = mLabelViews.get(i);
-                String label = mContext.getString(
-                        R.string.status_bar_settings_battery_meter_format,
-                        mLastPercentage);
-                if (v.getTag() != null
-                        && v.getTag().equals(
-                                EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
-                    if (Settings.System.getInt(mContext.getContentResolver(),
-                            EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE,
-                            EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
-                        label = trimPercent(label);
-                    }
-                }
-                v.setText(label);
-            }
+            final int level = intent.getIntExtra(levelIntentParam, 0);
+            if (level !=0) mLastPercentage = level;
+            final int status = intent.getIntExtra(statusIntentParam, 0);
+            mCharging = isCharging(status);
+
+            updateViews();
+            updateLabelPercent();
 
             for (BatteryStateChangeCallback cb : mChangeCallbacks) {
-                cb.onBatteryLevelChanged(level, plugged);
+                cb.onBatteryLevelChanged(mLastPercentage, mCharging);
             }
         }
     }
