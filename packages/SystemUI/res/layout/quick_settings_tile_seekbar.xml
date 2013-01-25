@@ -1,77 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2012 The Android Open Source Project
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<com.android.systemui.statusbar.HorizontalPager xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:id="@+id/eos_quicksettings_seekbars"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical" >
-
-    <Switch
-        android:id="@+id/view_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textOff="Brightness"
-        android:textOn="Volume" />
-
-    <FrameLayout
+    android:layout_height="match_parent" >
+    
+    <!-- Brightness -->
+    <LinearLayout
+        android:gravity="center_vertical"
+        android:id="@+id/brightness_row"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical" >
+        android:layout_height="match_parent" >
 
-        <LinearLayout
-            android:id="@+id/brightness_view"
+        <ImageView
+            android:id="@+id/brightness_icon"
+            android:src="@drawable/ic_sysbar_brightness"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="7dp"
+            android:layout_marginRight="3dp" />
+            
+        <CheckBox
+            android:id="@+id/brightness_switch"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:button="@null" />
+
+        <SeekBar
+            android:id="@+id/brightness_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal" >
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="7dp" />
+    </LinearLayout>
 
-            <CheckBox
-                android:id="@+id/brightness_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+    <!-- Volume -->
+    <LinearLayout
+        android:id="@+id/volume_row"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
 
-            <SeekBar
-                android:id="@+id/brightness_seekbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="7dp"
-                android:layout_marginRight="7dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/volume_view"
+        <ImageView
+            android:id="@+id/sound_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="7dp"
+            android:layout_marginRight="3dp" />
+        
+        <SeekBar
+            android:id="@+id/volume_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:visibility="gone" >
-
-            <CheckBox
-                android:id="@+id/volume_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <SeekBar
-                android:id="@+id/volume_seekbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="7dp"
-                android:layout_marginRight="7dp" />
-        </LinearLayout>
-    </FrameLayout>
-
-</LinearLayout>
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="7dp" />
+    </LinearLayout>
+    
+</com.android.systemui.statusbar.HorizontalPager>

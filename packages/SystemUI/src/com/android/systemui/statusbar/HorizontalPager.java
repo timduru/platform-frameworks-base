@@ -165,8 +165,7 @@ public final class HorizontalPager extends ViewGroup {
         }
 
         if (mFirstLayout) {
-            int centerScreen = mCurrentScreen + 1;
-            scrollTo(centerScreen * width, 0);
+            scrollTo(mCurrentScreen * width, 0);
             mFirstLayout = false;
         }
 
@@ -208,7 +207,8 @@ public final class HorizontalPager extends ViewGroup {
         }
     }
 
-    public boolean receiveTouchEvent(final MotionEvent ev) {
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
 
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();

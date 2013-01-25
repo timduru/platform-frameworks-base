@@ -693,21 +693,15 @@ class QuickSettings {
         seekbarTile.setContent(R.layout.quick_settings_tile_seekbar, inflater);
         seekbarTile.setColumnSpan(mSeekbarSpan);
 
-        final Switch swView = (Switch) seekbarTile.findViewById(R.id.view_switch);
         final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
-        final CheckBox cbVolume = (CheckBox) seekbarTile.findViewById(R.id.volume_switch);
-        final SeekBar sbBrightness = (SeekBar) seekbarTile
-                .findViewById(R.id.brightness_seekbar);
-        final CheckBox cbBrightness = (CheckBox) seekbarTile
-                .findViewById(R.id.brightness_switch);
-        final LinearLayout brightnessView = (LinearLayout) seekbarTile
-                .findViewById(R.id.brightness_view);
-        final LinearLayout volumeView = (LinearLayout) seekbarTile
-                .findViewById(R.id.volume_view);
+        final ImageView ivVolume = (ImageView) seekbarTile.findViewById(R.id.sound_icon);
+        final SeekBar sbBrightness = (SeekBar) seekbarTile.findViewById(R.id.brightness_seekbar);
+        final CheckBox cbBrightness = (CheckBox) seekbarTile.findViewById(R.id.brightness_switch);     
 
+        cbBrightness.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.status_bar_toggle_button));
+        
         final AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        final IPowerManager ipm = IPowerManager.Stub.asInterface(ServiceManager
-                .getService("power"));
+        final IPowerManager ipm = IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
         final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         final int min = pm.getMinimumScreenBrightnessSetting();
         final int max = pm.getMaximumScreenBrightnessSetting();
@@ -718,11 +712,9 @@ class QuickSettings {
                 sbVolume.setMax(am.getStreamMaxVolume(mVolumeStream));
                 sbVolume.setProgress(am.getStreamVolume(mVolumeStream));
                 if (mVolumeStream == AudioManager.STREAM_MUSIC) {
-                    cbVolume.setChecked(true);
-                    cbVolume.setText("Media");
+                    ivVolume.setImageResource(com.android.internal.R.drawable.ic_audio_vol);
                 } else {
-                    cbVolume.setChecked(false);
-                    cbVolume.setText("Ring");
+                    ivVolume.setImageResource(com.android.internal.R.drawable.ic_audio_ring_notif);
                 }
 
                 int automatic = 0;
@@ -737,11 +729,9 @@ class QuickSettings {
 
                 if (automatic == 1) {
                     cbBrightness.setChecked(true);
-                    cbBrightness.setText("Auto");
                     sbBrightness.setEnabled(false);
                 } else {
                     cbBrightness.setChecked(false);
-                    cbBrightness.setText("Manual");
                     sbBrightness.setEnabled(true);
                 }
                 sbBrightness.setMax(max - min);
@@ -750,94 +740,15 @@ class QuickSettings {
         });
         parent.addView(seekbarTile);
 
-        swView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        ivVolume.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    Animation slideInFromLeft = AnimationUtils.loadAnimation(mContext,
-                            R.anim.in_from_left);
-                    slideInFromLeft.setAnimationListener(new AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-                            volumeView.setVisibility(View.VISIBLE);
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                        }
-                    });
-                    volumeView.startAnimation(slideInFromLeft);
-
-                    Animation slideOutToRight = AnimationUtils.loadAnimation(mContext,
-                            R.anim.out_to_right);
-                    slideOutToRight.setAnimationListener(new AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            brightnessView.setVisibility(View.GONE);
-                        }
-                    });
-                    brightnessView.startAnimation(slideOutToRight);
-                } else {
-                    Animation slideInFromRight = AnimationUtils.loadAnimation(mContext,
-                            R.anim.in_from_right);
-                    slideInFromRight.setAnimationListener(new AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-                            brightnessView.setVisibility(View.VISIBLE);
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                        }
-                    });
-                    brightnessView.startAnimation(slideInFromRight);
-
-                    Animation slideOutToLeft = AnimationUtils.loadAnimation(mContext,
-                            R.anim.out_to_left);
-                    slideOutToLeft.setAnimationListener(new AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            volumeView.setVisibility(View.GONE);
-                        }
-                    });
-                    volumeView.startAnimation(slideOutToLeft);
-                }
-            }
-        });
-
-        cbVolume.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
+            public void onClick(View v) {
+                if (mVolumeStream == AudioManager.STREAM_RING) {
                     mVolumeStream = AudioManager.STREAM_MUSIC;
-                    cbVolume.setText("Media");
+                    ivVolume.setImageResource(com.android.internal.R.drawable.ic_audio_vol);
                 } else {
                     mVolumeStream = AudioManager.STREAM_RING;
-                    cbVolume.setText("Ring");
+                    ivVolume.setImageResource(com.android.internal.R.drawable.ic_audio_ring_notif);
                 }
                 mContext.sendBroadcast(new Intent(INTENT_UPDATE_VOLUME_OBSERVER_STREAM));
             }
@@ -870,12 +781,10 @@ class QuickSettings {
                         Settings.System.putInt(mContext.getContentResolver(),
                                 Settings.System.SCREEN_BRIGHTNESS_MODE, 1);
                         sbBrightness.setEnabled(false);
-                        cbBrightness.setText("Auto");
                     } else {
                         Settings.System.putInt(mContext.getContentResolver(),
                                 Settings.System.SCREEN_BRIGHTNESS_MODE, 0);
                         sbBrightness.setEnabled(true);
-                        cbBrightness.setText("Manual");
                     }
                 } catch (Exception e) {
                 }
