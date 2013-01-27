@@ -278,10 +278,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mNavigationBarOnBottom = true; // is the navigation bar on the bottom *right now*?
     int[] mNavigationBarHeightForRotation = new int[4];
     int[] mNavigationBarWidthForRotation = new int[4];
-    // we need 100% certainty if this is a hybrid ui device
-    boolean mIsHybridUi = false;
+
+    // Eos feature config bools
     // low profile mode smaller system/nav bar
     boolean mLowProfile = false;
+    // devices with XLarge screen have custom hide navbar feature
+    boolean mHasCustomHideBar = false;
 
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
@@ -569,34 +571,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    class EosUiModeObserver extends ContentObserver {
-        ContentResolver resolver;
-        EosUiModeObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    EOSConstants.SYSTEMUI_USE_TABLET_UI), false, this);
-            updateUiMode();
-        }
-
-        @Override public void onChange(boolean selfChange) {
-            updateUiMode();
-            setNavigationBarSize();
-            mContext.sendBroadcast(new Intent().setAction(Intent.ACTION_CONFIGURATION_CHANGED));
-        }
-
-        void updateUiMode() {
-            boolean isTabletMode = (Settings.System.getInt(resolver,
-                    EOSConstants.SYSTEMUI_USE_TABLET_UI,
-                    EOSConstants.SYSTEMUI_USE_TABLET_UI_DEF) == 1) ? true : false;
-            mHasSystemNavBar = isTabletMode ? true : false;
-            //mHasNavigationBar = !mHasSystemNavBar;
-        }
-    }
-
     class EosBarModeObserver extends ContentObserver {
         ContentResolver resolver;
 
@@ -607,21 +581,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         void observe() {
             resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_BAR_SIZE_MODE), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_HIDE_NAVBAR), false, this);
             setNavigationBarSize();
         }
 
         @Override
         public void onChange(boolean selfChange) {
-            updateNavBarHidden();
-            if(mHasNavigationBar) setNavigationBarSize();
+            if (mHasNavigationBar) setNavigationBarSize();
             mContext.sendBroadcast(new Intent().setAction(Intent.ACTION_CONFIGURATION_CHANGED));
         }
-
-        void updateNavBarHidden() {
-            mHasNavigationBar = (Settings.System.getInt(resolver, EOSConstants.SYSTEMUI_HIDE_NAVBAR, 0) != 1);
-        }
-
     }
 
     class MyOrientationListener extends WindowOrientationListener {
@@ -935,13 +902,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } catch (RemoteException ex) { }
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
-        mIsHybridUi = mContext.getResources().getBoolean(com.android.internal.R.bool.config_isHybridUiDevice);
-        if(mIsHybridUi) {
-            EosUiModeObserver eosUiModeObserver = new EosUiModeObserver(mHandler);
-            eosUiModeObserver.observe();
-        }
+
+        // initialize eos feature observer
+        mHasCustomHideBar = EOSUtils.isXLargeScreen();
         EosBarModeObserver eosBarModeObserver = new EosBarModeObserver(mHandler);
         eosBarModeObserver.observe();
+
         mShortcutManager = new ShortcutManager(context, mHandler);
         mShortcutManager.observe();
         mHomeIntent =  new Intent(Intent.ACTION_MAIN, null);
@@ -1109,9 +1075,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Allow a system property to override this. Used by the emulator.
             // See also hasNavigationBar().
             String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
-            boolean mNavBarHiddenByConf = (Settings.System.getInt(mContext.getContentResolver(), EOSConstants.SYSTEMUI_HIDE_NAVBAR, 0) == 1);
-            if      (navBarOverride.equals("1") || mNavBarHiddenByConf) mHasNavigationBar = false;
-            else if (navBarOverride.equals("0")) mHasNavigationBar = true;
+            if (!"".equals(navBarOverride)) {
+                if (navBarOverride.equals("1")) mHasNavigationBar = false;
+                else if (navBarOverride.equals("0")) mHasNavigationBar = true;
+            }
         } else {
             mHasNavigationBar = false;
         }

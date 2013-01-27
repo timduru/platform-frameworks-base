@@ -51,6 +51,11 @@ public class EosUiController extends ActionHandler {
     public static final boolean OBSERVERS_OFF = false;
 
     static final String TAG = "EosUiController";
+    
+    // we set a flag in settingsProvider indicating
+    // that we intentionally killed systemui. so we
+    // can restore states if need be
+    public static final String EOS_KILLED_ME = "eos_killed_me";
 
     static final int STOCK_NAV_BAR = com.android.systemui.R.layout.navigation_bar;
     static final int EOS_NAV_BAR = com.android.systemui.R.layout.eos_navigation_bar;
@@ -83,12 +88,10 @@ public class EosUiController extends ActionHandler {
     private Context mContext;
     private PhoneStatusBarView mStatusBarView;
     private PhoneStatusBar mService;
-    private View mStatusBarContainer;
     private NavigationBarView mNavigationBarView;
     private StatusBarWindowView mStatusBarWindow;
     private ContentResolver mResolver;
     private ContentObserver mLongPressActionObserver;
-    private ContentObserver mHideBarObserver;
     private ContentObserver mBatterySettingsObserver;
     private ContentObserver mEosSettingsContentObserver;
     private ContentObserver mClockSettingsObserver;
@@ -99,29 +102,12 @@ public class EosUiController extends ActionHandler {
     private BroadcastReceiver mControlCenterReceiver;
     private IntentFilter mFilter;
     private EosSettings mEosSettings;
-    private IWindowManager wm;
-    private WindowManager mWindowManager;
-    private WindowManager.LayoutParams mNavigationBarParams;
-    private WindowManager.LayoutParams mStatusBarParams;
-    private boolean mHasNavBar = false;
     private boolean mIsClockVisible = true;
 
     public EosUiController(Context context) {
         super(context);
         mContext = context;
         mResolver = mContext.getContentResolver();
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        wm = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
-
-        try {
-            mHasNavBar = wm.hasNavigationBar();
-        } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        DEBUG = true;
-
         mFilter = new IntentFilter();
         mFilter.addAction(EOSConstants.INTENT_EOS_CONTROL_CENTER);
         mControlCenterReceiver = new BroadcastReceiver() {
@@ -144,12 +130,7 @@ public class EosUiController extends ActionHandler {
             }
         };
         mContext.registerReceiver(mControlCenterReceiver, mFilter);
-
-        // no matter what, we set make bar visibility true on boot
-        Settings.System.putInt(mResolver, EOSConstants.SYSTEMUI_HIDE_BARS,
-                EOSConstants.SYSTEMUI_HIDE_BARS_DEF);   
-
-        initObservers();   
+        initObservers();
     }
 
     public static void registerObserverStateListener(OnObserverStateChangedListener l) {
@@ -281,7 +262,6 @@ public class EosUiController extends ActionHandler {
     }
 
     public NavigationBarView setNavigationBarView(WindowManager.LayoutParams lp) {
-        mNavigationBarParams = lp;
         int layout = Settings.System.getInt(mResolver,
                 EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR,
                 EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF)
@@ -289,6 +269,7 @@ public class EosUiController extends ActionHandler {
                         ? STOCK_NAV_BAR
                         : EOS_NAV_BAR;
         mNavigationBarView = (NavigationBarView) View.inflate(mContext, layout, null);
+        SystembarStateHandler.setNavigationBar(mNavigationBarView, lp);
         mSoftKeyObjects = new ArrayList<SoftKeyObject>();
         updateNavigationBarColor();
         initSoftKeys();
@@ -308,17 +289,6 @@ public class EosUiController extends ActionHandler {
     // we need this to be set when the theme engine creates new view
     public void setStatusBarView(PhoneStatusBarView bar) {
         mStatusBarView = bar;
-        // we have to register this on start because it's a EosAction
-        mHideBarObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateBarVisibility();
-            }
-        };
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_HIDE_BARS), false,
-                mHideBarObserver);
-
         // now we're sure we're getting the correct batteries
         View text = mStatusBarView
                 .findViewById(R.id.signal_battery_cluster)
@@ -333,12 +303,6 @@ public class EosUiController extends ActionHandler {
         updateStatusBarColor();
         processBatterySettingsChange();
         processClockSettingsChange();
-    }
-
-    // we need this to add and remove the view from the windowmanager
-    public void setStatusBarContainer(View container, WindowManager.LayoutParams lp) {
-        mStatusBarContainer = container;
-        mStatusBarParams = lp;
     }
 
     static void log(String s) {
@@ -440,6 +404,8 @@ public class EosUiController extends ActionHandler {
 
     public void processBarStyleChange() {
         // time to die, but i shall return again soon
+        // before we go let's set our flag
+        Settings.System.putInt(mResolver, EOS_KILLED_ME, 1);
         unregisterObservers();
         notifyObserverListeners(OBSERVERS_OFF);
         removeObserverStateListeners();
@@ -542,24 +508,6 @@ public class EosUiController extends ActionHandler {
             mStatusBarWindow.setBackground(null);
             color = Color.rgb(Color.red(color), Color.green(color), Color.blue(color));
             mStatusBarView.setBackgroundColor(color);
-        }
-    }
-
-    private void updateBarVisibility() {
-        boolean hideBar = (Settings.System.getInt(mResolver, EOSConstants.SYSTEMUI_HIDE_BARS,
-                EOSConstants.SYSTEMUI_HIDE_BARS_DEF) == 1) ? true : false;
-        // all devices have a status bar but may not have a navbar
-        if (hideBar) {
-            mWindowManager.removeView(mStatusBarContainer);
-        } else {
-            mWindowManager.addView(mStatusBarContainer, mStatusBarParams);
-        }
-        if (mHasNavBar) {
-            if (hideBar) {
-                mWindowManager.removeView(mNavigationBarView);
-            } else {
-                mWindowManager.addView(mNavigationBarView, mNavigationBarParams);
-            }
         }
     }
 

@@ -429,12 +429,22 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final String INTENT_SYSTEMUI_REMOVE_BAR = "org.teameos.intent.action.REMOVE_BAR";
+    public static final String INTENT_SYSTEMUI_BAR_STATE = "org.teameos.intent.action.BAR_STATE";
 
     /**
      * @hide
      */
-    public static final String INTENT_SYSTEMUI_BAR_RESTORED = "org.teameos.intent.action.BAR_RESTORED";
+    public static final String INTENT_SYSTEMUI_BAR_STATE_KEY = "org.teameos.intent.action.BAR_STATE_KEY";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_SYSTEMUI_BAR_STATE_REQUEST_TOGGLE = "org.teameos.intent.action.BAR_STATE_REQUEST_TOGGLE";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_SYSTEMUI_BAR_STATE_CHANGED_EXCEPTION = "org.teameos.intent.action.BAR_STATE_CHANGED_EXCEPTION";
 
     /**
      * @hide
@@ -519,22 +529,26 @@ public final class EOSConstants {
      * @hide
      */
     public static final int DEVICE_SETTINGS_TOUCHPAD_ENABLED = 1;
-    /**
-     * On the grouper, we use this to switch between the hybrid UI and the tablet UI
-     * @hide
-     */
-    public static final String SYSTEMUI_USE_TABLET_UI = "eos_systemui_tablet_ui";
-    /**
-     * @hide
-     */
-    public static final int SYSTEMUI_USE_TABLET_UI_DEF = 0;
 
-    public static final String SYSTEMUI_HIDE_NAVBAR = "eos_systemui_hide_navbar";
     /**
      * @hide
      */
-    public static final int SYSTEMUI_SYSTEMUI_HIDE_NAVBAR_DEF = 0;
+    public static final String SYSTEMUI_HIDE_NAVBAR_ON_BOOT = "eos_systemui_hide_navbar_on_boot";
 
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_HIDE_NAVBAR_ON_BOOT_DEF = 0;
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_HIDE_STATBAR_TOO = "eos_systemui_hide_statbar_too";
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_HIDE_STATBAR_TOO_DEF = 0;
 
     /**
     * Use a modified eos style navigation bar to help tablet users adjust to new ui

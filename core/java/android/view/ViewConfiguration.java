@@ -291,7 +291,7 @@ public class ViewConfiguration {
 
         // if we have hidden the navbar, don't use the sHasPermanentMenuKeySet logic below (consider that it has already been set)
         // it seems wrong for recent android versions and the new inApp menu keys logic
-        sHasPermanentMenuKeySet = Settings.System.getInt(context.getContentResolver(), EOSConstants.SYSTEMUI_HIDE_NAVBAR, 0) ==1;
+        sHasPermanentMenuKeySet = Settings.System.getInt(context.getContentResolver(), EOSConstants.SYSTEMUI_HIDE_BARS, 0) ==1;
 
         if (!sHasPermanentMenuKeySet) {
             IWindowManager wm = WindowManagerGlobal.getWindowManagerService();

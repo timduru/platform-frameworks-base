@@ -116,7 +116,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mHasVibrator;
     private boolean mRebootMenu = false;
     private boolean mHasNavBar = false;
-    private boolean mHasSystemBar = false;
     private boolean mHasStatBarOnly = false;
 
     /**
@@ -148,22 +147,15 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
-        if (mContext.getResources().getBoolean(R.bool.config_isHybridUiDevice)) {
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.System.getUriFor(EOSConstants.SYSTEMUI_USE_TABLET_UI), true,
-                    mHybridUiObserver);
-        }
         Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = vibrator != null && vibrator.hasVibrator();
         try {
             mHasNavBar = getWindowManager().hasNavigationBar();
-            mHasSystemBar = getWindowManager().hasSystemNavBar();
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        mHasStatBarOnly = false;
-        if (!mHasNavBar && !mHasSystemBar) mHasStatBarOnly = true;
+        mHasStatBarOnly = !mHasNavBar;
     }
 
     /**
@@ -218,9 +210,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     // helper methods to help properly initialize the show/hide bars feature
     // based on the proper device configuration
     private int getTitle() {
-        if (mHasSystemBar) {
-            return R.string.eos_globalactions_hide_systembar_title;
-        } else if (mHasNavBar) {
+        if (mHasNavBar) {
             return R.string.eos_globalactions_hide_bars_title;
         } else if (mHasStatBarOnly) {
             return R.string.eos_globalactions_hide_statusbar_title;
@@ -230,9 +220,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private int getStatusOn() {
-        if (mHasSystemBar) {
-            return R.string.eos_globalactions_hide_systembar_hidden;
-        } else if (mHasNavBar) {
+        if (mHasNavBar) {
             return R.string.eos_globalactions_hide_bars_hidden;
         } else if (mHasStatBarOnly) {
             return R.string.eos_globalactions_hide_statusbar_hidden;
@@ -242,9 +230,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private int getStatusOff() {
-        if (mHasSystemBar) {
-            return R.string.eos_globalactions_hide_systembar_visible;
-        } else if (mHasNavBar) {
+        if (mHasNavBar) {
             return R.string.eos_globalactions_hide_bars_visible;
         } else if (mHasStatBarOnly) {
             return R.string.eos_globalactions_hide_statusbar_visible;
@@ -589,14 +575,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 	private void refreshBarMode() {
         try {
             mHasNavBar = getWindowManager().hasNavigationBar();
-            mHasSystemBar = getWindowManager().hasSystemNavBar();
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        mHasStatBarOnly = false;
-        if (!mHasNavBar && !mHasSystemBar)
-            mHasStatBarOnly = true;
+        mHasStatBarOnly = !mHasNavBar;
         final boolean mBarHidden = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_HIDE_BARS,
                 EOSConstants.SYSTEMUI_HIDE_BARS_DEF) == 1 ? true : false;
@@ -963,8 +946,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         @Override
         void onToggle(boolean on) {
             // TODO Auto-generated method stub
-            Settings.System.putInt(mContext.getContentResolver(),
-                    EOSConstants.SYSTEMUI_HIDE_BARS, on ? 1 : 0);
+            mContext.sendBroadcast(new Intent()
+            .setAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE_REQUEST_TOGGLE));
         }
     }
 

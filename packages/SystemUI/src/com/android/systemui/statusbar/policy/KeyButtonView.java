@@ -16,14 +16,12 @@
 
 package com.android.systemui.statusbar.policy;
 
-import java.util.Arrays;
 
 import android.animation.Animator.AnimatorListener;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.PorterDuff.Mode;
@@ -33,10 +31,7 @@ import android.graphics.Color;
 import android.graphics.RectF;
 import android.hardware.input.InputManager;
 import android.os.Handler;
-import android.os.Message;
-import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityEvent;
@@ -53,7 +48,6 @@ import android.widget.ImageView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.EosUiController;
-import com.android.systemui.statusbar.EosUiController.OnObserverStateChangedListener;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -75,7 +69,6 @@ public class KeyButtonView extends ImageView {
     AnimatorSet mPressedAnim;
     boolean mDisabled = false;
     boolean mIsLongPressing = false;
-    boolean mIsSw600Device = false;
     boolean mIsTabletMode = false;
     boolean mAnimRunning = false;
     float glowScaleWidth;
@@ -133,27 +126,6 @@ public class KeyButtonView extends ImageView {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.KeyButtonView,
                 defStyle, 0);
 
-        // only apply special case to tablet mode
-        mWindowManager = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
-        try {
-            mIsTabletMode = mWindowManager.hasSystemNavBar();
-        } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        // apply special case to sw600 device in table tablet mode
-        // use this call from tabletstatusbar to try and trim the
-        // GlowBG width some. We need to do this because the glow
-        // bleeds into the notfication area. Also, we don't want to
-        // change the background resource name because it will interfere
-        // with themes
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_USE_TABLET_UI, EOSConstants.SYSTEMUI_USE_TABLET_UI_DEF) == 1) {
-            mIsSw600Device = true;
-        }
-
         mCode = a.getInteger(R.styleable.KeyButtonView_keyCode, 0);
         mKeyIndex = a.getInteger(R.styleable.KeyButtonView_keyIdentifier, 0);
         glowScaleWidth = a.getFloat(R.styleable.KeyButtonView_glowScaleFactorWidth, 1.0f);
@@ -168,10 +140,6 @@ public class KeyButtonView extends ImageView {
             setDrawingAlpha(BUTTON_QUIESCENT_ALPHA);
             mGlowWidth = mGlowBG.getIntrinsicWidth();
             mGlowHeight = mGlowBG.getIntrinsicHeight();
-            if (mIsTabletMode && mIsSw600Device) {
-                mGlowWidth = Math.round(mGlowWidth * glowScaleWidth);
-                mGlowHeight = Math.round(mGlowHeight * glowScaleHeight);
-            }
         }
 
         a.recycle();

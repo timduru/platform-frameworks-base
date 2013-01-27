@@ -268,15 +268,12 @@ public abstract class ActionHandler {
     }
 
     private void hideBars() {
-        // just set value to 1. The Uicontroller handles the rest
-        // check first just in case a fluke happens
-        boolean hideBar = (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_HIDE_BARS,
-                EOSConstants.SYSTEMUI_HIDE_BARS_DEF) == 1) ? true : false;
-        if (!hideBar) {
-            Settings.System.putInt(mContext.getContentResolver(), EOSConstants.SYSTEMUI_HIDE_BARS,
-                    1);
-        }
+        // the only way to call this is if
+        // the navigationbar was visible to start with
+        // but we send the toggle intent and the handler
+        // should get it right
+        mContext.sendBroadcast(new Intent()
+        .setAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE_REQUEST_TOGGLE));
     }
 
     private void showPowerMenu() {
