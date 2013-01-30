@@ -63,6 +63,8 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.View.OnLongClickListener;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
@@ -839,20 +841,24 @@ public class PhoneStatusBar extends BaseStatusBar {
     };
 
     private int mShowSearchHoldoff = 0;
-    private Runnable mShowSearchPanel = new Runnable() {
+    public Runnable mShowSearchPanel = new Runnable() {
         public void run() {
-            showSearchPanel();
-            awakenDreams();
+            if (mEosController.isSearchLightLongPress() || !mEosController.isNxEnabled()) {
+                showSearchPanel();
+                awakenDreams();
+            }
         }
     };
 
-    View.OnTouchListener mHomeSearchActionListener = new View.OnTouchListener() {
+    public View.OnTouchListener mHomeSearchActionListener = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     if (!shouldDisableNavbarGestures()) {
+                        mEosController.setSearchLightOn(true);
+                        mEosController.setSearchLightLongPress(true);
                         mHandler.removeCallbacks(mShowSearchPanel);
-                        mHandler.postDelayed(mShowSearchPanel, mShowSearchHoldoff);
+                        mHandler.postDelayed(mShowSearchPanel, mEosController.isNxEnabled() ? ViewConfiguration.getLongPressTimeout() : mShowSearchHoldoff);
                     }
                     break;
 
@@ -883,6 +889,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPreloadOnTouchListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
         mNavigationBarView.getSearchLight().setOnTouchListener(mHomeSearchActionListener);
+
         updateSearchPanel();
     }
 

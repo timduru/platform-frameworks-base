@@ -95,6 +95,9 @@ public class NavigationBarView extends LinearLayout {
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
     final static int MSG_CHECK_INVALID_LAYOUT = 8686;
 
+    // looks like we gotta bring it in
+    private EosUiController mEosUiController;
+
     private ContentObserver mMenuPersistObserver;
     private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {
         @Override
@@ -131,6 +134,10 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
+    public void setEos(EosUiController controller) {
+        mEosUiController = controller;
+    }
+
     private void registerObservers() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST), false,
@@ -155,17 +162,26 @@ public class NavigationBarView extends LinearLayout {
         if (mDeadZone != null && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
             mDeadZone.poke(event);
         }
-        if (mDelegateHelper != null) {
-            boolean ret = mDelegateHelper.onInterceptTouchEvent(event);
-            if (ret)
-                return true;
+        if (mEosUiController.isSearchLightOn() || !mEosUiController.isNxEnabled()) {
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                mEosUiController.setSearchLightOn(false);
+            }
+            if (mDelegateHelper != null) {               
+                boolean ret = mDelegateHelper.onInterceptTouchEvent(event);                                
+                if (ret)
+                    return true;
+            }
         }
         return super.onTouchEvent(event);
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        return mDelegateHelper.onInterceptTouchEvent(event);
+        boolean ret = false;
+        if (mEosUiController.isSearchLightOn() || !mEosUiController.isNxEnabled()) {
+            ret = mDelegateHelper.onInterceptTouchEvent(event);
+        }
+        return ret;
     }
 
     private H mHandler = new H();
@@ -194,7 +210,6 @@ public class NavigationBarView extends LinearLayout {
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-
         mHidden = false;
 
         mDisplay = ((WindowManager) context.getSystemService(
@@ -286,6 +301,8 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setDisabledFlags(int disabledFlags, boolean force) {
+        if (mEosUiController.isNxEnabled())
+            return;
         if (!force && mDisabledFlags == disabledFlags)
             return;
 
@@ -321,6 +338,14 @@ public class NavigationBarView extends LinearLayout {
         getSearchLight().setVisibility((disableHome && !disableSearch) ? View.VISIBLE : View.GONE);
     }
 
+    public void setNxLayout() {
+        getBackButton().setVisibility(View.INVISIBLE);
+        getHomeButton().setVisibility(View.INVISIBLE);
+        getRecentsButton().setVisibility(View.INVISIBLE);
+        getMenuButton().setVisibility(View.INVISIBLE);
+        getSearchLight().setVisibility(View.VISIBLE);
+    }
+
     public void setSlippery(boolean newSlippery) {
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) getLayoutParams();
         if (lp != null) {
@@ -343,6 +368,8 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setMenuVisibility(final boolean show, final boolean force) {
+        if (mEosUiController.isNxEnabled())
+            return;
         if (mShowMenuPersist)
             return;
         if (!force && mShowMenu == show)
@@ -358,6 +385,8 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setLowProfile(final boolean lightsOut, final boolean animate, final boolean force) {
+        if (mEosUiController.isNxEnabled())
+            return;
         if (!force && lightsOut == mLowProfile)
             return;
 
@@ -450,6 +479,8 @@ public class NavigationBarView extends LinearLayout {
         }
 
         setNavigationIconHints(mNavigationIconHints, true);
+        if (mEosUiController.isNxEnabled()) 
+            setNxLayout();
     }
 
     @Override
