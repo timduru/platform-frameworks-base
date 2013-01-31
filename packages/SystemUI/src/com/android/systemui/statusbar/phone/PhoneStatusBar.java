@@ -360,6 +360,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     // Eos feature observers
     private boolean mIsNavbarHidden;
 
+    SystembarStateHandler mSystembarHandler;
     EosUiController mEosController;
     EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {        
         @Override
@@ -399,8 +400,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             mCurrentTheme = (CustomTheme) currentTheme.clone();
         }
 
-        SystembarStateHandler.init(mContext);
-        SystembarStateHandler.setOnBarStateChangeListener(mBarListener);
+        // initialize bar settings before anything else happens
+        mSystembarHandler = new SystembarStateHandler(mContext, mBarListener);
 
         super.start(); // calls createAndAddWindows()
 
@@ -419,7 +420,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     protected PhoneStatusBarView makeStatusBarView() {
         final Context context = mContext;
 
-        mEosController = new EosUiController(context);
+        mEosController = new EosUiController(context, mSystembarHandler);
 
         Resources res = context.getResources();
 
@@ -890,7 +891,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private void addNavigationBar() {
         if (DEBUG)
             Slog.v(TAG, "addNavigationBar: about to add " + mNavigationBarView);
-        if (mNavigationBarView == null || SystembarStateHandler.mNavBarPreviouslyHiddenByConf)
+        if (mNavigationBarView == null || mSystembarHandler.isBarPreviouslyHiddenByConf())
             return;
 
         prepareNavigationBarView();
@@ -2267,15 +2268,16 @@ public class PhoneStatusBar extends BaseStatusBar {
     private void addStatusBarWindow() {
         makeStatusBarView();
         mStatusBarContainer.addView(mStatusBarWindow);
-        SystembarStateHandler.setStatusBar(mStatusBarContainer, getStatusBarWindowParams());
+        mSystembarHandler.setStatusBar(mStatusBarContainer, getStatusBarWindowParams());
 
         // two conditions in which we add statusbar on boot
         // 1: navbar is visible, statusbar must be visible
         // 2: navbar is hidden but the statusbar does not hide with it
         // StateHandler handles checks
-        SystembarStateHandler.addStatusbarWindow(mWindowManager);
-        // mContext.sendBroadcast(new
-        // Intent().setAction(EOSConstants.INTENT_SYSTEMUI_BAR_RESTORED));
+        mSystembarHandler.addStatusbarWindow();
+        // let ECC know systemui is back online
+        mContext.sendBroadcast(new
+        Intent().setAction(EOSConstants.INTENT_SETTINGS_RESTART_INTERFACE_SETTINGS));
     }
 
     private WindowManager.LayoutParams getStatusBarWindowParams() {

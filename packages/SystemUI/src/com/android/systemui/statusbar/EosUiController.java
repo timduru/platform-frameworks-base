@@ -102,11 +102,13 @@ public class EosUiController extends ActionHandler {
     private BroadcastReceiver mControlCenterReceiver;
     private IntentFilter mFilter;
     private EosSettings mEosSettings;
+    private SystembarStateHandler mSystembarHandler;
     private boolean mIsClockVisible = true;
 
-    public EosUiController(Context context) {
+    public EosUiController(Context context, SystembarStateHandler handler) {
         super(context);
         mContext = context;
+        mSystembarHandler = handler;
         mResolver = mContext.getContentResolver();
         mFilter = new IntentFilter();
         mFilter.addAction(EOSConstants.INTENT_EOS_CONTROL_CENTER);
@@ -150,13 +152,19 @@ public class EosUiController extends ActionHandler {
     }
 
     private void unregisterObservers() {
-        for (ContentObserver co : observers) {
-            mResolver.unregisterContentObserver(co);
-            log(co.toString() + " unregistered");
+        if (observers != null) {
+            for (ContentObserver co : observers) {
+                mResolver.unregisterContentObserver(co);
+                log(co.toString() + " unregistered");
+            }
         }
     }
 
     private void registerObservers() {
+
+        // disable this just for now...
+        // unregisterObservers();
+        //
         mResolver.registerContentObserver(
                 Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE), false,
                 mBatterySettingsObserver);
@@ -269,7 +277,7 @@ public class EosUiController extends ActionHandler {
                         ? STOCK_NAV_BAR
                         : EOS_NAV_BAR;
         mNavigationBarView = (NavigationBarView) View.inflate(mContext, layout, null);
-        SystembarStateHandler.setNavigationBar(mNavigationBarView, lp);
+        mSystembarHandler.setNavigationBar(mNavigationBarView, lp);
         mSoftKeyObjects = new ArrayList<SoftKeyObject>();
         updateNavigationBarColor();
         initSoftKeys();

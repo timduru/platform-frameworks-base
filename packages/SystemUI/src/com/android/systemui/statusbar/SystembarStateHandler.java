@@ -32,7 +32,7 @@ public class SystembarStateHandler {
     }
 
     // holds registered callbacks
-    private static ArrayList<OnBarStateChangedListener> mListeners = new ArrayList<OnBarStateChangedListener>();
+    private ArrayList<OnBarStateChangedListener> mListeners = new ArrayList<OnBarStateChangedListener>();
 
     // there are two hidden states:
     // STATE 1: the bars are hidden on boot. there may be
@@ -44,24 +44,24 @@ public class SystembarStateHandler {
     // them gone now. we just remove from windowmanager and notify
     // interested parties
 
-    public static boolean mNavBarPreviouslyHiddenByConf = false;
+    private boolean mNavBarPreviouslyHiddenByConf = false;
 
     // if true handle systemui initialization
-    private static boolean mNavBarHidesOnBoot = false;
+    private boolean mNavBarHidesOnBoot = false;
 
     // by default, hiding bars means only hide the
     // navigation bar. but if the user want's, the
     // statusbar will hide when navigation bar hides
     // there is no state in which only statusbar can
     // be hidden by itself
-    private static boolean mStatBarHidesToo = false;
+    private boolean mStatBarHidesToo = false;
 
     // current visibility state we get from SettingsProvider
     // this class is the only place that actually reads and
     // writes to this. interested parties can request current
     // state through callback or broadcast or request state
     // change through broadcast
-    private static int currentVisibilityState;
+    private int currentVisibilityState;
 
     // value from window manager
     // I should become apparent why we can't change the
@@ -69,26 +69,33 @@ public class SystembarStateHandler {
     // no real basis in which to determine what the original
     // state of the device is. Also, there's nothing in
     // WindowManager that we cant do from here
-    private static boolean mHasNavigationBar = true;
+    private boolean mHasNavigationBar = true;
 
     // check for capacitive button devices so we
     // don't have to look for a navigation bar
-    private static boolean mHasStatusBarOnly = false;
+    private boolean mHasStatusBarOnly = false;
 
     // working in SystemUI context
-    private static Context mContext;
+    private Context mContext;
 
     // hold our view instances and layout params
     // need to update if services restarts
-    private static NavigationBarView mNavigationBarView;
-    private static WindowManager.LayoutParams mNavigationBarParams;
-    private static View mStatusBarView;
-    private static WindowManager.LayoutParams mStatusBarParams;
+    private NavigationBarView mNavigationBarView;
+    private WindowManager.LayoutParams mNavigationBarParams;
+    private View mStatusBarView;
+    private WindowManager.LayoutParams mStatusBarParams;
+    private WindowManager mWindowManager;
+    
+    public SystembarStateHandler (Context context, OnBarStateChangedListener listener) {
+        mContext = context;
+        mListeners.add(listener);
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        init();
+    }
 
     // we'll call this from BaseStatusBar so we can get a clean
     // initial state before the PhoneStatusBar is even created
-    public static void init(Context context) {
-        mContext = context;
+    private void init() {
         loadStatesFromProvider();
 
         try {
@@ -140,23 +147,31 @@ public class SystembarStateHandler {
         // refresh values
         loadStatesFromProvider();
 
+        // now our states are clean we can notify listeners
+        // of accurate visiblity state
+        notifyVisibilityChanged();
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE);
         filter.addAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE_REQUEST_TOGGLE);
         mContext.registerReceiver(mReceiver, filter);
     }
 
-    public static void setNavigationBar(NavigationBarView view, WindowManager.LayoutParams lp) {
+    public void setNavigationBar(NavigationBarView view, WindowManager.LayoutParams lp) {
         mNavigationBarView = view;
         mNavigationBarParams = lp;
     }
 
-    public static void setStatusBar(View view, WindowManager.LayoutParams lp) {
+    public void setStatusBar(View view, WindowManager.LayoutParams lp) {
         mStatusBarView = view;
         mStatusBarParams = lp;
     }
 
-    private static BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    public boolean isBarPreviouslyHiddenByConf() {
+        return mNavBarPreviouslyHiddenByConf;
+    }
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -179,7 +194,7 @@ public class SystembarStateHandler {
         }
     };
 
-    private static void sendExceptionBroadcast() {
+    private void sendExceptionBroadcast() {
         // send this so reqesting app can update ui accordingly
         Intent exception = new Intent()
                 .setAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE_CHANGED_EXCEPTION)
@@ -187,18 +202,18 @@ public class SystembarStateHandler {
         mContext.sendBroadcast(exception);
     }
 
-    public static void addStatusbarWindow(WindowManager wm) {
+    public void addStatusbarWindow() {
         boolean isNavbarHidden = currentVisibilityState == View.GONE;
         if (!isNavbarHidden
                 || (isNavbarHidden && !mStatBarHidesToo)) {
-            wm.addView(mStatusBarView, mStatusBarParams);
+            mWindowManager.addView(mStatusBarView, mStatusBarParams);
         }
     }
 
-    private static boolean toggleStatusBar(WindowManager wm, boolean shouldHide) {
+    private boolean toggleStatusBar(boolean shouldHide) {
         if (shouldHide) {
             try {
-                wm.removeView(mStatusBarView);
+                mWindowManager.removeView(mStatusBarView);
             } catch (Exception e) {
                 sendExceptionBroadcast();
                 resetStatesToProvider();
@@ -208,7 +223,7 @@ public class SystembarStateHandler {
         } else {
             // let's try to put the statusbar back
             try {
-                wm.addView(mStatusBarView, mStatusBarParams);
+                mWindowManager.addView(mStatusBarView, mStatusBarParams);
             } catch (Exception e) {
                 sendExceptionBroadcast();
                 resetStatesToProvider();
@@ -219,10 +234,10 @@ public class SystembarStateHandler {
         return true;
     }
 
-    private static boolean toggleNavigationBar(WindowManager wm, boolean shouldHide) {
+    private boolean toggleNavigationBar(boolean shouldHide) {
         if (shouldHide) {
             try {
-                wm.removeView(mNavigationBarView);
+                mWindowManager.removeView(mNavigationBarView);
             } catch (Exception e) {
                 sendExceptionBroadcast();
                 resetStatesToProvider();
@@ -232,7 +247,7 @@ public class SystembarStateHandler {
         } else {
             // let's try to put the navigationbar back
             try {
-                wm.addView(mNavigationBarView, mNavigationBarParams);
+                mWindowManager.addView(mNavigationBarView, mNavigationBarParams);
             } catch (Exception e) {
                 sendExceptionBroadcast();
                 resetStatesToProvider();
@@ -243,7 +258,7 @@ public class SystembarStateHandler {
         return true;
     }
 
-    private static void toggleVisibility() {
+    private void toggleVisibility() {
         if ((mHasNavigationBar && mNavigationBarView == null)
                 || mStatusBarView == null) {
             resetStatesToProvider();
@@ -252,15 +267,12 @@ public class SystembarStateHandler {
 
         loadStatesFromProvider();
 
-        WindowManager mWindowManager = (WindowManager) mContext
-                .getSystemService(Context.WINDOW_SERVICE);
-
         boolean shouldHide = currentVisibilityState == View.VISIBLE;
         boolean statusBarSuccess = false;
         boolean navBarSuccess = false;
 
         if (mStatBarHidesToo || mHasStatusBarOnly) {
-            statusBarSuccess = toggleStatusBar(mWindowManager, shouldHide);
+            statusBarSuccess = toggleStatusBar(shouldHide);
         } else {
             statusBarSuccess = true;
         }
@@ -277,7 +289,7 @@ public class SystembarStateHandler {
             navBarSuccess = true;
         } else {
             if (mHasNavigationBar) {
-                navBarSuccess = toggleNavigationBar(mWindowManager, shouldHide);
+                navBarSuccess = toggleNavigationBar(shouldHide);
             } else {
                 navBarSuccess = true;
             }
@@ -301,7 +313,7 @@ public class SystembarStateHandler {
         }
     }
 
-    private static void loadStatesFromProvider() {
+    private void loadStatesFromProvider() {
         updateHideBarsOnBootEnabled();
         updateStatBarHidesTooEnabled();
         updateNavBarHidden();
@@ -312,55 +324,55 @@ public class SystembarStateHandler {
     // we try to write default values to provider
     // so we don't get caught in some crazy fail
     // loop. Also, settings can correctly update
-    private static void resetStatesToProvider() {
+    private void resetStatesToProvider() {
         resetHideBarsOnBootEnabled();
         resetStatBarHidesTooEnabled();
         resetNavBarHidden();
     }
 
-    public static void setOnBarStateChangeListener(OnBarStateChangedListener l) {
+    public void setOnBarStateChangeListener(OnBarStateChangedListener l) {
         l.onBarStateChanged(currentVisibilityState);
         mListeners.add(l);
         log(l.toString() + " added to arraylist");
     }
 
-    private static void resetHideBarsOnBootEnabled() {
+    private void resetHideBarsOnBootEnabled() {
         Settings.System.putInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_HIDE_NAVBAR_ON_BOOT,
                 EOSConstants.SYSTEMUI_HIDE_NAVBAR_ON_BOOT_DEF);
     }
 
-    private static void resetStatBarHidesTooEnabled() {
+    private void resetStatBarHidesTooEnabled() {
         Settings.System.putInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_HIDE_STATBAR_TOO,
                 EOSConstants.SYSTEMUI_HIDE_STATBAR_TOO_DEF);
     }
 
-    private static void resetNavBarHidden() {
+    private void resetNavBarHidden() {
         Settings.System.putInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_HIDE_BARS,
                 EOSConstants.SYSTEMUI_HIDE_BARS_DEF);
     }
 
-    private static void updateHideBarsOnBootEnabled() {
+    private void updateHideBarsOnBootEnabled() {
         mNavBarHidesOnBoot = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_HIDE_NAVBAR_ON_BOOT,
                 EOSConstants.SYSTEMUI_HIDE_NAVBAR_ON_BOOT_DEF) == 1;
     }
 
-    private static void updateStatBarHidesTooEnabled() {
+    private void updateStatBarHidesTooEnabled() {
         mStatBarHidesToo = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_HIDE_STATBAR_TOO,
                 EOSConstants.SYSTEMUI_HIDE_STATBAR_TOO_DEF) == 1;
     }
 
-    private static void updateNavBarHidden() {
+    private void updateNavBarHidden() {
         currentVisibilityState = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_HIDE_BARS,
                 EOSConstants.SYSTEMUI_HIDE_BARS_DEF) == 1 ? View.GONE : View.VISIBLE;
     }
 
-    private static void notifyVisibilityChanged() {
+    private void notifyVisibilityChanged() {
         for (OnBarStateChangedListener l : mListeners) {
             l.onBarStateChanged(currentVisibilityState);
             log(l.toString() + " notified");
