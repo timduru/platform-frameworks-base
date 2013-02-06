@@ -30,7 +30,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.IConnectivityManager;
 import android.net.ConnectivityManager;
@@ -69,7 +68,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -304,7 +302,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mContext = context;
 
         //STOPSHIP: get this from native side
-        mInterface = "p2p0";
+        mInterface = SystemProperties.get("wifi.p2pinterface", "p2p0");
         mActivityMgr = (ActivityManager)context.getSystemService(Activity.ACTIVITY_SERVICE);
 
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI_P2P, 0, NETWORKTYPE, "");
@@ -1949,26 +1947,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 break;
             default:
                 break;
-        }
-
-        if ((r.getConfiguration().uiMode & Configuration.UI_MODE_TYPE_APPLIANCE) ==
-                Configuration.UI_MODE_TYPE_APPLIANCE) {
-            // For appliance devices, add a key listener which accepts.
-            dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-
-                @Override
-                public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                    // TODO: make the actual key come from a config value.
-                    if (keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
-                        sendMessage(PEER_CONNECTION_USER_ACCEPT);
-                        dialog.dismiss();
-                        return true;
-                    }
-                    return false;
-                }
-            });
-            // TODO: add timeout for this dialog.
-            // TODO: update UI in appliance mode to tell user what to do.
         }
 
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);

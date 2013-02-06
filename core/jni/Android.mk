@@ -11,6 +11,10 @@ else
 	LOCAL_CFLAGS += -DPACKED=""
 endif
 
+ifeq ($(WITH_JIT),true)
+	LOCAL_CFLAGS += -DWITH_JIT
+endif
+
 ifneq ($(USE_CUSTOM_RUNTIME_HEAP_MAX),)
   LOCAL_CFLAGS += -DCUSTOM_RUNTIME_HEAP_MAX=$(USE_CUSTOM_RUNTIME_HEAP_MAX)
 endif
@@ -148,6 +152,12 @@ LOCAL_SRC_FILES:= \
 	android_content_res_Configuration.cpp \
     android_animation_PropertyValuesHolder.cpp
 
+ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+    LOCAL_CFLAGS += -DQCOM_HARDWARE
+    LOCAL_SRC_FILES += \
+	    com_android_internal_app_ActivityTrigger.cpp
+endif
+
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
 	$(LOCAL_PATH)/android/graphics \
@@ -197,7 +207,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libETC1 \
 	libhardware \
 	libhardware_legacy \
-	libselinux \
 	libsonivox \
 	libcrypto \
 	libssl \
@@ -210,6 +219,12 @@ LOCAL_SHARED_LIBRARIES := \
 	libusbhost \
 	libharfbuzz \
 	libz
+
+ifeq ($(HAVE_SELINUX),true)
+LOCAL_C_INCLUDES += external/libselinux/include
+LOCAL_SHARED_LIBRARIES += libselinux
+LOCAL_CFLAGS += -DHAVE_SELINUX
+endif # HAVE_SELINUX
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui
