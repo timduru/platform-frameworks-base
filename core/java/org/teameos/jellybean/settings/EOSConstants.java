@@ -561,6 +561,17 @@ public final class EOSConstants {
     */
    public static final int SYSTEMUI_USE_HYBRID_STATBAR_DEF = 0;
 
+   /**
+   * Eos exclusive gesture navigation bar
+   * @hide
+   */
+   public static final String SYSTEMUI_USE_NX_NAVBAR = "eos_systemui_use_nx_navbar";
+
+  /**
+   * @hide
+   */
+   public static final int SYSTEMUI_USE_NX_NAVBAR_DEF = 0;
+
     /**
      * @hide
      */

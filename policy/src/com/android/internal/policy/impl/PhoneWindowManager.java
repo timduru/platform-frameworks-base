@@ -279,12 +279,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int[] mNavigationBarHeightForRotation = new int[4];
     int[] mNavigationBarWidthForRotation = new int[4];
 
-    // Eos feature config bools
-    // low profile mode smaller system/nav bar
-    boolean mLowProfile = false;
-    // devices with XLarge screen have custom hide navbar feature
-    boolean mHasCustomHideBar = false;
-
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
     GlobalActions mGlobalActions;
@@ -903,8 +897,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
 
-        // initialize eos feature observer
-        mHasCustomHideBar = EOSUtils.isXLargeScreen();
         EosBarModeObserver eosBarModeObserver = new EosBarModeObserver(mHandler);
         eosBarModeObserver.observe();
 
@@ -994,22 +986,49 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void setNavigationBarSize() {
-        // get low profile settings here
-        // for now only apply to navigation bar
-        mLowProfile = (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0) == 1) && mHasNavigationBar;
+        /*
+         * get desired bar size 
+         * 0 = normal 
+         * 1 = low profile 
+         * 2 = tiny
+         */
+
+        int barHeight;
+        int barHeightLandscape;
+        int barWidth;
+
+        int barMode = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0);
+        switch (barMode) {
+            case 0:
+                barHeight = com.android.internal.R.dimen.navigation_bar_height;
+                barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape;
+                barWidth = com.android.internal.R.dimen.navigation_bar_width;
+                break;
+            case 1:
+                barHeight = com.android.internal.R.dimen.navigation_bar_height_low_profile;
+                barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape_low_profile;
+                barWidth = com.android.internal.R.dimen.navigation_bar_width_low_profile;
+                break;
+            case 2:
+                barHeight = com.android.internal.R.dimen.navigation_bar_height_tiny_profile;
+                barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape_tiny_profile;
+                barWidth = com.android.internal.R.dimen.navigation_bar_width_tiny_profile;
+                break;
+            default:
+                barHeight = com.android.internal.R.dimen.navigation_bar_height;
+                barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape;
+                barWidth = com.android.internal.R.dimen.navigation_bar_width;
+                break;
+        }
             mNavigationBarHeightForRotation[mPortraitRotation] =
             mNavigationBarHeightForRotation[mUpsideDownRotation] =
                 mContext.getResources()
-                    .getDimensionPixelSize(mLowProfile ? 
-                         com.android.internal.R.dimen.navigation_bar_height_low_profile
-                         : com.android.internal.R.dimen.navigation_bar_height);
+                    .getDimensionPixelSize(barHeight);
             mNavigationBarHeightForRotation[mLandscapeRotation] =
             mNavigationBarHeightForRotation[mSeascapeRotation] =
                 mContext.getResources()
-                     .getDimensionPixelSize(mLowProfile ?
-                         com.android.internal.R.dimen.navigation_bar_height_landscape_low_profile
-                         : com.android.internal.R.dimen.navigation_bar_height_landscape);
+                     .getDimensionPixelSize(barHeightLandscape);
 
             // Width of the navigation bar when presented vertically along
             // one side
@@ -1018,9 +1037,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mNavigationBarWidthForRotation[mLandscapeRotation] =
             mNavigationBarWidthForRotation[mSeascapeRotation] =
                 mContext.getResources()
-                    .getDimensionPixelSize(mLowProfile ?
-                         com.android.internal.R.dimen.navigation_bar_width_low_profile
-                         : com.android.internal.R.dimen.navigation_bar_width);
+                    .getDimensionPixelSize(barWidth);
     }
     public void setInitialDisplaySize(Display display, int width, int height, int density) {
         mDisplay = display;
