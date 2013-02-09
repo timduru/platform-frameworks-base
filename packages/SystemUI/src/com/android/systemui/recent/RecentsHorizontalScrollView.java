@@ -16,8 +16,11 @@
 
 package com.android.systemui.recent;
 
+import android.app.ActivityManager;
 import android.animation.LayoutTransition;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.Canvas;
@@ -40,6 +43,7 @@ import com.android.systemui.recent.RecentsPanelView.TaskDescriptionAdapter;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 public class RecentsHorizontalScrollView extends HorizontalScrollView
         implements SwipeHelper.Callback, RecentsPanelView.RecentsScrollView {
@@ -190,7 +194,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
             @Override
             public void run() {
                 int count = mLinearLayout.getChildCount();
-                if (!RecentsActivity.mHomeForeground) {
+                if (!mHomeForeground()) {
                     count--;
                 }
 
@@ -212,7 +216,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                     }
                 }
                 
-                if (!RecentsActivity.mHomeForeground && mLinearLayout.getChildCount() > 1) {
+                if (!mHomeForeground() && mLinearLayout.getChildCount() > 1) {
                     mCallback.handleOnClick(mLinearLayout.getChildAt(mLinearLayout.getChildCount() - 1));
                 }
             }
@@ -220,6 +224,20 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         clearAll.start();
     }
 
+    private boolean mHomeForeground() {
+        final ActivityManager mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        final List<ActivityManager.RecentTaskInfo> mRecentTasks = mActivityManager.getRecentTasks(2, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+    
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+    	intent.addCategory(Intent.CATEGORY_HOME);
+    	intent.addCategory(Intent.CATEGORY_DEFAULT);	
+        ResolveInfo mInfo = mContext.getPackageManager().resolveActivity(intent, 0);
+        String defaultLauncher = mInfo.activityInfo.packageName.toString().trim().toLowerCase();
+        String task = mRecentTasks.get(1).baseIntent.getComponent().getPackageName().toString().trim().toLowerCase();
+        
+        return defaultLauncher.equals(task);
+    }
+    
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (DEBUG)
             Log.v(TAG, "onInterceptTouchEvent()");

@@ -51,8 +51,6 @@ public class RecentsActivity extends Activity {
     private boolean mShowing;
     private boolean mForeground;
 
-    public static boolean mHomeForeground = false;
-
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -97,7 +95,6 @@ public class RecentsActivity extends Activity {
                 R.anim.recents_return_to_launcher_enter,
                 R.anim.recents_return_to_launcher_exit);
         mForeground = false;
-        mHomeForeground = false;
         super.onPause();
     }
 
