@@ -499,6 +499,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mVolumeUpPress;
     private boolean mVolumeDownPress;
 
+    // Eos Glass
+    private boolean mGlassEnabled;
+
     private class PolicyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -577,12 +580,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         void observe() {
             resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_BAR_SIZE_MODE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_USE_GLASS), false, this);
             setNavigationBarSize();
+            setGlassMode();
         }
 
         @Override
         public void onChange(boolean selfChange) {
             if (mHasNavigationBar) setNavigationBarSize();
+            setGlassMode();
             mContext.sendBroadcast(new Intent().setAction(Intent.ACTION_CONFIGURATION_CHANGED));
         }
     }
@@ -1041,6 +1047,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mContext.getResources()
                     .getDimensionPixelSize(barWidth);
     }
+
+    private void setGlassMode() {
+        mGlassEnabled = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_USE_GLASS,
+                EOSConstants.SYSTEMUI_USE_GLASS_DEF) == 1;
+    }
+
     public void setInitialDisplaySize(Display display, int width, int height, int density) {
         mDisplay = display;
 
@@ -2629,8 +2642,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         systemRect.top = mSystemTop;
         systemRect.right = mSystemRight;
         systemRect.bottom = mSystemBottom;
-        if (mStatusBar != null) return mStatusBar.getSurfaceLayer();
-        if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
+        if (mStatusBar != null && !mGlassEnabled) return mStatusBar.getSurfaceLayer();
+        if (mNavigationBar != null && !mGlassEnabled) return mNavigationBar.getSurfaceLayer();
         return 0;
     }
 

@@ -495,8 +495,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (DEBUG)
                 Slog.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
-                mNavigationBarView = mEosController
-                        .setNavigationBarView(getNavigationBarLayoutParams());
+                mNavigationBarView = mEosController.setNavigationBarView();
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
             }
@@ -887,7 +886,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         prepareNavigationBarView();
 
-        mWindowManager.addView(mNavigationBarView, getNavigationBarLayoutParams());
+        mWindowManager.addView(mNavigationBarView,
+                mEosController.getNavigationBarLayoutParams());
     }
 
     private void repositionNavigationBar() {
@@ -902,35 +902,14 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         prepareNavigationBarView();
 
-        mWindowManager.updateViewLayout(mNavigationBarView, getNavigationBarLayoutParams());
+        mWindowManager.updateViewLayout(mNavigationBarView,
+                mEosController.getNavigationBarLayoutParams());
     }
 
     private void notifyNavigationBarScreenOn(boolean screenOn) {
         if (mNavigationBarView == null)
             return;
         mNavigationBarView.notifyScreenOn(screenOn);
-    }
-
-    private WindowManager.LayoutParams getNavigationBarLayoutParams() {
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
-                0
-                        | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                PixelFormat.OPAQUE);
-        // this will allow the navbar to run in an overlay on devices that
-        // support this
-        if (ActivityManager.isHighEndGfx()) {
-            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        }
-
-        lp.setTitle("NavigationBar");
-        lp.windowAnimations = 0;
-        return lp;
     }
 
     private void addIntruderView() {
@@ -1407,6 +1386,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 haltTicker();
             }
         }
+
+        if (mEosController.isGlassEnabled()) mEosController.applyGlassEffect();
     }
 
     @Override
@@ -2103,6 +2084,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void topAppWindowChanged(boolean showMenu) {
+        if (mEosController.isGlassEnabled()) mEosController.applyGlassEffect();
+
         if (DEBUG) {
             Slog.d(TAG, (showMenu ? "showing" : "hiding") + " the MENU button");
         }

@@ -86,15 +86,15 @@ public final class EOSConstants {
      */
     public static final String SYSTEMUI_CLOCK_AMPM = "eos_systemui_clock_ampm";
 
-    /**		
-     * @hide		
-     */	
-    public static final String SYSTEMUI_CLOCK_SIGNAL_CLUSTER_TAG = "eos_systemui_clock_cluster_tag";		
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_CLOCK_SIGNAL_CLUSTER_TAG = "eos_systemui_clock_cluster_tag";
 
-    /**		
-     * @hide		
-     */		
-    public static final String SYSTEMUI_CLOCK_CENTER_TAG = "eos_systemui_clock_center_tag";		
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_CLOCK_CENTER_TAG = "eos_systemui_clock_center_tag";
 
     /**
      * @hide
@@ -344,7 +344,7 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final int SYSTEMUI_SETTINGS_INDICATOR_HIDDEN_DEF= 0;
+    public static final int SYSTEMUI_SETTINGS_INDICATOR_HIDDEN_DEF = 0;
 
     /**
      * @hide
@@ -394,14 +394,14 @@ public final class EOSConstants {
 
     /**
      * Broadcast Action: Request to turn Eos Torch application off
-     *
+     * 
      * @hide
      */
     public static final String ACTION_TORCH_OFF = "android.intent.action.TORCH_OFF";
 
     /**
      * Broadcast Action: Notify listeners control center is running or stopped
-     *
+     * 
      * @hide
      */
     public static final String INTENT_EOS_CONTROL_CENTER = "org.teameos.intent.CONTROL_CENTER";
@@ -509,23 +509,27 @@ public final class EOSConstants {
     public static final int SYSTEMUI_SETTINGS_STANDARD_SETTINGS_DEF = 1;
     /**
      * The touchpad gesture mode. (0 = spots, 1 = pointer)
+     * 
      * @hide
      */
     public static final String DEVICE_SETTINGS_TOUCHPAD_MODE = "eos_device_settings_touchpad_mode";
     /**
      * Whether or not the touchpad is enabled. (0 = false, 1 = true)
+     * 
      * @hide
      */
     public static final String DEVICE_SETTINGS_TOUCHPAD_STATUS = "eos_device_settings_touchpad_status";
     /**
-     * Value for {@link #EOS_TOUCHPAD_STATUS} to use
-     * the touchpad located on the hardware keyboard dock.
+     * Value for {@link #EOS_TOUCHPAD_STATUS} to use the touchpad located on the
+     * hardware keyboard dock.
+     * 
      * @hide
      */
     public static final int DEVICE_SETTINGS_TOUCHPAD_DISABLED = 0;
     /**
-     * Value for {@link #EOS_TOUCHPAD_STATUS} to use
-     * the touchpad located on the hardware keyboard dock.
+     * Value for {@link #EOS_TOUCHPAD_STATUS} to use the touchpad located on the
+     * hardware keyboard dock.
+     * 
      * @hide
      */
     public static final int DEVICE_SETTINGS_TOUCHPAD_ENABLED = 1;
@@ -551,26 +555,83 @@ public final class EOSConstants {
     public static final int SYSTEMUI_HIDE_STATBAR_TOO_DEF = 0;
 
     /**
-    * Use a modified eos style navigation bar to help tablet users adjust to new ui
-    * @hide
-    */
-   public static final String SYSTEMUI_USE_HYBRID_STATBAR = "eos_systemui_use_hybrid_statbar";
+     * Use a modified eos style navigation bar to help tablet users adjust to
+     * new ui
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_USE_HYBRID_STATBAR = "eos_systemui_use_hybrid_statbar";
 
-   /**
-    * @hide
-    */
-   public static final int SYSTEMUI_USE_HYBRID_STATBAR_DEF = 0;
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_USE_HYBRID_STATBAR_DEF = 0;
 
-   /**
-   * Eos exclusive gesture navigation bar
-   * @hide
-   */
-   public static final String SYSTEMUI_USE_NX_NAVBAR = "eos_systemui_use_nx_navbar";
+    /**
+     * We got some bomb glass baby ;P
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_USE_GLASS = "eos_systemui_use_glass";
 
-  /**
-   * @hide
-   */
-   public static final int SYSTEMUI_USE_NX_NAVBAR_DEF = 0;
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_USE_GLASS_DEF = 0;
+
+    /**
+     * transparency level for navbar glass when launcher is showing
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_NAVBAR_GLASS_LEVEL = "eos_systemui_navbar_glass_level";
+
+    /**
+     * transparency level for statusbar glass when launcher is showing
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_STATUSBAR_GLASS_LEVEL = "eos_systemui_statusbar_glass_level";
+
+    /**
+     * default transparency enabled for navbar glass when launcher is showing
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_NAVBAR_GLASS_DEFAULT_ENABLED = "eos_systemui_navbar_glass_default_enabled";
+
+    /**
+     * default transparency enabled for navbar glass when launcher is showing
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_STATUSBAR_GLASS_DEFAULT_ENABLED = "eos_systemui_statusbar_glass_default_enabled";
+
+    /**
+     * default transparency level preset for navbar when launcher is showing
+     * 
+     * @hide
+     */
+    public static final int SYSTEMUI_NAVBAR_GLASS_PRESET = 125;
+
+    /**
+     * default transparency level preset for statusbar when launcher is showing
+     * 
+     * @hide
+     */
+    public static final int SYSTEMUI_STATUSBAR_GLASS_PRESET = 120;
+
+    /**
+     * Eos exclusive gesture navigation bar
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_USE_NX_NAVBAR = "eos_systemui_use_nx_navbar";
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_USE_NX_NAVBAR_DEF = 0;
 
     /**
      * @hide
@@ -586,7 +647,7 @@ public final class EOSConstants {
      * @hide
      */
     public static final String SYSTEM_DEFAULT_VOLUME_STREAM = "eos_system_default_volume_stream";
-    
+
     /**
      * @hide
      */
@@ -666,7 +727,7 @@ public final class EOSConstants {
      * @hide
      */
     public static final String SYSTEMUI_TABLET_BIG_CLEAR_BUTTON = "eos_interface_big_clear_button";
-    
+
     /**
      * @hide
      */
@@ -686,7 +747,7 @@ public final class EOSConstants {
      * @hide
      */
     public static final String SYSTEMUI_PANEL_SEEKBAR_TILE = "QS_Seekbar";
-    
+
     /**
      * @hide
      */
@@ -735,7 +796,7 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final String SYSTEMUI_PANEL_LOCATION_TILE= "QS_Location";
+    public static final String SYSTEMUI_PANEL_LOCATION_TILE = "QS_Location";
 
     /**
      * @hide
@@ -792,7 +853,7 @@ public final class EOSConstants {
      */
     public static final String[] SYSTEMUI_PANEL_DEFAULTS = {
             SYSTEMUI_PANEL_USER_TILE,
-            SYSTEMUI_PANEL_SETTINGS_TILE,            
+            SYSTEMUI_PANEL_SETTINGS_TILE,
             SYSTEMUI_PANEL_BATTERY_TILE,
             SYSTEMUI_PANEL_SEEKBAR_TILE,
             SYSTEMUI_PANEL_ROTATION_TILE,
@@ -807,7 +868,7 @@ public final class EOSConstants {
     public static final Map<String, Boolean> getEosSystemUIPanelMap() {
         LinkedHashMap<String, Boolean> map = new LinkedHashMap<String, Boolean>();
         map.put(SYSTEMUI_PANEL_USER_TILE, true);
-        map.put(SYSTEMUI_PANEL_SETTINGS_TILE, true);        
+        map.put(SYSTEMUI_PANEL_SETTINGS_TILE, true);
         map.put(SYSTEMUI_PANEL_BATTERY_TILE, true);
         map.put(SYSTEMUI_PANEL_SEEKBAR_TILE, true);
         map.put(SYSTEMUI_PANEL_ROTATION_TILE, true);

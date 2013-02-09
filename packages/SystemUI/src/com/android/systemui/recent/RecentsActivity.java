@@ -49,7 +49,7 @@ public class RecentsActivity extends Activity {
     private RecentsPanelView mRecentsPanel;
     private IntentFilter mIntentFilter;
     private boolean mShowing;
-    private boolean mForeground;
+    private static boolean mForeground;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -254,7 +254,7 @@ public class RecentsActivity extends Activity {
         }
     }
 
-    boolean isForeground() {
+    public static boolean isForeground() {
         return mForeground;
     }
 

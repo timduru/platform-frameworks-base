@@ -132,8 +132,7 @@ public class EosNxHandler {
                         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                                 float velocityY) {
                             final float deltaParallel = isNavBarVertical() ? e2.getY() - e1.getY()
-                                    : e2
-                                            .getX() - e1.getX();
+                                    : e2.getX() - e1.getX();
                             final float deltaPerpendicular = isNavBarVertical() ? e2.getX()
                                     - e1.getX()
                                     : e2.getY() - e1.getY();
@@ -157,18 +156,14 @@ public class EosNxHandler {
                             }
                             final int holoColor = mContext.getResources()
                                     .getColor(com.android.internal.R.color.holo_blue_light);
-                            mNavigationBarView.setBackgroundColor(Color.argb(125,
-                                    Color.red(holoColor),
-                                    Color.green(holoColor), Color.blue(holoColor)));
+                            mNavigationBarView.setBackgroundColor(Color.argb(125, Color.red(holoColor),
+                                                    Color.green(holoColor), Color.blue(holoColor)));
 
-                            mNxNavBarGlow = true;
-                            handleNavigationBarColorChange();
                             final Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mNxNavBarGlow = false;
-                                    handleNavigationBarColorChange();
+                                    EosUiController.getEosUiController().updateBarColors();
                                 }
                             }, 100);
 
@@ -258,7 +253,8 @@ public class EosNxHandler {
         private void handleNavigationBarColorChange() {
             int color = 0;
             if (mNxNavBarGlow) {
-                color = mContext.getResources().getColor(com.android.internal.R.color.holo_blue_light);
+                color = mContext.getResources().getColor(
+                        com.android.internal.R.color.holo_blue_light);
             } else {
                 color = Settings.System.getInt(mContext.getContentResolver(),
                         EOSConstants.SYSTEMUI_NAVBAR_COLOR,

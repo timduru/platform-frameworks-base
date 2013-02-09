@@ -3,17 +3,26 @@ package com.android.systemui.statusbar;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.app.ActivityManager;
+import android.app.KeyguardManager;
+import android.content.ComponentName;
+import android.content.pm.ResolveInfo;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Bitmap.Config;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -23,10 +32,12 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.preferences.EosSettings;
+import com.android.systemui.recent.RecentsActivity;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class EosUiController implements OnFeatureStateChangedListener {
 
@@ -45,6 +56,7 @@ public class EosUiController implements OnFeatureStateChangedListener {
     private static boolean DEBUG = false;
 
     private Context mContext;
+
     private PhoneStatusBarView mStatusBarView;
     private PhoneStatusBar mService;
     private NavigationBarView mNavigationBarView;
@@ -60,6 +72,11 @@ public class EosUiController implements OnFeatureStateChangedListener {
     private int MSG_STATUSBAR_COLOR_SETTINGS;
     private int MSG_NAVBAR_COLOR_SETTINGS;
     private int MSG_HYBRID_BAR_SETTINGS;
+    private int MSG_GLASS_SETTINGS;
+    private int MSG_GLASS_NAVBAR_SETTINGS;
+    private int MSG_GLASS_STATUSBAR_SETTINGS;
+    private int MSG_GLASS_NAVBAR_PRESET;
+    private int MSG_GLASS_STATUSBAR_PRESET;
 
     // Eos classes
     private EosSettings mEosLegacyToggles;
@@ -68,6 +85,26 @@ public class EosUiController implements OnFeatureStateChangedListener {
 
     private boolean mIsClockVisible = true;
     private int mCurrentNavLayout;
+
+    // glass
+    private boolean mGlassEnabled = false;
+    private boolean mGlassNavbarPreset = false;
+    private boolean mGlassStatusbarPreset = false;
+    private int mNavbarGlassLevel = NAVBAR_DEF;
+    private int mStatusbarGlassLevel = STATUSBAR_DEF;
+    
+    private ArrayList<ComponentName> mLaunchers = new ArrayList<ComponentName>();
+
+    // for glass and no glass
+    private int mNavbarColor;
+    private int mStatusbarColor;
+
+    private static final int NAVBAR_DEF = EOSConstants.SYSTEMUI_NAVBAR_GLASS_PRESET;
+    private static final int STATUSBAR_DEF = EOSConstants.SYSTEMUI_STATUSBAR_GLASS_PRESET;;
+    private static final int KEYGUARD_NAV = Color.parseColor("#73000000");
+    private static final int KEYGUARD_STAT = Color.parseColor("#73000000");
+    private static final int RECENT_NAV = Color.parseColor("#e0000000");
+    private static final int RECENT_STAT = Color.parseColor("#99000000");
 
     // our one and only instance
     private static EosUiController eosUiController;
@@ -86,6 +123,8 @@ public class EosUiController implements OnFeatureStateChangedListener {
         EosObserverHandler.initHandler(context);
         mObserverHandler = EosObserverHandler.getEosObserverHandler();
         mResolver = mContext.getContentResolver();
+        // we should be cool running this here
+        new LauncherList().execute();
         registerUriList();
     }
 
@@ -115,6 +154,16 @@ public class EosUiController implements OnFeatureStateChangedListener {
                 .registerUri(EOSConstants.SYSTEMUI_NAVBAR_COLOR);
         MSG_HYBRID_BAR_SETTINGS = mObserverHandler
                 .registerUri(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR);
+        MSG_GLASS_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_USE_GLASS);
+        MSG_GLASS_NAVBAR_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_NAVBAR_GLASS_LEVEL);
+        MSG_GLASS_STATUSBAR_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_STATUSBAR_GLASS_LEVEL);
+        MSG_GLASS_NAVBAR_PRESET = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_NAVBAR_GLASS_DEFAULT_ENABLED);
+        MSG_GLASS_STATUSBAR_PRESET = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_STATUSBAR_GLASS_DEFAULT_ENABLED);
 
         mObserverHandler.setOnFeatureStateChangedListener((OnFeatureStateChangedListener) this);
     }
@@ -142,10 +191,39 @@ public class EosUiController implements OnFeatureStateChangedListener {
         } else if (msg == MSG_HYBRID_BAR_SETTINGS) {
             restartSystemUIServce();
             return;
+        } else if (msg == MSG_GLASS_SETTINGS
+                || msg == MSG_GLASS_NAVBAR_SETTINGS
+                || msg == MSG_GLASS_STATUSBAR_SETTINGS
+                || msg == MSG_GLASS_NAVBAR_PRESET
+                || msg == MSG_GLASS_STATUSBAR_PRESET) {
+            handleGlassChange();
+            return;
         }
     }
 
-    public NavigationBarView setNavigationBarView(WindowManager.LayoutParams lp) {
+    public WindowManager.LayoutParams getNavigationBarLayoutParams() {
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
+                0
+                        | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                PixelFormat.TRANSLUCENT);
+        // this will allow the navbar to run in an overlay on devices that
+        // support this
+        if (ActivityManager.isHighEndGfx()) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        }
+
+        lp.setTitle("NavigationBar");
+        lp.windowAnimations = 0;
+        return lp;
+    }
+
+    public NavigationBarView setNavigationBarView() {
         mCurrentNavLayout = Settings.System.getInt(mResolver,
                 EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR,
                 EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF)
@@ -154,6 +232,9 @@ public class EosUiController implements OnFeatureStateChangedListener {
                         : EOS_NAV_BAR;
         mNavigationBarView = (NavigationBarView) View.inflate(mContext, mCurrentNavLayout, null);
 
+        // send bar to visibility handler first
+        mSystembarHandler.setNavigationBar(mNavigationBarView, getNavigationBarLayoutParams());
+
         // startNX the instance handles all states
         if (mCurrentNavLayout == STOCK_NAV_BAR) {
             EosNxHandler.create(mContext, mNavigationBarView, mService);
@@ -161,8 +242,9 @@ public class EosUiController implements OnFeatureStateChangedListener {
         // softkey longpress action handler
         EosSoftkeyHandler.init(mContext, mNavigationBarView);
 
-        mSystembarHandler.setNavigationBar(mNavigationBarView, lp);
-        handleNavigationBarColorChange();
+        // start glass
+        handleGlassChange();
+
         return mNavigationBarView;
     }
 
@@ -191,7 +273,6 @@ public class EosUiController implements OnFeatureStateChangedListener {
                 .findViewById(R.id.signal_battery_cluster)
                 .findViewById(R.id.battery));
 
-        handleStatusbarColorChange();
         handleBatteryChange();
         handleClockChange();
     }
@@ -212,31 +293,141 @@ public class EosUiController implements OnFeatureStateChangedListener {
         System.exit(0);
     }
 
-    private void handleNavigationBarColorChange() {
-        int color = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_NAVBAR_COLOR,
-                EOSConstants.SYSTEMUI_NAVBAR_COLOR_DEF);
-        if (color == -1)
-            color = EOSConstants.SYSTEMUI_NAVBAR_COLOR_DEF;
+    private void handleGlassChange() {
+        mGlassEnabled = Settings.System.getInt(mResolver,
+                EOSConstants.SYSTEMUI_USE_GLASS,
+                EOSConstants.SYSTEMUI_USE_GLASS_DEF) == 1;
+        mNavbarGlassLevel = Settings.System.getInt(mResolver,
+                EOSConstants.SYSTEMUI_NAVBAR_GLASS_LEVEL, NAVBAR_DEF);
+        mStatusbarGlassLevel = Settings.System.getInt(mResolver,
+                EOSConstants.SYSTEMUI_STATUSBAR_GLASS_LEVEL, STATUSBAR_DEF);
+        mGlassNavbarPreset = Settings.System.getInt(mResolver,
+                EOSConstants.SYSTEMUI_NAVBAR_GLASS_DEFAULT_ENABLED, 0) == 1;
+        mGlassStatusbarPreset = Settings.System.getInt(mResolver,
+                EOSConstants.SYSTEMUI_STATUSBAR_GLASS_DEFAULT_ENABLED, 0) == 1;
 
-        // we don't want alpha here
-        color = Color.rgb(Color.red(color), Color.green(color), Color.blue(color));
-        mNavigationBarView.setBackgroundColor(color);
+        if (mGlassNavbarPreset)
+            mNavbarGlassLevel = NAVBAR_DEF;
+        if (mGlassStatusbarPreset)
+            mStatusbarGlassLevel = STATUSBAR_DEF;
+        updateBarColors();
     }
 
-    // applies to Statusbar only
-    private void handleStatusbarColorChange() {
-        int color = Settings.System.getInt(mContext.getContentResolver(),
+    private boolean isLauncherForeground() {
+        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        final List<ActivityManager.RecentTaskInfo> recentTasks = am
+                .getRecentTasksForUser(
+                        1, ActivityManager.RECENT_WITH_EXCLUDED,
+                        UserHandle.CURRENT.getIdentifier());
+        if (recentTasks.size() > 0) {
+            ActivityManager.RecentTaskInfo recentInfo = recentTasks.get(0);
+            Intent intent = new Intent(recentInfo.baseIntent);
+            if (recentInfo.origActivity != null) {
+                intent.setComponent(recentInfo.origActivity);
+            }
+            for (ComponentName comp : mLaunchers) {
+                if (intent.getComponent().equals(comp))
+                    return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    private boolean isKeyguardForeground() {
+        KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        if (km == null)
+            return false;
+        return km.isKeyguardLocked();
+    }
+
+    public boolean isGlassEnabled() {
+        return mGlassEnabled;
+    }
+
+    public void updateBarColors() {
+        if (mGlassEnabled) {
+            updateNavbarColorValue();
+            updateStatusbarColorValue();
+            applyGlassEffect();
+        } else {
+            handleNavigationBarColorChange();
+            handleStatusbarColorChange();
+        }
+    }
+
+    public void applyGlassEffect() {
+        if (isKeyguardForeground()) {
+            if (mNavigationBarView != null)
+                mNavigationBarView
+                        .setBackgroundColor(applyAlphaToColor(KEYGUARD_NAV, mNavbarColor));
+            mStatusBarView.setBackgroundColor(applyAlphaToColor(KEYGUARD_STAT, mStatusbarColor));
+            return;
+        } else if (isLauncherForeground()) {
+            if (mNavigationBarView != null)
+                mNavigationBarView.setBackgroundColor(applyAlphaToColor(Color.argb(mNavbarGlassLevel, 0, 0, 0),
+                        mNavbarColor));
+
+            mStatusBarView.setBackgroundColor(applyAlphaToColor(Color.argb(mStatusbarGlassLevel, 0, 0, 0),
+                    mStatusbarColor));
+            return;
+        } else if (RecentsActivity.isForeground()) {
+            if (mNavigationBarView != null)
+                mNavigationBarView.setBackgroundColor(applyAlphaToColor(RECENT_NAV, mNavbarColor));
+            mStatusBarView.setBackgroundColor(applyAlphaToColor(RECENT_STAT, mStatusbarColor));
+            return;
+        } else {
+            if (mNavigationBarView != null)
+                mNavigationBarView.setBackgroundColor(mNavbarColor);
+            mStatusBarView.setBackgroundColor(mStatusbarColor);
+        }
+    }
+
+    private void updateNavbarColorValue() {
+        mNavbarColor = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_NAVBAR_COLOR,
+                EOSConstants.SYSTEMUI_NAVBAR_COLOR_DEF);
+        if (mNavbarColor == -1)
+            mNavbarColor = EOSConstants.SYSTEMUI_NAVBAR_COLOR_DEF;
+
+        mNavbarColor = removeAlphaFromColor(mNavbarColor);
+    }
+
+    private void updateStatusbarColorValue() {
+        mStatusbarColor = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_STATUSBAR_COLOR,
                 EOSConstants.SYSTEMUI_STATUSBAR_COLOR_DEF);
+        if (mStatusbarColor == -1 && mGlassEnabled) {
+            mStatusbarColor = EOSConstants.SYSTEMUI_NAVBAR_COLOR_DEF;
+            mStatusbarColor = removeAlphaFromColor(mStatusbarColor);
+        }
+    }
+
+    private int removeAlphaFromColor(int color) {
+        return Color.rgb(Color.red(color), Color.green(color), Color.blue(color));
+    }
+
+    private int applyAlphaToColor(int alpha, int color) {
+        return Color.argb(Color.alpha(alpha), Color.red(color), Color.green(color), Color.blue(color));
+    }
+
+    private void handleNavigationBarColorChange() {
+        if (mNavigationBarView == null)
+            return;
+        updateNavbarColorValue();
+        mNavigationBarView.setBackgroundColor(mNavbarColor);
+    }
+
+    private void handleStatusbarColorChange() {
+        updateStatusbarColorValue();
         // For themes
         mStatusBarView.setBackground(mContext.getResources().getDrawable(
                 R.drawable.status_bar_background));
-        if (color != -1) {
+        if (mStatusbarColor != -1) {
             // we don't want alpha here
             mStatusBarWindow.setBackground(null);
-            color = Color.rgb(Color.red(color), Color.green(color), Color.blue(color));
-            mStatusBarView.setBackgroundColor(color);
+            mStatusbarColor = removeAlphaFromColor(mStatusbarColor);
+            mStatusBarView.setBackgroundColor(mStatusbarColor);
         }
     }
 
@@ -316,6 +507,22 @@ public class EosUiController implements OnFeatureStateChangedListener {
                 mEosLegacyToggles.setEnabled(isTogglesEnabled);
                 mEosLegacyToggles = null;
             }
+        }
+    }
+
+    private class LauncherList extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Intent intent = new Intent(Intent.ACTION_MAIN, null);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            List<ResolveInfo> activities = mContext.getPackageManager().queryIntentActivities(
+                    intent, 0);
+            for (ResolveInfo ri : activities) {
+                mLaunchers.add(new ComponentName(ri.activityInfo.packageName,
+                        ri.activityInfo.name));
+            }
+            return null;
         }
     }
 
