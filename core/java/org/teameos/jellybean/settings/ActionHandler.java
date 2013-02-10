@@ -1,6 +1,7 @@
 package org.teameos.jellybean.settings;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -14,11 +15,14 @@ import android.os.PowerManager;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
+import android.view.IWindowManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -256,14 +260,37 @@ public abstract class ActionHandler {
     }
 
     private void startAssistActivity() {
-    	SearchManager sm = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
-        Intent intent = sm.getAssistIntent(mContext);
-        if (intent == null) return;
+        IWindowManager mWm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
+        boolean isKeyguardShowing = false;
         try {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Slog.w(TAG, "Activity not found for " + intent.getAction());
+            isKeyguardShowing = mWm.isKeyguardLocked();
+        } catch (RemoteException e) {
+
+        }
+
+        if (isKeyguardShowing) {
+            try {
+                mWm.showAssistant();
+            } catch (RemoteException e) {
+            }
+        } else {
+            Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                    .getAssistIntent(mContext, UserHandle.USER_CURRENT);
+            if (intent == null)
+                return;
+
+            try {
+                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            } catch (RemoteException e) {
+                // too bad, so sad...
+            }
+
+            try {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+            } catch (ActivityNotFoundException e) {
+                Slog.w(TAG, "Activity not found for " + intent.getAction());
+            }
         }
     }
 
