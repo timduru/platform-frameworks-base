@@ -216,7 +216,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                     }
                 }
                 
-                if (!mHomeForeground() && mLinearLayout.getChildCount() > 1) {
+                if (mLinearLayout.getChildCount() > 1 && !mHomeForeground()) {
                     mCallback.handleOnClick(mLinearLayout.getChildAt(mLinearLayout.getChildCount() - 1));
                 }
             }
@@ -233,7 +233,9 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     	intent.addCategory(Intent.CATEGORY_DEFAULT);	
         ResolveInfo mInfo = mContext.getPackageManager().resolveActivity(intent, 0);
         String defaultLauncher = mInfo.activityInfo.packageName.toString().trim().toLowerCase();
-        String task = mRecentTasks.get(1).baseIntent.getComponent().getPackageName().toString().trim().toLowerCase();
+        String task = "";
+        if(mRecentTasks.size() >1) 
+            task = mRecentTasks.get(1).baseIntent.getComponent().getPackageName().toString().trim().toLowerCase();
         
         return defaultLauncher.equals(task);
     }
