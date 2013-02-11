@@ -6,13 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.database.ContentObserver;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.EosObserverHandler;
+import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,17 +22,15 @@ import org.teameos.jellybean.settings.EOSConstants;
 public class EosSettings {
 
     private static String APP_TAG = "EOS Settings";
-    private static final int MSG_EOS_UPDATE_SETTINGS = 2012;
-    private static final int MSG_EOS_UPDATE_INDICATOR = 2013;
+    private int MSG_EOS_UPDATE_SETTINGS;
+    private int MSG_EOS_INDICATOR_COLOR;
+    private int MSG_EOS_INDICATOR_HIDDEN;
 
     private Context mContext;
     private ContentResolver mContentResolver;
     private ViewGroup mParent;
     private List<SettingsController> visibleControllers;
     private List<View> mIndicatorViews;
-    private SettingsObserver mSettingsObserver;
-    private SettingsObserver mIndicatorObserver;
-    private H mHandler;
 
     public EosSettings(ViewGroup parent, Context context) {
         if (parent == null) {
@@ -42,24 +39,46 @@ public class EosSettings {
         }
 
         mContext = context;
-        mContentResolver = mContext.getContentResolver();
         mParent = parent;
-        mHandler = new H();
-        mSettingsObserver = new SettingsObserver(mHandler, MSG_EOS_UPDATE_SETTINGS);
-        mIndicatorObserver = new SettingsObserver(mHandler, MSG_EOS_UPDATE_INDICATOR);
 
-        mContentResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_ENABLED_CONTROLS),
-                false, mSettingsObserver);
-        mContentResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_INDICATOR_HIDDEN),
-                false, mIndicatorObserver);
-        mContentResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_INDICATOR_COLOR),
-                false, mIndicatorObserver);
+        MSG_EOS_UPDATE_SETTINGS = EosObserverHandler.getEosObserverHandler().registerUri(
+                EOSConstants.SYSTEMUI_SETTINGS_ENABLED_CONTROLS);
+        MSG_EOS_INDICATOR_COLOR = EosObserverHandler.getEosObserverHandler().registerUri(
+                EOSConstants.SYSTEMUI_SETTINGS_INDICATOR_COLOR);
+        MSG_EOS_INDICATOR_HIDDEN = EosObserverHandler.getEosObserverHandler().registerUri(
+                EOSConstants.SYSTEMUI_SETTINGS_INDICATOR_HIDDEN);
 
+        EosObserverHandler.getEosObserverHandler().setOnFeatureStateChangedListener(
+                new OnFeatureStateChangedListener() {
+                    @Override
+                    public void onFeatureStateChanged(int msg) {
+                        if (msg == MSG_EOS_UPDATE_SETTINGS) {
+                            detach();
+                            setupControllers();
+                            updateIndicatorAppearance();
+                            return;
+                        } else if (msg == MSG_EOS_INDICATOR_COLOR
+                                || msg == MSG_EOS_INDICATOR_HIDDEN) {
+                            updateIndicatorAppearance();
+                            return;
+                        }
+                    }
+                });
         setupControllers();
         updateIndicatorAppearance();
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (enabled) {
+            mParent.setVisibility(View.VISIBLE);
+            attach();
+        } else {
+            mParent.setVisibility(View.GONE);
+            EosObserverHandler.getEosObserverHandler().unregisterUri(MSG_EOS_UPDATE_SETTINGS);
+            EosObserverHandler.getEosObserverHandler().unregisterUri(MSG_EOS_INDICATOR_COLOR);
+            EosObserverHandler.getEosObserverHandler().unregisterUri(MSG_EOS_INDICATOR_HIDDEN);
+            detach();
+        }
     }
 
     private void setupControllers() {
@@ -111,7 +130,6 @@ public class EosSettings {
                 } else if (i.equals(EOSConstants.SYSTEMUI_SETTINGS_LTE)) {
                     visibleControllers.add(new LteController(mContext, child));
                 }
-
             }
         }
     }
@@ -139,36 +157,5 @@ public class EosSettings {
     public void detach() {
         for (SettingsController i : visibleControllers)
             i.detach();
-    }
-
-    private class H extends Handler {
-        public void handleMessage(Message m) {
-            super.handleMessage(m);
-            switch (m.what) {
-                case MSG_EOS_UPDATE_SETTINGS:
-                    detach();
-                    setupControllers();
-                    updateIndicatorAppearance();
-                    break;
-                case MSG_EOS_UPDATE_INDICATOR:
-                    updateIndicatorAppearance();
-                    break;
-            }
-        }
-    }
-
-    private class SettingsObserver extends ContentObserver {
-        Handler handler;
-        int message;
-
-        public SettingsObserver(Handler handler, int message) {
-            super(handler);
-            this.handler = handler;
-            this.message = message;
-        }
-
-        public void onChange(boolean selfChange) {
-            handler.sendEmptyMessage(message);
-        }
     }
 }

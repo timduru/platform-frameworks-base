@@ -27,7 +27,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -63,7 +62,6 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -76,7 +74,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -86,13 +83,14 @@ import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.EosObserverHandler;
 import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.HorizontalPager;
 import com.android.systemui.statusbar.SystembarStateHandler;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ExternalBatteryController;
@@ -104,11 +102,6 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.Prefs;
-
-import com.android.systemui.statusbar.policy.ToggleSlider;
-import com.android.systemui.statusbar.policy.VolumeController;
-import com.android.systemui.statusbar.policy.BrightnessController;
-import com.android.systemui.statusbar.preferences.EosSettings;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -363,29 +356,15 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     SystembarStateHandler mSystembarHandler;
     EosUiController mEosController;
-    EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {        
-        @Override
-        public void observerStateChanged(boolean state) {
-            if(state == EosUiController.OBSERVERS_ON) {
-                registerObservers();
-            } else {
-                unregisterObservers();
-            }            
-        }
-    };
+    int MSG_QS_ENBLED_SETTINGS;
+    int MSG_QS_TILES_SETTINGS;
+    int MSG_QS_COLUMN_SETTINGS;
 
     SystembarStateHandler.OnBarStateChangedListener mBarListener = new SystembarStateHandler.OnBarStateChangedListener() {
         @Override
         public void onBarStateChanged(int state) {
             mIsNavbarHidden = state == View.GONE;            
         }        
-    };
-
-    ContentObserver mEosQsObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            processEosQsChange();
-        }
     };
 
     @Override
@@ -402,7 +381,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         // initialize bar settings before anything else happens
-        mSystembarHandler = new SystembarStateHandler(mContext, mBarListener);
+        SystembarStateHandler.initHandler(mContext, mBarListener);
+        mSystembarHandler = SystembarStateHandler.getSystembarStateHandler();
 
         super.start(); // calls createAndAddWindows()
 
@@ -421,7 +401,28 @@ public class PhoneStatusBar extends BaseStatusBar {
     protected PhoneStatusBarView makeStatusBarView() {
         final Context context = mContext;
 
-        mEosController = new EosUiController(context, mSystembarHandler);
+        // let's get Eos fired up
+        EosUiController.initEos(mContext, mSystembarHandler);
+        mEosController = EosUiController.getEosUiController();
+
+        MSG_QS_ENBLED_SETTINGS = EosObserverHandler.getEosObserverHandler()
+                .registerUri(EOSConstants.SYSTEMUI_PANEL_DISABLED);
+        MSG_QS_TILES_SETTINGS = EosObserverHandler.getEosObserverHandler()
+                .registerUri(EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES);
+        MSG_QS_COLUMN_SETTINGS = EosObserverHandler.getEosObserverHandler()
+                .registerUri(EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT);
+
+        EosObserverHandler.getEosObserverHandler()
+        .setOnFeatureStateChangedListener(new OnFeatureStateChangedListener() {
+            @Override
+            public void onFeatureStateChanged(int msg) {
+               if (msg == MSG_QS_ENBLED_SETTINGS
+                       || msg == MSG_QS_TILES_SETTINGS
+                       || msg == MSG_QS_COLUMN_SETTINGS) {
+                   processEosQsChange();
+               }                
+            }            
+        });
 
         Resources res = context.getResources();
 
@@ -450,7 +451,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         mEosController.setBar(this);
         mEosController.setBarWindow(mStatusBarWindow);
         mEosController.setStatusBarView(mStatusBarView);
-        EosUiController.registerObserverStateListener(mListener);
 
         PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
         mStatusBarView.setPanelHolder(holder);
@@ -711,22 +711,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         resetUserSetupObserver();
 
         return mStatusBarView;
-    }
-
-    private void registerObservers() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_DISABLED), false,
-                mEosQsObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES), false,
-                mEosQsObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT), false,
-                mEosQsObserver);
-    }
-
-    private void unregisterObservers() {
-        mContext.getContentResolver().unregisterContentObserver(mEosQsObserver);
     }
 
     @Override

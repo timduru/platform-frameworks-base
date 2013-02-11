@@ -20,8 +20,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.ContentObserver;
-import android.os.Handler;
 import android.provider.Settings;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -37,7 +35,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.android.internal.R;
-import com.android.systemui.statusbar.EosUiController;
+import com.android.systemui.statusbar.EosObserverHandler;
+import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -57,28 +56,14 @@ public class Clock extends TextView {
     // no longer static each instance different style
     private int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
+    // Eos feature
     // tags to recognize different views
     private static final String TAG_SIGNAL_CLUSTER = EOSConstants.SYSTEMUI_CLOCK_SIGNAL_CLUSTER_TAG;
     private static final String TAG_CENTER_VIEW = EOSConstants.SYSTEMUI_CLOCK_CENTER_TAG;
     // set bools at init for easy management
     private boolean mIsSignalView = false;
     private boolean mIsCenterView = false;
-    private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {
-        @Override
-        public void observerStateChanged(boolean state) {
-            if (state == EosUiController.OBSERVERS_ON) {
-                if (mIsSignalView || mIsCenterView) {
-                    getContext().getContentResolver().registerContentObserver(
-                            Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_AMPM), false,
-                            mClockAmPmObserver);
-                }
-            } else {
-                if (mIsSignalView || mIsCenterView) {
-                    getContext().getContentResolver().unregisterContentObserver(mClockAmPmObserver);
-                }
-            }
-        }
-    };
+    private int MSG_CLOCK_AMPM_SETTINGS;
 
     public Clock(Context context) {
         this(context, null);
@@ -97,7 +82,19 @@ public class Clock extends TextView {
                 mIsCenterView = true;
             }
         }
-        EosUiController.registerObserverStateListener(mListener);
+
+        MSG_CLOCK_AMPM_SETTINGS = EosObserverHandler.getEosObserverHandler()
+                .registerUri(EOSConstants.SYSTEMUI_CLOCK_AMPM);
+
+        EosObserverHandler.getEosObserverHandler()
+                .setOnFeatureStateChangedListener(new OnFeatureStateChangedListener() {
+                    @Override
+                    public void onFeatureStateChanged(int msg) {
+                        if (msg == MSG_CLOCK_AMPM_SETTINGS) {
+                            updateAmPmStyle();
+                        }
+                    }
+                });
     }
 
     @Override
@@ -261,11 +258,4 @@ public class Clock extends TextView {
                 EOSConstants.SYSTEMUI_CLOCK_AMPM_DEF);
         updateAmPm();
     }
-
-    private ContentObserver mClockAmPmObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            updateAmPmStyle();
-        }
-    };
 }

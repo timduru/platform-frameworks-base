@@ -23,14 +23,12 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.database.ContentObserver;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.RectF;
 import android.hardware.input.InputManager;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.AttributeSet;
@@ -47,7 +45,8 @@ import android.view.ViewConfiguration;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.EosUiController;
+import com.android.systemui.statusbar.EosObserverHandler;
+import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -74,23 +73,15 @@ public class KeyButtonView extends ImageView {
     float glowScaleWidth;
     float glowScaleHeight;
     IWindowManager mWindowManager;
+    
+    // Eos feature
     int mKeyFilterColor;
     int mGlowFilterColor;
     String mKeyColorUri;
     String mGlowColorUri;
     int mKeyIndex;
-    private ContentObserver mGlowColorObserver;
-    private ContentObserver mKeyColorObserver;
-    private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {        
-        @Override
-        public void observerStateChanged(boolean state) {
-            if(state == EosUiController.OBSERVERS_ON) {
-                registerObservers();
-            } else {
-                unregisterObservers();
-            }            
-        }
-    };
+    private int MSG_KEY_COLOR_CHANGED;
+    private int MSG_GLOW_COLOR_CHANGED;
 
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -146,33 +137,23 @@ public class KeyButtonView extends ImageView {
 
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        mKeyColorObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateKeyFilter();
-            }
-        };
-        mGlowColorObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateGlowFilter();
-            }
-        };
-        EosUiController.registerObserverStateListener(mListener);
+
+        MSG_KEY_COLOR_CHANGED = EosObserverHandler.getEosObserverHandler().registerUri(mKeyColorUri);
+        MSG_GLOW_COLOR_CHANGED = EosObserverHandler.getEosObserverHandler().registerUri(mGlowColorUri);
+
+        EosObserverHandler.getEosObserverHandler().setOnFeatureStateChangedListener(
+                new OnFeatureStateChangedListener() {
+                    @Override
+                    public void onFeatureStateChanged(int msg) {
+                        if (msg == MSG_KEY_COLOR_CHANGED) {
+                            updateKeyFilter();
+                        } else if (msg == MSG_GLOW_COLOR_CHANGED) {
+                            updateGlowFilter();
+                        }
+                    }
+                });
         updateKeyFilter();
         updateGlowFilter();
-    }
-
-    private void registerObservers() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(mKeyColorUri), false, mKeyColorObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(mGlowColorUri), false, mGlowColorObserver);
-    }
-
-    private void unregisterObservers() {
-        mContext.getContentResolver().unregisterContentObserver(mKeyColorObserver);
-        mContext.getContentResolver().unregisterContentObserver(mGlowColorObserver);
     }
 
     private void updateKeyFilter() {

@@ -85,7 +85,19 @@ public class SystembarStateHandler {
     private View mStatusBarView;
     private WindowManager.LayoutParams mStatusBarParams;
     private WindowManager mWindowManager;
-    
+
+	// our one and only instance
+	private static SystembarStateHandler systembarStateHandler;
+
+	public static void initHandler(Context context,
+			OnBarStateChangedListener listener) {
+		systembarStateHandler = new SystembarStateHandler(context, listener);
+	}
+
+	public static SystembarStateHandler getSystembarStateHandler() {
+		return systembarStateHandler;
+	}
+
     public SystembarStateHandler (Context context, OnBarStateChangedListener listener) {
         mContext = context;
         mListeners.add(listener);

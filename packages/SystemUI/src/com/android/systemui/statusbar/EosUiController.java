@@ -1,49 +1,36 @@
+
 package com.android.systemui.statusbar;
 
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.Bitmap.Config;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.input.InputManager;
-import android.os.RemoteException;
 import android.os.Handler;
-import android.os.Message;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnGestureListener;
-import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.SoundEffectConstants;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
@@ -57,19 +44,10 @@ import org.teameos.jellybean.settings.ActionHandler;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class EosUiController extends ActionHandler {
-
-    public interface OnObserverStateChangedListener {
-        public void observerStateChanged(boolean state);
-    }
-
-    private static ArrayList<OnObserverStateChangedListener> mListeners = new ArrayList<OnObserverStateChangedListener>();
-
-    public static final boolean OBSERVERS_ON = true;
-    public static final boolean OBSERVERS_OFF = false;
+public class EosUiController extends ActionHandler implements OnFeatureStateChangedListener {
 
     static final String TAG = "EosUiController";
-    
+
     // we set a flag in settingsProvider indicating
     // that we intentionally killed systemui. so we
     // can restore states if need be
@@ -82,18 +60,12 @@ public class EosUiController extends ActionHandler {
     static final int RECENT_KEY = com.android.systemui.R.id.recent_apps;
     static final int MENU_KEY = com.android.systemui.R.id.menu;
 
-    private ArrayList<ContentObserver> observers = new ArrayList<ContentObserver>();
-
     private ArrayList<View> mBatteryList = new ArrayList<View>();
 
     // we'll cheat just a little to help with the two navigation bar views
     static final int NAVBAR_ROT_90 = com.android.systemui.R.id.rot90;
     static final int NAVBAR_ROT_0 = com.android.systemui.R.id.rot0;
 
-    static final String BACK_KEY_URI_TAG = EOSConstants.SYSTEMUI_SOFTKEY_BACK;
-    static final String HOME_KEY_URI_TAG = EOSConstants.SYSTEMUI_SOFTKEY_HOME;
-    static final String RECENT_KEY_URI_TAG = EOSConstants.SYSTEMUI_SOFTKEY_RECENT;
-    static final String MENU_KEY_URI_TAG = EOSConstants.SYSTEMUI_SOFTKEY_MENU;
     static final int BACK_KEY_LOCATION = 0;
     static final int HOME_KEY_LOCATION = 1;
     static final int RECENT_KEY_LOCATION = 2;
@@ -111,19 +83,28 @@ public class EosUiController extends ActionHandler {
     private WindowManager mWindowManager;
     private ContentResolver mResolver;
     private Resources mRes;
-    private ContentObserver mLongPressActionObserver;
-    private ContentObserver mBatterySettingsObserver;
-    private ContentObserver mEosSettingsContentObserver;
-    private ContentObserver mClockSettingsObserver;
-    private ContentObserver mEnableLongPressActionsObserver;
-    private ContentObserver mStatusBarColorObserver;
-    private ContentObserver mNavigationBarColorObserver;
-    private ContentObserver mHybridBarObserver;
-    private ContentObserver mNxObserver;
-    private BroadcastReceiver mControlCenterReceiver;
-    private IntentFilter mFilter;
-    private EosSettings mEosSettings;
+
+    private int MSG_BATTERY_ICON_SETTINGS;
+    private int MSG_BATTERY_TEXT_SETTINGS;
+    private int MSG_BATTERY_TEXT_COLOR_SETTINGS;
+    private int MSG_CLOCK_VISIBLE_SETTINGS;
+    private int MSG_CLOCK_COLOR_SETTINGS;
+    private int MSG_SOFTKEY_LONGPRESS_ENABLED_SETTINGS;
+    private int MSG_SOFTKEY_LONGPRESS_BACK_SETTINGS;
+    private int MSG_SOFTKEY_LONGPRESS_HOME_SETTINGS;
+    private int MSG_SOFTKEY_LONGPRESS_RECENT_SETTINGS;
+    private int MSG_SOFTKEY_LONGPRESS_MENU_SETTINGS;
+    private int MSG_LEGACY_TOGGLES_SETTINGS;
+    private int MSG_STATUSBAR_COLOR_SETTINGS;
+    private int MSG_NAVBAR_COLOR_SETTINGS;
+    private int MSG_HYBRID_BAR_SETTINGS;
+    private int MSG_NX_BAR_SETTINGS;
+
+    // Eos classes
+    private EosSettings mEosLegacyToggles;
     private SystembarStateHandler mSystembarHandler;
+    private EosObserverHandler mObserverHandler;
+
     private boolean mIsClockVisible = true;
 
     // NX
@@ -133,182 +114,113 @@ public class EosUiController extends ActionHandler {
     private boolean mNX = false;
     private int mCurrentNavLayout;
     private boolean mNxNavBarGlow = false;
-    
+
+	// our one and only instance
+	private static EosUiController eosUiController;
+
+	public static void initEos(Context context, SystembarStateHandler handler) {
+		eosUiController = new EosUiController(context, handler);
+	}
+
+	public static EosUiController getEosUiController() {
+		return eosUiController;
+	}
+
     public EosUiController(Context context, SystembarStateHandler handler) {
         super(context);
         mContext = context;
         mSystembarHandler = handler;
+        EosObserverHandler.initHandler(context);
+        mObserverHandler = EosObserverHandler.getEosObserverHandler();
         mResolver = mContext.getContentResolver();
         mRes = mContext.getResources();
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mFilter = new IntentFilter();
-        mFilter.addAction(EOSConstants.INTENT_EOS_CONTROL_CENTER);
-        mControlCenterReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (EOSConstants.INTENT_EOS_CONTROL_CENTER.equals(action)) {
-                    boolean state = intent.getBooleanExtra(
-                            EOSConstants.INTENT_EOS_CONTROL_CENTER_EXTRAS_STATE, OBSERVERS_ON);
-                    log("message from control center " + String.valueOf(state));
-                    if (OBSERVERS_ON == state) {
-                        registerObservers();
-                        notifyObserverListeners(OBSERVERS_ON);
-                    } else if (OBSERVERS_OFF == state) {
-                        unregisterObservers();
-                        notifyObserverListeners(OBSERVERS_OFF);
-                    }
-                }
 
-            }
-        };
-        mContext.registerReceiver(mControlCenterReceiver, mFilter);
-        initObservers();
+        registerUriList();
     }
 
-    public static void registerObserverStateListener(OnObserverStateChangedListener l) {
-        mListeners.add(l);
-        log(l.toString() + " added to arraylist");
+    private void registerUriList() {
+        // battery
+        MSG_BATTERY_ICON_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE);
+        MSG_BATTERY_TEXT_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE);
+        MSG_BATTERY_TEXT_COLOR_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_BATTERY_TEXT_COLOR);
+
+        // clock
+        MSG_CLOCK_VISIBLE_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_CLOCK_VISIBLE);
+        MSG_CLOCK_COLOR_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_CLOCK_COLOR);
+
+        // i really need to rename the string uri constant for this
+        MSG_SOFTKEY_LONGPRESS_ENABLED_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE);
+
+        // softkey longpress actions
+        MSG_SOFTKEY_LONGPRESS_BACK_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_SOFTKEY_BACK);
+        MSG_SOFTKEY_LONGPRESS_HOME_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_SOFTKEY_HOME);
+        MSG_SOFTKEY_LONGPRESS_RECENT_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_SOFTKEY_RECENT);
+        MSG_SOFTKEY_LONGPRESS_MENU_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_SOFTKEY_MENU);
+
+        // legacy toggles
+        MSG_LEGACY_TOGGLES_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_SETTINGS_ENABLED);
+
+        // bar appearance
+        MSG_STATUSBAR_COLOR_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_STATUSBAR_COLOR);
+        MSG_NAVBAR_COLOR_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_NAVBAR_COLOR);
+        MSG_HYBRID_BAR_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR);
+        MSG_NX_BAR_SETTINGS = mObserverHandler
+                .registerUri(EOSConstants.SYSTEMUI_USE_NX_NAVBAR);
+
+        mObserverHandler.setOnFeatureStateChangedListener((OnFeatureStateChangedListener) this);
     }
 
-    private void removeObserverStateListeners() {
-        mListeners.clear();
-    }
-
-    private void notifyObserverListeners(boolean state) {
-        for (OnObserverStateChangedListener l : mListeners) {
-            l.observerStateChanged(state);
-            log(l.toString() + " notified");
+    @Override
+    public void onFeatureStateChanged(int msg) {
+        if (msg == MSG_BATTERY_ICON_SETTINGS
+                || msg == MSG_BATTERY_TEXT_SETTINGS
+                || msg == MSG_BATTERY_TEXT_COLOR_SETTINGS) {
+            handleBatteryChange();
+            return;
+        } else if (msg == MSG_CLOCK_VISIBLE_SETTINGS
+                || msg == MSG_CLOCK_COLOR_SETTINGS) {
+            handleClockChange();
+            return;
+        } else if (msg == MSG_LEGACY_TOGGLES_SETTINGS) {
+            handleLegacyTogglesChange();
+            return;
+        } else if (msg == MSG_SOFTKEY_LONGPRESS_ENABLED_SETTINGS) {
+            handleSoftkeyLongpressChange();
+            return;
+        } else if (msg == MSG_SOFTKEY_LONGPRESS_BACK_SETTINGS
+                || msg == MSG_SOFTKEY_LONGPRESS_HOME_SETTINGS
+                || msg == MSG_SOFTKEY_LONGPRESS_RECENT_SETTINGS
+                || msg == MSG_SOFTKEY_LONGPRESS_MENU_SETTINGS) {
+            loadSoftkeyActions();
+            return;
+        } else if (msg == MSG_STATUSBAR_COLOR_SETTINGS) {
+            handleStatusbarColorChange();
+            return;
+        } else if (msg == MSG_NAVBAR_COLOR_SETTINGS) {
+            handleNavigationBarColorChange();
+            return;
+        } else if (msg == MSG_HYBRID_BAR_SETTINGS) {
+            restartSystemUIServce();
+            return;
+        } else if (msg == MSG_NX_BAR_SETTINGS) {
+            handleNxChange();
+            return;
         }
-    }
-
-    private void unregisterObservers() {
-        if (observers != null) {
-            for (ContentObserver co : observers) {
-                mResolver.unregisterContentObserver(co);
-                log(co.toString() + " unregistered");
-            }
-        }
-    }
-
-    private void registerObservers() {
-
-        // disable this just for now...
-        // unregisterObservers();
-        //
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE), false,
-                mBatterySettingsObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE), false,
-                mBatterySettingsObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_TEXT_COLOR), false,
-                mBatterySettingsObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE), false,
-                mBatterySettingsObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_VISIBLE), false,
-                mClockSettingsObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_CLOCK_COLOR), false,
-                mClockSettingsObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SETTINGS_ENABLED), false,
-                mEosSettingsContentObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE), false,
-                mEnableLongPressActionsObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_STATUSBAR_COLOR), false,
-                mStatusBarColorObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_NAVBAR_COLOR), false,
-                mNavigationBarColorObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR), false,
-                mHybridBarObserver);
-        mResolver.registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_USE_NX_NAVBAR), false,
-                mNxObserver);
-        if(mSoftKeyObjects != null) {
-            loadSoftkeyObservers();
-        }
-    }
-
-    private void initObservers() {
-        mClockSettingsObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                processClockSettingsChange();
-            }
-        };
-        observers.add(mClockSettingsObserver);
-
-        mBatterySettingsObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                processBatterySettingsChange();
-            }
-        };
-        observers.add(mBatterySettingsObserver);
-
-        mEosSettingsContentObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                processEosSettingsChange();
-            }
-        };
-        observers.add(mEosSettingsContentObserver);
-
-        mLongPressActionObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                loadSoftkeyActions();
-            }
-        };
-        observers.add(mLongPressActionObserver);
-
-        mEnableLongPressActionsObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateNavigationLongPressState();
-            }
-        };
-        observers.add(mEnableLongPressActionsObserver);
-
-        mStatusBarColorObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateStatusBarColor();
-            }
-        };
-        observers.add(mStatusBarColorObserver);
-
-        mNavigationBarColorObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateNavigationBarColor();
-            }
-        };
-        observers.add(mNavigationBarColorObserver);
-
-        mHybridBarObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                processBarStyleChange();
-            }
-        };
-        observers.add(mHybridBarObserver);
-
-        mNxObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                handleNxChange();
-            }
-        };
-        observers.add(mNxObserver);
     }
 
     public NavigationBarView setNavigationBarView(WindowManager.LayoutParams lp) {
@@ -320,7 +232,7 @@ public class EosUiController extends ActionHandler {
                         : EOS_NAV_BAR;
         mNavigationBarView = (NavigationBarView) View.inflate(mContext, mCurrentNavLayout, null);
         mNavigationBarView.setEos(this);
-        
+
         // see if need to init NX
         mNX = Settings.System.getInt(mResolver,
                 EOSConstants.SYSTEMUI_USE_NX_NAVBAR,
@@ -332,7 +244,7 @@ public class EosUiController extends ActionHandler {
         // either way init softkeys, the views are there anyway
         initSoftKeys();
         mSystembarHandler.setNavigationBar(mNavigationBarView, lp);
-        updateNavigationBarColor();
+        handleNavigationBarColorChange();
         return mNavigationBarView;
     }
 
@@ -342,8 +254,8 @@ public class EosUiController extends ActionHandler {
 
     public void setBarWindow(StatusBarWindowView window) {
         mStatusBarWindow = window;
-        mStatusBarWindow.setEosSettings(mEosSettings);
-        processEosSettingsChange();
+        handleLegacyTogglesChange();
+        mStatusBarWindow.setEosSettings(mEosLegacyToggles);
     }
 
     // we need this to be set when the theme engine creates new view
@@ -361,9 +273,9 @@ public class EosUiController extends ActionHandler {
                 .findViewById(R.id.signal_battery_cluster)
                 .findViewById(R.id.battery));
 
-        updateStatusBarColor();
-        processBatterySettingsChange();
-        processClockSettingsChange();
+        handleStatusbarColorChange();
+        handleBatteryChange();
+        handleClockChange();
     }
 
     static void log(String s) {
@@ -375,7 +287,7 @@ public class EosUiController extends ActionHandler {
         SoftKeyObject back = new SoftKeyObject();
         back.setSoftKey(BACK_KEY,
                 BACK_KEY_LOCATION,
-                BACK_KEY_URI_TAG,
+                EOSConstants.SYSTEMUI_SOFTKEY_BACK,
                 new SoftkeyLongClickListener(BACK_KEY_LOCATION),
                 parent);
         mSoftKeyObjects.add(back);
@@ -385,7 +297,7 @@ public class EosUiController extends ActionHandler {
         SoftKeyObject home = new SoftKeyObject();
         home.setSoftKey(HOME_KEY,
                 HOME_KEY_LOCATION,
-                HOME_KEY_URI_TAG,
+                EOSConstants.SYSTEMUI_SOFTKEY_HOME,
                 new SoftkeyLongClickListener(HOME_KEY_LOCATION),
                 parent);
         mSoftKeyObjects.add(home);
@@ -395,7 +307,7 @@ public class EosUiController extends ActionHandler {
         SoftKeyObject recent = new SoftKeyObject();
         recent.setSoftKey(RECENT_KEY,
                 RECENT_KEY_LOCATION,
-                RECENT_KEY_URI_TAG,
+                EOSConstants.SYSTEMUI_SOFTKEY_RECENT,
                 new SoftkeyLongClickListener(RECENT_KEY_LOCATION),
                 parent);
         mSoftKeyObjects.add(recent);
@@ -405,7 +317,7 @@ public class EosUiController extends ActionHandler {
         SoftKeyObject menu = new SoftKeyObject();
         menu.setSoftKey(MENU_KEY,
                 MENU_KEY_LOCATION,
-                MENU_KEY_URI_TAG,
+                EOSConstants.SYSTEMUI_SOFTKEY_MENU,
                 new SoftkeyLongClickListener(MENU_KEY_LOCATION),
                 parent);
         mSoftKeyObjects.add(menu);
@@ -429,16 +341,9 @@ public class EosUiController extends ActionHandler {
             s.unloadListener();
         }
     }
-    
-    private void loadSoftkeyObservers() {
-        for (SoftKeyObject s : mSoftKeyObjects) {
-            mResolver.registerContentObserver(Settings.System.getUriFor(s.mUri), false,
-                    mLongPressActionObserver);
-        }
-    }
 
     public EosSettings getEosSettings() {
-        return mEosSettings;
+        return mEosLegacyToggles;
     }
 
     void initSoftKeys() {
@@ -450,10 +355,10 @@ public class EosUiController extends ActionHandler {
         // loadHomeKey(parent);
         loadRecentKey(parent);
         loadMenuKey(parent);
-        updateNavigationLongPressState();
+        handleSoftkeyLongpressChange();
     }
 
-    private void updateNavigationLongPressState() {
+    private void handleSoftkeyLongpressChange() {
         if (Settings.System.getInt(mResolver,
                 EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE,
                 EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE_DEF) == 1) {
@@ -463,14 +368,10 @@ public class EosUiController extends ActionHandler {
         }
     }
 
-    public void processBarStyleChange() {
+    private void restartSystemUIServce() {
         // time to die, but i shall return again soon
         // before we go let's set our flag
         Settings.System.putInt(mResolver, EOS_KILLED_ME, 1);
-        unregisterObservers();
-        notifyObserverListeners(OBSERVERS_OFF);
-        removeObserverStateListeners();
-        mContext.unregisterReceiver(mControlCenterReceiver);
         System.exit(0);
     }
 
@@ -619,17 +520,18 @@ public class EosUiController extends ActionHandler {
                         }
 
                         mNxNavBarGlow = true;
-                        updateNavigationBarColor();
+                        handleNavigationBarColorChange();
                         final Handler handler = new Handler();
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 mNxNavBarGlow = false;
-                                updateNavigationBarColor();
+                                handleNavigationBarColorChange();
                             }
                         }, 100);
 
-                        mNavigationBarView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                        mNavigationBarView
+                                .performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                         mNavigationBarView.playSoundEffect(SoundEffectConstants.CLICK);
 
                         return true;
@@ -712,7 +614,7 @@ public class EosUiController extends ActionHandler {
     }
 
     // applies to Navigation Bar or Systembar
-    private void updateNavigationBarColor() {
+    private void handleNavigationBarColorChange() {
         int color = 0;
         if (mNxNavBarGlow) {
             color = mRes.getColor(com.android.internal.R.color.holo_blue_light);
@@ -729,12 +631,13 @@ public class EosUiController extends ActionHandler {
     }
 
     // applies to Statusbar only
-    private void updateStatusBarColor() {
+    private void handleStatusbarColorChange() {
         int color = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_STATUSBAR_COLOR,
                 EOSConstants.SYSTEMUI_STATUSBAR_COLOR_DEF);
-        //For themes
-        mStatusBarView.setBackground(mContext.getResources().getDrawable(R.drawable.status_bar_background));
+        // For themes
+        mStatusBarView.setBackground(mContext.getResources().getDrawable(
+                R.drawable.status_bar_background));
         if (color != -1) {
             // we don't want alpha here
             mStatusBarWindow.setBackground(null);
@@ -743,7 +646,7 @@ public class EosUiController extends ActionHandler {
         }
     }
 
-    private void processBatterySettingsChange() {
+    private void handleBatteryChange() {
         int icon_visible = (Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE,
                 EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE_DEF) == 1) ? View.VISIBLE : View.GONE;
@@ -784,7 +687,7 @@ public class EosUiController extends ActionHandler {
         }
     }
 
-    private void processClockSettingsChange() {
+    private void handleClockChange() {
         if (mStatusBarView == null)
             return;
         TextView clock = (TextView) mStatusBarView.findViewById(R.id.clock);
@@ -803,24 +706,24 @@ public class EosUiController extends ActionHandler {
         clock.setTextColor(color);
     }
 
-    private void processEosSettingsChange() {
-        ContentResolver resolver = mContext.getContentResolver();
-        ViewGroup toggles = (ViewGroup) mStatusBarWindow.findViewById(R.id.eos_toggles);
-        boolean eosSettingsEnabled = Settings.System.getInt(resolver,
-                EOSConstants.SYSTEMUI_SETTINGS_ENABLED,
-                EOSConstants.SYSTEMUI_SETTINGS_ENABLED_DEF) == 1;
-        if (eosSettingsEnabled) {
-            mEosSettings = new EosSettings(toggles, mContext);
-            toggles.setVisibility(View.VISIBLE);
-        } else {
-            if (mEosSettings != null) {
-                mEosSettings.detach();
-                mEosSettings = null;
-            }
-            toggles.setVisibility(View.GONE);
-            toggles.removeAllViews();
-        }
-    }
+	private void handleLegacyTogglesChange() {
+		boolean isTogglesEnabled = Settings.System.getInt(
+				mContext.getContentResolver(),
+				EOSConstants.SYSTEMUI_SETTINGS_ENABLED,
+				EOSConstants.SYSTEMUI_SETTINGS_ENABLED_DEF) == 1;
+
+		if (isTogglesEnabled) {
+			mEosLegacyToggles = new EosSettings(
+					(ViewGroup) mStatusBarWindow.findViewById(R.id.eos_toggles),
+					mContext);
+			mEosLegacyToggles.setEnabled(isTogglesEnabled);
+		} else {
+			if (mEosLegacyToggles != null) {
+				mEosLegacyToggles.setEnabled(isTogglesEnabled);
+				mEosLegacyToggles = null;
+			}
+		}
+	}
 
     // utility to help bigclearbutton feature
     // seems ok here for now as it could be useful later

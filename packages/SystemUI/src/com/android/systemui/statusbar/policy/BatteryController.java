@@ -23,9 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.ContentObserver;
 import android.os.BatteryManager;
-import android.os.Handler;
 import android.provider.Settings;
 import android.util.Slog;
 import android.widget.ImageView;
@@ -33,7 +31,8 @@ import android.widget.TextView;
 import android.view.View;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.EosUiController;
+import com.android.systemui.statusbar.EosObserverHandler;
+import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -50,19 +49,11 @@ public class BatteryController extends BroadcastReceiver {
     private boolean mCharging = false;
     protected boolean mVisibilityOverride = false;
     protected boolean mVisibility = true;
-    private ContentObserver mPercentObserver;
+    
+    // Eos feature
+    private int MSG_BATTERY_PERCENT_SETTINGS;
 
     private ArrayList<BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<BatteryStateChangeCallback>();
-
-    private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {        
-        @Override
-        public void observerStateChanged(boolean state) {
-            if(state == EosUiController.OBSERVERS_ON)
-                registerObservers();
-            else
-                unregisterObservers();
-        }
-    };
 
     public interface BatteryStateChangeCallback {
         public void onBatteryLevelChanged(int level, boolean pluggedIn);
@@ -87,23 +78,19 @@ public class BatteryController extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         context.registerReceiver(this, filter);
-        mPercentObserver = new ContentObserver(new Handler()) {
+
+        MSG_BATTERY_PERCENT_SETTINGS = EosObserverHandler.getEosObserverHandler()
+                .registerUri(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE);
+
+        EosObserverHandler.getEosObserverHandler()
+        .setOnFeatureStateChangedListener(new OnFeatureStateChangedListener() {
             @Override
-            public void onChange(boolean selfChange) {
-                updateLabelPercent();
+            public void onFeatureStateChanged(int msg) {
+                if (msg == MSG_BATTERY_PERCENT_SETTINGS) {
+                    updateLabelPercent();
+                }
             }
-        };
-        EosUiController.registerObserverStateListener(mListener);
-
-    }
-
-    private void registerObservers() {
-        mContext.getContentResolver().registerContentObserver( 
-            Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE), false, mPercentObserver);
-    }
-
-    private void unregisterObservers() {
-        mContext.getContentResolver().unregisterContentObserver(mPercentObserver);
+        });
     }
 
     public void addIconView(ImageView v) {
@@ -133,7 +120,9 @@ public class BatteryController extends BroadcastReceiver {
             TextView v = mLabelViews.get(i);
             String label = mContext.getString( R.string.status_bar_settings_battery_meter_format, mLastPercentage);
             if (v.getTag() != null && v.getTag().equals( EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
-                if (Settings.System.getInt(mContext.getContentResolver(), EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE, EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
+                if (Settings.System.getInt(mContext.getContentResolver(),
+                        EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE,
+                        EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
                     label = trimPercent(label);
                 }
             }

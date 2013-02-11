@@ -22,7 +22,6 @@ import android.animation.LayoutTransition;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -49,6 +48,8 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
+import com.android.systemui.statusbar.EosObserverHandler;
+import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
 import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonView;
@@ -97,19 +98,7 @@ public class NavigationBarView extends LinearLayout {
 
     // looks like we gotta bring it in
     private EosUiController mEosUiController;
-
-    private ContentObserver mMenuPersistObserver;
-    private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {
-        @Override
-        public void observerStateChanged(boolean state) {
-            if (state == EosUiController.OBSERVERS_ON) {
-                registerObservers();
-            } else {
-                unregisterObservers();
-            }
-
-        }
-    };
+    private int MSG_MENU_PERSIST_CHANGED;
 
     private class H extends Handler {
         public void handleMessage(Message m) {
@@ -136,17 +125,6 @@ public class NavigationBarView extends LinearLayout {
 
     public void setEos(EosUiController controller) {
         mEosUiController = controller;
-    }
-
-    private void registerObservers() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST), false,
-                mMenuPersistObserver);
-
-    }
-
-    private void unregisterObservers() {
-        mContext.getContentResolver().unregisterContentObserver(mMenuPersistObserver);
     }
 
     public void setDelegateView(View view) {
@@ -229,13 +207,19 @@ public class NavigationBarView extends LinearLayout {
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
         mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
         mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
-        mMenuPersistObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateMenuPersist();
-            }
-        };
-        EosUiController.registerObserverStateListener(mListener);
+
+        MSG_MENU_PERSIST_CHANGED = EosObserverHandler.getEosObserverHandler().registerUri(
+                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST);
+
+        EosObserverHandler.getEosObserverHandler().setOnFeatureStateChangedListener(
+                new OnFeatureStateChangedListener() {
+                    @Override
+                    public void onFeatureStateChanged(int msg) {
+                        if (msg == MSG_MENU_PERSIST_CHANGED) {
+                            updateMenuPersist();
+                        }
+                    }
+                });
     }
 
     public void notifyScreenOn(boolean screenOn) {
