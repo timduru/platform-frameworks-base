@@ -21,8 +21,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:importantForAccessibility="no"
     android:paddingLeft="@dimen/status_bar_recents_item_padding"
     android:paddingRight="@dimen/status_bar_recents_item_padding" >
 
@@ -31,8 +29,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:clipChildren="false"
-        android:clipToPadding="false"
         android:paddingTop="@*android:dimen/status_bar_height" >
 
         <FrameLayout
@@ -78,7 +74,6 @@
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
             android:fadingEdgeLength="@dimen/status_bar_recents_text_fading_edge_length"
-            android:importantForAccessibility="no"
             android:scrollHorizontally="true"
             android:singleLine="true"
             android:textColor="@color/status_bar_recents_app_label_color"

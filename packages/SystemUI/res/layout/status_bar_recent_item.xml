@@ -21,8 +21,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clipChildren="false"
-    android:importantForAccessibility="no"
     android:paddingBottom="@dimen/status_bar_recents_item_padding"
     android:paddingTop="@dimen/status_bar_recents_item_padding" >
 
@@ -30,8 +28,7 @@
         android:id="@+id/recent_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:clipChildren="false" >
+        android:layout_gravity="center_horizontal" >
 
         <TextView
             android:id="@+id/app_label"
@@ -43,7 +40,6 @@
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
             android:fadingEdgeLength="@dimen/status_bar_recents_text_fading_edge_length"
-            android:importantForAccessibility="no"
             android:paddingTop="2dp"
             android:scrollHorizontally="true"
             android:singleLine="true"
