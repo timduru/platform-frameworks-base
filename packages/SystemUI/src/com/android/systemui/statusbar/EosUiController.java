@@ -35,16 +35,13 @@ import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
-import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.statusbar.preferences.EosSettings;
 
 import org.teameos.jellybean.settings.EOSConstants;
-import org.teameos.jellybean.settings.ActionHandler;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class EosUiController extends ActionHandler implements OnFeatureStateChangedListener {
+public class EosUiController implements OnFeatureStateChangedListener {
 
     static final String TAG = "EosUiController";
 
@@ -55,25 +52,10 @@ public class EosUiController extends ActionHandler implements OnFeatureStateChan
 
     static final int STOCK_NAV_BAR = com.android.systemui.R.layout.navigation_bar;
     static final int EOS_NAV_BAR = com.android.systemui.R.layout.eos_navigation_bar;
-    static final int BACK_KEY = com.android.systemui.R.id.back;
-    static final int HOME_KEY = com.android.systemui.R.id.home;
-    static final int RECENT_KEY = com.android.systemui.R.id.recent_apps;
-    static final int MENU_KEY = com.android.systemui.R.id.menu;
 
     private ArrayList<View> mBatteryList = new ArrayList<View>();
 
-    // we'll cheat just a little to help with the two navigation bar views
-    static final int NAVBAR_ROT_90 = com.android.systemui.R.id.rot90;
-    static final int NAVBAR_ROT_0 = com.android.systemui.R.id.rot0;
-
-    static final int BACK_KEY_LOCATION = 0;
-    static final int HOME_KEY_LOCATION = 1;
-    static final int RECENT_KEY_LOCATION = 2;
-    static final int MENU_KEY_LOCATION = 3;
-
     private static boolean DEBUG = false;
-
-    private ArrayList<SoftKeyObject> mSoftKeyObjects = new ArrayList<SoftKeyObject>();
 
     private Context mContext;
     private PhoneStatusBarView mStatusBarView;
@@ -89,11 +71,6 @@ public class EosUiController extends ActionHandler implements OnFeatureStateChan
     private int MSG_BATTERY_TEXT_COLOR_SETTINGS;
     private int MSG_CLOCK_VISIBLE_SETTINGS;
     private int MSG_CLOCK_COLOR_SETTINGS;
-    private int MSG_SOFTKEY_LONGPRESS_ENABLED_SETTINGS;
-    private int MSG_SOFTKEY_LONGPRESS_BACK_SETTINGS;
-    private int MSG_SOFTKEY_LONGPRESS_HOME_SETTINGS;
-    private int MSG_SOFTKEY_LONGPRESS_RECENT_SETTINGS;
-    private int MSG_SOFTKEY_LONGPRESS_MENU_SETTINGS;
     private int MSG_LEGACY_TOGGLES_SETTINGS;
     private int MSG_STATUSBAR_COLOR_SETTINGS;
     private int MSG_NAVBAR_COLOR_SETTINGS;
@@ -127,7 +104,6 @@ public class EosUiController extends ActionHandler implements OnFeatureStateChan
 	}
 
     public EosUiController(Context context, SystembarStateHandler handler) {
-        super(context);
         mContext = context;
         mSystembarHandler = handler;
         EosObserverHandler.initHandler(context);
@@ -135,7 +111,6 @@ public class EosUiController extends ActionHandler implements OnFeatureStateChan
         mResolver = mContext.getContentResolver();
         mRes = mContext.getResources();
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-
         registerUriList();
     }
 
@@ -153,20 +128,6 @@ public class EosUiController extends ActionHandler implements OnFeatureStateChan
                 .registerUri(EOSConstants.SYSTEMUI_CLOCK_VISIBLE);
         MSG_CLOCK_COLOR_SETTINGS = mObserverHandler
                 .registerUri(EOSConstants.SYSTEMUI_CLOCK_COLOR);
-
-        // i really need to rename the string uri constant for this
-        MSG_SOFTKEY_LONGPRESS_ENABLED_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE);
-
-        // softkey longpress actions
-        MSG_SOFTKEY_LONGPRESS_BACK_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_SOFTKEY_BACK);
-        MSG_SOFTKEY_LONGPRESS_HOME_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_SOFTKEY_HOME);
-        MSG_SOFTKEY_LONGPRESS_RECENT_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_SOFTKEY_RECENT);
-        MSG_SOFTKEY_LONGPRESS_MENU_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_SOFTKEY_MENU);
 
         // legacy toggles
         MSG_LEGACY_TOGGLES_SETTINGS = mObserverHandler
@@ -198,15 +159,6 @@ public class EosUiController extends ActionHandler implements OnFeatureStateChan
             return;
         } else if (msg == MSG_LEGACY_TOGGLES_SETTINGS) {
             handleLegacyTogglesChange();
-            return;
-        } else if (msg == MSG_SOFTKEY_LONGPRESS_ENABLED_SETTINGS) {
-            handleSoftkeyLongpressChange();
-            return;
-        } else if (msg == MSG_SOFTKEY_LONGPRESS_BACK_SETTINGS
-                || msg == MSG_SOFTKEY_LONGPRESS_HOME_SETTINGS
-                || msg == MSG_SOFTKEY_LONGPRESS_RECENT_SETTINGS
-                || msg == MSG_SOFTKEY_LONGPRESS_MENU_SETTINGS) {
-            loadSoftkeyActions();
             return;
         } else if (msg == MSG_STATUSBAR_COLOR_SETTINGS) {
             handleStatusbarColorChange();
@@ -241,8 +193,9 @@ public class EosUiController extends ActionHandler implements OnFeatureStateChan
             startNX();
         }
 
-        // either way init softkeys, the views are there anyway
-        initSoftKeys();
+        // softkey longpress action handler
+        EosSoftkeyHandler.init(mContext, mNavigationBarView);
+
         mSystembarHandler.setNavigationBar(mNavigationBarView, lp);
         handleNavigationBarColorChange();
         return mNavigationBarView;
@@ -283,89 +236,8 @@ public class EosUiController extends ActionHandler implements OnFeatureStateChan
             Log.i(TAG, s);
     }
 
-    void loadBackKey(ArrayList<View> parent) {
-        SoftKeyObject back = new SoftKeyObject();
-        back.setSoftKey(BACK_KEY,
-                BACK_KEY_LOCATION,
-                EOSConstants.SYSTEMUI_SOFTKEY_BACK,
-                new SoftkeyLongClickListener(BACK_KEY_LOCATION),
-                parent);
-        mSoftKeyObjects.add(back);
-    }
-
-    void loadHomeKey(ArrayList<View> parent) {
-        SoftKeyObject home = new SoftKeyObject();
-        home.setSoftKey(HOME_KEY,
-                HOME_KEY_LOCATION,
-                EOSConstants.SYSTEMUI_SOFTKEY_HOME,
-                new SoftkeyLongClickListener(HOME_KEY_LOCATION),
-                parent);
-        mSoftKeyObjects.add(home);
-    }
-
-    void loadRecentKey(ArrayList<View> parent) {
-        SoftKeyObject recent = new SoftKeyObject();
-        recent.setSoftKey(RECENT_KEY,
-                RECENT_KEY_LOCATION,
-                EOSConstants.SYSTEMUI_SOFTKEY_RECENT,
-                new SoftkeyLongClickListener(RECENT_KEY_LOCATION),
-                parent);
-        mSoftKeyObjects.add(recent);
-    }
-
-    void loadMenuKey(ArrayList<View> parent) {
-        SoftKeyObject menu = new SoftKeyObject();
-        menu.setSoftKey(MENU_KEY,
-                MENU_KEY_LOCATION,
-                EOSConstants.SYSTEMUI_SOFTKEY_MENU,
-                new SoftkeyLongClickListener(MENU_KEY_LOCATION),
-                parent);
-        mSoftKeyObjects.add(menu);
-    }
-
-    public void loadSoftkeyActions() {
-        if (mActions == null)
-            mActions = new ArrayList<String>();
-        else
-            mActions.clear();
-        String[] actions = new String[4];
-        for (SoftKeyObject s : mSoftKeyObjects) {
-            actions[s.mPosition] = Settings.System.getString(mResolver, s.mUri);
-            s.loadListener();
-        }
-        mActions.addAll(Arrays.asList(actions));
-    }
-
-    public void unloadSoftkeyActions() {
-        for (SoftKeyObject s : mSoftKeyObjects) {
-            s.unloadListener();
-        }
-    }
-
     public EosSettings getEosSettings() {
         return mEosLegacyToggles;
-    }
-
-    void initSoftKeys() {
-        // softkey objects only need to the the parent view
-        ArrayList<View> parent = new ArrayList<View>();
-        parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_90));
-        parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_0));
-        loadBackKey(parent);
-        // loadHomeKey(parent);
-        loadRecentKey(parent);
-        loadMenuKey(parent);
-        handleSoftkeyLongpressChange();
-    }
-
-    private void handleSoftkeyLongpressChange() {
-        if (Settings.System.getInt(mResolver,
-                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE,
-                EOSConstants.SYSTEMUI_NAVBAR_DISABLE_GESTURE_DEF) == 1) {
-            loadSoftkeyActions();
-        } else {
-            unloadSoftkeyActions();
-        }
     }
 
     private void restartSystemUIServce() {
@@ -404,77 +276,6 @@ public class EosUiController extends ActionHandler implements OnFeatureStateChan
 
     public void setSearchLightLongPress(boolean state) {
         mSearchLightLongPress = state;
-    }
-
-    @Override
-    public boolean handleAction(String action) {
-        return true;
-    }
-
-    class SoftkeyLongClickListener implements View.OnLongClickListener {
-        int position;
-
-        public SoftkeyLongClickListener(int i) {
-            position = i;
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            // TODO Auto-generated method stub
-            handleEvent(position);
-            return false;
-        }
-
-    }
-
-    // Dummy cheaters class to help keep organized
-    protected static class SoftKeyObject {
-        private int mId;
-        private ArrayList<View> mParent = new ArrayList<View>();
-        private int mPosition;
-        private String mUri;
-        private SoftkeyLongClickListener mListener;
-        private int mKeyCode;
-        private boolean mSupportsLongPress = true;
-
-        public void setSoftKey(int id, int position, String uri,
-                SoftkeyLongClickListener l, ArrayList<View> parent) {
-            mId = id;
-            mPosition = position;
-            mUri = uri;
-            mListener = l;
-            mParent = parent;
-        }
-
-        public void loadListener() {
-            for (View v : mParent) {
-                KeyButtonView key = (KeyButtonView) v.findViewById(mId);
-                key.setOnLongClickListener(null);
-                key.setOnLongClickListener(mListener);
-                key.disableLongPressIntercept(true);
-                mSupportsLongPress = key.getSupportsLongPress();
-                if (!mSupportsLongPress)
-                    key.setSupportsLongPress(true);
-            }
-        }
-
-        public void unloadListener() {
-            for (View v : mParent) {
-                KeyButtonView key = (KeyButtonView) v.findViewById(mId);
-                key.setOnLongClickListener(null);
-                key.disableLongPressIntercept(false);
-                if (key.getSupportsLongPress())
-                    key.setSupportsLongPress(false);
-            }
-        }
-
-        public void dump() {
-            StringBuilder b = new StringBuilder();
-            b.append("Id = " + String.valueOf(mId))
-                    .append(" Postition = " + String.valueOf(mPosition))
-                    .append(" Uri = " + mUri);
-            log(b.toString());
-        }
     }
 
     private GestureDetector getNxDetector() {
