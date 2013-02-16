@@ -367,6 +367,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mContext.getContentResolver().registerContentObserver(
                 volumeStreamUri(QuickSettings.mVolumeStream), true, mVolumeObserver);
 
+        MobileDataObserver mdo = new MobileDataObserver(new Handler());
+        mContext.getContentResolver()
+                .registerContentObserver(Settings.Global.getUriFor(Settings.Global.MOBILE_DATA),
+                        false, mdo);
+
         mHasMobileData = deviceSupportsTelephony();
     }
 
@@ -969,7 +974,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     };
 
     private class VolumeObserver extends ContentObserver {
-
         public VolumeObserver(Handler handler) {
             super(handler);
         }
@@ -984,6 +988,25 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             super.onChange(selfChange);
             if (isToggleEnabled(SEEKBAR)) {
                 mSeekbarCallback.refreshView(mSeekbarTile, mSeekbarState);
+            }
+        }
+    }
+
+    private class MobileDataObserver extends ContentObserver {
+        public MobileDataObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public boolean deliverSelfNotifications() {
+            return super.deliverSelfNotifications();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
+            if (isToggleEnabled(DATA)) {
+                mRSSICallback.refreshView(mRSSITile, mRSSIState);
             }
         }
     }

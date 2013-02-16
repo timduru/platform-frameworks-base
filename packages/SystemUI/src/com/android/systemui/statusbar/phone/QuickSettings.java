@@ -56,6 +56,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.SurfaceTexture;
@@ -1125,6 +1126,14 @@ class QuickSettings {
                             R.string.accessibility_quick_settings_mobile,
                             rssiState.signalContentDescription, rssiState.dataContentDescription,
                             state.label));
+
+                    if (Settings.Global.getInt(mContext.getContentResolver(),
+                            Settings.Global.MOBILE_DATA, 0) == 1) {
+                        tv.setTextColor(mContext.getResources().getColor(
+                                com.android.internal.R.color.holo_blue_light));
+                    } else {
+                        tv.setTextColor(Color.parseColor("#CCCCCC"));
+                    }
                 }
             });
             parent.addView(rssiTile);
