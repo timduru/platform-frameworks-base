@@ -48,9 +48,9 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
+import com.android.systemui.statusbar.EosNxHandler;
 import com.android.systemui.statusbar.EosObserverHandler;
 import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
-import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
@@ -96,8 +96,6 @@ public class NavigationBarView extends LinearLayout {
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
     final static int MSG_CHECK_INVALID_LAYOUT = 8686;
 
-    // looks like we gotta bring it in
-    private EosUiController mEosUiController;
     private int MSG_MENU_PERSIST_CHANGED;
 
     private class H extends Handler {
@@ -123,10 +121,6 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
-    public void setEos(EosUiController controller) {
-        mEosUiController = controller;
-    }
-
     public void setDelegateView(View view) {
         mDelegateHelper.setDelegateView(view);
     }
@@ -140,9 +134,9 @@ public class NavigationBarView extends LinearLayout {
         if (mDeadZone != null && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
             mDeadZone.poke(event);
         }
-        if (mEosUiController.isSearchLightOn() || !mEosUiController.isNxEnabled()) {
+        if (EosNxHandler.isSearchLightOn() || !EosNxHandler.isNxEnabled()) {
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                mEosUiController.setSearchLightOn(false);
+                EosNxHandler.setSearchLightOn(false);
             }
             if (mDelegateHelper != null) {               
                 boolean ret = mDelegateHelper.onInterceptTouchEvent(event);                                
@@ -156,7 +150,7 @@ public class NavigationBarView extends LinearLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         boolean ret = false;
-        if (mEosUiController.isSearchLightOn() || !mEosUiController.isNxEnabled()) {
+        if (EosNxHandler.isSearchLightOn() || !EosNxHandler.isNxEnabled()) {
             ret = mDelegateHelper.onInterceptTouchEvent(event);
         }
         return ret;
@@ -285,7 +279,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setDisabledFlags(int disabledFlags, boolean force) {
-        if (mEosUiController.isNxEnabled())
+        if (EosNxHandler.isNxEnabled())
             return;
         if (!force && mDisabledFlags == disabledFlags)
             return;
@@ -352,7 +346,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setMenuVisibility(final boolean show, final boolean force) {
-        if (mEosUiController.isNxEnabled())
+        if (EosNxHandler.isNxEnabled())
             return;
         if (mShowMenuPersist)
             return;
@@ -369,7 +363,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setLowProfile(final boolean lightsOut, final boolean animate, final boolean force) {
-        if (mEosUiController.isNxEnabled())
+        if (EosNxHandler.isNxEnabled())
             return;
         if (!force && lightsOut == mLowProfile)
             return;
@@ -463,7 +457,7 @@ public class NavigationBarView extends LinearLayout {
         }
 
         setNavigationIconHints(mNavigationIconHints, true);
-        if (mEosUiController.isNxEnabled()) 
+        if (EosNxHandler.isNxEnabled()) 
             setNxLayout();
     }
 

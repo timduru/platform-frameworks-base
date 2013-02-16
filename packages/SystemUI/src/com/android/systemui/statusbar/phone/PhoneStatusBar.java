@@ -83,6 +83,7 @@ import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.EosNxHandler;
 import com.android.systemui.statusbar.EosObserverHandler;
 import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -826,7 +827,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private int mShowSearchHoldoff = 0;
     public Runnable mShowSearchPanel = new Runnable() {
         public void run() {
-            if (mEosController.isSearchLightLongPress() || !mEosController.isNxEnabled()) {
+            if (EosNxHandler.isSearchLightLongPress()|| !EosNxHandler.isNxEnabled()) {
                 showSearchPanel();
                 awakenDreams();
             }
@@ -838,10 +839,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     if (!shouldDisableNavbarGestures()) {
-                        mEosController.setSearchLightOn(true);
-                        mEosController.setSearchLightLongPress(true);
+                        EosNxHandler.setSearchLightOn(true);
+                        EosNxHandler.setSearchLightLongPress(true);
                         mHandler.removeCallbacks(mShowSearchPanel);
-                        mHandler.postDelayed(mShowSearchPanel, mEosController.isNxEnabled() ? ViewConfiguration.getLongPressTimeout() : mShowSearchHoldoff);
+                        mHandler.postDelayed(mShowSearchPanel, EosNxHandler.isNxEnabled() ? ViewConfiguration.getLongPressTimeout() : mShowSearchHoldoff);
                     }
                     break;
 

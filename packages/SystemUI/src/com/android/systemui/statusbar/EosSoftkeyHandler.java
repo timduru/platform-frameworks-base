@@ -21,12 +21,8 @@ public class EosSoftkeyHandler {
     static final String TAG = "EosSoftkeyHandler";
     private static final boolean DEBUG = true;
 
-    private static EosSoftkeys eosSoftkeyHandler = null;
-
     public static void init(Context context, NavigationBarView view) {
-        if (eosSoftkeyHandler == null) {
-            eosSoftkeyHandler = new EosSoftkeys(context, view);
-        }
+        new EosSoftkeys(context, view);
     }
 
     private static class EosSoftkeys extends ActionHandler implements OnFeatureStateChangedListener {
