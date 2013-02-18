@@ -253,14 +253,7 @@
                 <category android:name="android.intent.category.DESK_DOCK" />
             </intent-filter>
         </activity>
-        <!-- torch -->
-        <activity
-            android:name="com.android.systemui.Torch"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:theme="@android:style/Theme.Holo.Panel" >
-        </activity>
+
         <!-- Dream (screensaver) implementation -->
         <service
             android:name=".eos.EosDream"
