@@ -235,8 +235,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mScreenCallback;
     private State mScreenState = new State();
 
-    private final boolean mHasMobileData;
-
     private QuickSettingsTileView mUserTile;
     private RefreshCallback mUserCallback;
     private UserState mUserState = new UserState();
@@ -316,6 +314,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private VolumeObserver mVolumeObserver;
     private LteStateObserver mLteObserver;
+    private boolean mHasMobileData = false;
 
     // keep aosp constructor just in case
     public QuickSettingsModel(Context context) {
@@ -351,10 +350,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mLteObserver.startObserving();
         }
 
-        ConnectivityManager cm = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mHasMobileData = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
-
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(Intent.ACTION_ALARM_CHANGED);
         context.registerReceiver(mAlarmIntentReceiver, alarmIntentFilter);
@@ -371,6 +366,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mVolumeObserver = new VolumeObserver(new Handler());
         mContext.getContentResolver().registerContentObserver(
                 volumeStreamUri(QuickSettings.mVolumeStream), true, mVolumeObserver);
+
+        mHasMobileData = deviceSupportsTelephony();
     }
 
     public void removeReceivers() {
@@ -605,10 +602,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
-    boolean deviceHasMobileData() {
-        return mHasMobileData;
-    }
-
     // RSSI
     void addRSSITile(QuickSettingsTileView view, RefreshCallback cb) {
         mRSSITile = view;
@@ -626,7 +619,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     public void onMobileDataSignalChanged(
             boolean enabled, int mobileSignalIconId, String signalContentDescription,
             int dataTypeIconId, String dataContentDescription, String enabledDesc) {
-        if (deviceHasMobileData()) {
+        if (mHasMobileData) {
             // TODO: If view is in awaiting state, disable
             Resources r = mContext.getResources();
             mRSSIState.signalIconId = enabled && (mobileSignalIconId > 0)
