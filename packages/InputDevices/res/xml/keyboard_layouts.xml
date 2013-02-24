@@ -107,4 +107,61 @@
     <keyboard-layout android:name="keyboard_layout_ukrainian"
             android:label="@string/keyboard_layout_ukrainian"
             android:keyboardLayout="@raw/keyboard_layout_ukrainian" />
+
+    <keyboard-layout android:name="keyboard_layout_ar_EG"
+            android:label="@string/keyboard_layout_ar_EG"
+            android:keyboardLayout="@raw/keyboard_layout_ar_eg" />
+
+    <keyboard-layout android:name="keyboard_layout_nl_BE"
+            android:label="@string/keyboard_layout_nl_BE"
+            android:keyboardLayout="@raw/keyboard_layout_nl_be" />
+
+    <keyboard-layout android:name="keyboard_layout_en_CA"
+            android:label="@string/keyboard_layout_en_CA"
+            android:keyboardLayout="@raw/keyboard_layout_en_ca" />
+
+    <keyboard-layout android:name="keyboard_layout_en_GB"
+            android:label="@string/keyboard_layout_en_GB"
+            android:keyboardLayout="@raw/keyboard_layout_en_gb" />
+
+    <keyboard-layout android:name="keyboard_layout_de_CH"
+            android:label="@string/keyboard_layout_de_CH"
+            android:keyboardLayout="@raw/keyboard_layout_de_ch" />
+
+    <keyboard-layout android:name="keyboard_layout_el_GR"
+            android:label="@string/keyboard_layout_el_GR"
+            android:keyboardLayout="@raw/keyboard_layout_el_gr" />
+
+    <keyboard-layout android:name="keyboard_layout_iw_IL"
+            android:label="@string/keyboard_layout_iw_IL"
+            android:keyboardLayout="@raw/keyboard_layout_iw_il" />
+
+    <keyboard-layout android:name="keyboard_layout_it_CH"
+            android:label="@string/keyboard_layout_it_CH"
+            android:keyboardLayout="@raw/keyboard_layout_it_ch" />
+
+    <keyboard-layout android:name="keyboard_layout_ko_KR"
+            android:label="@string/keyboard_layout_ko_KR"
+            android:keyboardLayout="@raw/keyboard_layout_ko_kr" />
+
+    <keyboard-layout android:name="keyboard_layout_pt_BR"
+            android:label="@string/keyboard_layout_pt_BR"
+            android:keyboardLayout="@raw/keyboard_layout_pt_br" />
+
+    <keyboard-layout android:name="keyboard_layout_es_LA"
+            android:label="@string/keyboard_layout_es_LA"
+            android:keyboardLayout="@raw/keyboard_layout_es_la" />
+
+    <keyboard-layout android:name="keyboard_layout_es_US"
+            android:label="@string/keyboard_layout_es_US"
+            android:keyboardLayout="@raw/keyboard_layout_es_us" />
+
+    <keyboard-layout android:name="keyboard_layout_th_TH"
+            android:label="@string/keyboard_layout_th_TH"
+            android:keyboardLayout="@raw/keyboard_layout_th_th" />
+
+    <keyboard-layout android:name="keyboard_layout_pl_PL"
+            android:label="@string/keyboard_layout_pl_PL"
+            android:keyboardLayout="@raw/keyboard_layout_pl_pl" />
+
 </keyboard-layouts>
