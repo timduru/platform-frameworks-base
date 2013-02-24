@@ -86,6 +86,13 @@ public class SystembarStateHandler {
     private WindowManager.LayoutParams mStatusBarParams;
     private WindowManager mWindowManager;
 
+    // keeps anything from spamming bar hide
+    // making SystemUI unstable
+    private long mLastStateChange;
+
+    // 2 seconds between allowed requested state change
+    private static final long STATE_CHANGE_THRESHOLD = 2 * 1000;
+
 	// our one and only instance
 	private static SystembarStateHandler systembarStateHandler;
 
@@ -163,6 +170,8 @@ public class SystembarStateHandler {
         // of accurate visiblity state
         notifyVisibilityChanged();
 
+        mLastStateChange = System.currentTimeMillis();
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE);
         filter.addAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE_REQUEST_TOGGLE);
@@ -199,6 +208,8 @@ public class SystembarStateHandler {
                         .putExtra(CHECK_CALLER, TAG);
                 mContext.sendBroadcast(response);
             } else if (EOSConstants.INTENT_SYSTEMUI_BAR_STATE_REQUEST_TOGGLE.equals(action)) {
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - mLastStateChange < STATE_CHANGE_THRESHOLD) return;
                 toggleVisibility();
             } else {
                 return;
@@ -320,6 +331,7 @@ public class SystembarStateHandler {
                             currentVisibilityState)
                     .putExtra(CHECK_CALLER, TAG);
             mContext.sendBroadcast(response);
+            mLastStateChange = System.currentTimeMillis();
         } else {
             log("I think the universe failed if we get here");
         }
