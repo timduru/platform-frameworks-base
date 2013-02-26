@@ -1,0 +1,253 @@
+--- frameworks/base/services/java/com/android/server/am/ActivityManagerService.java
++++ frameworks/base/services/java/com/android/server/am/ActivityManagerService.java
+@@ -3398,8 +4138,43 @@
+                 }
+             }
+             final long origId = Binder.clearCallingIdentity();
+-            boolean res = mMainStack.requestFinishActivityLocked(token, resultCode,
++            /**
++             * Author: Onskreen
++             * Date: 16/07/2011
++             *
++             * If cornerstone stack found, then kill the CSPanel and cornerstone panel
++             * activities and inform the WindowManagerService to set the layout as per
++             * layout config.
++             */
++            boolean res;
++            if(targetStack == mCornerstoneStack) {
++                mActivityStackExiting = true;
++                for(int i = 0; i < mCornerstonePanelStacks.size(); i++){
++                    targetStack = mCornerstonePanelStacks.get(i);
++                    for (int j = targetStack.mHistory.size()-1; j >= 0; j--) {
++                        ActivityRecord r = (ActivityRecord)targetStack.mHistory.get(j);
++                        targetStack.requestFinishActivityLocked(r.appToken.asBinder(), 0, null, "app-request");
++                    }
++                }
++                res = mCornerstoneStack.requestFinishActivityLocked(token, resultCode,
++                            resultData, "app-request");
++                mWindowManager.setCornerstoneState(WindowManagerService.Cornerstone_State.TERMINATED);
++
++                /**
++                 * Author: Onskreen
++                 * Date: 26/12/2011
++                 *
++                 * Trigger the Main Stack to config itself.
++                 */
++                if(DEBUG_CONFIGURATION) {
++                    Slog.i(TAG, "State: Cornerstone Exit\tAction: Config Main Panel");
++                }
++                forceConfigurationLocked(mMainStack, WindowManagerService.Cornerstone_State.TERMINATED);
++            } else {
++                res = targetStack.requestFinishActivityLocked(token, resultCode,
+                     resultData, "app-request");
++            }
++
+             Binder.restoreCallingIdentity(origId);
+             return res;
+         }
+@@ -3712,27 +4631,27 @@
+         }
+ 
+         // Just in case...
+-        if (mMainStack.mPausingActivity != null && mMainStack.mPausingActivity.app == app) {
+-            if (DEBUG_PAUSE) Slog.v(TAG, "App died while pausing: " +mMainStack.mPausingActivity);
+-            mMainStack.mPausingActivity = null;
++        if (currStack.mPausingActivity != null && currStack.mPausingActivity.app == app) {
++            if (DEBUG_PAUSE) Slog.v(TAG, "App died while pausing: " +currStack.mPausingActivity);
++            currStack.mPausingActivity = null;
+         }
+-        if (mMainStack.mLastPausedActivity != null && mMainStack.mLastPausedActivity.app == app) {
+-            mMainStack.mLastPausedActivity = null;
++        if (currStack.mLastPausedActivity != null && currStack.mLastPausedActivity.app == app) {
++            currStack.mLastPausedActivity = null;
+         }
+ 
+         // Remove this application's activities from active lists.
+-        mMainStack.removeHistoryRecordsForAppLocked(app);
++        currStack.removeHistoryRecordsForAppLocked(app);
+ 
+         boolean atTop = true;
+         boolean hasVisibleActivities = false;
+ 
+         // Clean out the history list.
+-        int i = mMainStack.mHistory.size();
++        int i = currStack.mHistory.size();
+         if (localLOGV) Slog.v(
+             TAG, "Removing app " + app + " from history with " + i + " entries");
+         while (i > 0) {
+             i--;
+-            ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
++            ActivityRecord r = (ActivityRecord)currStack.mHistory.get(i);
+             if (localLOGV) Slog.v(
+                 TAG, "Record #" + i + " " + r + ": app=" + r.app);
+             if (r.app == app) {
+@@ -3753,7 +4672,7 @@
+                                 r.task.taskId, r.shortComponentName,
+                                 "proc died without state saved");
+                     }
+-                    mMainStack.removeActivityFromHistoryLocked(r);
++                    currStack.removeActivityFromHistoryLocked(r);
+ 
+                 } else {
+                     // We have the current state for this activity, so
+@@ -13570,7 +15152,30 @@
+ 
+             ActivityRecord activity = null;
+             if (token != null) {
+-                activity = mMainStack.isInStackLocked(token);
++                /**
++                 * Author: Onskreen
++                 * Date: 27/01/2011
++                 *
++                 * Choosing between stacks
++                 */
++                int stack = getActivityStack(token);
++                ActivityStack targetStack = null;
++                //Cornerstone Panel
++                if(stack >= 0) {
++                    if(stack < mCornerstonePanelStacks.size()) {
++                        targetStack = mCornerstonePanelStacks.get(stack);
++                    } else {
++                        Log.e(TAG, "Found in Non-Existent Stack");
++                        return -1;
++                    }
++                } else if(stack == CORNERSTONE_STACK) {
++                    //Cornerstone
++                    targetStack = mCornerstoneStack;
++                } else if(stack == MAIN_STACK || stack == NO_STACK) {
++                    //Main stack or Unknown
++                    targetStack = mMainStack;
++                }
++                activity = targetStack.isInStackLocked(token);
+                 if (activity == null) {
+                     Slog.w(TAG, "Binding with unknown activity: " + token);
+                     return 0;
+@@ -15354,10 +17210,29 @@
+                     ProcessRecord app = mLruProcesses.get(i);
+                     try {
+                         if (app.thread != null) {
++                            /**
++                             * Author: Onskreen
++                             * Date: 26/12/2011
++                             *
++                             * Have to send WP specific configs in cases where the process has activities in a WP. In case
++                             * where the process holds system level apps, the standard config is set.
++                             *
++                             */
++							ActivityRecord matchingActivity = matchActivityWithProcess(app);
++							if(matchingActivity!=null) {
++								Configuration wpConfigWithChanges = mWindowManager.computeWindowPanelConfiguration(configCopy, matchingActivity.appToken, mWindowManager.mCornerstoneState);
++                                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
++                                        + app.processName + " new config " + wpConfigWithChanges);
++                                app.thread.scheduleConfigurationChanged(wpConfigWithChanges);
++                            }  else {
+                             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
+                                     + app.processName + " new config " + mConfiguration);
+                             app.thread.scheduleConfigurationChanged(configCopy);
+                         }
++                            /*if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
++                                    + app.processName + " new config " + mConfiguration);
++                            app.thread.scheduleConfigurationChanged(configCopy);*/
++                        }
+                     } catch (Exception e) {
+                     }
+                 }
+@@ -15375,20 +17250,95 @@
+             }
+         }
+         
+-        if (changes != 0 && starting == null) {
++        if (changes != 0 /*&& starting == null*/) {
+             // If the configuration changed, and the caller is not already
+             // in the process of starting an activity, then find the top
+             // activity to check if its configuration needs to change.
+-            starting = mMainStack.topRunningActivityLocked(null);
++            //starting = mMainStack.topRunningActivityLocked(null);
++            /**
++             * Author: Onskreen
++             * Date: 26/12/2011
++             *
++             * At this pont mConfiguration contains the changes. Changes below ensures that wpconfig has the wp specific settings
++             *  and the mconfiguraiton values also. Then we can diff them to get the changes.
++             */
++            // Cornerstone Stack
++            ActivityRecord csStarting = mCornerstoneStack.topRunningActivityLocked(null);
++            if (csStarting != null) {
++				Configuration wpConfigWithChanges = mWindowManager.computeWindowPanelConfiguration(mConfiguration, csStarting.appToken, mWindowManager.mCornerstoneState);
++				Configuration wpConfigWithoutChanges = new Configuration(mWindowManager.computeWindowPanelConfiguration(WindowManagerService.WP_Panel.CORNERSTONE));
++				int wpChanges = wpConfigWithoutChanges.updateFrom(wpConfigWithChanges);
++
++                //kept = mCornerstoneStack.ensureActivityConfigurationLocked(starting, changes);
++				kept = mCornerstoneStack.ensureActivityConfigurationLocked(csStarting, wpChanges);
++                if (kept) {
++                  if (DEBUG_SWITCH) Slog.i(TAG, "Config distartingdn't destroy " + csStarting
++                    + ", ensuring otstartingFoundInWPStackhers are correct.");
++                        //mCornerstoneStack.ensureActivitiesVisibleLocked(starting, changes);
++                        mCornerstoneStack.ensureActivitiesVisibleLocked(csStarting, wpChanges);
++                  }
++            }
++
++            // Cornerstone Panel Stack
++            for(int i = 0; i < mCornerstonePanelStacks.size(); i ++) {
++                ActivityStack targetStack = mCornerstonePanelStacks.get(i);
++                ActivityRecord csPanelStarting = targetStack.topRunningActivityLocked(null);
++                if (csPanelStarting != null) {
++					Configuration wpConfigWithChanges = mWindowManager.computeWindowPanelConfiguration(mConfiguration, csPanelStarting.appToken, mWindowManager.mCornerstoneState);
++					Configuration wpConfigWithoutChanges = null;
++					if(i==0) {
++						wpConfigWithoutChanges= new Configuration(mWindowManager.computeWindowPanelConfiguration(WindowManagerService.WP_Panel.CS_APP_0));
++					} else {
++						wpConfigWithoutChanges= new Configuration(mWindowManager.computeWindowPanelConfiguration(WindowManagerService.WP_Panel.CS_APP_1));
+         }
++					int wpChanges = wpConfigWithoutChanges.updateFrom(wpConfigWithChanges);
+         
+-        if (starting != null) {
++					//kept = targetStack.ensureActivityConfigurationLocked(starting, changes);
++					kept = targetStack.ensureActivityConfigurationLocked(csPanelStarting, wpChanges);
++                    if (kept) {
++                      if (DEBUG_SWITCH) Slog.i(TAG, "Config didn't destroy " + csPanelStarting
++                        + ", ensuring others are correct.");
++                        //targetStack.ensureActivitiesVisibleLocked(starting, changes);
++                      targetStack.ensureActivitiesVisibleLocked(csPanelStarting, wpChanges);
++                     }
++                 }
++            }
++            // Main Panel Stack
++            ActivityRecord mainStarting = mMainStack.topRunningActivityLocked(null);
++            if (mainStarting != null) {
++				Configuration wpConfigWithChanges = mWindowManager.computeWindowPanelConfiguration(mConfiguration, mainStarting.appToken, mWindowManager.mCornerstoneState);
++				Configuration wpConfigWithoutChanges = new Configuration(mWindowManager.computeWindowPanelConfiguration(WindowManagerService.WP_Panel.MAIN_PANEL));
++				int wpChanges = wpConfigWithoutChanges.updateFrom(wpConfigWithChanges);
++
++				kept = mMainStack.ensureActivityConfigurationLocked(mainStarting, wpChanges);
++				//kept = mMainStack.ensureActivityConfigurationLocked(starting, changes);
++                if (kept) {
++                    // If this didn't result in the starting activity being
++                    // destroyed, then we need to make sure at this point that all
++                    // other activities are made visible.
++                  if (DEBUG_SWITCH) Slog.i(TAG, "Config didn't destroy " + mainStarting
++                    + ", ensuring others are correct.");
++                    //mMainStack.ensureActivitiesVisibleLocked(starting, changes);
++                      mMainStack.ensureActivitiesVisibleLocked(mainStarting, wpChanges);
++                }
++            }
++
++            //Non-WindowPanel
++            /**if (!startingFoundInWPStack && starting != null) {
+             kept = mMainStack.ensureActivityConfigurationLocked(starting, changes);
+             // And we need to make sure at this point that all other activities
+             // are made visible with the correct configuration.
+             mMainStack.ensureActivitiesVisibleLocked(starting, changes);
++            }**/
+         }
+         
++        /*if (starting != null) {
++            kept = mMainStack.ensureActivityConfigurationLocked(starting, changes);
++            // And we need to make sure at this point that all other activities
++            // are made visible with the correct configuration.
++            mMainStack.ensureActivitiesVisibleLocked(starting, changes);
++        }*/
++
+         if (values != null && mWindowManager != null) {
+             mWindowManager.setNewConfiguration(mConfiguration);
+         }
