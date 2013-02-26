@@ -40,6 +40,19 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+
+import java.util.Locale;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+
+
+
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ThemeUtils;
 
@@ -109,7 +122,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.FloatMath;
 import android.util.Log;
-import android.util.LocaleUtil;
+//import android.util.LocaleUtil;
 import android.util.SparseArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -181,23 +194,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 DisplayManagerService.WindowManagerFuncs, DisplayManager.DisplayListener {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
-    static final boolean DEBUG_ADD_REMOVE = false;
-    static final boolean DEBUG_FOCUS = false;
+    static final boolean DEBUG_ADD_REMOVE = true;
+    static final boolean DEBUG_FOCUS = true;
     static final boolean DEBUG_ANIM = false;
-    static final boolean DEBUG_LAYOUT = false;
-    static final boolean DEBUG_RESIZE = false;
+    static final boolean DEBUG_LAYOUT = true;
+    static final boolean DEBUG_RESIZE = true;
     static final boolean DEBUG_LAYERS = false;
     static final boolean DEBUG_INPUT = false;
     static final boolean DEBUG_INPUT_METHOD = false;
-    static final boolean DEBUG_VISIBILITY = false;
-    static final boolean DEBUG_WINDOW_MOVEMENT = false;
-    static final boolean DEBUG_TOKEN_MOVEMENT = false;
+    static final boolean DEBUG_VISIBILITY = true;
+    static final boolean DEBUG_WINDOW_MOVEMENT = true;
+    static final boolean DEBUG_TOKEN_MOVEMENT = true;
     static final boolean DEBUG_ORIENTATION = true;
     static final boolean DEBUG_APP_ORIENTATION = false;
     static final boolean DEBUG_CONFIGURATION = false;
     static final boolean DEBUG_APP_TRANSITIONS = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
-    static final boolean DEBUG_REORDER = false;
+    static final boolean DEBUG_REORDER = true;
     static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_WALLPAPER_LIGHT = false || DEBUG_WALLPAPER;
     static final boolean DEBUG_DRAG = false;
@@ -212,6 +225,18 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
     static final boolean HIDE_STACK_CRAWLS = true;
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
+
+    /**
+     * Author: Onskreen
+     * Date: 24/01/2011
+     *
+     * Debug flag for cornerstone specific logic
+     */
+    static final boolean DEBUG_WP_POSITIONS = true;
+    static final boolean DEBUG_WP_GROUPING = true;
+    static final boolean DEBUG_WP_CONFIG = false;
+    static final boolean DEBUG_CORNERSTONE = true;
+
 
     static final boolean PROFILE_ORIENTATION = false;
     static final boolean localLOGV = DEBUG;
@@ -652,7 +677,16 @@ public class WindowManagerService extends IWindowManager.Stub
             final AppWindowToken atoken = appAnimator.mAppToken;
             mWinAnimators = new ArrayList<WindowStateAnimator>();
             final int N = atoken.allAppWindows.size();
-            for (int i = 0; i < N; i++) {
+                    /**
+                     * Author: Onskreen
+                     * Date: 11/19/2012
+                     *
+                     * This method triggers animation by WindowStateAnimator.animate() method.
+                     * The loop must start from mWindows.size()-1 to 0 to recify the
+                     * Z-order list of Windows. Hence, animation is applied in the order
+                     * from top to bottom Windows.
+                     */
+                    for (int i = N-1; i >= 0; i--) {
                 mWinAnimators.add(atoken.allAppWindows.get(i).mWinAnimator);
             }
         }
@@ -781,7 +815,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // For example, when this flag is true, there will be no wallpaper service.
     final boolean mOnlyCore;
 
-    public static WindowManagerService main(final Context context,
     /**
      * Author: Onskreen
      * Date: 12/01/2011
@@ -861,6 +894,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     static final String CSLAUNCHER = "com.onskreen.cornerstone.launcher";
 
+    public static WindowManagerService main(final Context context,
             final PowerManagerService pm, final DisplayManagerService dm,
             final InputManagerService im,
             final Handler uiHandler, final Handler wmHandler,
@@ -958,74 +992,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         ThemeUtils.registerThemeChangeReceiver(mContext, mThemeChangeReceiver);
-    }
-
-    private Context getUiContext() {
-        if (mUiContext == null) {
-            mUiContext = ThemeUtils.createUiContext(mContext);
-        }
-        return mUiContext != null ? mUiContext : mContext;
-    }
-
-    public InputMonitor getInputMonitor() {
-        return mInputMonitor;
-    }
-
-    @Override
-    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
-            throws RemoteException {
-        try {
-            return super.onTransact(code, data, reply, flags);
-        } catch (RuntimeException e) {
-            // The window manager only throws security exceptions, so let's
-            // log all others.
-            if (!(e instanceof SecurityException)) {
-                Log.wtf(TAG, "Window Manager Crash", e);
-            }
-            throw e;
-        }
-    }
-
-    private void placeWindowAfter(WindowState pos, WindowState window) {
-        final WindowList windows = pos.getWindowList();
-        final int i = windows.indexOf(pos);
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
-            TAG, "Adding window " + window + " at "
-            + (i+1) + " of " + windows.size() + " (after " + pos + ")");
-        windows.add(i+1, window);
-        mWindowsChanged = true;
-    }
-
-    private void placeWindowBefore(WindowState pos, WindowState window) {
-        final WindowList windows = pos.getWindowList();
-        final int i = windows.indexOf(pos);
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
-            TAG, "Adding window " + window + " at "
-            + i + " of " + windows.size() + " (before " + pos + ")");
-        windows.add(i, window);
-        mWindowsChanged = true;
-    }
-
-    //This method finds out the index of a window that has the same app token as
-    //win. used for z ordering the windows in mWindows
-    private int findIdxBasedOnAppTokens(WindowState win) {
-        WindowList windows = win.getWindowList();
-        for(int j = windows.size() - 1; j >= 0; j--) {
-            WindowState wentry = windows.get(j);
-            if(wentry.mAppToken == win.mAppToken) {
-                return j;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Return the list of Windows from the passed token on the given Display.
-     * @param token The token with all the windows.
-     * @param displayContent The display we are interested in.
-     * @return List of windows from token that are on displayContent.
-     */
-    WindowList getTokenWindowsOnDisplay(WindowToken token, DisplayContent displayContent) {
 
         /**
          * Author: Onskreen
@@ -1169,6 +1135,74 @@ public class WindowManagerService extends IWindowManager.Stub
          * Turn off the keyguard window which is active by default Release
          */
         mPolicy.enableKeyguard(false);
+    }
+
+    private Context getUiContext() {
+        if (mUiContext == null) {
+            mUiContext = ThemeUtils.createUiContext(mContext);
+        }
+        return mUiContext != null ? mUiContext : mContext;
+    }
+
+    public InputMonitor getInputMonitor() {
+        return mInputMonitor;
+    }
+
+    @Override
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+            throws RemoteException {
+        try {
+            return super.onTransact(code, data, reply, flags);
+        } catch (RuntimeException e) {
+            // The window manager only throws security exceptions, so let's
+            // log all others.
+            if (!(e instanceof SecurityException)) {
+                Log.wtf(TAG, "Window Manager Crash", e);
+            }
+            throw e;
+        }
+    }
+
+    private void placeWindowAfter(WindowState pos, WindowState window) {
+        final WindowList windows = pos.getWindowList();
+        final int i = windows.indexOf(pos);
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
+            TAG, "Adding window " + window + " at "
+            + (i+1) + " of " + windows.size() + " (after " + pos + ")");
+        windows.add(i+1, window);
+        mWindowsChanged = true;
+    }
+
+    private void placeWindowBefore(WindowState pos, WindowState window) {
+        final WindowList windows = pos.getWindowList();
+        final int i = windows.indexOf(pos);
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
+            TAG, "Adding window " + window + " at "
+            + i + " of " + windows.size() + " (before " + pos + ")");
+        windows.add(i, window);
+        mWindowsChanged = true;
+    }
+
+    //This method finds out the index of a window that has the same app token as
+    //win. used for z ordering the windows in mWindows
+    private int findIdxBasedOnAppTokens(WindowState win) {
+        WindowList windows = win.getWindowList();
+        for(int j = windows.size() - 1; j >= 0; j--) {
+            WindowState wentry = windows.get(j);
+            if(wentry.mAppToken == win.mAppToken) {
+                return j;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Return the list of Windows from the passed token on the given Display.
+     * @param token The token with all the windows.
+     * @param displayContent The display we are interested in.
+     * @return List of windows from token that are on displayContent.
+     */
+    WindowList getTokenWindowsOnDisplay(WindowToken token, DisplayContent displayContent) {
         final WindowList windowList = new WindowList();
         final int count = token.windows.size();
         for (int i = 0; i < count; i++) {
@@ -1685,9 +1719,14 @@ public class WindowManagerService extends IWindowManager.Stub
      * Ignores non-app windows.
      */
     public void logQuickWMSState() {
+
         // dump the WMS data
-        for (int i = 0; i < mWindows.size(); i++) {
-            WindowState win = (WindowState) mWindows.get(i);
+    //    for (int i = 0; i < mWindows.size(); i++) {
+        final AllWindowsIterator iterator = new AllWindowsIterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            final WindowState win = iterator.next();
+          //  WindowState win = (WindowState) mWindows.get(i);
             if (win.mAppToken != null) {
                 Log.v(TAG, i + ". " + win);
 
@@ -1705,6 +1744,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     Log.i(TAG, "\tWindow Panel: None!");
                 }
             }
+            i++;
         }
     }
 
@@ -1714,10 +1754,14 @@ public class WindowManagerService extends IWindowManager.Stub
      *
      * Utility method to dump relevant window output to log. For debugging.
      */
+
     public void logWMSState(boolean logAppTokenDetail, boolean ignoreNonAppTokens) {
         // dump the WMS data
-        for (int i = 0; i < mWindows.size(); i++) {
-            WindowState win = (WindowState) mWindows.get(i);
+        final AllWindowsIterator iterator = new AllWindowsIterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            final WindowState win = iterator.next();
+
             if (win.mAppToken == null && ignoreNonAppTokens) {
                 Log.v(TAG, i + ". " + win + " Ignored (non-apptoken)");
             } else {
@@ -1754,6 +1798,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
             }
+            i++;
         }
     }
 
@@ -1929,6 +1974,7 @@ public class WindowManagerService extends IWindowManager.Stub
     int adjustWallpaperWindowsLocked() {
         mInnerFields.mWallpaperMayChange = false;
         int changed = 0;
+/*
         boolean targetChanged = false;
 
         // TODO(multidisplay): Wallpapers on main screen only.
@@ -2237,13 +2283,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWindowsChanged = true;
                 changed |= ADJUST_WALLPAPER_LAYERS_CHANGED;
             }
-        }*/
+        }
 
         if (targetChanged && DEBUG_WALLPAPER_LIGHT) {
             Slog.d(TAG, "New wallpaper: target=" + mWallpaperTarget
                     + " lower=" + mLowerWallpaperTarget + " upper="
                     + mUpperWallpaperTarget);
         }
+*/
 
         return changed;
     }
@@ -3138,50 +3185,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (attrs != null) {
                 mPolicy.adjustWindowParamsLw(attrs);
-                    /**
-                     * Author: Onskreen
-                     * Date: 26/12/2011
-                     *
-                     * Do not consider the config changed if the Win is in a window panel unless the orientation is different.
-                     * TODO this could backfire when other non orientation values change. we might need a config compare method
-                     * that compares a WP config and mCurConfiguration exluding the WP specific values?
-                     */
-                    if(mCornerstoneState != Cornerstone_State.TERMINATED	&&										//Only do special layout when Cornerstone is on
-                            win.mAppToken != null &&
-                            (win.mAppToken.isCornerstone ||
-                            win.mAppToken.isInCornerstonePanelWindowPanel() ||
-                            win.mAppToken.isInMainPanelWindowPanel())) {
-                        /**
-                         * Make sure that window had its configuration set by its WindowPanel. It's possible that
-                         * it didn't when added if this is the first Window in the Panel
-                         */
-                        WindowPanel wp = findWindowPanel(win.mAppToken.groupId);
-                        wp.updateConfiguration(true);
-                        outConfig.setTo(wp.getConfiguration());
-
-                        Rect rect = this.computeWindowPanelRect(wp, wp.getConfiguration().orientation, mCornerstoneState);
-                        if(DEBUG_CORNERSTONE) {
-                            Slog.v(TAG, "Relayout: " + wp);
-                            Slog.v(TAG, "mCornerstoneStateChangeAnimating: " + this.mCornerstoneStateChangeAnimating);
-                            Slog.v(TAG, "mCornerstoneStateChangeProcessing: " + this.mCornerstoneStateChangeProcessing);
-                            Slog.v(TAG, "to rect: " + rect);
-                        }
-                        if(!mCornerstoneStateChangeAnimating || !wp.isCornerstonePanel()) {
-                            if(DEBUG_CORNERSTONE) {
-                                Slog.v(TAG, "Cornerstone not animating, or non cornerstone panel - reposition window panel frame");
-                            }
-                            wp.setFrame(rect);
-                        } else {
-                            if(DEBUG_CORNERSTONE) {
-                                Slog.v(TAG, "Cornerstone animating - do not reposition window panel frame");
-                            }
-                        }
-
-						if(DEBUG_WP_CONFIG) {
-							Slog.v(TAG, "Ignoring diff in configuration for WindowPanel: " + win);
-							Slog.v(TAG, "with config: " + win.mConfiguration);
-						}
-                    } else {
             }
 
             winAnimator.mSurfaceDestroyDeferred =
@@ -3245,8 +3248,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.i(TAG, "Relayout " + win + ": oldVis=" + oldVisibility
                         + " newVis=" + viewVisibility, stack);
             }
-            if (viewVisibility == View.VISIBLE &&
-                    (win.mAppToken == null || !win.mAppToken.clientHidden)) {
+            if (viewVisibility == View.VISIBLE && (win.mAppToken == null || !win.mAppToken.clientHidden)) {
                 toBeDisplayed = !win.isVisibleLw();
                 if (win.mExiting) {
                     winAnimator.cancelExitAnimationForNextAnimationLocked();
@@ -3269,6 +3271,54 @@ public class WindowManagerService extends IWindowManager.Stub
                                 "Relayout window turning screen on: " + win);
                         win.mTurnOnScreen = true;
                     }
+
+
+
+                    /**
+                     * Author: Onskreen
+                     * Date: 26/12/2011
+                     *
+                     * Do not consider the config changed if the Win is in a window panel unless the orientation is different.
+                     * TODO this could backfire when other non orientation values change. we might need a config compare method
+                     * that compares a WP config and mCurConfiguration exluding the WP specific values?
+                     */
+                    if(mCornerstoneState != Cornerstone_State.TERMINATED	&&										//Only do special layout when Cornerstone is on
+                            win.mAppToken != null &&
+                            (win.mAppToken.isCornerstone ||
+                            win.mAppToken.isInCornerstonePanelWindowPanel() ||
+                            win.mAppToken.isInMainPanelWindowPanel())) {
+                        /**
+                         * Make sure that window had its configuration set by its WindowPanel. It's possible that
+                         * it didn't when added if this is the first Window in the Panel
+                         */
+                        WindowPanel wp = findWindowPanel(win.mAppToken.groupId);
+                        wp.updateConfiguration(true);
+                        outConfig.setTo(wp.getConfiguration());
+
+                        Rect rect = this.computeWindowPanelRect(wp, wp.getConfiguration().orientation, mCornerstoneState);
+                        if(DEBUG_CORNERSTONE) {
+                            Slog.v(TAG, "Relayout: " + wp);
+                            Slog.v(TAG, "mCornerstoneStateChangeAnimating: " + this.mCornerstoneStateChangeAnimating);
+                            Slog.v(TAG, "mCornerstoneStateChangeProcessing: " + this.mCornerstoneStateChangeProcessing);
+                            Slog.v(TAG, "to rect: " + rect);
+                        }
+                        if(!mCornerstoneStateChangeAnimating || !wp.isCornerstonePanel()) {
+                            if(DEBUG_CORNERSTONE) {
+                                Slog.v(TAG, "Cornerstone not animating, or non cornerstone panel - reposition window panel frame");
+                            }
+                            wp.setFrame(rect);
+                        } else {
+                            if(DEBUG_CORNERSTONE) {
+                                Slog.v(TAG, "Cornerstone animating - do not reposition window panel frame");
+                            }
+                        }
+
+						if(DEBUG_WP_CONFIG) {
+							Slog.v(TAG, "Ignoring diff in configuration for WindowPanel: " + win);
+							Slog.v(TAG, "with config: " + win.mConfiguration);
+						}
+                    } else {
+
                     if (win.isConfigChanged()) {
                         if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + win
                                 + " visible with new config: " + mCurConfiguration);
@@ -3953,13 +4003,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean isMainPanel = false;
                 boolean isCSPanel0 = false;
                 boolean isCSPanel1 = false;
-                if(wtoken == null) {
+                if(atoken == null) {
 					isMainPanel = true;
                 } else {
-                    WindowPanel wp = findWindowPanel(wtoken.groupId);
+                    WindowPanel wp = findWindowPanel(atoken.groupId);
                     if(wp==null) {
 						isMainPanel = true;		//When all else fails, just act as if main panel
-						if (DEBUG_CORNERSTONE) Log.v(TAG, "Failed to find WindowPanel containing token: " + wtoken);
+						if (DEBUG_CORNERSTONE) Log.v(TAG, "Failed to find WindowPanel containing token: " + atoken);
 					} else if(wp.isMainPanel()) {
 						isMainPanel = true;
 					} else if(wp.isCornerstone()) {
@@ -4468,9 +4518,33 @@ public class WindowManagerService extends IWindowManager.Stub
         mAnimatingAppTokens.add(mAnimatingAppTokens.indexOf(aboveAnchor), atoken);
     }
 
+    /**
+     * Author: Onskreen
+     * Date: 24/01/2011
+     *
+     * Rather than change the IWindowManager interface, left this as a stub and put its implementation
+     * into the overridden method below.
+     */
     @Override
     public void addAppToken(int addPos, int userId, IApplicationToken token,
             int groupId, int requestedOrientation, boolean fullscreen, boolean showWhenLocked) {
+
+        }
+
+    /**
+     * Author: Onskreen
+     * Date: 24/01/2011
+     *
+     * Overloaded version which also takes as cornerstone specific parameters:
+     * - inMainPanel - boolean indicating if the app should be in the main panel.
+     * - isCornerstone - boolean indicating if the token is the cornerstone
+     * - cornerstonePanelIndex - int indicating which cornerstone panel. -1 indicates
+     * invalid value (not a cornerstone panel)
+     */
+
+    public void addAppToken(int addPos,  int userId, IApplicationToken token, int groupId, int requestedOrientation, boolean fullscreen, boolean inMainPanel, boolean isCornerstone,
+            int cornerstonePanelIndex, boolean showWhenLocked) {
+
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -4502,10 +4576,185 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.appFullscreen = fullscreen;
             atoken.showWhenLocked = showWhenLocked;
             atoken.requestedOrientation = requestedOrientation;
+
+
+            /**
+             * Author: Onskreen
+             * Date: 11/02/2011
+             *
+             * Set the cornerstone flag in the token
+             */
+            atoken.isCornerstone = isCornerstone;
+
+            /**
+             * Author: Onskreen
+             * Date: 12/01/2011
+             *
+             * Add the new apptoken to an existing WindowPanel, or create a new one
+             * for that panel if required.
+             */
+            WindowPanel wpToAddTo = null;
+            //Main Panel
+            if(inMainPanel) {
+                if (DEBUG_WP_GROUPING) {
+                    Log.w(TAG, "Trying to add: " + atoken + " to Main Panel");
+                }
+                for (int k = 0; k < mWindowPanels.size(); k++) {
+                    WindowPanel wp = mWindowPanels.get(k);
+                    if(wp.isMainPanel()) {
+                        wpToAddTo = wp;
+                        if (DEBUG_WP_GROUPING) {
+                            Log.w(TAG, "\tFound matching Window Panel" + wp);
+                        }
+                        break;
+                    }
+                }
+            } else if(isCornerstone) {
+                //Cornerstone
+                if (DEBUG_WP_GROUPING) {
+                    Log.w(TAG, "Trying to add: " + atoken + " to Cornerstone");
+                }
+                for (int k = 0; k < mWindowPanels.size(); k++) {
+                    WindowPanel wp = mWindowPanels.get(k);
+                    if(wp.isCornerstone()) {
+                        wpToAddTo = wp;
+                        if (DEBUG_WP_GROUPING) {
+                            Log.w(TAG, "\tFound matching Window Panel" + wp);
+                        }
+                        break;
+                    }
+                }
+            } else {
+                //Cornerstone Panel
+                if (DEBUG_WP_GROUPING) {
+                    Log.w(TAG, "Trying to add: " + atoken + " to Cornerstone Panel: " + cornerstonePanelIndex);
+                }
+                for (int k = 0; k < mWindowPanels.size(); k++) {
+                    WindowPanel wp = mWindowPanels.get(k);
+                    if(wp.isCornerstonePanel() && wp.mCornerstonePanelIndex==cornerstonePanelIndex) {
+                        wpToAddTo = wp;
+                        if (DEBUG_WP_GROUPING) {
+                            Log.w(TAG, "\tFound matching Window Panel" + wp);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            //Add to existing Window Panel
+            if(wpToAddTo != null) {
+                if (DEBUG_WP_GROUPING) {
+                    Log.w(TAG, "\tAdding to Window Panel");
+                }
+                wpToAddTo.addGroupId(atoken.groupId);
+
+            } else {
+                //Create new Window Panel
+                WindowPanel newWP = new WindowPanel();
+                newWP.setName(atoken.stringName);
+                newWP.addGroupId(atoken.groupId);
+                mWindowPanels.add(newWP);
+
+                if(inMainPanel) {
+                    if (DEBUG_WP_GROUPING) {
+                        Log.w(TAG, "\tCreating new Window Panel: Main Panel");
+                    }
+                    newWP.setInMainPanel(inMainPanel);
+                    newWP.setIsCornerstonePanel(false);
+                } else if(isCornerstone) {
+                    if (DEBUG_WP_GROUPING) {
+                        Log.w(TAG, "\tCreating new Window Panel: Cornerstone");
+                    }
+                    newWP.setInMainPanel(inMainPanel);
+                    newWP.setIsCornerstonePanel(false);
+                } else {
+                    if (DEBUG_WP_GROUPING) {
+                        Log.w(TAG, "\tCreating new Window Panel: Cornerstone Panel: " + cornerstonePanelIndex);
+                    }
+                    newWP.setInMainPanel(inMainPanel);
+                    newWP.setIsCornerstonePanel(true);
+                    newWP.mCornerstonePanelIndex = cornerstonePanelIndex;
+                }
+            }
+
+        /**
+         * Author: Onskreen
+         * Date: 01/02/2010
+         *
+         * Translate the addPos to be appropriate for the WMS. The addPos is given by the ActivityStack
+         * based on its known tasks, however those could be in variable z-order in mWindows.
+         *
+         * TO CONSIDER:
+         * - If the apptoken wanted to be the top apptoken in its stack, should it be placed
+         * at the top of mapptokens, regardless of where the last activity of it's stack is in
+         * mAppTokens?
+         */
+        int newAddPos = addPos; 		//Translated addPos
+        if(DEBUG_CORNERSTONE) {
+            Log.v(TAG, "State of mAppTokens before calculating where token should be added:");
+            for(int k=0; k<mAppTokens.size(); k++) {
+                Log.v(TAG, k + ": " + mAppTokens.get(k));
+            }
+        }
+
+        WindowPanel targetWP = null;
+        for(int k=0; k<mWindowPanels.size(); k++) {
+            WindowPanel wp = mWindowPanels.get(k);
+            //Found the window panel which contains the token being added. Use this version of contains() because
+            //the appwindowtoken has not been added to internal data structures yet so other version will fail
+            if(wp.contains(atoken.groupId)) {
+                targetWP = wp;
+                break;
+            }
+        }
+
+        //Cornerstone
+        if(atoken.isCornerstone) {
+            if(DEBUG_CORNERSTONE) {
+                Log.v(TAG, "Token is cornerstone, place at bottom.");
+            }
+            newAddPos = 0;
+        } else {
+			//For any other ActivityStack count the spot to place the token
+			int numAppTokensInPanel = 0;
+			boolean cornerstoneFound = false;
+			for(int i=0; i<mAppTokens.size(); i++) {
+				if(targetWP.contains(mAppTokens.get(i).groupId)) {
+					numAppTokensInPanel++;
+					if(DEBUG_CORNERSTONE) {
+						Log.v(TAG, "Found other token of same wp: " + mAppTokens.get(i));
+					}
+				}
+				if(mAppTokens.get(i).isCornerstone) {
+					cornerstoneFound = true;
+					if(DEBUG_CORNERSTONE) {
+						Log.v(TAG, "Found cornerstone: " + mAppTokens.get(i));
+					}
+				}
+				if(addPos == 0 && numAppTokensInPanel==1) {
+					newAddPos = i;
+					break;
+				} else if(addPos>0 && addPos==numAppTokensInPanel) {
+					newAddPos = i;
+					break;
+				}
+		}
+		newAddPos = mAppTokens.size();
+/*		//If went through whole list put at bottom (taking into account cornerstone)
+		if(cornerstoneFound) {
+			newAddPos = addPos + 1;
+		} else {
+			newAddPos = addPos;
+		}
+*/
+        }
+
+
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG, "addAppToken: " + atoken
-                    + " at " + addPos);
-            mAppTokens.add(addPos, atoken);
-            addAppTokenToAnimating(addPos, atoken);
+                    + " at " + newAddPos);
+            mAppTokens.add(newAddPos, atoken);
+            addAppTokenToAnimating(newAddPos, atoken);
+
             mTokenMap.put(token.asBinder(), atoken);
 
             // Application tokens start out hidden.
@@ -4616,7 +4865,7 @@ public class WindowManagerService extends IWindowManager.Stub
              * START: ORIENTATION_FIX
              * Removed to disable orientation support
              */
-            if(wtoken.isInCornerstonePanelWindowPanel()){
+            if(atoken.isInCornerstonePanelWindowPanel()){
                 /**
                  * Author: Onskreen
                  * Date: 09/06/2011
@@ -4662,6 +4911,19 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             // If this application has requested an explicit orientation,
             // then use it.
+            if (or != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                    && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
+                        + " -- explicitly set, return " + or);
+                return or;
+            }
+            findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
+        }
+        if (DEBUG_ORIENTATION) Slog.v(TAG, "No app is requesting an orientation");
+        return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    }
+
+
     /**
      * Author: Onskreen
      * Date: 26/12/2011
@@ -4697,7 +4959,7 @@ public class WindowManagerService extends IWindowManager.Stub
              changed |= ActivityInfo.CONFIG_LOCALE;
              wpConfig.locale = otherConfig.locale != null
                      ? (Locale) otherConfig.locale.clone() : null;
-             wpConfig.layoutDirection = LocaleUtil.getLayoutDirectionFromLocale(wpConfig.locale);
+//FIXME             wpConfig.layoutDirection = LocaleUtil.getLayoutDirectionFromLocale(wpConfig.locale);
          }
          if (otherConfig.userSetLocale && (!wpConfig.userSetLocale || ((changed & ActivityInfo.CONFIG_LOCALE) != 0))) {
              wpConfig.userSetLocale = true;
@@ -5198,18 +5460,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
 		return curLayout;
 
-    }
-
-            if (or != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                    && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
-                        + " -- explicitly set, return " + or);
-                return or;
-            }
-            findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
-        }
-        if (DEBUG_ORIENTATION) Slog.v(TAG, "No app is requesting an orientation");
-        return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
     @Override
@@ -8258,7 +8508,7 @@ public class WindowManagerService extends IWindowManager.Stub
             for(WindowPanel wp: mWindowPanels) {
                 wp.setFrame(computeWindowPanelRect(wp, mCurConfiguration.orientation, mCornerstoneState));
             }
-            mLayoutNeeded=true;
+          //FIXME mLayoutNeeded=true;
             performLayoutAndPlaceSurfacesLocked();
         }
 
@@ -8311,7 +8561,7 @@ public class WindowManagerService extends IWindowManager.Stub
            for(WindowPanel wp: mWindowPanels) {
                wp.setFrame(computeWindowPanelRect(wp, mCurConfiguration.orientation, mCornerstoneState));
            }
-           mLayoutNeeded=true;
+           //FIXME mLayoutNeeded=true;
            performLayoutAndPlaceSurfacesLocked();
        }
 
@@ -8551,8 +8801,8 @@ public class WindowManagerService extends IWindowManager.Stub
                  * the Main Panel is no longer being reconfigurated on a CS State change from open to close or
                  * vice versa
                  */
-                try {
-                    mainWin.mClient.resized(mainPanelWP.getPos().width(), mainPanelWP.getPos().height(),
+                try {//CHECK
+                    mainWin.mClient.resized(new Rect(0,0,mainPanelWP.getPos().width(), mainPanelWP.getPos().height()),
                     mainWin.mContentInsets, mainWin.mVisibleInsets,
                     mainWin.mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING, mainWin.mConfiguration);
                 } catch (RemoteException e) {
@@ -8582,7 +8832,7 @@ public class WindowManagerService extends IWindowManager.Stub
                  */
                 try {
                         mCornerstoneStateChangeAnimating = true;
-                        mainWin.mClient.resized(mainPanelWP.getPos().width(), mainPanelWP.getPos().height(),
+                        mainWin.mClient.resized(new Rect(0,0,mainPanelWP.getPos().width(), mainPanelWP.getPos().height()), //CHECK
                         mainWin.mContentInsets, mainWin.mVisibleInsets, mainWin.mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING, mainWin.mConfiguration);
                         /**
                          * This call to PLAPSL() is functinally useless. The call to resized() above triggers a call
@@ -8590,7 +8840,7 @@ public class WindowManagerService extends IWindowManager.Stub
                          * to the screen asap, hopefully so that it does not display on top of the cornerstone at
                          * any time.
                          */
-                        mLayoutNeeded=true;
+                        mainWin.mLayoutNeeded=true;
                         performLayoutAndPlaceSurfacesLocked();
                 } catch (RemoteException e) {
                     e.printStackTrace();
@@ -8732,10 +8982,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void handleFocusChangeLocked(IBinder token) {
 		WindowPanel wp = findWindowPanel(token);
+		WindowList mWindows = getDefaultWindowListLocked();
+
 		if(DEBUG_REORDER) {
 			Log.v(TAG, "Moving token: " + token + " (and all tokens in same window panel) to top of z-order");
 			Log.v(TAG, "Containing Window Panel: " + wp);
-			logWindowList("  ");
+			logWindowList(mWindows, "  ");
 			logQuickWMSState();
 		}
 		if(DEBUG_FOCUS) {
@@ -8954,6 +9206,9 @@ public class WindowManagerService extends IWindowManager.Stub
         /**Now using to calculate in various rotations other than the current, so be sure
          * to use the appropriate width/height
          */
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+        int mBaseDisplayWidth = displayContent.mBaseDisplayWidth , mBaseDisplayHeight = displayContent.mBaseDisplayHeight;
+        
         int fullWidth, fullHeight;
         if(orientation == Configuration.ORIENTATION_LANDSCAPE ||
                 orientation == Configuration.ORIENTATION_SQUARE ||
@@ -9003,10 +9258,10 @@ public class WindowManagerService extends IWindowManager.Stub
 		Rect emptyRect = new Rect(0, 0, 0, 0);
 		Rect fullDisplayRect = new Rect(0,0,displayWidth,displayHeight);
 		//during startup the display may not yet be configured
-		if(mDisplay == null) {
+/*		if(mDisplay == null) {
 			return emptyRect;
 		}
-
+*/
 		//If the state is TERMINATED, return the full display
 		if(mCornerstoneState == Cornerstone_State.TERMINATED) {
 			if(panel == WP_Panel.MAIN_PANEL) {
@@ -9311,8 +9566,9 @@ public class WindowManagerService extends IWindowManager.Stub
 			WindowState mainWinToBe = null;
 			WindowState csPanelWinToBe = null;
 
-			for(int i=0; i<mWindows.size(); i++) {
-				WindowState win = mWindows.get(i);
+            final AllWindowsIterator iterator = new AllWindowsIterator();
+            while (iterator.hasNext()) {
+                final WindowState win = iterator.next();
 				if(win.mAppToken!=null) {
 					if(mainPanelGroupsMoved.contains(win.mAppToken.groupId))
 						csPanelWinToBe = win;
@@ -9412,20 +9668,20 @@ public class WindowManagerService extends IWindowManager.Stub
             */
 			try {
 				if(mainWinToBe != null && moveCSPanelTokens && csPanelWinToBe != null) {
-					mainWinToBe.mClient.resized(csPanelWinToBe.mFrame.width(),
-						csPanelWinToBe.mFrame.height(), csPanelWinToBe.mLastContentInsets,
+					mainWinToBe.mClient.resized(new Rect(0,0,csPanelWinToBe.mFrame.width(), //CHECK
+						csPanelWinToBe.mFrame.height()), csPanelWinToBe.mLastContentInsets,
 						csPanelWinToBe.mLastVisibleInsets, csPanelWinToBe.mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
 						csPanelWinToBe.mConfiguration);
 				}
 
 				if(csPanelWinToBe != null && mainWinToBe != null) {
-					csPanelWinToBe.mClient.resized(mainWinToBe.mFrame.width(),
-						mainWinToBe.mFrame.height(), mainWinToBe.mLastContentInsets,
+					csPanelWinToBe.mClient.resized(new Rect(0,0,mainWinToBe.mFrame.width(), //CHECK
+						mainWinToBe.mFrame.height()), mainWinToBe.mLastContentInsets,
 						mainWinToBe.mLastVisibleInsets, mainWinToBe.mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
 						mainWinToBe.mConfiguration);
 				}
 
-				mLayoutNeeded=true;
+				//FIXME mLayoutNeeded=true;
 				performLayoutAndPlaceSurfacesLocked();
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -9445,7 +9701,7 @@ public class WindowManagerService extends IWindowManager.Stub
 					csWinToBeEndPosTop+csWinToBeEndHeight);
 			}
 
-			mLayoutNeeded=true;
+			//FIXME mLayoutNeeded=true;
 			performLayoutAndPlaceSurfacesLocked();
 
 			//Ensure that all windows in the WP have the correct pos
@@ -10516,7 +10772,7 @@ public class WindowManagerService extends IWindowManager.Stub
 							WindowState win = appToken.allAppWindows.get(k);
 							win.mWinAnimator.mSurfaceResized = true;
 							if(destroy) {
-								win.mWinAnimator.destroySurfaceLocked();
+								win.mWinAnimator.destroySurfaceLocked(false);
 								win.mWinAnimator.createSurfaceLocked();
 							}
 						}
@@ -10646,8 +10902,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
 			//Find topmost appwindow token
 			int topMostGroupId = -1;
-			for(int i=mWindows.size()-1; i>=0; i--) {
-				WindowState win = mWindows.get(i);
+            final AllWindowsIterator iterator = new AllWindowsIterator(true);
+            while (iterator.hasNext()) {
+            final WindowState win = iterator.next();
+			//for(int i=mWindows.size()-1; i>=0; i--) {
+				//WindowState win = mWindows.get(i);
 				if(win.mAppToken!=null) {
 					topMostGroupId = win.mAppToken.groupId;
 					break;
@@ -10754,7 +11013,6 @@ public class WindowManagerService extends IWindowManager.Stub
          * Async handler message for showing hidden dialog windows
          * when cornerstone is opened by the user.
          */
-	public static final int SHOW_HIDDEN_DIALOG_WINDOWS = 28;
         public static final int NOTIFY_ROTATION_CHANGED = 28;
         public static final int NOTIFY_WINDOW_TRANSITION = 29;
         public static final int NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED = 30;
@@ -10765,10 +11023,12 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int DO_DISPLAY_CHANGED = 34;
 
         public static final int CLIENT_FREEZE_TIMEOUT = 35;
+	public static final int SHOW_HIDDEN_DIALOG_WINDOWS = 36;
 
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
         public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 2;
+        public static final int SET_DIM_PARAMETERS = ANIMATOR_WHAT_OFFSET + 3;
 
         public H() {
         }
@@ -11259,6 +11519,18 @@ public class WindowManagerService extends IWindowManager.Stub
                         handleDisplayChangedLocked(msg.arg1);
                     }
                     break;
+                /**
+                 * Author: Onskreen
+                 * Date: 14/02/2012
+                 *
+                 * Shows hidden dialog window(s) when user opens
+                 * cornerstone after closing it.
+                 */
+		case SHOW_HIDDEN_DIALOG_WINDOWS: {
+	  		handleCSPanelDialogWindows(mCornerstoneState);
+			break;
+				}
+
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG, "handleMessage: exit");
@@ -11323,17 +11595,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                /**
-                 * Author: Onskreen
-                 * Date: 14/02/2012
-                 *
-                 * Shows hidden dialog window(s) when user opens
-                 * cornerstone after closing it.
-                 */
-				case SHOW_HIDDEN_DIALOG_WINDOWS: {
-					handleCSPanelDialogWindows(mCornerstoneState);
-					break;
-				}
             }
 
             // Okay, how about this...  what is the current focus?
@@ -12281,37 +12542,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mAnimatingAppTokens.clear();
         mAnimatingAppTokens.addAll(mAppTokens);
 
-                        /**
-                         * Author: Onskreen
-                         * Date: 26/12/2011
-                         *
-                         * Do not consider the config changed if the Win is in a window panel unless the orientation is different.
-                         * TODO this could backfire when other non orientation values change. we might need a config compare method
-                         * that compares a WP config and mCurConfiguration exluding the WP specific values?
-                         */
-                        if(w.mAppToken != null &&
-                                (w.mAppToken.isCornerstone ||
-                                w.mAppToken.isInCornerstonePanelWindowPanel() ||
-                                w.mAppToken.isInMainPanelWindowPanel())) {
-                            WindowPanel wp = findWindowPanel(w.mAppToken.token);
-                            //Re-evaluate resetting the config
-                            if(w.mConfiguration == null) {
-                                //Got this far with the WindowPanel not assigning its config.
-                                if(wp!=null) wp.updateConfiguration(false);
-                            }
 
-                            if(w.mConfiguration != null && wp.getConfiguration() != null &&
-                                  w.mConfiguration.orientation==wp.getConfiguration().orientation) {
-                                configChanged = false;
-                                if(DEBUG_WP_CONFIG) {
-                                    //Slog.v(TAG, "Not taking mCurConfiguration because has same orientation " + w);
-                                }
-                            } else {
-                                if(DEBUG_WP_CONFIG) {
-                                    Slog.v(TAG, "Resetting mCurConfiguration because orientation changed " + w);
-                                }
-                            }
-                        }
 
         rebuildAppWindowListLocked();
 
@@ -12366,6 +12597,38 @@ public class WindowManagerService extends IWindowManager.Stub
             w.mVisibleInsetsChanged |=
                     !w.mLastVisibleInsets.equals(w.mVisibleInsets);
             boolean configChanged = w.isConfigChanged();
+            
+            /**
+             * Author: Onskreen
+             * Date: 26/12/2011
+             *
+             * Do not consider the config changed if the Win is in a window panel unless the orientation is different.
+             * TODO this could backfire when other non orientation values change. we might need a config compare method
+             * that compares a WP config and mCurConfiguration exluding the WP specific values?
+             */
+            if(w.mAppToken != null &&
+                    (w.mAppToken.isCornerstone ||
+                    w.mAppToken.isInCornerstonePanelWindowPanel() ||
+                    w.mAppToken.isInMainPanelWindowPanel())) {
+                WindowPanel wp = findWindowPanel(w.mAppToken.token);
+                //Re-evaluate resetting the config
+                if(w.mConfiguration == null) {
+                    //Got this far with the WindowPanel not assigning its config.
+                    if(wp!=null) wp.updateConfiguration(false);
+                }
+
+                if(w.mConfiguration != null && wp.getConfiguration() != null &&
+                      w.mConfiguration.orientation==wp.getConfiguration().orientation) {
+                    configChanged = false;
+                    if(DEBUG_WP_CONFIG) {
+                        //Slog.v(TAG, "Not taking mCurConfiguration because has same orientation " + w);
+                    }
+                } else {
+                    if(DEBUG_WP_CONFIG) {
+                        Slog.v(TAG, "Resetting mCurConfiguration because orientation changed " + w);
+                    }
+                }
+            }            
             if (DEBUG_CONFIGURATION && configChanged) {
                 Slog.v(TAG, "Win " + w + " config changed: "
                         + mCurConfiguration);
@@ -12590,15 +12853,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // Reset for each display unless we are forcing mirroring.
                 if (mInnerFields.mDisplayHasContent != LayoutFields.DISPLAY_CONTENT_MIRROR) {
-                /**
-                 * Author: Onskreen
-                 * Date: 13/12/2011
-                 *
-                 * Instead of running animation on full screen, animation
-                 * should be played as per the Window's layout rect.
-                 */
-                int animDw = w.mFrame.width();//innerDw;
-                int animDh = w.mFrame.height();//innerDh;
 
                     mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNKNOWN;
                 }
@@ -12694,6 +12948,15 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     final WindowStateAnimator winAnimator = w.mWinAnimator;
+                    /**
+                     * Author: Onskreen
+                     * Date: 13/12/2011
+                     *
+                     * Instead of running animation on full screen, animation
+                     * should be played as per the Window's layout rect.
+                     */
+                    int animDw = w.mFrame.width();//innerDw;
+                    int animDh = w.mFrame.height();//innerDh;
 
                     // If the window has moved due to its containing
                     // content frame changing, then we'd like to animate
@@ -12784,101 +13047,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                     if (!atoken.mAppAnimator.freezingScreen || !w.mAppFreezing) {
                                         atoken.numInterestingWindows++;
                                         if (w.isDrawnLw()) {
-                    /**
-                     * Author: Onskreen
-                     * Date: 26/12/2011
-                     *
-                     * If this config was determined changed above, then it was added to mResizingWindows and is dealt with here.
-                     * It could also have been added if insets changed or surface resized. so the setting of the WindowState.mConfiguration
-                     * has to be safe here and be sure that WindowPanels get the config that is meant for them and not the system
-                     * config.
-                     */
-                    if(mCornerstoneState != Cornerstone_State.TERMINATED	&&										//Only do special layout when Cornerstone is on
-                            win.mAppToken != null &&
-                            (win.mAppToken.isCornerstone ||
-                            win.mAppToken.isInCornerstonePanelWindowPanel() ||
-                            win.mAppToken.isInMainPanelWindowPanel())) {
-                        /**
-                         * Make sure that window had its configuration set by its WindowPanel. It's possible that
-                         * it didn't when added if this is the first Window in the Panel
-                         */
-                        WindowPanel wp = findWindowPanel(win.mAppToken.groupId);
-                        wp.updateConfiguration(false);
-                        boolean configChanged =
-                            win.mConfiguration != wp.getConfiguration()
-                            && (win.mConfiguration == null
-                            || (diff=wp.getConfiguration().diff(win.mConfiguration)) != 0);
-                        /**
-                         * Author: Onskreen
-                         * Date: 26/12/2011
-                         *
-                         * WindowStates within WindowPanels need to be sure their configs as well as frames are updated.
-                         */
-                        //win.mConfiguration = wp.getConfiguration();
-                        if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION) &&
-                               configChanged) {
-                            Slog.i(TAG, "Sending new config to window panel " + win + ": "
-                                + win.mWinAnimator.mSurfaceW + "x" + win.mWinAnimator.mSurfaceH
-                                //+ wp.getPos().width() + "x" + wp.getPos().height()
-                                + " / " + wp.getConfiguration() + " / 0x"
-                                + Integer.toHexString(diff));
-                        }
-
-                        wp.updateConfiguration(true);
-                        /**
-                         * The cs state change animation might be complete, but if we are still in the process
-                         * of a state change be sure to set the rect to the desired state
-                         */
-                        Cornerstone_State csState;
-						if(mCornerstoneStateChangeProcessing) {
-							if(mCornerstoneState == Cornerstone_State.RUNNING_CLOSED)
-								csState = Cornerstone_State.RUNNING_OPEN;
-							else
-								csState = Cornerstone_State.RUNNING_CLOSED;
-						} else {
-							csState = mCornerstoneState;
-						}
-
-						Rect rect = computeWindowPanelRect(wp, wp.getConfiguration().orientation, csState);
-						if(DEBUG_CORNERSTONE) {
-							Slog.v(TAG, "WP: " + wp);
-							Slog.v(TAG, "mCornerstoneStateChangeAnimating: " + mCornerstoneStateChangeAnimating);
-							Slog.v(TAG, "mCornerstoneStateChangeProcessing: " + mCornerstoneStateChangeProcessing);
-							Slog.v(TAG, "Using CSState: " + csState);
-							Slog.v(TAG, "win.mFrame " + win.mFrame);
-							Slog.v(TAG, "win.mShownFrame " + win.mShownFrame);
-						}
-
-                        /**
-                         * Author: Onskreen
-                         * Date: 26/12/2011
-                         *
-                         * When the Cornerstone Panel has an app containing a SurfaceView it considers it's surface to
-                         * to be resized during Cornerstone state change animations. To avoid any layout inconsistencies
-                         * we don't reposition the Window Panel mFrame when we are in the midst of a Cornerstone
-                         * state change. An example of this is the Google Maps Application.
-                         */
-						if(!mCornerstoneStateChangeAnimating || !wp.isCornerstonePanel()) {
-							if(DEBUG_CORNERSTONE) {
-								Slog.v(TAG, "Cornerstone not animating or non-Cornerstone WP - Reposition Window Panel Frame");
-							}
-							wp.setFrame(rect);
-						} else {
-							if(DEBUG_CORNERSTONE) {
-								Slog.v(TAG, "Cornerstone animating - Do not reposition Window Panel Frame");
-							}
-						}
-
-						if (DEBUG_ORIENTATION && win.mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
-								TAG, "Resizing " + win + " WITH DRAW PENDING");
-						win.mClient.resized((int)win.mWinAnimator.mSurfaceW, (int)win.mWinAnimator.mSurfaceH,
-								win.mLastContentInsets, win.mLastVisibleInsets,
-								win.mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
-								configChanged ? wp.getConfiguration() : null);
-						win.mContentInsetsChanged = false;
-						win.mVisibleInsetsChanged = false;
-						win.mWinAnimator.mSurfaceResized = false;
-                    } else {
                                             atoken.numDrawnWindows++;
                                             if (WindowManagerService.DEBUG_VISIBILITY ||
                                                     WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
@@ -12891,22 +13059,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 } else if (w.isDrawnLw()) {
                                     atoken.startingDisplayed = true;
                                 }
-                    /**
-                     * Author: Onskreen
-                     * Date: 26/12/2011
-                     *
-                     * The main Window Panel is still grouped as must be updated when
-                     * the Cornerstone is terminated. Make sure it is updated in cases
-                     * when we encounter a config change.
-                     */
-                    if(win.mAppToken!=null && win.mAppToken.isInMainPanelWindowPanel()) {
-							WindowPanel wp = findWindowPanel(win.mAppToken.groupId);
-							if(wp!=null) {
-								wp.updateConfiguration(true);
-								Rect rect = computeWindowPanelRect(wp, wp.getConfiguration().orientation, Cornerstone_State.TERMINATED);
-								wp.setFrame(rect);
-							}
-                    }
+
                             }
                         }
                     }
@@ -12919,34 +13072,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateResizingWindows(w);
                 }
 
-                    /**
-                     * Original Implementation
-                     */
-                    /*boolean configChanged =
-                        win.mConfiguration != mCurConfiguration
-                        && (win.mConfiguration == null
-                                || (diff=mCurConfiguration.diff(win.mConfiguration)) != 0);
-                    if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION)
-                            && configChanged) {
-                        Slog.i(TAG, "Sending new config to window " + win + ": "
-                                + winAnimator.mSurfaceW + "x" + winAnimator.mSurfaceH
-                                + " / " + mCurConfiguration + " / 0x"
-                                + Integer.toHexString(diff));
-                    }
-                    win.mConfiguration = mCurConfiguration;
-                    if (DEBUG_ORIENTATION &&
-                            winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
-                            TAG, "Resizing " + win + " WITH DRAW PENDING");
-                    win.mClient.resized((int)winAnimator.mSurfaceW,
-                            (int)winAnimator.mSurfaceH,
-                            win.mLastContentInsets, win.mLastVisibleInsets,
-                            winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
-                            configChanged ? win.mConfiguration : null);
-                    win.mContentInsetsChanged = false;
-                    win.mVisibleInsetsChanged = false;
-                    winAnimator.mSurfaceResized = false;*/
-                    }
-
+                   
                 final boolean hasUniqueContent;
                 switch (mInnerFields.mDisplayHasContent) {
                     case LayoutFields.DISPLAY_CONTENT_MIRROR:
@@ -12967,7 +13093,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     stopDimmingLocked(displayId);
                 }
             }
-
+            
+            
             if (updateAllDrawn) {
                 updateAllDrawnLocked();
             }
@@ -13069,7 +13196,102 @@ public class WindowManagerService extends IWindowManager.Stub
             try {
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
                         "Reporting new frame to " + win + ": " + win.mCompatFrame);
-                int diff = 0;
+                int diff = 0; //=====================================================
+                /**
+                 * Author: Onskreen
+                 * Date: 26/12/2011
+                 *
+                 * If this config was determined changed above, then it was added to mResizingWindows and is dealt with here.
+                 * It could also have been added if insets changed or surface resized. so the setting of the WindowState.mConfiguration
+                 * has to be safe here and be sure that WindowPanels get the config that is meant for them and not the system
+                 * config.
+                 */
+                if(mCornerstoneState != Cornerstone_State.TERMINATED	&&										//Only do special layout when Cornerstone is on
+                        win.mAppToken != null &&
+                        (win.mAppToken.isCornerstone ||
+                        win.mAppToken.isInCornerstonePanelWindowPanel() ||
+                        win.mAppToken.isInMainPanelWindowPanel())) {
+                    /**
+                     * Make sure that window had its configuration set by its WindowPanel. It's possible that
+                     * it didn't when added if this is the first Window in the Panel
+                     */
+                    WindowPanel wp = findWindowPanel(win.mAppToken.groupId);
+                    wp.updateConfiguration(false);
+                    boolean configChanged =
+                        win.mConfiguration != wp.getConfiguration()
+                        && (win.mConfiguration == null
+                        || (diff=wp.getConfiguration().diff(win.mConfiguration)) != 0);
+                    /**
+                     * Author: Onskreen
+                     * Date: 26/12/2011
+                     *
+                     * WindowStates within WindowPanels need to be sure their configs as well as frames are updated.
+                     */
+                    //win.mConfiguration = wp.getConfiguration();
+                    if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION) &&
+                           configChanged) {
+                        Slog.i(TAG, "Sending new config to window panel " + win + ": "
+                            + win.mWinAnimator.mSurfaceW + "x" + win.mWinAnimator.mSurfaceH
+                            //+ wp.getPos().width() + "x" + wp.getPos().height()
+                            + " / " + wp.getConfiguration() + " / 0x"
+                            + Integer.toHexString(diff));
+                    }
+
+                    wp.updateConfiguration(true);
+                    /**
+                     * The cs state change animation might be complete, but if we are still in the process
+                     * of a state change be sure to set the rect to the desired state
+                     */
+                    Cornerstone_State csState;
+					if(mCornerstoneStateChangeProcessing) {
+						if(mCornerstoneState == Cornerstone_State.RUNNING_CLOSED)
+							csState = Cornerstone_State.RUNNING_OPEN;
+						else
+							csState = Cornerstone_State.RUNNING_CLOSED;
+					} else {
+						csState = mCornerstoneState;
+					}
+
+					Rect rect = computeWindowPanelRect(wp, wp.getConfiguration().orientation, csState);
+					if(DEBUG_CORNERSTONE) {
+						Slog.v(TAG, "WP: " + wp);
+						Slog.v(TAG, "mCornerstoneStateChangeAnimating: " + mCornerstoneStateChangeAnimating);
+						Slog.v(TAG, "mCornerstoneStateChangeProcessing: " + mCornerstoneStateChangeProcessing);
+						Slog.v(TAG, "Using CSState: " + csState);
+						Slog.v(TAG, "win.mFrame " + win.mFrame);
+						Slog.v(TAG, "win.mShownFrame " + win.mShownFrame);
+					}
+
+                    /**
+                     * Author: Onskreen
+                     * Date: 26/12/2011
+                     *
+                     * When the Cornerstone Panel has an app containing a SurfaceView it considers it's surface to
+                     * to be resized during Cornerstone state change animations. To avoid any layout inconsistencies
+                     * we don't reposition the Window Panel mFrame when we are in the midst of a Cornerstone
+                     * state change. An example of this is the Google Maps Application.
+                     */
+					if(!mCornerstoneStateChangeAnimating || !wp.isCornerstonePanel()) {
+						if(DEBUG_CORNERSTONE) {
+							Slog.v(TAG, "Cornerstone not animating or non-Cornerstone WP - Reposition Window Panel Frame");
+						}
+						wp.setFrame(rect);
+					} else {
+						if(DEBUG_CORNERSTONE) {
+							Slog.v(TAG, "Cornerstone animating - Do not reposition Window Panel Frame");
+						}
+					}
+
+					if (DEBUG_ORIENTATION && win.mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
+							TAG, "Resizing " + win + " WITH DRAW PENDING");
+					win.mClient.resized(new Rect(0,0,(int)win.mWinAnimator.mSurfaceW, (int)win.mWinAnimator.mSurfaceH), //CHECK
+							win.mLastContentInsets, win.mLastVisibleInsets,
+							win.mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
+							configChanged ? wp.getConfiguration() : null);
+					win.mContentInsetsChanged = false;
+					win.mVisibleInsetsChanged = false;
+					win.mWinAnimator.mSurfaceResized = false;
+                } else {                
                 boolean configChanged = win.isConfigChanged();
                 if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION)
                         && configChanged) {
@@ -13079,6 +13301,33 @@ public class WindowManagerService extends IWindowManager.Stub
                             + Integer.toHexString(diff));
                 }
                 win.setConfiguration(mCurConfiguration);
+                
+                
+                
+                
+                
+                /**
+                 * Author: Onskreen
+                 * Date: 26/12/2011
+                 *
+                 * The main Window Panel is still grouped as must be updated when
+                 * the Cornerstone is terminated. Make sure it is updated in cases
+                 * when we encounter a config change.
+                 */
+                if(win.mAppToken!=null && win.mAppToken.isInMainPanelWindowPanel()) {
+						WindowPanel wp = findWindowPanel(win.mAppToken.groupId);
+						if(wp!=null) {
+							wp.updateConfiguration(true);
+							Rect rect = computeWindowPanelRect(wp, wp.getConfiguration().orientation, Cornerstone_State.TERMINATED);
+							wp.setFrame(rect);
+						}
+                }          
+                
+                
+                
+                
+                
+                
                 if (DEBUG_ORIENTATION &&
                         winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                         TAG, "Resizing " + win + " WITH DRAW PENDING");
@@ -13088,6 +13337,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mContentInsetsChanged = false;
                 win.mVisibleInsetsChanged = false;
                 winAnimator.mSurfaceResized = false;
+                }
             } catch (RemoteException e) {
                 win.mOrientationChanging = false;
             }

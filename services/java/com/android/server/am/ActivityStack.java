@@ -1323,7 +1323,21 @@ final class ActivityStack {
         if (prev != null) {
             if (prev.finishing) {
                 if (DEBUG_PAUSE) Slog.v(TAG, "Executing finish of activity: " + prev);
+                /*
+                 * Onscreen-Cornerstone
+                 * Version: 0.84
+                 * Date: 08.11.2011
+                 *
+                 * When cornerstone is exiting, we must kill the activities in the specific stack.
+                 * As we don't want to resume any previous activity in the stack, we should call the
+                 * finishCurrentActivityLocked with FINISH_IMMEDIATELY mode.
+                 */
+                 if(mService.mActivityStackExiting) {
+                     mStackPaused = false;
+                     prev = finishCurrentActivityLocked(prev, FINISH_IMMEDIATELY, false);
+                 } else {
                 prev = finishCurrentActivityLocked(prev, FINISH_AFTER_VISIBLE, false);
+                 }
             } else if (prev.app != null) {
                 if (DEBUG_PAUSE) Slog.v(TAG, "Enqueueing pending stop: " + prev);
                 if (prev.waitingVisible) {
@@ -1425,11 +1439,11 @@ final class ActivityStack {
             mHandler.sendMessage(msg);
         }
 
-        if (mMainStack) {
+        if (mMainStack || mCornerstoneStack || mCornerstonePanelStack) {
             mService.reportResumedActivityLocked(next);
         }
 
-        if (mMainStack) {
+        if (mMainStack || mCornerstoneStack || mCornerstonePanelStack) {
             mService.setFocusedActivityLocked(next);
         }
         next.resumeKeyDispatchingLocked();
@@ -2115,8 +2129,19 @@ final class ActivityStack {
                         }
                         mHistory.add(addPos, r);
                         r.putInHistory();
-                        mService.mWindowManager.addAppToken(addPos, r.userId, r.appToken,
-                                r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                        //mService.mWindowManager.addAppToken(addPos, r.appToken, r.task.taskId,
+                        //        r.info.screenOrientation, r.fullscreen);
+                        /**
+                         * Author: Onskreen
+                         * Date: 24/01/2011
+                         *
+                         * Udpated to use new overloaded version
+                         */
+                        mService.mWindowManager.addAppToken(addPos, r.userId, r.appToken, r.task.taskId, 
+                                r.info.screenOrientation, r.fullscreen,
+                                mMainStack,
+                                mService.isCornerstone(r),
+                                mCornerstonePanelIndex,
                                 (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
@@ -2180,8 +2205,20 @@ final class ActivityStack {
                 mNoAnimActivities.remove(r);
             }
             r.updateOptionsLocked(options);
+            //mService.mWindowManager.addAppToken(
+            //        addPos, r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen);
+                       /**
+             * Author: Onskreen
+             * Date: 24/01/2011
+             *
+             * Updated to use new overloaded version
+             */
+
             mService.mWindowManager.addAppToken(addPos, r.userId, r.appToken,
                     r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                    mMainStack,
+                    mService.isCornerstone(r),
+                    mCornerstonePanelIndex,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             boolean doShow = true;
             if (newTask) {
@@ -2219,8 +2256,21 @@ final class ActivityStack {
         } else {
             // If this is the first activity, don't do any fancy animations,
             // because there is nothing for it to animate on top of.
+            //mService.mWindowManager.addAppToken(addPos, r.appToken, r.task.taskId,
+            //        r.info.screenOrientation, r.fullscreen);
+            /**
+             * Author: Onskreen
+             * Date: 24/01/2011
+             *
+             * Updated to use new overloaded version
+             */
+             //Log.i(TAG, "First Activity in the stack");
+
             mService.mWindowManager.addAppToken(addPos, r.userId, r.appToken,
                     r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                   mMainStack,
+                   mService.isCornerstone(r),
+                   mCornerstonePanelIndex,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             ActivityOptions.abort(options);
         }
@@ -4101,8 +4151,7 @@ final class ActivityStack {
      * @return Returns true if this activity has been removed from the history
      * list, or false if it is still in the list and will be removed later.
      */
-    final boolean finishActivityLocked(ActivityRecord r, int index,
-            int resultCode, Intent resultData, String reason, boolean oomAdj) {
+    final boolean finishActivityLocked(ActivityRecord r, int index, int resultCode, Intent resultData, String reason, boolean oomAdj) {
         return finishActivityLocked(r, index, resultCode, resultData, reason, false, oomAdj);
     }
 
@@ -4178,8 +4227,22 @@ final class ActivityStack {
             // If the activity is PAUSING, we will complete the finish once
             // it is done pausing; else we can just directly finish it here.
             if (DEBUG_PAUSE) Slog.v(TAG, "Finish not pausing: " + r);
-            return finishCurrentActivityLocked(r, index,
-                    FINISH_AFTER_PAUSE, oomAdj) == null;
+            /*
+             * Onscreen-Cornerstone
+             * Date: 08.11.2011
+             *
+             * When cornerstone is exiting, we must kill the activities in the specific stack.
+             * As we don't want to resume any previous activity in the stack, we should call the
+             * finishCurrentActivityLocked with FINISH_IMMEDIATELY mode.
+             */
+            boolean finished = false;
+            if(mService.mActivityStackExiting) {
+                mStackPaused = false;
+                finished = finishCurrentActivityLocked(r, index, FINISH_IMMEDIATELY) == null;
+            } else {
+                finished = finishCurrentActivityLocked(r, index, FINISH_AFTER_PAUSE) == null;
+            }
+            return finished;
         } else {
             if (DEBUG_PAUSE) Slog.v(TAG, "Finish waiting for pause of: " + r);
         }
@@ -4191,8 +4254,11 @@ final class ActivityStack {
     private static final int FINISH_AFTER_PAUSE = 1;
     private static final int FINISH_AFTER_VISIBLE = 2;
 
-    private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r,
-            int mode, boolean oomAdj) {
+    private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r, int mode ) {
+ 	return finishCurrentActivityLocked(r, mode, false );
+    }
+
+    private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r, int mode, boolean oomAdj) {
         final int index = indexOfActivityLocked(r);
         if (index < 0) {
             return null;
@@ -4201,8 +4267,11 @@ final class ActivityStack {
         return finishCurrentActivityLocked(r, index, mode, oomAdj);
     }
 
-    private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r,
-            int index, int mode, boolean oomAdj) {
+    private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r, int index, int mode) {
+        return  finishCurrentActivityLocked(r, index, mode, false);
+    }
+
+    private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r, int index, int mode, boolean oomAdj) {
         // First things first: if this activity is currently visible,
         // and the resumed activity is not yet visible, then hold off on
         // finishing until the resumed one becomes visible.

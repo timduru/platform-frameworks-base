@@ -984,7 +984,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      * the multiple instances of same app (for ex, Gallery) to avoid
      * any unwanted crashes.
      */
-    static final int SHOW_APP_ERROR_MSG = 34;
     static final int SHOW_COMPAT_MODE_DIALOG_MSG = 30;
     static final int DISPATCH_PROCESSES_CHANGED = 31;
     static final int DISPATCH_PROCESS_DIED = 32;
@@ -992,6 +991,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int REPORT_USER_SWITCH_MSG = 34;
     static final int CONTINUE_USER_SWITCH_MSG = 35;
     static final int USER_SWITCH_TIMEOUT_MSG = 36;
+    static final int SHOW_APP_ERROR_MSG = 37;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -3509,8 +3509,43 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             final long origId = Binder.clearCallingIdentity();
-            boolean res = mMainStack.requestFinishActivityLocked(token, resultCode,
-                    resultData, "app-request", true);
+            /**
+             * Author: Onskreen
+             * Date: 16/07/2011
+             *
+             * If cornerstone stack found, then kill the CSPanel and cornerstone panel
+             * activities and inform the WindowManagerService to set the layout as per
+             * layout config.
+             */
+            boolean res;
+            if(targetStack == mCornerstoneStack) {
+                mActivityStackExiting = true;
+                for(int i = 0; i < mCornerstonePanelStacks.size(); i++){
+                    targetStack = mCornerstonePanelStacks.get(i);
+                    for (int j = targetStack.mHistory.size()-1; j >= 0; j--) {
+                        ActivityRecord r = (ActivityRecord)targetStack.mHistory.get(j);
+                        targetStack.requestFinishActivityLocked(r.appToken.asBinder(), 0, null, "app-request", false);
+                    }
+                }
+                res = mCornerstoneStack.requestFinishActivityLocked(token, resultCode,
+                            resultData, "app-request", false);
+                mWindowManager.setCornerstoneState(WindowManagerService.Cornerstone_State.TERMINATED);
+
+                /**
+                 * Author: Onskreen
+                 * Date: 26/12/2011
+                 *
+                 * Trigger the Main Stack to config itself.
+                 */
+                if(DEBUG_CONFIGURATION) {
+                    Slog.i(TAG, "State: Cornerstone Exit\tAction: Config Main Panel");
+                }
+                forceConfigurationLocked(mMainStack, WindowManagerService.Cornerstone_State.TERMINATED);
+            } else {
+                res = targetStack.requestFinishActivityLocked(token, resultCode,
+                            resultData, "app-request", false);
+            }
+
             Binder.restoreCallingIdentity(origId);
             return res;
         }
@@ -3824,17 +3859,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Just in case...
-        if (mMainStack.mPausingActivity != null && mMainStack.mPausingActivity.app == app) {
-            if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG,
-                    "App died while pausing: " + mMainStack.mPausingActivity);
-            mMainStack.mPausingActivity = null;
+        if (currStack.mPausingActivity != null && currStack.mPausingActivity.app == app) {
+            if (DEBUG_PAUSE) Slog.v(TAG, "App died while pausing: " +currStack.mPausingActivity);
+            currStack.mPausingActivity = null;
         }
-        if (mMainStack.mLastPausedActivity != null && mMainStack.mLastPausedActivity.app == app) {
-            mMainStack.mLastPausedActivity = null;
+        if (currStack.mLastPausedActivity != null && currStack.mLastPausedActivity.app == app) {
+            currStack.mLastPausedActivity = null;
         }
 
         // Remove this application's activities from active lists.
-        boolean hasVisibleActivities = mMainStack.removeHistoryRecordsForAppLocked(app);
+        boolean hasVisibleActivities = currStack.removeHistoryRecordsForAppLocked(app);
 
         app.activities.clear();
         
@@ -4535,8 +4569,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=mCornerstoneStack.mHistory.size()-1; i>=0; i--) {
                 ActivityRecord r = (ActivityRecord)mCornerstoneStack.mHistory.get(i);
                 if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
-                    r.stack.finishActivityLocked(r, i,
-                            Activity.RESULT_CANCELED, null, "close-sys");
+                    r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED, null, "close-sys", true);
                 }
             }
             synchronized (this) {
@@ -4709,27 +4742,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 // Process has passed all conditions, kill it!
-        /**
-         * Author: Onskreen
-         * Date: 27/01/2011
-         *
-         * Mirroing logic in cornerstone.
-         */
-        for (i=mCornerstoneStack.mHistory.size()-1; i>=0; i--) {
-            ActivityRecord r = (ActivityRecord)mCornerstoneStack.mHistory.get(i);
-            if (r.packageName.equals(name)) {
-                if (!doit) {
-                    return true;
-                }
-                didSomething = true;
-                Slog.i(TAG, "  Force finishing activity " + r);
-                if (r.app != null) {
-                    r.app.removed = true;
-                }
-                r.app = null;
-                r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED, null, "uninstall");
-            }
-        }
                 if (!doit) {
                     return true;
                 }
@@ -4833,6 +4845,28 @@ public final class ActivityManagerService extends ActivityManagerNative
                         null, "force-stop", true)) {
                     i--;
                 }
+            }
+        }
+
+        /**
+         * Author: Onskreen
+         * Date: 27/01/2011
+         *
+         * Mirroing logic in cornerstone.
+         */
+        for (i=mCornerstoneStack.mHistory.size()-1; i>=0; i--) {
+            ActivityRecord r = (ActivityRecord)mCornerstoneStack.mHistory.get(i);
+            if (r.packageName.equals(name)) {
+                if (!doit) {
+                    return true;
+                }
+                didSomething = true;
+                Slog.i(TAG, "  Force finishing activity " + r);
+                if (r.app != null) {
+                    r.app.removed = true;
+                }
+                r.app = null;
+                r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED, null, "uninstall", false);
             }
         }
 
@@ -9559,7 +9593,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (r.app == app) {
                     Slog.w(TAG, "  Force finishing activity "
                         + r.intent.getComponent().flattenToShortString());
-                    r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED, null, "crashed");
+                    r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED, null, "crashed", false);
                 }
             }
             if (!app.persistent) {
@@ -9608,7 +9642,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + r.intent.getComponent().flattenToShortString());
                 int index = mMainStack.indexOfActivityLocked(r);
                 r.stack.finishActivityLocked(r, index,
-                        Activity.RESULT_CANCELED, null, "crashed", false);
+                        Activity.RESULT_CANCELED, null, "crashed", true);
                 // Also terminate any activities below it that aren't yet
                 // stopped, to avoid a situation where one will get
                 // re-start our crashing activity once it gets resumed again.
@@ -9622,7 +9656,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             Slog.w(TAG, "  Force finishing activity "
                                     + r.intent.getComponent().flattenToShortString());
                             r.stack.finishActivityLocked(r, index,
-                                    Activity.RESULT_CANCELED, null, "crashed", false);
+                                    Activity.RESULT_CANCELED, null, "crashed", true);
                         }
                     }
                 }
@@ -9642,7 +9676,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + r_c.intent.getComponent().flattenToShortString());
                 int index = mCornerstoneStack.indexOfTokenLocked(r.appToken.asBinder());
                 r_c.stack.finishActivityLocked(r, index,
-                        Activity.RESULT_CANCELED, null, "crashed");
+                        Activity.RESULT_CANCELED, null, "crashed", true);
                 // Also terminate any activities below it that aren't yet
                 // stopped, to avoid a situation where one will get
                 // re-start our crashing activity once it gets resumed again.
@@ -9656,7 +9690,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             Slog.w(TAG, "  Force finishing activity "
                                     + r_c.intent.getComponent().flattenToShortString());
                             r_c.stack.finishActivityLocked(r, index,
-                                    Activity.RESULT_CANCELED, null, "crashed");
+                                    Activity.RESULT_CANCELED, null, "crashed", true);
                         }
                     }
                 }
@@ -12646,10 +12680,35 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         synchronized(this) {
             return mServices.bindServiceLocked(caller, token, service, resolvedType,
-                    connection, flags, userId);
+                    connection, flags, userId, getCSActivityFromStack(token));
         }
     }
 
+    public ActivityRecord getCSActivityFromStack(IBinder token) {
+    if(token == null) return null;
+                /**
+                 * Author: Onskreen
+                 * Date: 27/01/2011
+                 *
+                 * Choosing between stacks
+                 */
+                int stack = getActivityStack(token);
+                ActivityStack targetStack = null;
+                //Cornerstone Panel
+                if(stack >= 0) {
+                    if(stack < mCornerstonePanelStacks.size()) {
+                        targetStack = mCornerstonePanelStacks.get(stack);
+                    } else {
+                        Log.e(TAG, "Found in Non-Existent Stack");
+                        return null;
+                    }
+                } else if(stack == CORNERSTONE_STACK) {
+                    targetStack = mCornerstoneStack; //Cornerstone
+                } else if(stack == MAIN_STACK || stack == NO_STACK) {
+                    targetStack = mMainStack; //Main stack or Unknown
+                }
+    return  targetStack.isInStackLocked(token);
+}
     public boolean unbindService(IServiceConnection connection) {
         synchronized (this) {
             return mServices.unbindServiceLocked(connection);
@@ -13932,10 +13991,31 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ProcessRecord app = mLruProcesses.get(i);
                     try {
                         if (app.thread != null) {
+                            /**
+                             * Author: Onskreen
+                             * Date: 26/12/2011
+                             *
+                             * Have to send WP specific configs in cases where the process has activities in a WP. In case
+                             * where the process holds system level apps, the standard config is set.
+                             *
+                             */
+                                                       ActivityRecord matchingActivity = matchActivityWithProcess(app);
+                                                       if(matchingActivity!=null) {
+                                                               Configuration wpConfigWithChanges = mWindowManager.computeWindowPanelConfiguration(configCopy, matchingActivity.appToken, mWindowManager.mCornerstoneState);
+                                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
+                                        + app.processName + " new config " + wpConfigWithChanges);
+                                app.thread.scheduleConfigurationChanged(wpConfigWithChanges);
+                            }  else {
+
                             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
                                     + app.processName + " new config " + mConfiguration);
                             app.thread.scheduleConfigurationChanged(configCopy);
                         }
+                            /*if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
+                                    + app.processName + " new config " + mConfiguration);
+                            app.thread.scheduleConfigurationChanged(configCopy);*/
+                        }
+
                     } catch (Exception e) {
                     }
                 }
@@ -13955,20 +14035,100 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         
-        if (changes != 0 && starting == null) {
+        if (changes != 0 /*&& starting == null*/) {
+
             // If the configuration changed, and the caller is not already
             // in the process of starting an activity, then find the top
             // activity to check if its configuration needs to change.
-            starting = mMainStack.topRunningActivityLocked(null);
-        }
+            //starting = mMainStack.topRunningActivityLocked(null);
+            /**
+             * Author: Onskreen
+             * Date: 26/12/2011
+             *
+             * At this pont mConfiguration contains the changes. Changes below ensures that wpconfig has the wp specific settings
+             *  and the mconfiguraiton values also. Then we can diff them to get the changes.
+             */
+            // Cornerstone Stack
+            ActivityRecord csStarting = mCornerstoneStack.topRunningActivityLocked(null);
+            if (csStarting != null) {
+                               Configuration wpConfigWithChanges = mWindowManager.computeWindowPanelConfiguration(mConfiguration, csStarting.appToken, mWindowManager.mCornerstoneState);
+                               Configuration wpConfigWithoutChanges = new Configuration(mWindowManager.computeWindowPanelConfiguration(WindowManagerService.WP_Panel.CORNERSTONE));
+                               int wpChanges = wpConfigWithoutChanges.updateFrom(wpConfigWithChanges);
+
+                //kept = mCornerstoneStack.ensureActivityConfigurationLocked(starting, changes);
+                               kept = mCornerstoneStack.ensureActivityConfigurationLocked(csStarting, wpChanges);
+                if (kept) {
+                  if (DEBUG_SWITCH) Slog.i(TAG, "Config distartingdn't destroy " + csStarting
+                    + ", ensuring otstartingFoundInWPStackhers are correct.");
+                        //mCornerstoneStack.ensureActivitiesVisibleLocked(starting, changes);
+                        mCornerstoneStack.ensureActivitiesVisibleLocked(csStarting, wpChanges);
+                  }
+            }
+
+            // Cornerstone Panel Stack
+            for(int i = 0; i < mCornerstonePanelStacks.size(); i ++) {
+                ActivityStack targetStack = mCornerstonePanelStacks.get(i);
+                ActivityRecord csPanelStarting = targetStack.topRunningActivityLocked(null);
+                if (csPanelStarting != null) {
+                                       Configuration wpConfigWithChanges = mWindowManager.computeWindowPanelConfiguration(mConfiguration, csPanelStarting.appToken, mWindowManager.mCornerstoneState);
+                                       Configuration wpConfigWithoutChanges = null;
+                                       if(i==0) {
+                                               wpConfigWithoutChanges= new Configuration(mWindowManager.computeWindowPanelConfiguration(WindowManagerService.WP_Panel.CS_APP_0));
+                                       } else {
+                                               wpConfigWithoutChanges= new Configuration(mWindowManager.computeWindowPanelConfiguration(WindowManagerService.WP_Panel.CS_APP_1));
+         }
+                                       int wpChanges = wpConfigWithoutChanges.updateFrom(wpConfigWithChanges);
+
         
-        if (starting != null) {
+                                       //kept = targetStack.ensureActivityConfigurationLocked(starting, changes);
+                                       kept = targetStack.ensureActivityConfigurationLocked(csPanelStarting, wpChanges);
+                    if (kept) {
+                      if (DEBUG_SWITCH) Slog.i(TAG, "Config didn't destroy " + csPanelStarting
+                        + ", ensuring others are correct.");
+                        //targetStack.ensureActivitiesVisibleLocked(starting, changes);
+                      targetStack.ensureActivitiesVisibleLocked(csPanelStarting, wpChanges);
+                     }
+                 }
+            }
+            // Main Panel Stack
+            ActivityRecord mainStarting = mMainStack.topRunningActivityLocked(null);
+            if (mainStarting != null) {
+                               Configuration wpConfigWithChanges = mWindowManager.computeWindowPanelConfiguration(mConfiguration, mainStarting.appToken, mWindowManager.mCornerstoneState);
+                               Configuration wpConfigWithoutChanges = new Configuration(mWindowManager.computeWindowPanelConfiguration(WindowManagerService.WP_Panel.MAIN_PANEL));
+                               int wpChanges = wpConfigWithoutChanges.updateFrom(wpConfigWithChanges);
+
+                               kept = mMainStack.ensureActivityConfigurationLocked(mainStarting, wpChanges);
+                               //kept = mMainStack.ensureActivityConfigurationLocked(starting, changes);
+                if (kept) {
+                    // If this didn't result in the starting activity being
+                    // destroyed, then we need to make sure at this point that all
+                    // other activities are made visible.
+                  if (DEBUG_SWITCH) Slog.i(TAG, "Config didn't destroy " + mainStarting
+                    + ", ensuring others are correct.");
+                    //mMainStack.ensureActivitiesVisibleLocked(starting, changes);
+                      mMainStack.ensureActivitiesVisibleLocked(mainStarting, wpChanges);
+                }
+            }
+
+            //Non-WindowPanel
+            /**if (!startingFoundInWPStack && starting != null) {
+
             kept = mMainStack.ensureActivityConfigurationLocked(starting, changes);
             // And we need to make sure at this point that all other activities
             // are made visible with the correct configuration.
             mMainStack.ensureActivitiesVisibleLocked(starting, changes);
+            }**/
+
         }
         
+        /*if (starting != null) {
+            kept = mMainStack.ensureActivityConfigurationLocked(starting, changes);
+            // And we need to make sure at this point that all other activities
+            // are made visible with the correct configuration.
+            mMainStack.ensureActivitiesVisibleLocked(starting, changes);
+        }*/
+
+
         if (values != null && mWindowManager != null) {
             mWindowManager.setNewConfiguration(mConfiguration);
         }
@@ -15329,7 +15489,134 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         mNumServiceProcs = mNewNumServiceProcs;
-     * Author: Onskreen
+
+        // Now determine the memory trimming level of background processes.
+        // Unfortunately we need to start at the back of the list to do this
+        // properly.  We only do this if the number of background apps we
+        // are managing to keep around is less than half the maximum we desire;
+        // if we are keeping a good number around, we'll let them use whatever
+        // memory they want.
+        if (numHidden <= ProcessList.TRIM_HIDDEN_APPS
+                && numEmpty <= ProcessList.TRIM_EMPTY_APPS) {
+            final int numHiddenAndEmpty = numHidden + numEmpty;
+            final int N = mLruProcesses.size();
+            int factor = numTrimming/3;
+            int minFactor = 2;
+            if (mHomeProcess != null) minFactor++;
+            if (mPreviousProcess != null) minFactor++;
+            if (factor < minFactor) factor = minFactor;
+            int step = 0;
+            int fgTrimLevel;
+            if (numHiddenAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
+                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
+            } else if (numHiddenAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
+                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
+            } else {
+                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
+            }
+            int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
+            for (i=0; i<N; i++) {
+                ProcessRecord app = mLruProcesses.get(i);
+                if (app.nonStoppingAdj >= ProcessList.HOME_APP_ADJ
+                        && app.nonStoppingAdj != ProcessList.SERVICE_B_ADJ
+                        && !app.killedBackground) {
+                    if (app.trimMemoryLevel < curLevel && app.thread != null) {
+                        try {
+                            app.thread.scheduleTrimMemory(curLevel);
+                        } catch (RemoteException e) {
+                        }
+                        if (false) {
+                            // For now we won't do this; our memory trimming seems
+                            // to be good enough at this point that destroying
+                            // activities causes more harm than good.
+                            if (curLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE
+                                    && app != mHomeProcess && app != mPreviousProcess) {
+                                // Need to do this on its own message because the stack may not
+                                // be in a consistent state at this point.
+                                // For these apps we will also finish their activities
+                                // to help them free memory.
+                                mMainStack.scheduleDestroyActivities(app, false, "trim");
+                            }
+                        }
+                    }
+                    app.trimMemoryLevel = curLevel;
+                    step++;
+                    if (step >= factor) {
+                        step = 0;
+                        switch (curLevel) {
+                            case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+                                curLevel = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
+                                break;
+                            case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+                                curLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+                                break;
+                        }
+                    }
+                } else if (app.nonStoppingAdj == ProcessList.HEAVY_WEIGHT_APP_ADJ) {
+                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
+                            && app.thread != null) {
+                        try {
+                            app.thread.scheduleTrimMemory(
+                                    ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                    app.trimMemoryLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+                } else {
+                    if ((app.nonStoppingAdj > ProcessList.VISIBLE_APP_ADJ || app.systemNoUi)
+                            && app.pendingUiClean) {
+                        // If this application is now in the background and it
+                        // had done UI, then give it the special trim level to
+                        // have it free UI resources.
+                        final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
+                        if (app.trimMemoryLevel < level && app.thread != null) {
+                            try {
+                                app.thread.scheduleTrimMemory(level);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                        app.pendingUiClean = false;
+                    }
+                    if (app.trimMemoryLevel < fgTrimLevel && app.thread != null) {
+                        try {
+                            app.thread.scheduleTrimMemory(fgTrimLevel);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                    app.trimMemoryLevel = fgTrimLevel;
+                }
+            }
+        } else {
+            final int N = mLruProcesses.size();
+            for (i=0; i<N; i++) {
+                ProcessRecord app = mLruProcesses.get(i);
+                if ((app.nonStoppingAdj > ProcessList.VISIBLE_APP_ADJ || app.systemNoUi)
+                        && app.pendingUiClean) {
+                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
+                            && app.thread != null) {
+                        try {
+                            app.thread.scheduleTrimMemory(
+                                    ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                    app.pendingUiClean = false;
+                }
+                app.trimMemoryLevel = 0;
+            }
+        }
+
+        if (mAlwaysFinishActivities) {
+            // Need to do this on its own message because the stack may not
+            // be in a consistent state at this point.
+            mMainStack.scheduleDestroyActivities(null, false, "always-finish");
+        }
+    }
+
+
+
+
+     /** Author: Onskreen
      * Date: 09/06/2011
      *
      * Force the specified ActivityStack to reconfig itself. The purpose of this method as opposed to
@@ -15580,130 +15867,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 		return null;
     }
 
-    /**
-
-        // Now determine the memory trimming level of background processes.
-        // Unfortunately we need to start at the back of the list to do this
-        // properly.  We only do this if the number of background apps we
-        // are managing to keep around is less than half the maximum we desire;
-        // if we are keeping a good number around, we'll let them use whatever
-        // memory they want.
-        if (numHidden <= ProcessList.TRIM_HIDDEN_APPS
-                && numEmpty <= ProcessList.TRIM_EMPTY_APPS) {
-            final int numHiddenAndEmpty = numHidden + numEmpty;
-            final int N = mLruProcesses.size();
-            int factor = numTrimming/3;
-            int minFactor = 2;
-            if (mHomeProcess != null) minFactor++;
-            if (mPreviousProcess != null) minFactor++;
-            if (factor < minFactor) factor = minFactor;
-            int step = 0;
-            int fgTrimLevel;
-            if (numHiddenAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
-                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
-            } else if (numHiddenAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
-                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
-            } else {
-                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
-            }
-            int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-            for (i=0; i<N; i++) {
-                ProcessRecord app = mLruProcesses.get(i);
-                if (app.nonStoppingAdj >= ProcessList.HOME_APP_ADJ
-                        && app.nonStoppingAdj != ProcessList.SERVICE_B_ADJ
-                        && !app.killedBackground) {
-                    if (app.trimMemoryLevel < curLevel && app.thread != null) {
-                        try {
-                            app.thread.scheduleTrimMemory(curLevel);
-                        } catch (RemoteException e) {
-                        }
-                        if (false) {
-                            // For now we won't do this; our memory trimming seems
-                            // to be good enough at this point that destroying
-                            // activities causes more harm than good.
-                            if (curLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE
-                                    && app != mHomeProcess && app != mPreviousProcess) {
-                                // Need to do this on its own message because the stack may not
-                                // be in a consistent state at this point.
-                                // For these apps we will also finish their activities
-                                // to help them free memory.
-                                mMainStack.scheduleDestroyActivities(app, false, "trim");
-                            }
-                        }
-                    }
-                    app.trimMemoryLevel = curLevel;
-                    step++;
-                    if (step >= factor) {
-                        step = 0;
-                        switch (curLevel) {
-                            case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                                curLevel = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
-                                break;
-                            case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
-                                curLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
-                                break;
-                        }
-                    }
-                } else if (app.nonStoppingAdj == ProcessList.HEAVY_WEIGHT_APP_ADJ) {
-                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
-                            && app.thread != null) {
-                        try {
-                            app.thread.scheduleTrimMemory(
-                                    ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.trimMemoryLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
-                } else {
-                    if ((app.nonStoppingAdj > ProcessList.VISIBLE_APP_ADJ || app.systemNoUi)
-                            && app.pendingUiClean) {
-                        // If this application is now in the background and it
-                        // had done UI, then give it the special trim level to
-                        // have it free UI resources.
-                        final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
-                        if (app.trimMemoryLevel < level && app.thread != null) {
-                            try {
-                                app.thread.scheduleTrimMemory(level);
-                            } catch (RemoteException e) {
-                            }
-                        }
-                        app.pendingUiClean = false;
-                    }
-                    if (app.trimMemoryLevel < fgTrimLevel && app.thread != null) {
-                        try {
-                            app.thread.scheduleTrimMemory(fgTrimLevel);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.trimMemoryLevel = fgTrimLevel;
-                }
-            }
-        } else {
-            final int N = mLruProcesses.size();
-            for (i=0; i<N; i++) {
-                ProcessRecord app = mLruProcesses.get(i);
-                if ((app.nonStoppingAdj > ProcessList.VISIBLE_APP_ADJ || app.systemNoUi)
-                        && app.pendingUiClean) {
-                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
-                            && app.thread != null) {
-                        try {
-                            app.thread.scheduleTrimMemory(
-                                    ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.pendingUiClean = false;
-                }
-                app.trimMemoryLevel = 0;
-            }
-        }
-
-        if (mAlwaysFinishActivities) {
-            // Need to do this on its own message because the stack may not
-            // be in a consistent state at this point.
-            mMainStack.scheduleDestroyActivities(null, false, "always-finish");
-        }
-    }
 
     final void trimApplications() {
         synchronized (this) {
@@ -16556,7 +16719,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         info.applicationInfo = getAppInfoForUser(info.applicationInfo, userId);
         return info;
     }
-}
+
     /**
      * Author: Onskreen
      * Date: 27/01/2011
@@ -17409,3 +17572,4 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
     }
+}

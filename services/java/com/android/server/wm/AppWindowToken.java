@@ -101,9 +101,22 @@ class AppWindowToken extends WindowToken {
     // Input application handle used by the input dispatcher.
     final InputApplicationHandle mInputApplicationHandle;
 
+    /**
+     * Author: Onskreen
+     * Date: 11/02/2010
+     *
+     * Flag indiciating if token is the cornerstone.
+     */
+    boolean isCornerstone;
+
+    final WindowManagerService mService;
+
+
+
     AppWindowToken(WindowManagerService _service, int _userId, IApplicationToken _token) {
         super(_service, _token.asBinder(),
                 WindowManager.LayoutParams.TYPE_APPLICATION, true);
+       mService = _service;
         userId = _userId;
         appWindowToken = this;
         appToken = _token;

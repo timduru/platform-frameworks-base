@@ -667,50 +667,6 @@ public interface IActivityManager extends IInterface {
     int UNSTABLE_PROVIDER_DIED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+150;
     int IS_INTENT_SENDER_AN_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+151;
     int START_ACTIVITY_AS_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+152;
-
-    /**
-     * Author: Onskreen
-     * Date: 15/02/2011
-     *
-     * Cornerstone specific transactions
-     */
-    int SWAP_PANELS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+152;
-    /**
-     * Author: Onskreen
-     * Date: 22/02/2011
-     *
-     * Cornerstone specific transactions
-     */
-    int CORNERSTONE_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+153;
-    /**
-     * Author: Onskreen
-     * Date: 28/02/2011
-     *
-     * Cornerstone specific transactions
-     */
-    int CORNERSTONE_MANAGER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+154;
-    /**
-     * Author: Onskreen
-     * Date: 28/02/2011
-     *
-     * Cornerstone specific transactions
-     */
-    int CORNERSTONE_MANAGER_BROADCAST_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+155;
-    /**
-     * Author: Onskreen
-     * Date: 08/03/2011
-     *
-     * Cornerstone specific transactions
-     */
-    int START_CORNERSTONE_APP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+156;
-
-    /**
-     * Author: Onskreen
-     * Date: 11/04/2011
-     *
-     * Cornerstone specific transactions
-     */
-    int SET_CORNERSTONE_FOCUSED_APP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+157;
     int STOP_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+153;
     int REGISTER_USER_SWITCH_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+154;
     int UNREGISTER_USER_SWITCH_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+155;
@@ -719,4 +675,13 @@ public interface IActivityManager extends IInterface {
     int INPUT_DISPATCHING_TIMED_OUT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+158;
     int CLEAR_PENDING_BACKUP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+159;
     int GET_INTENT_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+160;
+
+     // Cornerstone specific transactions
+    int SWAP_PANELS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+161;
+    int CORNERSTONE_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+162;
+    int CORNERSTONE_MANAGER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+163;
+    int CORNERSTONE_MANAGER_BROADCAST_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+164;
+    int START_CORNERSTONE_APP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+165;
+    int SET_CORNERSTONE_FOCUSED_APP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+166;
+
 }

@@ -4389,7 +4389,7 @@ public final class ViewRootImpl implements ViewParent,
 						//If the window of this view already has the focus, no need
 						//to trigger the java side processing of managing this event
 						if(!mView.hasWindowFocus()) {
-							sWindowSession.handleFocusChange(mWindowAttributes.token);
+							mWindowSession.handleFocusChange(mWindowAttributes.token);
 						}
 					}
 				} catch (RemoteException e) {
