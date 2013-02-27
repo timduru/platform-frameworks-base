@@ -690,6 +690,11 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final String SYSTEMUI_PANEL_BRIGHTNESS_TILE = "QS_Brightness";
+    
+    /**
+     * @hide
+     */
     public static final String SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT = "QuickSettingsMod.UPDATE_VOLUME_OBSERVER_STREAM";
 
     /**

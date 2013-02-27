@@ -97,6 +97,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         Drawable avatar;
     }
 
+    static class BrightnessState extends State {
+        boolean autoBrightness;
+    }
+
     public static class BluetoothState extends State {
         boolean connected = false;
         String stateContentDescription;
@@ -283,6 +287,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mRotationLockCallback;
     private State mRotationLockState = new State();
 
+    private QuickSettingsTileView mBrightnessTile;
+    private RefreshCallback mBrightnessCallback;
+    private BrightnessState mBrightnessState = new BrightnessState();
+
     private QuickSettingsTileView mBugreportTile;
     private RefreshCallback mBugreportCallback;
     private State mBugreportState = new State();
@@ -295,22 +303,24 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mLteCallback;
     private LteState mLteState = new LteState();
 
-    private String SETTINGS = EOSConstants.SYSTEMUI_PANEL_SETTINGS_TILE;
-    private String SEEKBAR = EOSConstants.SYSTEMUI_PANEL_SEEKBAR_TILE;
-    private String BATTERY = EOSConstants.SYSTEMUI_PANEL_BATTERY_TILE;
-    private String ROTATION = EOSConstants.SYSTEMUI_PANEL_ROTATION_TILE;
-    private String AIRPLANE = EOSConstants.SYSTEMUI_PANEL_AIRPLANE_TILE;
-    private String WIFI = EOSConstants.SYSTEMUI_PANEL_WIFI_TILE;
-    private String DATA = EOSConstants.SYSTEMUI_PANEL_DATA_TILE;
-    private String BT = EOSConstants.SYSTEMUI_PANEL_BT_TILE;
-    private String SCREEN = EOSConstants.SYSTEMUI_PANEL_SCREENOFF_TILE;
-    private String LOCATION = EOSConstants.SYSTEMUI_PANEL_LOCATION_TILE;
-    private String RINGER = EOSConstants.SYSTEMUI_PANEL_RINGER_TILE;
-    private String WIFIAP = EOSConstants.SYSTEMUI_PANEL_WIFIAP_TILE;
-    private String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
-    private String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
-    private String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
-    private String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
+    private final String AVATAR = EOSConstants.SYSTEMUI_PANEL_USER_TILE;
+    private final String SETTINGS = EOSConstants.SYSTEMUI_PANEL_SETTINGS_TILE;
+    private final String SEEKBAR = EOSConstants.SYSTEMUI_PANEL_SEEKBAR_TILE;
+    private final String BATTERY = EOSConstants.SYSTEMUI_PANEL_BATTERY_TILE;
+    private final String ROTATION = EOSConstants.SYSTEMUI_PANEL_ROTATION_TILE;
+    private final String AIRPLANE = EOSConstants.SYSTEMUI_PANEL_AIRPLANE_TILE;
+    private final String WIFI = EOSConstants.SYSTEMUI_PANEL_WIFI_TILE;
+    private final String DATA = EOSConstants.SYSTEMUI_PANEL_DATA_TILE;
+    private final String BT = EOSConstants.SYSTEMUI_PANEL_BT_TILE;
+    private final String SCREEN = EOSConstants.SYSTEMUI_PANEL_SCREENOFF_TILE;
+    private final String LOCATION = EOSConstants.SYSTEMUI_PANEL_LOCATION_TILE;
+    private final String RINGER = EOSConstants.SYSTEMUI_PANEL_RINGER_TILE;
+    private final String WIFIAP = EOSConstants.SYSTEMUI_PANEL_WIFIAP_TILE;
+    private final String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
+    private final String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
+    private final String BRIGHTNESS = EOSConstants.SYSTEMUI_PANEL_BRIGHTNESS_TILE;
+    private final String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
+    private final String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
 
     private VolumeObserver mVolumeObserver;
     private LteStateObserver mLteObserver;
@@ -383,6 +393,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     void updateResources() {
         refreshSettingsTile();
         refreshBatteryTile();
+        refreshBrightnessTile();
         refreshBluetoothTile();
         refreshRotationLockTile();
     }
@@ -904,10 +915,32 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    // Brightness
+    void addBrightnessTile(QuickSettingsTileView view, RefreshCallback cb) {	
+        mBrightnessTile = view;
+        mBrightnessCallback = cb;
+        onBrightnessLevelChanged();
+    }
+
     @Override
     public void onBrightnessLevelChanged() {
         if (isToggleEnabled(SEEKBAR)) {
             mSeekbarCallback.refreshView(mSeekbarTile, mSeekbarState);
+        }
+
+        if (isToggleEnabled(BRIGHTNESS)) {
+            Resources r = mContext.getResources();
+            int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_MODE,
+                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
+                    mUserTracker.getCurrentUserId());
+            mBrightnessState.autoBrightness =
+                    (mode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+            mBrightnessState.iconId = mBrightnessState.autoBrightness
+                    ? R.drawable.ic_qs_brightness_auto_on
+                    : R.drawable.ic_qs_brightness_auto_off;
+            mBrightnessState.label = r.getString(R.string.quick_settings_brightness_label);
+            mBrightnessCallback.refreshView(mBrightnessTile, mBrightnessState);
         }
     }
 

@@ -159,23 +159,24 @@ class QuickSettings {
     private int mSeekbarSpan;
     private Boolean mUserEnabled = true;
 
-    private String AVATAR = EOSConstants.SYSTEMUI_PANEL_USER_TILE;
-    private String SETTINGS = EOSConstants.SYSTEMUI_PANEL_SETTINGS_TILE;
-    private String SEEKBAR = EOSConstants.SYSTEMUI_PANEL_SEEKBAR_TILE;
-    private String BATTERY = EOSConstants.SYSTEMUI_PANEL_BATTERY_TILE;
-    private String ROTATION = EOSConstants.SYSTEMUI_PANEL_ROTATION_TILE;
-    private String AIRPLANE = EOSConstants.SYSTEMUI_PANEL_AIRPLANE_TILE;
-    private String WIFI = EOSConstants.SYSTEMUI_PANEL_WIFI_TILE;
-    private String DATA = EOSConstants.SYSTEMUI_PANEL_DATA_TILE;
-    private String BT = EOSConstants.SYSTEMUI_PANEL_BT_TILE;
-    private String SCREEN = EOSConstants.SYSTEMUI_PANEL_SCREENOFF_TILE;
-    private String LOCATION = EOSConstants.SYSTEMUI_PANEL_LOCATION_TILE;
-    private String RINGER = EOSConstants.SYSTEMUI_PANEL_RINGER_TILE;
-    private String WIFIAP = EOSConstants.SYSTEMUI_PANEL_WIFIAP_TILE;
-    private String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
-    private String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
-    private String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
-    private String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
+    private final String AVATAR = EOSConstants.SYSTEMUI_PANEL_USER_TILE;
+    private final String SETTINGS = EOSConstants.SYSTEMUI_PANEL_SETTINGS_TILE;
+    private final String SEEKBAR = EOSConstants.SYSTEMUI_PANEL_SEEKBAR_TILE;
+    private final String BATTERY = EOSConstants.SYSTEMUI_PANEL_BATTERY_TILE;
+    private final String ROTATION = EOSConstants.SYSTEMUI_PANEL_ROTATION_TILE;
+    private final String AIRPLANE = EOSConstants.SYSTEMUI_PANEL_AIRPLANE_TILE;
+    private final String WIFI = EOSConstants.SYSTEMUI_PANEL_WIFI_TILE;
+    private final String DATA = EOSConstants.SYSTEMUI_PANEL_DATA_TILE;
+    private final String BT = EOSConstants.SYSTEMUI_PANEL_BT_TILE;
+    private final String SCREEN = EOSConstants.SYSTEMUI_PANEL_SCREENOFF_TILE;
+    private final String LOCATION = EOSConstants.SYSTEMUI_PANEL_LOCATION_TILE;
+    private final String RINGER = EOSConstants.SYSTEMUI_PANEL_RINGER_TILE;
+    private final String WIFIAP = EOSConstants.SYSTEMUI_PANEL_WIFIAP_TILE;
+    private final String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
+    private final String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
+    private final String BRIGHTNESS = EOSConstants.SYSTEMUI_PANEL_BRIGHTNESS_TILE;
+    private final String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
+    private final String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
 
     // The set of QuickSettingsTiles that have dynamic spans (and need to be
     // updated on
@@ -1275,8 +1276,7 @@ class QuickSettings {
                 }
             });
             parent.addView(WifiApTile);
-        }
-        if (tile.equals(TORCH)) {
+        } else if (tile.equals(TORCH)) {
             // Torch
             QuickSettingsTileView torchTile = (QuickSettingsTileView)
                     inflater.inflate(R.layout.quick_settings_tile, parent, false);
@@ -1327,6 +1327,27 @@ class QuickSettings {
                 }
             });
             parent.addView(screenTile);
+        } else if (tile.equals(BRIGHTNESS)) {
+            QuickSettingsTileView brightnessTile = (QuickSettingsTileView)
+                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+            brightnessTile.setContent(R.layout.quick_settings_tile_brightness, inflater);
+            brightnessTile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mBar.collapseAllPanels(true);
+                    showBrightnessDialog();
+                }
+            });
+            mModel.addBrightnessTile(brightnessTile, new QuickSettingsModel.RefreshCallback() {
+                @Override
+                public void refreshView(QuickSettingsTileView view, State state) {
+                    TextView tv = (TextView) view.findViewById(R.id.brightness_textview);
+                    tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+                    tv.setText(state.label);
+                    dismissBrightnessDialog(mBrightnessDialogShortTimeout);
+                }
+            });
+            parent.addView(brightnessTile);   
         }
     }
 
