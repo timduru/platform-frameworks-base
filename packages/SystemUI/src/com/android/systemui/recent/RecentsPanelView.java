@@ -789,7 +789,13 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             setContentDescription(null);
         }
 
-        updateMemDisplay();
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateMemDisplay();
+            }
+        }, 500);  
     }
 
     private void startApplicationDetailsActivity(String packageName) {
