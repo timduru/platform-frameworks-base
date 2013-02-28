@@ -437,10 +437,10 @@ public class ActiveServices {
                     + ") when binding service " + service);
         }
 
-            if (activity == null) {
-                Slog.w(TAG, "Binding with unknown activity: " + token);
-                return 0;
-            }
+        if (token != null && activity == null) {
+            Slog.w(TAG, "Binding with unknown activity: " + token);
+            return 0;
+        }
 
         int clientLabel = 0;
         PendingIntent clientIntent = null;
