@@ -3524,11 +3524,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     targetStack = mCornerstonePanelStacks.get(i);
                     for (int j = targetStack.mHistory.size()-1; j >= 0; j--) {
                         ActivityRecord r = (ActivityRecord)targetStack.mHistory.get(j);
-                        targetStack.requestFinishActivityLocked(r.appToken.asBinder(), 0, null, "app-request", false);
+                        targetStack.requestFinishActivityLocked(r.appToken.asBinder(), 0, null, "app-request", true);
                     }
                 }
-                res = mCornerstoneStack.requestFinishActivityLocked(token, resultCode,
-                            resultData, "app-request", false);
+                res = mCornerstoneStack.requestFinishActivityLocked(token, resultCode, resultData, "app-request", true);
                 mWindowManager.setCornerstoneState(WindowManagerService.Cornerstone_State.TERMINATED);
 
                 /**
@@ -3542,8 +3541,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 forceConfigurationLocked(mMainStack, WindowManagerService.Cornerstone_State.TERMINATED);
             } else {
-                res = targetStack.requestFinishActivityLocked(token, resultCode,
-                            resultData, "app-request", false);
+                res = targetStack.requestFinishActivityLocked(token, resultCode, resultData, "app-request", true);
             }
 
             Binder.restoreCallingIdentity(origId);
@@ -14234,8 +14232,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             for (int i = start; i > finishTo; i--) {
                 ActivityRecord r = history.get(i);
-                mMainStack.requestFinishActivityLocked(r.appToken, resultCode, resultData,
-                        "navigate-up", true);
+                mMainStack.requestFinishActivityLocked(r.appToken, resultCode, resultData, "navigate-up", true);
                 // Only return the supplied result for the first activity finished
                 resultCode = Activity.RESULT_CANCELED;
                 resultData = null;
