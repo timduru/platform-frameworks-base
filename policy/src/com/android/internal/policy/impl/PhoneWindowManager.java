@@ -3578,7 +3578,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 if (mVolumeUpPress) {
                                     handleVolumeLongPressAbort();
                                     mHandler.removeCallbacks(mVolumeUpDownPress);
-                                    mHandler.postDelayed(mVolumeUpDownPress, ViewConfiguration.getLongPressTimeout() / 2);
+                                    mHandler.postDelayed(mVolumeUpDownPress, ViewConfiguration.getLongPressTimeout());
                                 }
                             }
                         }
@@ -3594,6 +3594,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                         handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
                                     }
                                 }
+                                mHandler.removeCallbacks(mVolumeUpDownPress);
                                 mVolumeDownPress = false;
                             } else {
                                 handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
@@ -3620,7 +3621,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 if (mVolumeDownPress) {
                                     handleVolumeLongPressAbort();
                                     mHandler.removeCallbacks(mVolumeUpDownPress);
-                                    mHandler.postDelayed(mVolumeUpDownPress, ViewConfiguration.getLongPressTimeout() / 2);
+                                    mHandler.postDelayed(mVolumeUpDownPress, ViewConfiguration.getLongPressTimeout());
                                 }
                             }
                         }
@@ -3636,6 +3637,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                         handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
                                     }
                                 }
+                                mHandler.removeCallbacks(mVolumeUpDownPress);
                                 mVolumeUpPress = false;
                             } else {
                                 handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
