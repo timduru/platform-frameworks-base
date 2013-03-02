@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import com.android.internal.view.RotationPolicy;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 
 import com.android.systemui.statusbar.phone.QuickSettingsModel.BluetoothState;
@@ -46,7 +45,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -62,7 +60,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.LevelListDrawable;
 import android.hardware.Camera;
-import android.hardware.Camera.Parameters;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.AudioManager;
@@ -84,34 +81,24 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Profile;
 import android.provider.Settings;
-import android.net.wifi.WifiManager;
 import android.net.ConnectivityManager;
 import android.util.Log;
 import android.util.Pair;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationUtils;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.SeekBar;
-import android.widget.Switch;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Collections;
 
 /**
  *
@@ -131,11 +118,8 @@ class QuickSettings {
     private WifiDisplayStatus mWifiDisplayStatus;
     private PhoneStatusBar mStatusBarService;
     private BluetoothState mBluetoothState;
-    private BluetoothAdapter mBluetoothAdapter;
-    private WifiManager mWifiManager;
 
     private BrightnessController mBrightnessController;
-    private BluetoothController mBluetoothController;
 
     private Dialog mBrightnessDialog;
     private int mBrightnessDialogShortTimeout;
@@ -203,8 +187,6 @@ class QuickSettings {
         mModel = new QuickSettingsModel(mContext, mEnabledTiles);
         mWifiDisplayStatus = new WifiDisplayStatus();
         mBluetoothState = new QuickSettingsModel.BluetoothState();
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
 
         mHandler = new Handler();
 
@@ -260,7 +242,6 @@ class QuickSettings {
 
     void setup(NetworkController networkController, BluetoothController bluetoothController,
             BatteryController batteryController, LocationController locationController) {
-        mBluetoothController = bluetoothController;
 
         setupQuickSettings();
         updateWifiDisplayStatus();
@@ -438,7 +419,7 @@ class QuickSettings {
     }
 
     private void addSystemTiles(ViewGroup parent, LayoutInflater inflater) {
-        List<String> mGesturesOrderedList = getGesturesOrderedList();
+        List<String> mGesturesOrderedList = getTilesOrderedList();
         for (int i = 0; i < mGesturesOrderedList.size(); i++) {
             loadTile(mGesturesOrderedList.get(i), parent, inflater);
         }
@@ -899,15 +880,15 @@ class QuickSettings {
                     switch (am.getRingerMode()) {
                         case AudioManager.RINGER_MODE_NORMAL:
                             tv.setText("Normal");
-                            iv.setImageResource(R.drawable.stat_ring_on);
+                            iv.setImageResource(R.drawable.ic_qs_ring_on);
                             break;
                         case AudioManager.RINGER_MODE_VIBRATE:
                             tv.setText("Vibrate");
-                            iv.setImageResource(R.drawable.stat_ring_vibrate);
+                            iv.setImageResource(R.drawable.ic_qs_vibrate_on);
                             break;
                         case AudioManager.RINGER_MODE_SILENT:
                             tv.setText("Silent");
-                            iv.setImageResource(R.drawable.stat_ring_off);
+                            iv.setImageResource(R.drawable.ic_qs_ring_off);
                             break;
                     }
                 }
@@ -1167,8 +1148,6 @@ class QuickSettings {
                     BluetoothState bluetoothState = (BluetoothState) state;
                     TextView tv = (TextView) view.findViewById(R.id.bluetooth_textview);
                     tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
-
-                    Resources r = mContext.getResources();
                     String label = state.label;
                     /*
                      * //TODO: Show connected bluetooth device label
@@ -1224,10 +1203,10 @@ class QuickSettings {
                     ImageView iv = (ImageView) view.findViewById(R.id.location_image);
                     if (locationEnabled) {
                         tv.setText("GPS ON");
-                        iv.setImageResource(R.drawable.ic_qs_location_on);
+                        iv.setImageResource(R.drawable.ic_qs_gps_on);
                     } else {
                         tv.setText("GPS OFF");
-                        iv.setImageResource(R.drawable.ic_qs_location_off);
+                        iv.setImageResource(R.drawable.ic_qs_gps_off);
                     }
                 }
             });
@@ -1267,11 +1246,11 @@ class QuickSettings {
                     if (WifiApState == WifiManager.WIFI_AP_STATE_DISABLED
                             || WifiApState == WifiManager.WIFI_AP_STATE_DISABLING) {
                         tv.setText("Wifi AP Off");
-                        iv.setImageResource(R.drawable.stat_wifi_ap_off);
+                        iv.setImageResource(R.drawable.ic_qs_wifi_ap_off);
                     } else if (WifiApState == WifiManager.WIFI_AP_STATE_ENABLED
                             || WifiApState == WifiManager.WIFI_AP_STATE_ENABLING) {
                         tv.setText("Wifi AP On");
-                        iv.setImageResource(R.drawable.stat_wifi_ap_on);
+                        iv.setImageResource(R.drawable.ic_qs_wifi_ap_on);
                     }
                 }
             });
@@ -1298,10 +1277,10 @@ class QuickSettings {
 
                     if (mTorchEnabled) {
                         tv.setText("Torch On");
-                        iv.setImageResource(R.drawable.stat_flashlight_on);
+                        iv.setImageResource(R.drawable.ic_qs_torch_on);
                     } else {
                         tv.setText("Torch Off");
-                        iv.setImageResource(R.drawable.stat_flashlight_off);
+                        iv.setImageResource(R.drawable.ic_qs_torch_off);
                     }
                 }
             });
@@ -1351,7 +1330,7 @@ class QuickSettings {
         }
     }
 
-    private List<String> getGesturesOrderedList() {
+    private List<String> getTilesOrderedList() {
         List<String> tiles;
         String tempTilesString = Settings.System.getString(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES);
