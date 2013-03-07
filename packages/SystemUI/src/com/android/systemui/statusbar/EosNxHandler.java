@@ -163,7 +163,7 @@ public class EosNxHandler {
                             handler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    EosUiController.getEosUiController().updateBarColors();
+                                    EosGlassController.updateBarColors();
                                 }
                             }, 100);
 

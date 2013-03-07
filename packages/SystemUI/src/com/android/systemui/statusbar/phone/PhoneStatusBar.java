@@ -83,6 +83,7 @@ import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.EosGlassController;
 import com.android.systemui.statusbar.EosNxHandler;
 import com.android.systemui.statusbar.EosObserverHandler;
 import com.android.systemui.statusbar.EosUiController;
@@ -1387,7 +1388,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
-        if (mEosController.isGlassEnabled()) mEosController.applyGlassEffect();
+        if (EosGlassController.isGlassEnabled()) EosGlassController.applyGlassEffect();
     }
 
     @Override
@@ -2084,7 +2085,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void topAppWindowChanged(boolean showMenu) {
-        if (mEosController.isGlassEnabled()) mEosController.applyGlassEffect();
+        if (EosGlassController.isGlassEnabled()) EosGlassController.applyGlassEffect();
 
         if (DEBUG) {
             Slog.d(TAG, (showMenu ? "showing" : "hiding") + " the MENU button");
