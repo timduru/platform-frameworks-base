@@ -419,9 +419,9 @@ class QuickSettings {
     }
 
     private void addSystemTiles(ViewGroup parent, LayoutInflater inflater) {
-        List<String> mGesturesOrderedList = getTilesOrderedList();
-        for (int i = 0; i < mGesturesOrderedList.size(); i++) {
-            loadTile(mGesturesOrderedList.get(i), parent, inflater);
+        List<String> mTilesOrderedList = getTilesOrderedList();
+        for (String tile : mTilesOrderedList) {
+            loadTile(tile, parent, inflater);
         }
     }
 
