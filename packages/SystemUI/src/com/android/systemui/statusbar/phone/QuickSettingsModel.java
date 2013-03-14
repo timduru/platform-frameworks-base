@@ -105,7 +105,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         boolean connected = false;
         String stateContentDescription;
     }
-    
+
     public static class LteState extends State {
         int settingsNetworkMode;
         public static final int DEFAULT_MODE = Phone.PREFERRED_NT_MODE;
@@ -303,6 +303,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mLteCallback;
     private LteState mLteState = new LteState();
 
+    private QuickSettingsTileView mSyncTile;
+    private RefreshCallback mSyncCallback;
+    private State mSyncState = new State();
+
     private final String AVATAR = EOSConstants.SYSTEMUI_PANEL_USER_TILE;
     private final String SETTINGS = EOSConstants.SYSTEMUI_PANEL_SETTINGS_TILE;
     private final String SEEKBAR = EOSConstants.SYSTEMUI_PANEL_SEEKBAR_TILE;
@@ -319,6 +323,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
     private final String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
     private final String BRIGHTNESS = EOSConstants.SYSTEMUI_PANEL_BRIGHTNESS_TILE;
+    private final String SYNC = EOSConstants.SYSTEMUI_PANEL_SYNC_TILE;
     private final String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
     private final String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
 
@@ -444,6 +449,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshLteTile();
     }
 
+    // Sync
+    void addSyncTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mSyncTile = view;
+        mSyncCallback = cb;
+        refreshSyncTile();
+    }
+
     // Settings
     void addSettingsTile(QuickSettingsTileView view, RefreshCallback cb) {
         mSettingsTile = view;
@@ -465,6 +477,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 Phone.PREFERRED_NT_MODE);
         if (isToggleEnabled(LTE)) {
             mLteCallback.refreshView(mLteTile, mLteState);
+        }
+    }
+
+    public void refreshSyncTile() {
+        mSyncState.enabled = ContentResolver.getMasterSyncAutomatically();
+        if (isToggleEnabled(SYNC)) {
+            mSyncCallback.refreshView(mSyncTile, mSyncState);
         }
     }
 

@@ -44,6 +44,7 @@ import android.app.StatusBarManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -158,6 +159,7 @@ class QuickSettings {
     private final String WIFIAP = EOSConstants.SYSTEMUI_PANEL_WIFIAP_TILE;
     private final String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
     private final String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
+    private final String SYNC = EOSConstants.SYSTEMUI_PANEL_SYNC_TILE;
     private final String BRIGHTNESS = EOSConstants.SYSTEMUI_PANEL_BRIGHTNESS_TILE;
     private final String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
     private final String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
@@ -948,6 +950,41 @@ class QuickSettings {
                 }
             });
             parent.addView(lteTile);
+        } else if (tile.equals(SYNC)) {
+            QuickSettingsTileView syncTile = (QuickSettingsTileView)
+                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+            syncTile.setContent(R.layout.quick_settings_tile_sync, inflater);
+            syncTile.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    final boolean isSyncEnabled = ContentResolver.getMasterSyncAutomatically();
+                    ContentResolver.setMasterSyncAutomatically(!isSyncEnabled);
+                    mModel.refreshSyncTile();
+
+                }
+            });
+            syncTile.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    startSettingsActivity(android.provider.Settings.ACTION_SYNC_SETTINGS);
+                    return true;
+                }
+            });
+            mModel.addSyncTile(syncTile, new QuickSettingsModel.RefreshCallback() {
+                @Override
+                public void refreshView(QuickSettingsTileView view, State state) {
+                    TextView syncText = (TextView) view.findViewById(R.id.sync_textview);
+                    ImageView syncImage = (ImageView) view.findViewById(R.id.sync_image);
+                    syncText.setText(mContext
+                            .getString((state.enabled) ? R.string.quick_settings_sync_on_label
+                                    : R.string.quick_settings_sync_off_label));
+                    syncImage.setImageResource((state.enabled) ? R.drawable.ic_qs_sync_on
+                            : R.drawable.ic_qs_sync_off);
+
+                }
+            });
+            parent.addView(syncTile);
         } else if (tile.equals(BATTERY)) {
             // Battery
             QuickSettingsTileView batteryTile = (QuickSettingsTileView)

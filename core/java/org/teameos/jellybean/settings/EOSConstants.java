@@ -821,6 +821,11 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final String SYSTEMUI_PANEL_SYNC_TILE = "QS_Sync";
+
+    /**
+     * @hide
+     */
     public static final String SYSTEMUI_PANEL_TORCH_INTENT = "QuickSettingsMod.UPDATE_TORCH_TILE";
 
     /**
