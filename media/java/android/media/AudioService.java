@@ -2318,42 +2318,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
-    private void onConfigureSafeVolume(boolean force) {
-        synchronized (mSafeMediaVolumeState) {
-            int mcc = mContext.getResources().getConfiguration().mcc;
-            if ((mMcc != mcc) || ((mMcc == 0) && force)) {
-                mSafeMediaVolumeIndex = mContext.getResources().getInteger(
-                        com.android.internal.R.integer.config_safe_media_volume_index) * 10;
-                boolean safeMediaVolumeEnabled = mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_safe_media_volume_enabled);
-
-                // The persisted state is either "disabled" or "active": this is the state applied
-                // next time we boot and cannot be "inactive"
-                int persistedState;
-                if (safeMediaVolumeEnabled) {
-                    persistedState = SAFE_MEDIA_VOLUME_ACTIVE;
-                    // The state can already be "inactive" here if the user has forced it before
-                    // the 30 seconds timeout for forced configuration. In this case we don't reset
-                    // it to "active".
-                    if (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_INACTIVE) {
-                        mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
-                        enforceSafeMediaVolume();
-                    }
-                } else {
-                    persistedState = SAFE_MEDIA_VOLUME_DISABLED;
-                    mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
-                }
-                mMcc = mcc;
-                sendMsg(mAudioHandler,
-                        MSG_PERSIST_SAFE_VOLUME_STATE,
-                        SENDMSG_QUEUE,
-                        persistedState,
-                        0,
-                        null,
-                        0);
-            }
-        }
-    }
+    private void onConfigureSafeVolume(boolean force) { return; }
 
     ///////////////////////////////////////////////////////////////////////////
     // Internal methods
@@ -5935,83 +5900,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MUSIC_ACTIVE_POLL_PERIOD_MS = 60000;  // 1 minute polling interval
     private static final int SAFE_VOLUME_CONFIGURE_TIMEOUT_MS = 30000;  // 30s after boot completed
 
-    private void setSafeMediaVolumeEnabled(boolean on) {
-        synchronized (mSafeMediaVolumeState) {
-            if ((mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_NOT_CONFIGURED) &&
-                    (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_DISABLED)) {
-                if (on && (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_INACTIVE)) {
-                    mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
-                    enforceSafeMediaVolume();
-                } else if (!on && (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE)) {
-                    mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_INACTIVE;
-                    mMusicActiveMs = 0;
-                    sendMsg(mAudioHandler,
-                            MSG_CHECK_MUSIC_ACTIVE,
-                            SENDMSG_REPLACE,
-                            0,
-                            0,
-                            null,
-                            MUSIC_ACTIVE_POLL_PERIOD_MS);
-                }
-            }
-        }
-    }
+    private void setSafeMediaVolumeEnabled(boolean on) { return; }
 
-    private void enforceSafeMediaVolume() {
-        VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
-        boolean lastAudible = (streamState.muteCount() != 0);
-        int devices = mSafeMediaVolumeDevices;
-        int i = 0;
-
-        while (devices != 0) {
-            int device = 1 << i++;
-            if ((device & devices) == 0) {
-                continue;
-            }
-            int index = streamState.getIndex(device, lastAudible);
-            if (index > mSafeMediaVolumeIndex) {
-                if (lastAudible) {
-                    streamState.setLastAudibleIndex(mSafeMediaVolumeIndex, device);
-                    sendMsg(mAudioHandler,
-                            MSG_PERSIST_VOLUME,
-                            SENDMSG_QUEUE,
-                            PERSIST_LAST_AUDIBLE,
-                            device,
-                            streamState,
-                            PERSIST_DELAY);
-                } else {
-                    streamState.setIndex(mSafeMediaVolumeIndex, device, true);
-                    sendMsg(mAudioHandler,
-                            MSG_SET_DEVICE_VOLUME,
-                            SENDMSG_QUEUE,
-                            device,
-                            0,
-                            streamState,
-                            0);
-                }
-            }
-            devices &= ~device;
-        }
-    }
+    private void enforceSafeMediaVolume() { return; }
 
     private boolean checkSafeMediaVolume(int streamType, int index, int device) {
-        synchronized (mSafeMediaVolumeState) {
-            if ((mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) &&
-                    (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
-                    ((device & mSafeMediaVolumeDevices) != 0) &&
-                    (index > mSafeMediaVolumeIndex)) {
-                mVolumePanel.postDisplaySafeVolumeWarning();
-                return false;
-            }
-            return true;
-        }
+        return true;
     }
 
-    public void disableSafeMediaVolume() {
-        synchronized (mSafeMediaVolumeState) {
-            setSafeMediaVolumeEnabled(false);
-        }
-    }
+    public void disableSafeMediaVolume() { return; }
 
 
     //==========================================================================================
