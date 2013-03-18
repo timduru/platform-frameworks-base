@@ -563,6 +563,8 @@
     <string name="statusbar_eos_volume_slider_label">MUTE</string>
     <!-- Eos signal cluster clock tag Helps with only applying custom settings only to desired clock views -->
     <string name="eos_statusbar_clock_signal_cluster_tag">eos_systemui_clock_cluster_tag</string>
+    <string name="eos_statusbar_clock_center_tag">eos_systemui_clock_center_tag</string>
+    <string name="eos_statusbar_clock_left_tag">eos_systemui_clock_left_tag</string>
     <!-- Eos dream title -->
     <string name="eos_dream_title">EOS</string>
     <!-- Eos dream settings title -->

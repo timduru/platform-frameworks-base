@@ -24,7 +24,6 @@ import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
-import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.preferences.EosSettings;
 
 import org.teameos.jellybean.settings.EOSConstants;
@@ -69,6 +68,10 @@ public class EosUiController implements FeatureListener {
     private EosGlassController mGlass;
     private NX mNx;
     private EosSettings mEosLegacyToggles;
+
+    private View mClockCenter;
+    private View mClockCluster;
+    private View mCurrentClockView;
 
     private boolean mIsClockVisible = true;
     private int mCurrentNavLayout;
@@ -211,6 +214,9 @@ public class EosUiController implements FeatureListener {
                 .findViewById(R.id.signal_battery_cluster)
                 .findViewById(R.id.battery));
 
+        mClockCenter = mStatusBarView.findViewById(R.id.clock_center);
+        mClockCluster = mStatusBarView.findViewById(R.id.clock);
+
         // start here to include cap key devices
         mGlass = new EosGlassController(mContext, mStatusBarView,
                 mStatusBarWindow);
@@ -219,6 +225,7 @@ public class EosUiController implements FeatureListener {
         handleBatteryChange();
 
         mObserver.registerClass((FeatureListener) mStatusBarView.findViewById(R.id.clock));
+        mObserver.registerClass((FeatureListener) mStatusBarView.findViewById(R.id.clock_center));
         handleClockChange();
     }
 
@@ -275,25 +282,43 @@ public class EosUiController implements FeatureListener {
     }
 
     public void showClock(boolean show) {
-        View clock = mStatusBarView.findViewById(R.id.clock);
-        if (clock != null) {
-            if (mIsClockVisible) {
-                clock.setVisibility(show ? View.VISIBLE : View.GONE);
-            } else {
-                clock.setVisibility(View.GONE);
-            }
+        if (mIsClockVisible) {
+            mCurrentClockView.setVisibility(show ? View.VISIBLE : View.GONE);
+        } else {
+            mCurrentClockView.setVisibility(View.GONE);
         }
     }
 
     private void handleClockChange() {
         if (mStatusBarView == null)
             return;
-        TextView clock = (TextView) mStatusBarView.findViewById(R.id.clock);
 
-        mIsClockVisible = Settings.System.getInt(mContext.getContentResolver(),
+        if (mCurrentClockView == null) mCurrentClockView = mClockCluster;
+
+        int clock_state = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_CLOCK_VISIBLE,
-                EOSConstants.SYSTEMUI_CLOCK_VISIBLE_DEF) == 1 ? true : false;
-        showClock(true);
+                EOSConstants.SYSTEMUI_CLOCK_CLUSTER);
+
+        switch(clock_state) {
+            case EOSConstants.SYSTEMUI_CLOCK_GONE:
+                mIsClockVisible = false;
+                mClockCenter.setVisibility(View.GONE);
+                mClockCluster.setVisibility(View.GONE);
+                break;
+            case EOSConstants.SYSTEMUI_CLOCK_CLUSTER:
+                mIsClockVisible = true;
+                mClockCenter.setVisibility(View.GONE);
+                mClockCluster.setVisibility(View.VISIBLE);
+                mCurrentClockView = mClockCluster;
+                break;
+            case EOSConstants.SYSTEMUI_CLOCK_CENTER:
+                mIsClockVisible = true;
+                mClockCluster.setVisibility(View.GONE);
+                mClockCenter.setVisibility(View.VISIBLE);
+                mCurrentClockView = mClockCenter;
+                break;
+        }
+
         int color = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_CLOCK_COLOR,
                 EOSConstants.SYSTEMUI_CLOCK_COLOR_DEF);
@@ -301,7 +326,8 @@ public class EosUiController implements FeatureListener {
             color = mContext.getResources()
                     .getColor(android.R.color.holo_blue_light);
         }
-        clock.setTextColor(color);
+        ((TextView) mClockCluster).setTextColor(color);
+        ((TextView) mClockCenter).setTextColor(color);
     }
 
     private void handleLegacyTogglesChange() {

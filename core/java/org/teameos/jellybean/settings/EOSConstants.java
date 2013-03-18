@@ -69,7 +69,22 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final int SYSTEMUI_CLOCK_VISIBLE_DEF = 1;
+    public static final int SYSTEMUI_CLOCK_GONE = 0;
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_CLOCK_CLUSTER = 1;
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_CLOCK_CENTER = 2;
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_CLOCK_LEFT = 3;
 
     /**
      * @hide

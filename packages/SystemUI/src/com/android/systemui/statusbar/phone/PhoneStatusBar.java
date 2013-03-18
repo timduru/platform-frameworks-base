@@ -2077,7 +2077,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             final View systemIcons = mStatusBarView.findViewById(R.id.statusIcons);
             final View signal = mStatusBarView.findViewById(R.id.signal_cluster);
             final View battery = mStatusBarView.findViewById(R.id.battery);
-            final View clock = mStatusBarView.findViewById(R.id.clock);
+            final View clock_cluster = mStatusBarView.findViewById(R.id.clock);
+            final View clock_center = mStatusBarView.findViewById(R.id.clock_center);
 
             final AnimatorSet lightsOutAnim = new AnimatorSet();
             lightsOutAnim.playTogether(
@@ -2085,7 +2086,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 0),
                     ObjectAnimator.ofFloat(signal, View.ALPHA, 0),
                     ObjectAnimator.ofFloat(battery, View.ALPHA, 0.5f),
-                    ObjectAnimator.ofFloat(clock, View.ALPHA, 0.5f)
+                    ObjectAnimator.ofFloat(clock_cluster, View.ALPHA, 0.5f),
+                    ObjectAnimator.ofFloat(clock_center, View.ALPHA, 0.5f)
                     );
             lightsOutAnim.setDuration(750);
 
@@ -2095,7 +2097,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 1),
                     ObjectAnimator.ofFloat(signal, View.ALPHA, 1),
                     ObjectAnimator.ofFloat(battery, View.ALPHA, 1),
-                    ObjectAnimator.ofFloat(clock, View.ALPHA, 1)
+                    ObjectAnimator.ofFloat(clock_cluster, View.ALPHA, 1),
+                    ObjectAnimator.ofFloat(clock_center, View.ALPHA, 1)
                     );
             lightsOnAnim.setDuration(250);
 
@@ -2198,26 +2201,38 @@ public class PhoneStatusBar extends BaseStatusBar {
         public void tickerStarting() {
             mTicking = true;
             mStatusBarContents.setVisibility(View.GONE);
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .setVisibility(View.GONE);
             mTickerView.setVisibility(View.VISIBLE);
             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_up_in, null));
             mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_up_out,
                     null));
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .startAnimation(loadAnim(com.android.internal.R.anim.push_up_out, null));
         }
 
         @Override
         public void tickerDone() {
             mStatusBarContents.setVisibility(View.VISIBLE);
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
             mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in,
                     null));
             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_down_out,
                     mTickingDoneListener));
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
         }
 
         public void tickerHalting() {
             mStatusBarContents.setVisibility(View.VISIBLE);
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
             mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
             // we do not animate the ticker away at this point, just get rid of
             // it (b/6992707)
         }
