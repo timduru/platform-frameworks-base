@@ -297,6 +297,13 @@ public class DownloadManager {
      */
     public static final String EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS = "extra_click_download_ids";
 
+    /** {@hide} */
+    public final static String AUTH_DOWNLOAD_REQUEST_ACTION = "android.intent.action.AUTH_DOWNLOAD_REQUEST";
+    /** {@hide} */
+    public final static String AUTH_DOWNLOAD_RETURN_ACTION = "android.intent.action.AUTH_DOWNLOAD_RETURN";
+    /** {@hide} */
+    public final static String AUTH_DOWNLOAD_PERMISSION = "android.intent.action.AUTH_DOWNLOAD_PERMISSION";
+
     /**
      * columns to request from DownloadProvider.
      * @hide
