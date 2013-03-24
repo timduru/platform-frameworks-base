@@ -684,6 +684,20 @@ public final class EOSConstants {
     public static final String SYSTEMUI_NAVRING_3 = "eos_systemui_navring_3";
 
     /**
+     * if action is launched from glow ring or lockring while insecure lockscreen is on
+     * we forward the intent to PhoneWindowManager and let it handle
+     * Keyguard security
+     * @hide
+     */
+    public static final String SYSTEMUI_KEYGUARD_INTENT_KEY = "eos_systemui_keyguard_intent_key";
+
+    /**
+     * key for actual intent sent to PhoneWindowManager
+     * @hide
+     */
+    public static final String SYSTEMUI_KEYGUARD_INTENT_REQUEST = "eos_systemui_keyguard_intent_key";
+
+    /**
      * @hide
      */
     public static final String SYSTEMUI_TASK_ASSIST = "assist";

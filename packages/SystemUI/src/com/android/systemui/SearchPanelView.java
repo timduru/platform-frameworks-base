@@ -26,6 +26,7 @@ import org.teameos.jellybean.settings.EOSConstants;
 import android.animation.LayoutTransition;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
+import android.app.KeyguardManager;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -53,6 +54,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnPreDrawListener;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.multiwaveview.GlowPadView;
@@ -136,7 +138,19 @@ public class SearchPanelView extends FrameLayout implements
             return false;
         }
 
-        mActionHandler.performTask(targetKey);
+        // if we're locked, let PhoneWindowManager handle it
+        // otherwise we can handle it right here
+        final KeyguardManager km = (KeyguardManager) mContext
+                .getSystemService(Context.KEYGUARD_SERVICE);
+        if (km != null && km.isKeyguardLocked() && !km.isKeyguardSecure()) {
+            Intent intent = new Intent()
+                    .setAction(EOSConstants.SYSTEMUI_KEYGUARD_INTENT_KEY)
+                    .putExtra(EOSConstants.SYSTEMUI_KEYGUARD_INTENT_REQUEST, targetKey);
+            mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+        } else {
+            mActionHandler.performTask(targetKey);
+        }
+
         return true;
     }
 

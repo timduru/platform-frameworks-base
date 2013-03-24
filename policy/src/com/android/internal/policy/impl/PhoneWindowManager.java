@@ -593,6 +593,55 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    class EosIntentReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // got perms or return right off the bat
+            // since this is only used for custom lockscreen action launching
+            if (!(context
+                    .checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
+                    == PackageManager.PERMISSION_GRANTED)) {
+                return;
+            }
+
+            if (!intent.getAction().equals(EOSConstants.SYSTEMUI_KEYGUARD_INTENT_KEY)) {
+                return;
+            }
+            // get requested action from glowring or lockring
+            String action = intent.getStringExtra(EOSConstants.SYSTEMUI_KEYGUARD_INTENT_REQUEST);
+            if (action != null) {
+                // make sure Keyguard is in a state where it is sane to allow
+                // intent
+                if (!mKeyguardMediator.isSecure() && mKeyguardMediator.isDismissable()) {
+                    final WMActionHandler handler = new WMActionHandler(context);
+                    handler.performTask(action);
+                }
+            }
+        }
+    }
+
+    class WMActionHandler extends ActionHandler {
+
+        public WMActionHandler(Context context) {
+            super(context);
+            // TODO Auto-generated constructor stub
+        }
+
+        @Override
+        public boolean postActionEventHandled(boolean actionWasPerformed) {
+            // only dismiss if the action was handled
+            mKeyguardMediator.dismiss();
+            return actionWasPerformed;
+        }
+
+        @Override
+        public boolean handleAction(String action) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+    }
+
     class MyOrientationListener extends WindowOrientationListener {
         MyOrientationListener(Context context) {
             super(context);
@@ -908,6 +957,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         EosBarModeObserver eosBarModeObserver = new EosBarModeObserver(mHandler);
         eosBarModeObserver.observe();
 
+        EosIntentReceiver mEosIntentReceiver = new EosIntentReceiver();
+
         mShortcutManager = new ShortcutManager(context, mHandler);
         mShortcutManager.observe();
         mHomeIntent =  new Intent(Intent.ACTION_MAIN, null);
@@ -966,6 +1017,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // register for multiuser-relevant broadcasts
         filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
         context.registerReceiver(mMultiuserReceiver, filter);
+
+        // register for Eos lockscreen action requests
+        filter = new IntentFilter();
+        filter.addAction(EOSConstants.SYSTEMUI_KEYGUARD_INTENT_KEY);
+        context.registerReceiver(mEosIntentReceiver, filter);
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
