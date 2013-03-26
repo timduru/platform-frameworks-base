@@ -19,7 +19,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.IBinder;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -117,7 +116,6 @@ public abstract class ActionHandler {
     };
 
     private void launchActivity(String action) {
-        PackageManager pm = mContext.getPackageManager();
         String activity = action.substring(4);
         ComponentName component = ComponentName.unflattenFromString(activity);
 
@@ -130,6 +128,7 @@ public abstract class ActionHandler {
                     task.origActivity.equals(component)) {
                 activityManager.moveTaskToFront(task.id, ActivityManager.MOVE_TASK_WITH_HOME);
                 postActionEventHandled(true);
+                return;
             }
         }
 
@@ -305,6 +304,7 @@ public abstract class ActionHandler {
 
     private void showPowerMenu() {
         new PowerMenu(mContext);
+        postActionEventHandled(true);
     }
 
     /**
