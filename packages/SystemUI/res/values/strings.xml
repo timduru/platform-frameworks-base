@@ -545,6 +545,9 @@
     <!-- QuickSettings: LTE label -->
     <string name="quick_settings_lte_on_label">LTE On</string>
     <string name="quick_settings_lte_off_label">LTE Off</string>
+    <!-- QuickSettings: 2G3G label -->
+    <string name="quick_settings_2g_on_label">2g Only</string>
+    <string name="quick_settings_2g_off_label">2g/3g</string>
     <!-- QuickSettings: AutoSync label -->
     <string name="quick_settings_sync_on_label">Sync On</string>
     <string name="quick_settings_sync_off_label">Sync Off</string>

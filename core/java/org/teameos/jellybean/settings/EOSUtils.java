@@ -92,6 +92,12 @@ public final class EOSUtils {
         return (tm.getCurrentPhoneType() == TelephonyManager.PHONE_TYPE_CDMA);
     }
 
+    public static boolean isGSM(Context context) {
+        TelephonyManager tm = (TelephonyManager) context
+                .getSystemService(Context.TELEPHONY_SERVICE);
+        return (tm.getCurrentPhoneType() == TelephonyManager.PHONE_TYPE_GSM);
+    }
+
     public static boolean isCdmaLTE(Context context) {
         TelephonyManager tm = (TelephonyManager) context
                 .getSystemService(Context.TELEPHONY_SERVICE);

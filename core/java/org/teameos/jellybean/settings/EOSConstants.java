@@ -424,6 +424,16 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final String INTENT_TELEPHONY_2G3G_TOGGLE = "org.teameos.intent.action.TOGGLE_2G3G";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_TELEPHONY_2G3G_TOGGLE_KEY = "eos_intent_telephony_2g3g_mode_key";
+
+    /**
+     * @hide
+     */
     public static final String INTENT_SYSTEMUI_KILL_SERVICE = "org.teameos.intent.action.KILL_SYSTEMUI";
 
     /**
@@ -831,6 +841,11 @@ public final class EOSConstants {
      * @hide
      */
     public static final String SYSTEMUI_PANEL_LTE_TILE = "QS_LTE";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_2G3G_TILE = "QS_2G3G";
 
     /**
      * @hide

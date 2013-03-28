@@ -192,14 +192,15 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
     
-    private class LteStateObserver extends ContentObserver {
-        public LteStateObserver(Handler handler) {
+    private class NetworkStateObserver extends ContentObserver {
+        public NetworkStateObserver(Handler handler) {
             super(handler);
         }
 
         @Override
         public void onChange(boolean selfChange) {
             refreshLteTile();
+            refresh2g3gTile();
         }
         public void startObserving() {
             final ContentResolver cr = mContext.getContentResolver();
@@ -303,6 +304,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mLteCallback;
     private LteState mLteState = new LteState();
 
+    private QuickSettingsTileView m2g3gTile;
+    private RefreshCallback m2g3gCallback;
+    private State m2g3gState = new State();
+
     private QuickSettingsTileView mSyncTile;
     private RefreshCallback mSyncCallback;
     private State mSyncState = new State();
@@ -322,13 +327,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final String WIFIAP = EOSConstants.SYSTEMUI_PANEL_WIFIAP_TILE;
     private final String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
     private final String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
+    private final String TWOGEEZ = EOSConstants.SYSTEMUI_PANEL_2G3G_TILE;
     private final String BRIGHTNESS = EOSConstants.SYSTEMUI_PANEL_BRIGHTNESS_TILE;
     private final String SYNC = EOSConstants.SYSTEMUI_PANEL_SYNC_TILE;
     private final String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
     private final String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
 
     private VolumeObserver mVolumeObserver;
-    private LteStateObserver mLteObserver;
+    private NetworkStateObserver mNetworkObserver;
     private boolean mHasMobileData = false;
 
     // keep aosp constructor just in case
@@ -360,9 +366,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBugreportObserver.startObserving();
         mBrightnessObserver = new BrightnessObserver(mHandler);
         mBrightnessObserver.startObserving();
-        if (isToggleEnabled(LTE)) {
-            mLteObserver = new LteStateObserver(mHandler);
-            mLteObserver.startObserving();
+        if (isToggleEnabled(LTE) || isToggleEnabled(TWOGEEZ)) {
+            mNetworkObserver = new NetworkStateObserver(mHandler);
+            mNetworkObserver.startObserving();
         }
 
         IntentFilter alarmIntentFilter = new IntentFilter();
@@ -449,6 +455,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshLteTile();
     }
 
+    // GSM 2g only
+    void add2g3gTile(QuickSettingsTileView view, RefreshCallback cb) {
+        m2g3gTile = view;
+        m2g3gCallback = cb;
+        refresh2g3gTile();
+    }
+
     // Sync
     void addSyncTile(QuickSettingsTileView view, RefreshCallback cb) {
         mSyncTile = view;
@@ -477,6 +490,21 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 Phone.PREFERRED_NT_MODE);
         if (isToggleEnabled(LTE)) {
             mLteCallback.refreshView(mLteTile, mLteState);
+        }
+    }
+
+    void refresh2g3gTile() {
+        // keeps me from adding telephony-common
+        // default gsm mode Phone.NT_MODE_WCDMA_PREF = 0;
+        // gsm only Phone.NT_MODE_GSM_ONLY = 1;
+        final int GSM_DEFAULT = 0;
+        final int GSM_ONLY = 1;
+        int currentMode = android.provider.Settings.Secure.getInt(
+                mContext.getContentResolver(),
+                android.provider.Settings.Global.PREFERRED_NETWORK_MODE, GSM_DEFAULT);
+        m2g3gState.enabled = currentMode == GSM_ONLY ? true : false;
+        if (isToggleEnabled(TWOGEEZ)) {
+            m2g3gCallback.refreshView(m2g3gTile, m2g3gState);
         }
     }
 
