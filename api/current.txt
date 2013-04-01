@@ -13358,6 +13358,8 @@ package android.net.wifi {
     field public java.util.BitSet allowedPairwiseCiphers;
     field public java.util.BitSet allowedProtocols;
     field public boolean hiddenSSID;
+    field public boolean isIBSS;
+    field public int frequency;
     field public int networkId;
     field public java.lang.String preSharedKey;
     field public int priority;
@@ -13446,6 +13448,7 @@ package android.net.wifi {
     method public java.util.List<android.net.wifi.ScanResult> getScanResults();
     method public int getWifiState();
     method public boolean isWifiEnabled();
+    method public boolean isIbssSupported();
     method public boolean pingSupplicant();
     method public boolean reassociate();
     method public boolean reconnect();
