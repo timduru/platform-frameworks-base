@@ -438,8 +438,9 @@ class QuickSettings {
             public void onClick(View v) {
                 // TODO: Jump into the alarm application
                 Intent intent = new Intent();
+                // why is this pointing to gapps clock?
                 intent.setComponent(new ComponentName(
-                        "com.google.android.deskclock",
+                        "com.android.deskclock",
                         "com.android.deskclock.AlarmClock"));
                 startSettingsActivity(intent);
             }
