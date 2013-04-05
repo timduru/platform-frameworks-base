@@ -683,9 +683,10 @@ class QuickSettings {
     private void addSliderTile(ViewGroup parent, LayoutInflater inflater) {
         // Seekbar
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        seekbarTile.setContent(R.layout.quick_settings_tile_seekbar, inflater);
+                inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
+        seekbarTile.setIsSeekbar(true);
+        seekbarTile.setContent(R.layout.quick_settings_tile_seekbar, inflater);
 
         final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
         final ImageView ivVolume = (ImageView) seekbarTile.findViewById(R.id.sound_icon);

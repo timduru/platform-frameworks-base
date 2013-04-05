@@ -29,6 +29,7 @@ class QuickSettingsTileView extends FrameLayout {
     private int mColSpan;
     private int mRowSpan;
     private int mCellWidth;
+    private boolean mIsSeekbar;
 
     public QuickSettingsTileView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -43,6 +44,14 @@ class QuickSettingsTileView extends FrameLayout {
 
     int getColumnSpan() {
         return mColSpan;
+    }
+
+    void setIsSeekbar(boolean isSeekbar) {
+        mIsSeekbar = isSeekbar;
+    }
+
+    boolean isSeekbar() {
+        return mIsSeekbar;
     }
 
     void setContent(int layoutId, LayoutInflater inflater) {
