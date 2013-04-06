@@ -40,6 +40,10 @@ class QuickSettingsContainerView extends FrameLayout {
     // The gap between tiles in the QuickSettings grid
     private float mCellGap;
 
+    // The difference in height between normal cells
+    // and seekbar cells needed to properly measure height
+    private float mHeightDiff;
+
     // we need a context
     Context mContext;
 
@@ -63,6 +67,8 @@ class QuickSettingsContainerView extends FrameLayout {
         mNumColumns = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT,
                 EOSConstants.SYSTEMUI_PANEL_COLUMNS_DEF);
+        mHeightDiff = r.getDimension(R.dimen.quick_settings_cell_height)
+                - r.getDimension(R.dimen.quick_settings_slim_cell_height);
         requestLayout();
     }
 
@@ -79,12 +85,16 @@ class QuickSettingsContainerView extends FrameLayout {
         int N = getChildCount();
         int cellHeight = 0;
         int cursor = 0;
+        int numSeekbars = 0;
         for (int i = 0; i < N; ++i) {
             // Update the child's width
             QuickSettingsTileView v = (QuickSettingsTileView) getChildAt(i);
             if (v.getVisibility() != View.GONE) {
                 ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v
                         .getLayoutParams();
+                if (v.isSeekbar()) {
+                    numSeekbars += 1;
+                }
                 int colSpan = v.getColumnSpan();
                 lp.width = (int) ((colSpan * cellWidth) + (colSpan - 1) * mCellGap);
 
@@ -94,7 +104,7 @@ class QuickSettingsContainerView extends FrameLayout {
                 v.measure(newWidthSpec, newHeightSpec);
 
                 // Save the cell height
-                if (cellHeight <= 0) {
+                if (cellHeight <= 0 && !v.isSeekbar()) {
                     cellHeight = v.getMeasuredHeight();
                 }
                 cursor += colSpan;
@@ -105,8 +115,11 @@ class QuickSettingsContainerView extends FrameLayout {
         // to the height of
         // all the tiles.
         int numRows = (int) Math.ceil((float) cursor / mNumColumns);
+        // compensate for seekbar height variance
+        // then shave the difference from newHeight
+        int seekbarDiff = (int) Math.ceil((numSeekbars * mHeightDiff) - mCellGap);
         int newHeight = (int) ((numRows * cellHeight) + ((numRows - 1) * mCellGap)) +
-                getPaddingTop() + getPaddingBottom();
+                getPaddingTop() + getPaddingBottom() - seekbarDiff;
         setMeasuredDimension(width, newHeight);
     }
 
