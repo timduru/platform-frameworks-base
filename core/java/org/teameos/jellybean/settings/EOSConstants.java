@@ -775,6 +775,16 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final String SYSTEMUI_PANEL_BRIGHT_SEEKBAR_TILE = "QS_Bright_Seekbar";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_VOL_SEEKBAR_TILE = "QS_Vol_Seekbar";
+
+    /**
+     * @hide
+     */
     public static final String SYSTEMUI_PANEL_BRIGHTNESS_TILE = "QS_Brightness";
     
     /**

@@ -236,6 +236,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mSeekbarCallback;
     private State mSeekbarState = new State();
 
+    private QuickSettingsTileView mVolSeekbarTile;
+    private RefreshCallback mVolSeekbarCallback;
+    private State mVolSeekbarState = new State();
+
+    private QuickSettingsTileView mBrightSeekbarTile;
+    private RefreshCallback mBrightSeekbarCallback;
+    private State mBrightSeekbarState = new State();
+
     private QuickSettingsTileView mScreenTile;
     private RefreshCallback mScreenCallback;
     private State mScreenState = new State();
@@ -315,6 +323,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final String AVATAR = EOSConstants.SYSTEMUI_PANEL_USER_TILE;
     private final String SETTINGS = EOSConstants.SYSTEMUI_PANEL_SETTINGS_TILE;
     private final String SEEKBAR = EOSConstants.SYSTEMUI_PANEL_SEEKBAR_TILE;
+    private final String BRIGHT_SEEKBAR = EOSConstants.SYSTEMUI_PANEL_BRIGHT_SEEKBAR_TILE;
+    private final String VOL_SEEKBAR = EOSConstants.SYSTEMUI_PANEL_VOL_SEEKBAR_TILE;
     private final String BATTERY = EOSConstants.SYSTEMUI_PANEL_BATTERY_TILE;
     private final String ROTATION = EOSConstants.SYSTEMUI_PANEL_ROTATION_TILE;
     private final String AIRPLANE = EOSConstants.SYSTEMUI_PANEL_AIRPLANE_TILE;
@@ -439,6 +449,20 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mSeekbarTile = view;
         mSeekbarCallback = cb;
         mSeekbarCallback.refreshView(mSeekbarTile, mSeekbarState);
+    }
+
+    // Seekbar
+    void addVolSeekbarTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mVolSeekbarTile = view;
+        mVolSeekbarCallback = cb;
+        mVolSeekbarCallback.refreshView(mVolSeekbarTile, mVolSeekbarState);
+    }
+
+    // Seekbar
+    void addBrightSeekbarTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mBrightSeekbarTile = view;
+        mBrightSeekbarCallback = cb;
+        mBrightSeekbarCallback.refreshView(mBrightSeekbarTile, mBrightSeekbarState);
     }
 
     // Screen
@@ -975,6 +999,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mSeekbarCallback.refreshView(mSeekbarTile, mSeekbarState);
         }
 
+        if (isToggleEnabled(BRIGHT_SEEKBAR)) {
+            mBrightSeekbarCallback.refreshView(mBrightSeekbarTile, mBrightSeekbarState);
+        }
+
         if (isToggleEnabled(BRIGHTNESS)) {
             Resources r = mContext.getResources();
             int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
@@ -1049,6 +1077,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                     mContext.getContentResolver().registerContentObserver(
                             volumeStreamUri(QuickSettings.mVolumeStream), true, mVolumeObserver);
                 }
+                if (isToggleEnabled(VOL_SEEKBAR)) {
+                    mVolSeekbarCallback.refreshView(mVolSeekbarTile, mVolSeekbarState);
+                    mContext.getContentResolver().unregisterContentObserver(mVolumeObserver);
+                    mContext.getContentResolver().registerContentObserver(
+                            volumeStreamUri(QuickSettings.mVolumeStream), true, mVolumeObserver);
+                }
             }
         }
     };
@@ -1068,6 +1102,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             super.onChange(selfChange);
             if (isToggleEnabled(SEEKBAR)) {
                 mSeekbarCallback.refreshView(mSeekbarTile, mSeekbarState);
+            }
+            if (isToggleEnabled(VOL_SEEKBAR)) {
+                mVolSeekbarCallback.refreshView(mVolSeekbarTile, mVolSeekbarState);
             }
         }
     }

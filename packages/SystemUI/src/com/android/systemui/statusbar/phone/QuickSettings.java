@@ -148,6 +148,8 @@ class QuickSettings {
     private final String AVATAR = EOSConstants.SYSTEMUI_PANEL_USER_TILE;
     private final String SETTINGS = EOSConstants.SYSTEMUI_PANEL_SETTINGS_TILE;
     private final String SEEKBAR = EOSConstants.SYSTEMUI_PANEL_SEEKBAR_TILE;
+    private final String BRIGHT_SEEKBAR = EOSConstants.SYSTEMUI_PANEL_BRIGHT_SEEKBAR_TILE;
+    private final String VOL_SEEKBAR = EOSConstants.SYSTEMUI_PANEL_VOL_SEEKBAR_TILE;
     private final String BATTERY = EOSConstants.SYSTEMUI_PANEL_BATTERY_TILE;
     private final String ROTATION = EOSConstants.SYSTEMUI_PANEL_ROTATION_TILE;
     private final String AIRPLANE = EOSConstants.SYSTEMUI_PANEL_AIRPLANE_TILE;
@@ -332,9 +334,8 @@ class QuickSettings {
         // temporary ones)
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mUserEnabled = mModel.isToggleEnabled(AVATAR);
-        if (mModel.isToggleEnabled(SEEKBAR)) {
-            addSliderTile(mContainerView, inflater);
-        }
+
+        addSeekbarTiles(mContainerView, inflater);
         addSystemTiles(mContainerView, inflater);
         addTemporaryTiles(mContainerView, inflater);
 
@@ -426,6 +427,19 @@ class QuickSettings {
         List<String> mTilesOrderedList = getTilesOrderedList();
         for (String tile : mTilesOrderedList) {
             loadTile(tile, parent, inflater);
+        }
+    }
+
+    private void addSeekbarTiles(ViewGroup parent, LayoutInflater inflater) {
+        List<String> mTilesOrderedList = getTilesOrderedList();
+        for (String tile : mTilesOrderedList) {
+            if (tile.equals(SEEKBAR)) {
+                addSliderTile(mContainerView, inflater);
+            } else if (tile.equals(VOL_SEEKBAR)) {
+                addVolSliderTile(mContainerView, inflater);
+            } else if (tile.equals(BRIGHT_SEEKBAR)) {
+                addBrightSliderTile(mContainerView, inflater);
+            }
         }
     }
 
@@ -676,6 +690,154 @@ class QuickSettings {
         }
     }
 
+    private void addVolSliderTile(ViewGroup parent, LayoutInflater inflater) {
+        // Seekbar
+        QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
+        seekbarTile.setColumnSpan(mSeekbarSpan);
+        seekbarTile.setIsSeekbar(true);
+        seekbarTile.setContent(R.layout.quick_settings_tile_vol_seekbar, inflater);
+
+        final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
+        final ImageView ivVolume = (ImageView) seekbarTile.findViewById(R.id.sound_icon);
+
+        final AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+
+        mModel.addVolSeekbarTile(seekbarTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView view, State state) {
+                sbVolume.setMax(am.getStreamMaxVolume(mVolumeStream));
+                sbVolume.setProgress(am.getStreamVolume(mVolumeStream));
+                if (mVolumeStream == AudioManager.STREAM_MUSIC) {
+                    ivVolume.setImageResource(com.android.internal.R.drawable.ic_audio_vol);
+                } else {
+                    ivVolume.setImageResource(com.android.internal.R.drawable.ic_audio_ring_notif);
+                }
+            }
+        });
+        parent.addView(seekbarTile);
+
+        ivVolume.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mVolumeStream == AudioManager.STREAM_RING) {
+                    mVolumeStream = AudioManager.STREAM_MUSIC;
+                    ivVolume.setImageResource(com.android.internal.R.drawable.ic_audio_vol);
+                } else {
+                    mVolumeStream = AudioManager.STREAM_RING;
+                    ivVolume.setImageResource(com.android.internal.R.drawable.ic_audio_ring_notif);
+                }
+                mContext.sendBroadcast(new Intent(INTENT_UPDATE_VOLUME_OBSERVER_STREAM));
+            }
+        });
+
+        sbVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    am.setStreamVolume(mVolumeStream, progress, 0);
+                } else {
+                    sbVolume.setProgress(am.getStreamVolume(mVolumeStream));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+    }
+
+    private void addBrightSliderTile(ViewGroup parent, LayoutInflater inflater) {
+        // Seekbar
+        QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
+        seekbarTile.setColumnSpan(mSeekbarSpan);
+        seekbarTile.setIsSeekbar(true);
+        seekbarTile.setContent(R.layout.quick_settings_tile_bright_seekbar, inflater);
+
+        final SeekBar sbBrightness = (SeekBar) seekbarTile.findViewById(R.id.brightness_seekbar);
+        final CheckBox cbBrightness = (CheckBox) seekbarTile.findViewById(R.id.brightness_switch);
+
+        cbBrightness.setBackgroundResource(R.drawable.status_bar_toggle_button);
+
+        final IPowerManager ipm = IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
+        final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        final int min = pm.getMinimumScreenBrightnessSetting();
+        final int max = pm.getMaximumScreenBrightnessSetting();
+
+        mModel.addBrightSeekbarTile(seekbarTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView view, State state) {
+                int automatic = 0;
+                int value = max;
+                try {
+                    automatic = Settings.System.getInt(mContext.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS_MODE);
+                    value = Settings.System.getInt(mContext.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS);
+                } catch (Exception e) {
+                }
+
+                cbBrightness.setChecked(automatic == 1);
+
+                sbBrightness.setMax(max - min);
+                sbBrightness.setProgress(value - min);
+            }
+        });
+        parent.addView(seekbarTile);
+
+        cbBrightness.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                try {
+                    if (isChecked) {
+                        Settings.System.putInt(mContext.getContentResolver(),
+                                Settings.System.SCREEN_BRIGHTNESS_MODE, 1);
+                    } else {
+                        Settings.System.putInt(mContext.getContentResolver(),
+                                Settings.System.SCREEN_BRIGHTNESS_MODE, 0);
+                        // restore value set by user
+                        int progress = sbBrightness.getProgress();
+                        ipm.setTemporaryScreenBrightnessSettingOverride(progress + min);
+                        Settings.System.putInt(mContext.getContentResolver(),
+                                Settings.System.SCREEN_BRIGHTNESS, progress + min);
+                    }
+                } catch (Exception e) {
+                }
+            }
+        });
+
+        sbBrightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                try {
+                    // disable autobright if enabled first
+                    if (cbBrightness.isChecked()) {
+                        Settings.System.putInt(mContext.getContentResolver(),
+                                Settings.System.SCREEN_BRIGHTNESS_MODE, 0);
+                        cbBrightness.setChecked(false);
+                    }
+                    ipm.setTemporaryScreenBrightnessSettingOverride(progress + min);
+                    Settings.System.putInt(mContext.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS, progress + min);
+                } catch (Exception e) {
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+    }
+
     private void addSliderTile(ViewGroup parent, LayoutInflater inflater) {
         // Seekbar
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
@@ -689,7 +851,7 @@ class QuickSettings {
         final SeekBar sbBrightness = (SeekBar) seekbarTile.findViewById(R.id.brightness_seekbar);
         final CheckBox cbBrightness = (CheckBox) seekbarTile.findViewById(R.id.brightness_switch);     
 
-        cbBrightness.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.status_bar_toggle_button));
+        cbBrightness.setBackgroundResource(R.drawable.status_bar_toggle_button);
         
         final AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         final IPowerManager ipm = IPowerManager.Stub.asInterface(ServiceManager.getService("power"));

@@ -115,7 +115,9 @@ class QuickSettingsContainerView extends FrameLayout {
         // to the height of
         // all the tiles.
         int numRows = (int) Math.ceil((float) cursor / mNumColumns);
-        int seekbarDiff = (int) Math.ceil(numSeekbars * mHeightDiff);
+        // compensate for seekbar height variance
+        // then shave the difference from newHeight
+        int seekbarDiff = (int) Math.ceil((numSeekbars * mHeightDiff) - mCellGap);
         int newHeight = (int) ((numRows * cellHeight) + ((numRows - 1) * mCellGap)) +
                 getPaddingTop() + getPaddingBottom() - seekbarDiff;
         setMeasuredDimension(width, newHeight);
