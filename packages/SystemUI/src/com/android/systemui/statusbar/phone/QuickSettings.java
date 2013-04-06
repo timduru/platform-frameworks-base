@@ -44,6 +44,7 @@ import android.app.StatusBarManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -158,6 +159,8 @@ class QuickSettings {
     private final String WIFIAP = EOSConstants.SYSTEMUI_PANEL_WIFIAP_TILE;
     private final String TORCH = EOSConstants.SYSTEMUI_PANEL_TORCH_TILE;
     private final String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
+    private final String TWOGEEZ = EOSConstants.SYSTEMUI_PANEL_2G3G_TILE;
+    private final String SYNC = EOSConstants.SYSTEMUI_PANEL_SYNC_TILE;
     private final String BRIGHTNESS = EOSConstants.SYSTEMUI_PANEL_BRIGHTNESS_TILE;
     private final String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
     private final String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
@@ -948,6 +951,90 @@ class QuickSettings {
                 }
             });
             parent.addView(lteTile);
+        } else if (tile.equals(TWOGEEZ)) {
+            QuickSettingsTileView twoGeezTile = (QuickSettingsTileView)
+                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+            twoGeezTile.setContent(R.layout.quick_settings_tile_2g3g, inflater);
+            twoGeezTile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // keeps me from adding telephony-common
+                    // default gsm mode Phone.NT_MODE_WCDMA_PREF = 0;
+                    // gsm only Phone.NT_MODE_GSM_ONLY = 1;
+                    final int GSM_DEFAULT = 0;
+                    final int GSM_ONLY = 1;
+                    int currentMode = android.provider.Settings.Secure.getInt(
+                            mContext.getContentResolver(),
+                            android.provider.Settings.Global.PREFERRED_NETWORK_MODE, GSM_DEFAULT);
+                    int newMode = (currentMode == GSM_DEFAULT ? GSM_ONLY : GSM_DEFAULT);
+                    Intent intent = new Intent(EOSConstants.INTENT_TELEPHONY_2G3G_TOGGLE);
+                    intent.putExtra(EOSConstants.INTENT_TELEPHONY_2G3G_TOGGLE_KEY, newMode);
+                    mContext.sendBroadcast(intent);
+                }
+            });
+            twoGeezTile.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Intent intent = new Intent("com.android.phone.MobileNetworkSettings");
+                    intent.addCategory(Intent.ACTION_MAIN);
+                    intent.setClassName("com.android.phone", "com.android.phone.MobileNetworkSettings");
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(intent);
+                    StatusBarManager statusbar = (StatusBarManager) mContext.getSystemService("statusbar");
+                    statusbar.collapsePanels();
+                    return true;
+                }
+            });
+            mModel.add2g3gTile(twoGeezTile, new QuickSettingsModel.RefreshCallback() {
+                @Override
+                public void refreshView(QuickSettingsTileView view, State state) {
+                    final int GSM_DEFAULT = 0;
+                    final int GSM_ONLY = 1;
+                    int newMode = state.enabled ? GSM_ONLY : GSM_DEFAULT;
+                    TextView tv = (TextView) view.findViewById(R.id.twogeez_textview);
+                    ImageView iv = (ImageView) view.findViewById(R.id.twogeez_image);
+                    int stringRes = (state.enabled ? R.string.quick_settings_2g_on_label : R.string.quick_settings_2g_off_label);
+                    int iconRes = (state.enabled ? R.drawable.ic_qs_2g_on : R.drawable.ic_qs_2g_off);
+                    iv.setImageResource(iconRes);
+                    tv.setText(stringRes);
+                }
+            });
+            parent.addView(twoGeezTile);
+        } else if (tile.equals(SYNC)) {
+            QuickSettingsTileView syncTile = (QuickSettingsTileView)
+                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+            syncTile.setContent(R.layout.quick_settings_tile_sync, inflater);
+            syncTile.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    final boolean isSyncEnabled = ContentResolver.getMasterSyncAutomatically();
+                    ContentResolver.setMasterSyncAutomatically(!isSyncEnabled);
+                    mModel.refreshSyncTile();
+
+                }
+            });
+            syncTile.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    startSettingsActivity(android.provider.Settings.ACTION_SYNC_SETTINGS);
+                    return true;
+                }
+            });
+            mModel.addSyncTile(syncTile, new QuickSettingsModel.RefreshCallback() {
+                @Override
+                public void refreshView(QuickSettingsTileView view, State state) {
+                    TextView syncText = (TextView) view.findViewById(R.id.sync_textview);
+                    ImageView syncImage = (ImageView) view.findViewById(R.id.sync_image);
+                    syncText.setText(mContext
+                            .getString((state.enabled) ? R.string.quick_settings_sync_on_label
+                                    : R.string.quick_settings_sync_off_label));
+                    syncImage.setImageResource((state.enabled) ? R.drawable.ic_qs_sync_on
+                            : R.drawable.ic_qs_sync_off);
+
+                }
+            });
+            parent.addView(syncTile);
         } else if (tile.equals(BATTERY)) {
             // Battery
             QuickSettingsTileView batteryTile = (QuickSettingsTileView)

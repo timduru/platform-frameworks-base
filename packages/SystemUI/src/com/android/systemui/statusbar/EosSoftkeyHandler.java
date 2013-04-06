@@ -41,7 +41,7 @@ public class EosSoftkeyHandler {
         static final int RECENT_KEY_LOCATION = 2;
         static final int MENU_KEY_LOCATION = 3;
 
-        private ArrayList<SoftKeyObject> mSoftKeyObjects = new ArrayList<SoftKeyObject>();
+        private ArrayList<SoftKeyObject> mSoftKeyObjects;
 
         // handler messages
         private int MSG_SOFTKEY_LONGPRESS_ENABLED_SETTINGS;
@@ -58,7 +58,7 @@ public class EosSoftkeyHandler {
             mResolver = context.getContentResolver();
             mNavigationBarView = parent;
             registerUriList();
-            initSoftkeys();
+            handleSoftkeyLongpressChange();
         }
 
         private void registerUriList() {
@@ -76,17 +76,8 @@ public class EosSoftkeyHandler {
             MSG_SOFTKEY_LONGPRESS_MENU_SETTINGS = EosObserverHandler.getEosObserverHandler()
                     .registerUri(EOSConstants.SYSTEMUI_SOFTKEY_MENU);
             EosObserverHandler.getEosObserverHandler()
-                    .setOnFeatureStateChangedListener((OnFeatureStateChangedListener) EosSoftkeys.this);
-        }
-
-        private void loadBackKey(ArrayList<View> parent) {
-            SoftKeyObject back = new SoftKeyObject();
-            back.setSoftKey(BACK_KEY,
-                    BACK_KEY_LOCATION,
-                    EOSConstants.SYSTEMUI_SOFTKEY_BACK,
-                    new SoftkeyLongClickListener(BACK_KEY_LOCATION),
-                    parent);
-            mSoftKeyObjects.add(back);
+                    .setOnFeatureStateChangedListener(
+                            (OnFeatureStateChangedListener) EosSoftkeys.this);
         }
 
         private void loadHomeKey(ArrayList<View> parent) {
@@ -99,7 +90,28 @@ public class EosSoftkeyHandler {
             mSoftKeyObjects.add(home);
         }
 
-        private void loadRecentKey(ArrayList<View> parent) {
+        private void loadSoftkeyActions() {
+            if (mActions == null)
+                mActions = new ArrayList<String>(3);
+            else
+                mActions.clear();
+            if (mSoftKeyObjects == null)
+                mSoftKeyObjects = new ArrayList<SoftKeyObject>(3);
+            else
+                mSoftKeyObjects.clear();
+
+            ArrayList<View> parent = new ArrayList<View>();
+            parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_90));
+            parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_0));
+
+            SoftKeyObject back = new SoftKeyObject();
+            back.setSoftKey(BACK_KEY,
+                    BACK_KEY_LOCATION,
+                    EOSConstants.SYSTEMUI_SOFTKEY_BACK,
+                    new SoftkeyLongClickListener(BACK_KEY_LOCATION),
+                    parent);
+            mSoftKeyObjects.add(back);
+
             SoftKeyObject recent = new SoftKeyObject();
             recent.setSoftKey(RECENT_KEY,
                     RECENT_KEY_LOCATION,
@@ -107,9 +119,7 @@ public class EosSoftkeyHandler {
                     new SoftkeyLongClickListener(RECENT_KEY_LOCATION),
                     parent);
             mSoftKeyObjects.add(recent);
-        }
 
-        private void loadMenuKey(ArrayList<View> parent) {
             SoftKeyObject menu = new SoftKeyObject();
             menu.setSoftKey(MENU_KEY,
                     MENU_KEY_LOCATION,
@@ -117,13 +127,7 @@ public class EosSoftkeyHandler {
                     new SoftkeyLongClickListener(MENU_KEY_LOCATION),
                     parent);
             mSoftKeyObjects.add(menu);
-        }
 
-        private void loadSoftkeyActions() {
-            if (mActions == null)
-                mActions = new ArrayList<String>();
-            else
-                mActions.clear();
             String[] actions = new String[4];
             for (SoftKeyObject s : mSoftKeyObjects) {
                 actions[s.mPosition] = Settings.System.getString(mResolver, s.mUri);
@@ -133,21 +137,17 @@ public class EosSoftkeyHandler {
         }
 
         private void unloadSoftkeyActions() {
-            for (SoftKeyObject s : mSoftKeyObjects) {
-                s.unloadListener();
+            if (mSoftKeyObjects != null) {
+                for (SoftKeyObject s : mSoftKeyObjects) {
+                    s.unloadListener();
+                }
+                mSoftKeyObjects.clear();
+                mSoftKeyObjects = null;
             }
-        }
-
-        private void initSoftkeys() {
-            // softkey objects only need to the the parent view
-            ArrayList<View> parent = new ArrayList<View>();
-            parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_90));
-            parent.add(mNavigationBarView.findViewById(NAVBAR_ROT_0));
-            loadBackKey(parent);
-            // loadHomeKey(parent);
-            loadRecentKey(parent);
-            loadMenuKey(parent);
-            handleSoftkeyLongpressChange();
+            if (mActions != null) {
+                mActions.clear();
+                mActions = null;
+            }
         }
 
         private void handleSoftkeyLongpressChange() {

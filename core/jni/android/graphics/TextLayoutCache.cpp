@@ -144,7 +144,7 @@ sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
                     "This indicates that the cache already has an entry with the "
                     "same key but it should not since we checked earlier!"
                     " - start = %d, count = %d, contextCount = %d - Text = '%s'",
-                    start, count, contextCount, String8(key.getText() + start, count).string());
+                    start, count, contextCount, String8((const char16_t*)text + start, count).string());
 
             if (mDebugEnabled) {
                 nsecs_t totalTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
@@ -155,7 +155,7 @@ sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
                         value.get(), start, count, contextCount, size, mMaxSize - mSize,
                         value->getElapsedTime() * 0.000001f,
                         (totalTime - value->getElapsedTime()) * 0.000001f,
-                        String8(key.getText() + start, count).string());
+                        String8((char16_t*)text + start, count).string());
             }
         } else {
             if (mDebugEnabled) {
@@ -165,7 +165,7 @@ sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
                         " - Compute time %0.6f ms - Text = '%s'",
                         start, count, contextCount, size, mMaxSize - mSize,
                         value->getElapsedTime() * 0.000001f,
-                        String8(key.getText() + start, count).string());
+                        String8((char16_t*)text + start, count).string());
             }
         }
     } else {
@@ -185,7 +185,7 @@ sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
                         value->getElapsedTime() * 0.000001f,
                         elapsedTimeThruCacheGet * 0.000001f,
                         deltaPercent,
-                        String8(key.getText() + start, count).string());
+                        String8((char16_t*)text + start, count).string());
             }
             if (mCacheHitCount % DEFAULT_DUMP_STATS_CACHE_HIT_INTERVAL == 0) {
                 dumpCacheStats();
@@ -420,7 +420,7 @@ void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
                     } else if (!U_SUCCESS(status) || rc < 1) {
                         ALOGW("Need to force to single run -- string = '%s',"
                                 " status = %d, rc = %d",
-                                String8(chars + start, count).string(), status, int(rc));
+                                String8((const char16_t*)chars + start, count).string(), status, int(rc));
                         isRTL = (paraDir == 1);
                         useSingleRun = true;
                     } else {
@@ -945,7 +945,7 @@ sp<TextLayoutValue> TextLayoutEngine::getValue(const SkPaint* paint, const jchar
             contextCount, dirFlags);
     if (value == NULL) {
         ALOGE("Cannot get TextLayoutCache value for text = '%s'",
-                String8(text + start, count).string());
+                String8((const char16_t*)text + start, count).string());
     }
 #else
     value = new TextLayoutValue(count);

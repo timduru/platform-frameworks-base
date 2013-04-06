@@ -424,6 +424,16 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final String INTENT_TELEPHONY_2G3G_TOGGLE = "org.teameos.intent.action.TOGGLE_2G3G";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_TELEPHONY_2G3G_TOGGLE_KEY = "eos_intent_telephony_2g3g_mode_key";
+
+    /**
+     * @hide
+     */
     public static final String INTENT_SYSTEMUI_KILL_SERVICE = "org.teameos.intent.action.KILL_SYSTEMUI";
 
     /**
@@ -684,6 +694,20 @@ public final class EOSConstants {
     public static final String SYSTEMUI_NAVRING_3 = "eos_systemui_navring_3";
 
     /**
+     * if action is launched from glow ring or lockring while insecure lockscreen is on
+     * we forward the intent to PhoneWindowManager and let it handle
+     * Keyguard security
+     * @hide
+     */
+    public static final String SYSTEMUI_KEYGUARD_INTENT_KEY = "eos_systemui_keyguard_intent_key";
+
+    /**
+     * key for actual intent sent to PhoneWindowManager
+     * @hide
+     */
+    public static final String SYSTEMUI_KEYGUARD_INTENT_REQUEST = "eos_systemui_keyguard_intent_key";
+
+    /**
      * @hide
      */
     public static final String SYSTEMUI_TASK_ASSIST = "assist";
@@ -817,6 +841,16 @@ public final class EOSConstants {
      * @hide
      */
     public static final String SYSTEMUI_PANEL_LTE_TILE = "QS_LTE";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_2G3G_TILE = "QS_2G3G";
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PANEL_SYNC_TILE = "QS_Sync";
 
     /**
      * @hide
