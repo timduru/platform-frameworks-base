@@ -718,13 +718,8 @@ class QuickSettings {
                 } catch (Exception e) {
                 }
 
-                if (automatic == 1) {
-                    cbBrightness.setChecked(true);
-                    sbBrightness.setEnabled(false);
-                } else {
-                    cbBrightness.setChecked(false);
-                    sbBrightness.setEnabled(true);
-                }
+                cbBrightness.setChecked(automatic == 1);
+
                 sbBrightness.setMax(max - min);
                 sbBrightness.setProgress(value - min);
             }
@@ -771,11 +766,14 @@ class QuickSettings {
                     if (isChecked) {
                         Settings.System.putInt(mContext.getContentResolver(),
                                 Settings.System.SCREEN_BRIGHTNESS_MODE, 1);
-                        sbBrightness.setEnabled(false);
                     } else {
                         Settings.System.putInt(mContext.getContentResolver(),
                                 Settings.System.SCREEN_BRIGHTNESS_MODE, 0);
-                        sbBrightness.setEnabled(true);
+                        // restore value set by user
+                        int progress = sbBrightness.getProgress();
+                        ipm.setTemporaryScreenBrightnessSettingOverride(progress + min);
+                        Settings.System.putInt(mContext.getContentResolver(),
+                                Settings.System.SCREEN_BRIGHTNESS, progress + min);
                     }
                 } catch (Exception e) {
                 }
@@ -786,6 +784,12 @@ class QuickSettings {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 try {
+                    // disable autobright if enabled first
+                    if (cbBrightness.isChecked()) {
+                        Settings.System.putInt(mContext.getContentResolver(),
+                                Settings.System.SCREEN_BRIGHTNESS_MODE, 0);
+                        cbBrightness.setChecked(false);
+                    }
                     ipm.setTemporaryScreenBrightnessSettingOverride(progress + min);
                     Settings.System.putInt(mContext.getContentResolver(),
                             Settings.System.SCREEN_BRIGHTNESS, progress + min);
