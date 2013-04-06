@@ -78,6 +78,7 @@ import android.os.SystemClock;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.location.LocationManager;
+import android.provider.AlarmClock;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Profile;
@@ -436,15 +437,10 @@ class QuickSettings {
         alarmTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Jump into the alarm application
-                Intent intent = new Intent();
-                // why is this pointing to gapps clock?
-                intent.setComponent(new ComponentName(
-                        "com.android.deskclock",
-                        "com.android.deskclock.AlarmClock"));
-                startSettingsActivity(intent);
+                startSettingsActivity(new Intent(AlarmClock.ACTION_SET_ALARM));
             }
         });
+
         mModel.addAlarmTile(alarmTile, new QuickSettingsModel.RefreshCallback() {
             @Override
             public void refreshView(QuickSettingsTileView view, State alarmState) {
