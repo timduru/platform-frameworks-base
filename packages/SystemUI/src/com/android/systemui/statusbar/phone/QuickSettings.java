@@ -1326,6 +1326,7 @@ class QuickSettings {
                     ConnectivityManager cm = (ConnectivityManager) mContext
                             .getSystemService(Context.CONNECTIVITY_SERVICE);
                     cm.setMobileDataEnabled(!cm.getMobileDataEnabled());
+                    mModel.refreshRSSI();
                 }
             });
             rssiTile.setOnLongClickListener(new View.OnLongClickListener() {
@@ -1354,19 +1355,12 @@ class QuickSettings {
                     } else {
                         iov.setImageDrawable(null);
                     }
-                    tv.setText(state.label);
                     view.setContentDescription(mContext.getResources().getString(
                             R.string.accessibility_quick_settings_mobile,
                             rssiState.signalContentDescription, rssiState.dataContentDescription,
                             state.label));
 
-                    if (Settings.Global.getInt(mContext.getContentResolver(),
-                            Settings.Global.MOBILE_DATA, 0) == 1) {
-                        tv.setTextColor(mContext.getResources().getColor(
-                                com.android.internal.R.color.holo_blue_light));
-                    } else {
-                        tv.setTextColor(Color.parseColor("#CCCCCC"));
-                    }
+                    tv.setText(rssiState.enabledByUser ? state.label : "Disabled");
                 }
             });
             parent.addView(rssiTile);
