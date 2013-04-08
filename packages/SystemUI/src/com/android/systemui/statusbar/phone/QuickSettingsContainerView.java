@@ -85,15 +85,19 @@ class QuickSettingsContainerView extends FrameLayout {
         int N = getChildCount();
         int cellHeight = 0;
         int cursor = 0;
-        int numSeekbars = 0;
+        int numCustomRows = 0;
+        float customHeight = 0;
         for (int i = 0; i < N; ++i) {
             // Update the child's width
             QuickSettingsTileView v = (QuickSettingsTileView) getChildAt(i);
+            boolean isCustomHeight = false;
             if (v.getVisibility() != View.GONE) {
                 ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v
                         .getLayoutParams();
-                if (v.isSeekbar()) {
-                    numSeekbars += 1;
+                if (v.getCustomHeight() > 0) {
+                    customHeight += v.getCustomHeight();
+                    numCustomRows += 1;
+                    isCustomHeight = true;
                 }
                 int colSpan = v.getColumnSpan();
                 lp.width = (int) ((colSpan * cellWidth) + (colSpan - 1) * mCellGap);
@@ -104,7 +108,8 @@ class QuickSettingsContainerView extends FrameLayout {
                 v.measure(newWidthSpec, newHeightSpec);
 
                 // Save the cell height
-                if (cellHeight <= 0 && !v.isSeekbar()) {
+                // When this value is registered, it must be the height of a normal tile
+                if (cellHeight <= 0 && !isCustomHeight) {
                     cellHeight = v.getMeasuredHeight();
                 }
                 cursor += colSpan;
@@ -117,7 +122,7 @@ class QuickSettingsContainerView extends FrameLayout {
         int numRows = (int) Math.ceil((float) cursor / mNumColumns);
         // compensate for seekbar height variance
         // then shave the difference from newHeight
-        int seekbarDiff = (int) Math.ceil((numSeekbars * mHeightDiff) - mCellGap);
+        int seekbarDiff = (int) Math.ceil((numCustomRows * cellHeight) - customHeight - mCellGap);
         int newHeight = (int) ((numRows * cellHeight) + ((numRows - 1) * mCellGap)) +
                 getPaddingTop() + getPaddingBottom() - seekbarDiff;
         setMeasuredDimension(width, newHeight);

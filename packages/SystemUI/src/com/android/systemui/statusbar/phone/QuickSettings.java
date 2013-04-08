@@ -693,9 +693,10 @@ class QuickSettings {
     private void addVolSliderTile(ViewGroup parent, LayoutInflater inflater) {
         // Seekbar
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
+                inflater.inflate(R.layout.quick_settings_tile_more_slim, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setIsSeekbar(true);
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(
+                R.dimen.quick_settings_more_slim_cell_height));
         seekbarTile.setContent(R.layout.quick_settings_tile_vol_seekbar, inflater);
 
         final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
@@ -754,9 +755,10 @@ class QuickSettings {
     private void addBrightSliderTile(ViewGroup parent, LayoutInflater inflater) {
         // Seekbar
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
+                inflater.inflate(R.layout.quick_settings_tile_more_slim, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setIsSeekbar(true);
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(
+                R.dimen.quick_settings_more_slim_cell_height));
         seekbarTile.setContent(R.layout.quick_settings_tile_bright_seekbar, inflater);
 
         final SeekBar sbBrightness = (SeekBar) seekbarTile.findViewById(R.id.brightness_seekbar);
@@ -843,7 +845,8 @@ class QuickSettings {
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setIsSeekbar(true);
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(
+                R.dimen.quick_settings_slim_cell_height));
         seekbarTile.setContent(R.layout.quick_settings_tile_seekbar, inflater);
 
         final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);

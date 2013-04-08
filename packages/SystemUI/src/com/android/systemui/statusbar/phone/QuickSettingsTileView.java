@@ -29,7 +29,7 @@ class QuickSettingsTileView extends FrameLayout {
     private int mColSpan;
     private int mRowSpan;
     private int mCellWidth;
-    private boolean mIsSeekbar;
+    private float mCustomHeight;
 
     public QuickSettingsTileView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -46,12 +46,12 @@ class QuickSettingsTileView extends FrameLayout {
         return mColSpan;
     }
 
-    void setIsSeekbar(boolean isSeekbar) {
-        mIsSeekbar = isSeekbar;
+    void setCustomHeight(float height) {
+        mCustomHeight = height;
     }
 
-    boolean isSeekbar() {
-        return mIsSeekbar;
+    float getCustomHeight() {
+        return mCustomHeight;
     }
 
     void setContent(int layoutId, LayoutInflater inflater) {

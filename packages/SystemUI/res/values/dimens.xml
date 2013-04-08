@@ -200,7 +200,10 @@
     <dimen name="quick_settings_cell_height">110dp</dimen>
 
         <!-- height for seekbar tiles -->
-    <dimen name="quick_settings_slim_cell_height">80dp</dimen>
+    <dimen name="quick_settings_slim_cell_height">82dp</dimen>
+
+    <!-- height for paging seekbar tile -->
+    <dimen name="quick_settings_more_slim_cell_height">55dp</dimen>
 
     <!-- The padding between each tile within the QuickSettings layout -->
     <dimen name="quick_settings_cell_gap">4dp</dimen>
