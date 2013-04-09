@@ -54,7 +54,6 @@ public class EthernetStateMachine extends StateMachine {
     private State mIPConnectedState = new IPConnectedState();
     private State mDisconnectingState = new DisconnectingState();
     private INetworkManagementService mNetd;
-    private boolean mInterfaceGone = false;
 
     public EthernetStateMachine(Context context, String ifaceName, String hwAddr) {
         super(TAG);
@@ -96,12 +95,10 @@ public class EthernetStateMachine extends StateMachine {
     private void sendInterfaceStateChangedBroadcast() {
         if (DBG) Slog.d(TAG, "Sending INTERFACE_STATE_CHANGED_ACTION for "
                 + mEthernetInfo.getName());
-        if (!mInterfaceGone) {
-            Intent intent = new Intent(EthernetManager.INTERFACE_STATE_CHANGED_ACTION);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            intent.putExtra(EthernetManager.EXTRA_ETHERNET_INFO, new EthernetInfo(mEthernetInfo));
-            mContext.sendBroadcast(intent);
-        }
+        Intent intent = new Intent(EthernetManager.INTERFACE_STATE_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(EthernetManager.EXTRA_ETHERNET_INFO, new EthernetInfo(mEthernetInfo));
+        mContext.sendBroadcast(intent);
     }
 
     private void setNetworkDetailedState(DetailedState state) {
@@ -139,8 +136,6 @@ public class EthernetStateMachine extends StateMachine {
                     return HANDLED;
                 case CMD_SHUTDOWN:
                     shutdown();
-                case CMD_INTERFACE_GONE:
-                    mInterfaceGone = true;
                 default:
                     Slog.e(TAG, mEthernetInfo.getName()
                             + " Unhandled message in EthernetStateMachine: "
