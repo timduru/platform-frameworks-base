@@ -181,9 +181,6 @@ public class EosUiController implements OnFeatureStateChangedListener {
         // send view to glass
         EosGlassController.setNavigationBar(mNavigationBarView);
 
-        // softkey longpress action handler
-        EosSoftkeyHandler.init(mContext, mNavigationBarView);
-
         // give it back to SystemUI
         return mNavigationBarView;
     }
