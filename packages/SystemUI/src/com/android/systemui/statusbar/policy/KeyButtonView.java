@@ -44,13 +44,14 @@ import android.view.ViewConfiguration;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.EosObserverHandler;
-import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
+import com.android.systemui.statusbar.EosObserver.FeatureListener;
 
 import org.teameos.jellybean.settings.ActionHandler;
 import org.teameos.jellybean.settings.EOSConstants;
 
-public class KeyButtonView extends ImageView {
+import java.util.ArrayList;
+
+public class KeyButtonView extends ImageView implements FeatureListener {
     private static final String TAG = "StatusBar.KeyButtonView";
     private static Mode mMode = Mode.SRC_ATOP;
 
@@ -133,26 +134,6 @@ public class KeyButtonView extends ImageView {
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
-        MSG_SOFTKEY_CUSTOM_CONFIG_CHANGED = EosObserverHandler.getEosObserverHandler().registerUri(
-                mConfigUri);
-        MSG_KEY_COLOR_CHANGED = EosObserverHandler.getEosObserverHandler()
-                .registerUri(mKeyColorUri);
-        MSG_GLOW_COLOR_CHANGED = EosObserverHandler.getEosObserverHandler().registerUri(
-                mGlowColorUri);
-
-        EosObserverHandler.getEosObserverHandler().setOnFeatureStateChangedListener(
-                new OnFeatureStateChangedListener() {
-                    @Override
-                    public void onFeatureStateChanged(int msg) {
-                        if (msg == MSG_KEY_COLOR_CHANGED) {
-                            updateKeyFilter();
-                        } else if (msg == MSG_GLOW_COLOR_CHANGED) {
-                            updateGlowFilter();
-                        } else if (msg == MSG_SOFTKEY_CUSTOM_CONFIG_CHANGED) {
-                            updateCustomConfig();
-                        }
-                    }
-                });
         updateCustomConfig();
         updateKeyFilter();
         updateGlowFilter();
@@ -449,5 +430,36 @@ public class KeyButtonView extends ImageView {
                 InputDevice.SOURCE_KEYBOARD);
         InputManager.getInstance().injectInputEvent(ev,
                 InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+    }
+
+    @Override
+    public ArrayList<String> onRegisterClass() {
+        ArrayList<String> uris = new ArrayList<String>();
+        uris.add(mConfigUri);
+        uris.add(mKeyColorUri);
+        uris.add(mGlowColorUri);
+        return uris;
+    }
+
+    @Override
+    public void onSetMessage(String uri, int msg) {
+        if (uri.equals(mConfigUri)) {
+            MSG_SOFTKEY_CUSTOM_CONFIG_CHANGED = msg;
+        } else if (uri.equals(mGlowColorUri)) {
+            MSG_GLOW_COLOR_CHANGED = msg;
+        } else if (uri.equals(mKeyColorUri)) {
+            MSG_KEY_COLOR_CHANGED = msg;
+        }
+    }
+
+    @Override
+    public void onFeatureStateChanged(int msg) {
+        if (msg == MSG_KEY_COLOR_CHANGED) {
+            updateKeyFilter();
+        } else if (msg == MSG_GLOW_COLOR_CHANGED) {
+            updateGlowFilter();
+        } else if (msg == MSG_SOFTKEY_CUSTOM_CONFIG_CHANGED) {
+            updateCustomConfig();
+        }
     }
 }

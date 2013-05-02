@@ -10,8 +10,8 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.EosObserverHandler;
-import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
+import com.android.systemui.statusbar.EosObserver;
+import com.android.systemui.statusbar.EosObserver.FeatureListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +28,12 @@ public class EosSettings {
 
     private Context mContext;
     private ContentResolver mContentResolver;
+    private EosObserver mObserver;
     private ViewGroup mParent;
     private List<SettingsController> visibleControllers;
     private List<View> mIndicatorViews;
 
-    public EosSettings(ViewGroup parent, Context context) {
+    public EosSettings(ViewGroup parent, Context context, EosObserver observer) {
         if (parent == null) {
             Log.i(APP_TAG, "Parent is null, not continuing");
             return;
@@ -40,16 +41,17 @@ public class EosSettings {
 
         mContext = context;
         mParent = parent;
+        mObserver = observer;
 
-        MSG_EOS_UPDATE_SETTINGS = EosObserverHandler.getEosObserverHandler().registerUri(
-                EOSConstants.SYSTEMUI_SETTINGS_ENABLED_CONTROLS);
-        MSG_EOS_INDICATOR_COLOR = EosObserverHandler.getEosObserverHandler().registerUri(
-                EOSConstants.SYSTEMUI_SETTINGS_INDICATOR_COLOR);
-        MSG_EOS_INDICATOR_HIDDEN = EosObserverHandler.getEosObserverHandler().registerUri(
-                EOSConstants.SYSTEMUI_SETTINGS_INDICATOR_HIDDEN);
+        MSG_EOS_UPDATE_SETTINGS = mObserver
+                .registerUri(EOSConstants.SYSTEMUI_SETTINGS_ENABLED_CONTROLS);
+        MSG_EOS_INDICATOR_COLOR = mObserver
+                .registerUri(EOSConstants.SYSTEMUI_SETTINGS_INDICATOR_COLOR);
+        MSG_EOS_INDICATOR_HIDDEN = mObserver
+                .registerUri(EOSConstants.SYSTEMUI_SETTINGS_INDICATOR_HIDDEN);
 
-        EosObserverHandler.getEosObserverHandler().setOnFeatureStateChangedListener(
-                new OnFeatureStateChangedListener() {
+        mObserver.setFeatureListener(
+                new FeatureListener() {
                     @Override
                     public void onFeatureStateChanged(int msg) {
                         if (msg == MSG_EOS_UPDATE_SETTINGS) {
@@ -63,6 +65,18 @@ public class EosSettings {
                             return;
                         }
                     }
+
+                    @Override
+                    public ArrayList<String> onRegisterClass() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void onSetMessage(String uri, int msg) {
+                        // TODO Auto-generated method stub
+
+                    }
                 });
         setupControllers();
         updateIndicatorAppearance();
@@ -74,9 +88,9 @@ public class EosSettings {
             attach();
         } else {
             mParent.setVisibility(View.GONE);
-            EosObserverHandler.getEosObserverHandler().unregisterUri(MSG_EOS_UPDATE_SETTINGS);
-            EosObserverHandler.getEosObserverHandler().unregisterUri(MSG_EOS_INDICATOR_COLOR);
-            EosObserverHandler.getEosObserverHandler().unregisterUri(MSG_EOS_INDICATOR_HIDDEN);
+            mObserver.unregisterUri(MSG_EOS_UPDATE_SETTINGS);
+            mObserver.unregisterUri(MSG_EOS_INDICATOR_COLOR);
+            mObserver.unregisterUri(MSG_EOS_INDICATOR_HIDDEN);
             detach();
         }
     }

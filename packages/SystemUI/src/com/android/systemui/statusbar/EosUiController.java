@@ -19,18 +19,19 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
+import com.android.systemui.statusbar.EosObserver.FeatureListener;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.preferences.EosSettings;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
 import java.util.ArrayList;
 
-public class EosUiController implements OnFeatureStateChangedListener {
+public class EosUiController implements FeatureListener {
 
     static final String TAG = "EosUiController";
 
@@ -63,55 +64,52 @@ public class EosUiController implements OnFeatureStateChangedListener {
     private int MSG_HYBRID_BAR_SETTINGS;
 
     // Eos classes
-    private EosSettings mEosLegacyToggles;
     private SystembarStateHandler mSystembarHandler;
-    private EosObserverHandler mObserverHandler;
+    private EosObserver mObserver;
+    private EosGlassController mGlass;
+    private NX mNx;
+    private EosSettings mEosLegacyToggles;
 
     private boolean mIsClockVisible = true;
     private int mCurrentNavLayout;
 
-    // our one and only instance
-    private static EosUiController eosUiController;
-
-    public static void initEos(Context context, SystembarStateHandler handler) {
-        eosUiController = new EosUiController(context, handler);
-    }
-
-    public static EosUiController getEosUiController() {
-        return eosUiController;
-    }
-
-    public EosUiController(Context context, SystembarStateHandler handler) {
+    public EosUiController(Context context, SystembarStateHandler handler, EosObserver observer) {
         mContext = context;
         mSystembarHandler = handler;
-        EosObserverHandler.initHandler(context);
-        mObserverHandler = EosObserverHandler.getEosObserverHandler();
+        mObserver = observer;
         mResolver = mContext.getContentResolver();
-        registerUriList();
     }
 
-    private void registerUriList() {
-        // battery
-        MSG_BATTERY_ICON_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE);
-        MSG_BATTERY_TEXT_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE);
-        MSG_BATTERY_TEXT_COLOR_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_BATTERY_TEXT_COLOR);
+    @Override
+    public ArrayList<String> onRegisterClass() {
+        ArrayList<String> uris = new ArrayList<String>();
+        uris.add(EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE);
+        uris.add(EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE);
+        uris.add(EOSConstants.SYSTEMUI_BATTERY_TEXT_COLOR);
+        uris.add(EOSConstants.SYSTEMUI_CLOCK_VISIBLE);
+        uris.add(EOSConstants.SYSTEMUI_CLOCK_COLOR);
+        uris.add(EOSConstants.SYSTEMUI_SETTINGS_ENABLED);
+        uris.add(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR);
+        return uris;
+    }
 
-        // clock
-        MSG_CLOCK_VISIBLE_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_CLOCK_VISIBLE);
-        MSG_CLOCK_COLOR_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_CLOCK_COLOR);
-
-        // legacy toggles
-        MSG_LEGACY_TOGGLES_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_SETTINGS_ENABLED);
-        MSG_HYBRID_BAR_SETTINGS = mObserverHandler
-                .registerUri(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR);
-
-        mObserverHandler.setOnFeatureStateChangedListener((OnFeatureStateChangedListener) this);
+    @Override
+    public void onSetMessage(String uri, int msg) {
+        if (uri.equals(EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE)) {
+            MSG_BATTERY_ICON_SETTINGS = msg;
+        } else if (uri.equals(EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE)) {
+            MSG_BATTERY_TEXT_SETTINGS = msg;
+        } else if (uri.equals(EOSConstants.SYSTEMUI_BATTERY_TEXT_COLOR)) {
+            MSG_BATTERY_TEXT_COLOR_SETTINGS = msg;
+        } else if (uri.equals(EOSConstants.SYSTEMUI_CLOCK_VISIBLE)) {
+            MSG_CLOCK_VISIBLE_SETTINGS = msg;
+        } else if (uri.equals(EOSConstants.SYSTEMUI_CLOCK_COLOR)) {
+            MSG_CLOCK_COLOR_SETTINGS = msg;
+        } else if (uri.equals(EOSConstants.SYSTEMUI_SETTINGS_ENABLED)) {
+            MSG_LEGACY_TOGGLES_SETTINGS = msg;
+        } else if (uri.equals(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR)) {
+            MSG_HYBRID_BAR_SETTINGS = msg;
+        }
     }
 
     @Override
@@ -175,11 +173,14 @@ public class EosUiController implements OnFeatureStateChangedListener {
 
         // startNX the instance handles all states
         if (mCurrentNavLayout == STOCK_NAV_BAR) {
-            EosNxHandler.create(mContext, mNavigationBarView, mService);
+            mNx = new NX(mContext, mNavigationBarView, mService, EosUiController.this);
+            mObserver.registerClass(mNx);
+            mNavigationBarView.setNx(mNx);
+            mService.setNx(mNx);
         }
 
         // send view to glass
-        EosGlassController.setNavigationBar(mNavigationBarView);
+        mGlass.setNavigationBar(mNavigationBarView);
 
         // give it back to SystemUI
         return mNavigationBarView;
@@ -211,11 +212,20 @@ public class EosUiController implements OnFeatureStateChangedListener {
                 .findViewById(R.id.battery));
 
         // start here to include cap key devices
-        EosGlassController.startGlass(mContext, mStatusBarView,
+        mGlass = new EosGlassController(mContext, mStatusBarView,
                 mStatusBarWindow);
+        mObserver.registerClass(mGlass);
 
         handleBatteryChange();
+
+        mObserver.registerClass((FeatureListener) mStatusBarView.findViewById(R.id.clock));
         handleClockChange();
+    }
+
+    public void updateGlass() {
+        if (mGlass != null && mGlass.isGlassEnabled()) {
+            mGlass.applyGlassEffect();
+        }
     }
 
     static void log(String s) {
@@ -303,7 +313,7 @@ public class EosUiController implements OnFeatureStateChangedListener {
         if (isTogglesEnabled) {
             mEosLegacyToggles = new EosSettings(
                     (ViewGroup) mStatusBarWindow.findViewById(R.id.eos_toggles),
-                    mContext);
+                    mContext, mObserver);
             mEosLegacyToggles.setEnabled(isTogglesEnabled);
         } else {
             if (mEosLegacyToggles != null) {
