@@ -104,16 +104,32 @@ public final class EOSUtils {
     }
 
     public static boolean hasNavBar(Context context) {
-        boolean mHasNavBar = false;
         IWindowManager mWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         try {
-            mHasNavBar = mWindowManager.hasNavigationBar();
+            return mWindowManager.hasNavigationBar();
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return false;
         }
-        return mHasNavBar;
+    }
+
+    public static boolean hasSystemBar(Context context) {
+        IWindowManager mWindowManager = IWindowManager.Stub.asInterface(
+                ServiceManager.getService(Context.WINDOW_SERVICE));
+        try {
+            return mWindowManager.hasSystemNavBar();
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean isCapKeyDevice(Context context) {
+        return !context.getResources().getBoolean(
+                com.android.internal.R.bool.config_showNavigationBar);
     }
 
     public static boolean hasKernelFeature(String path) {

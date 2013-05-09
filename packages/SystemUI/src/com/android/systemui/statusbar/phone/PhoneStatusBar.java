@@ -374,6 +374,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         return mEosObserver;
     }
 
+    public EosUiController getEos() {
+        return mEosController;
+    }
+
     public void setNx(NX nx) {
         mNx = nx;
     }

@@ -61,8 +61,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="8dp"
-                class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
-                android:alpha="0.4" />
+                class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout" />
         </com.android.systemui.statusbar.tablet.NotificationIconArea>
     </LinearLayout>
 
@@ -80,6 +79,7 @@
             android:gravity="center_vertical|left"
             android:paddingLeft="6dip"
             android:singleLine="true"
+            android:tag="@string/eos_statusbar_clock_signal_cluster_tag"
             android:textAppearance="@style/TextAppearance.StatusBar.Clock" />
 
         <TextView
@@ -113,6 +113,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="4dip"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/dock_battery"
+                android:layout_width="wrap_content"
+                android:layout_height="18dp"
+                android:paddingLeft="4dip"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/dock_battery_text"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical|left"
+                android:paddingLeft="1dp"
+                android:paddingRight="1dp"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.StatusBar.BatteryText"
                 android:visibility="gone" />
 
             <ImageView

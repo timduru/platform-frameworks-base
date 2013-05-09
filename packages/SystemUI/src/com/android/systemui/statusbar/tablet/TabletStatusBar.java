@@ -41,7 +41,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -59,7 +58,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -70,15 +68,17 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DoNotDisturb;
+import com.android.systemui.statusbar.EosObserver;
 import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.SystembarStateHandler;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CompatModeButton;
+import com.android.systemui.statusbar.policy.ExternalBatteryController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
@@ -162,11 +162,13 @@ public class TabletStatusBar extends BaseStatusBar implements
     int mNotificationPeekTapDuration;
     int mNotificationFlingVelocity;
 
-    BatteryController mBatteryController;
+    BatteryController mBatteryController, mDockBatteryController;
     BluetoothController mBluetoothController;
     LocationController mLocationController;
     NetworkController mNetworkController;
     DoNotDisturb mDoNotDisturb;
+
+    private boolean mHasDockBattery;
 
     ViewGroup mBarContents;
 
@@ -194,15 +196,28 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     private int mShowSearchHoldoff = 0;
 
-    /**
-     * A boolean so that we can disable the IME button on sw600 tablets (i.e
-     * grouper), as they have a IME switch button in the notifications, and we
-     * don't have space for this view in portrait.
-     */
-    private boolean mIsSw600Device = false;
 
-    // boolean to help with the public method
-    private boolean mIsClockVisible = true;
+    // Eos feature observers
+    private boolean mIsNavbarHidden;
+
+    SystembarStateHandler mSystembarHandler;
+    EosUiController mEosController;
+    EosObserver mEosObserver;
+
+    SystembarStateHandler.OnBarStateChangedListener mBarListener = new SystembarStateHandler.OnBarStateChangedListener() {
+        @Override
+        public void onBarStateChanged(int state) {
+            mIsNavbarHidden = state == View.GONE;
+        }
+    };
+
+    public EosObserver getEosObserver() {
+        return mEosObserver;
+    }
+
+    public EosUiController getEos() {
+        return mEosController;
+    }
 
     public Context getContext() {
         return mContext;
@@ -253,7 +268,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                PixelFormat.OPAQUE);
+                PixelFormat.TRANSLUCENT);
 
         // We explicitly leave FLAG_HARDWARE_ACCELERATED out of the flags. The
         // status bar occupies
@@ -262,6 +277,11 @@ public class TabletStatusBar extends BaseStatusBar implements
         // for the status bar, we prevent the GPU from having to wake up just to
         // do these small
         // updates, which should help keep power consumption down.
+
+        /* nah, we'll add it back in ;D */
+        if (ActivityManager.isHighEndGfx()) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        }
 
         lp.gravity = getStatusBarGravity();
         lp.setTitle("SystemBar");
@@ -375,7 +395,10 @@ public class TabletStatusBar extends BaseStatusBar implements
                 R.layout.system_bar_compat_mode_panel, null);
         mCompatModePanel.setOnTouchListener(new TouchOutsideListener(
                 MSG_CLOSE_COMPAT_MODE_PANEL, mCompatModePanel));
-        mCompatModePanel.setTrigger(mCompatModeButton);
+
+        // easiest way to deal with this for now
+//        mCompatModePanel.setTrigger(mCompatModeButton);
+
         mCompatModePanel.setVisibility(View.GONE);
         mStatusBarView.setIgnoreChildren(3, mCompatModeButton, mCompatModePanel);
         lp = new WindowManager.LayoutParams(
@@ -442,6 +465,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         mNotificationData.clear();
 
         mStatusBarContainer.addView(makeStatusBarView());
+        mStatusBarView.setBar(this);
 
         // recreate notifications.
         for (int i = 0; i < nNotifs; i++) {
@@ -474,8 +498,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected void loadDimens() {
         final Resources res = mContext.getResources();
 
-        mNaturalBarHeight = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_height);
+        mNaturalBarHeight = res.getDimensionPixelSize(mEosController.getNavbarHeightResource());
 
         int newIconSize = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.system_bar_icon_size);
@@ -527,6 +550,12 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected View makeStatusBarView() {
         final Context context = mContext;
 
+        // initialize bar settings before anything else happens
+        mSystembarHandler = new SystembarStateHandler(mContext, mBarListener);
+        mEosObserver = new EosObserver(mContext);
+        mEosController = new EosUiController(mContext, mSystembarHandler, mEosObserver);
+        mEosObserver.registerClass(mEosController);
+
         CustomTheme currentTheme = mContext.getResources().getConfiguration().customTheme;
         if (currentTheme != null) {
             mCurrentTheme = (CustomTheme) currentTheme.clone();
@@ -537,6 +566,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         final TabletStatusBarView sb = (TabletStatusBarView) View.inflate(
                 context, R.layout.system_bar, null);
         mStatusBarView = sb;
+
+        mEosController.setStatusBarView(mStatusBarView);
 
         sb.setHandler(mHandler);
 
@@ -580,9 +611,16 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView) sb.findViewById(R.id.battery));
-        // we are safe updating clock here as the method checks
-        // for a null statusbar
-        processClockSettingsChange();
+        mBatteryController.addLabelView((TextView)mStatusBarView.findViewById(R.id.battery_text));
+        mEosObserver.registerClass(mBatteryController);
+
+        mHasDockBattery = mContext.getResources().getBoolean(com.android.internal.R.bool.config_hasDockBattery);
+        if (mHasDockBattery) {
+            mDockBatteryController = new ExternalBatteryController(mContext);
+            mDockBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.dock_battery));
+            mDockBatteryController.addLabelView((TextView)mStatusBarView.findViewById(R.id.dock_battery_text));
+        }
+
         mBluetoothController = new BluetoothController(mContext);
         mBluetoothController.addIconView((ImageView) sb.findViewById(R.id.bluetooth));
 
@@ -792,7 +830,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public int getStatusBarHeight() {
-        return mStatusBarView != null ? mStatusBarView.getHeight()
+        return mEosController != null ? mEosController.getNavbarHeightResource()
                 : mContext.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.navigation_bar_height);
     }
@@ -1012,23 +1050,12 @@ public class TabletStatusBar extends BaseStatusBar implements
         removeNotificationViews(key);
         mTicker.remove(key);
         setAreThereNotifications();
-    }
+    }    
 
     public void showClock(boolean show) {
-        View clock = mBarContents.findViewById(R.id.clock);
-        View network_text = mBarContents.findViewById(R.id.network_text);
-        if (clock != null) {
-            if (mIsClockVisible) {
-                clock.setVisibility(show ? View.VISIBLE : View.GONE);
-            } else {
-                clock.setVisibility(View.GONE);
-                if (network_text != null) {
-                    // if i don't want to see my clock, why for
-                    // goodness sakes would I want to see this?
-                    network_text.setVisibility(View.GONE);
-                }
-            }
-        }
+        if (mStatusBarView == null || mEosController == null)
+            return;
+        mEosController.showClock(show);
     }
 
     public void disable(int state) {
@@ -1085,6 +1112,8 @@ public class TabletStatusBar extends BaseStatusBar implements
                 mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
             }
         }
+
+        mEosController.updateGlass();
     }
 
     private void setNavigationVisibility(int visibility) {
@@ -1127,6 +1156,8 @@ public class TabletStatusBar extends BaseStatusBar implements
             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.add(key, n);
                 mFeedbackIconArea.setVisibility(View.GONE);
+                mStatusBarView.findViewById(R.id.clock_center_layout)
+                        .setVisibility(View.GONE);
             }
         }
     }
@@ -1134,6 +1165,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     // called by TabletTicker when it's done with all queued ticks
     public void doneTicking() {
         mFeedbackIconArea.setVisibility(View.VISIBLE);
+        mStatusBarView.findViewById(R.id.clock_center_layout).setVisibility(View.VISIBLE);
     }
 
     public void animateExpandNotificationsPanel() {
@@ -1246,6 +1278,8 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public void topAppWindowChanged(boolean showMenu) {
+        mEosController.updateGlass();
+
         if (DEBUG) {
             Slog.d(TAG, (showMenu ? "showing" : "hiding") + " the MENU button");
         }
@@ -1711,27 +1745,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected boolean shouldDisableNavbarGestures() {
         return mNotificationPanel.getVisibility() == View.VISIBLE
                 || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
-    }
-
-    protected void processClockSettingsChange() {
-        if (mStatusBarView == null)
-            return;
-        TextView clock = (TextView) mStatusBarView.findViewById(R.id.clock);
-
-        mIsClockVisible = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_CLOCK_VISIBLE,
-                EOSConstants.SYSTEMUI_CLOCK_VISIBLE_DEF) == 1 ? true : false;
-        showClock(true);
-        int color = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_CLOCK_COLOR,
-                EOSConstants.SYSTEMUI_CLOCK_COLOR_DEF);
-        if (color == -1) {
-            if (color == -1) {
-                color = mContext.getResources()
-                        .getColor(android.R.color.holo_blue_light);
-            }
-        }
-        clock.setTextColor(color);
     }
 
     private void updateMenuPersist() {

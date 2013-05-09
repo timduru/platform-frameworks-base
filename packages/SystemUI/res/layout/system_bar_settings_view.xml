@@ -157,4 +157,12 @@
 
     <View style="@style/SystemBarPanelSettingsPanelSeparator" />
 
+    <LinearLayout
+        android:id="@+id/eos_toggles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:visibility="gone" />
+
+    <View style="@style/SystemBarPanelSettingsPanelSeparator" />
 </com.android.systemui.statusbar.tablet.SettingsView>

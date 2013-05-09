@@ -593,6 +593,30 @@ public final class EOSConstants {
     public static final int SYSTEMUI_USE_HYBRID_STATBAR_DEF = 0;
 
     /**
+     * Force tablet ui on large and xlarge screen devices
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_USE_TABLET_BAR = "eos_systemui_use_tablet_statbar";
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_USE_TABLET_BAR_DEF = 0;
+
+    /**
+     * force a navigation bar on capacitive key devices
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_FORCE_NAVBAR = "eos_systemui_force_navbar";
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_FORCE_NAVBAR_DEF = 0;
+
+    /**
      * We got some bomb glass baby ;P
      * 
      * @hide

@@ -12,12 +12,11 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.statusbar.EosObserver.FeatureListener;
-import com.android.systemui.statusbar.phone.NavigationBarView;
-import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 
 import org.teameos.jellybean.settings.EOSConstants;
@@ -54,11 +53,11 @@ public class EosGlassController implements FeatureListener {
 
     private Context mContext;
     private ContentResolver mResolver;
-    private NavigationBarView mNavigationBarView;
-    private PhoneStatusBarView mStatusBarView;
+    private View mNavigationBarView;
+    private View mStatusBarView;
     private StatusBarWindowView mWindowView;
 
-    public EosGlassController(Context context, PhoneStatusBarView statbar,
+    public EosGlassController(Context context, View statbar,
             StatusBarWindowView window) {
         mContext = context;
         mResolver = context.getContentResolver();
@@ -68,9 +67,15 @@ public class EosGlassController implements FeatureListener {
         handleGlassChange();
     }
 
+    public EosGlassController(Context context) {
+        mContext = context;
+        mResolver = context.getContentResolver();
+        new LauncherList().execute();
+    }
+
     // we have to set this separately for cap key devices
     // that don't have navigationbar
-    public void setNavigationBar(NavigationBarView navbar) {
+    public void setNavigationBar(View navbar) {
         mNavigationBarView = navbar;
         handleGlassChange();
     }
@@ -195,6 +200,7 @@ public class EosGlassController implements FeatureListener {
             if (mNavigationBarView != null)
                 mNavigationBarView
                         .setBackgroundColor(applyAlphaToColor(KEYGUARD_NAV, mNavbarColor));
+            if (mStatusBarView != null)
             mStatusBarView
                     .setBackgroundColor(applyAlphaToColor(KEYGUARD_STAT, mStatusbarColor));
             return;
@@ -203,7 +209,7 @@ public class EosGlassController implements FeatureListener {
                 mNavigationBarView.setBackgroundColor(applyAlphaToColor(
                         Color.argb(mNavbarGlassLevel, 0, 0, 0),
                         mNavbarColor));
-
+            if (mStatusBarView != null)
             mStatusBarView.setBackgroundColor(applyAlphaToColor(
                     Color.argb(mStatusbarGlassLevel, 0, 0, 0),
                     mStatusbarColor));
@@ -212,11 +218,13 @@ public class EosGlassController implements FeatureListener {
             if (mNavigationBarView != null)
                 mNavigationBarView.setBackgroundColor(applyAlphaToColor(RECENT_NAV,
                         mNavbarColor));
+            if (mStatusBarView != null)
             mStatusBarView.setBackgroundColor(applyAlphaToColor(RECENT_STAT, mStatusbarColor));
             return;
         } else {
             if (mNavigationBarView != null)
                 mNavigationBarView.setBackgroundColor(mNavbarColor);
+            if (mStatusBarView != null)
             mStatusBarView.setBackgroundColor(mStatusbarColor);
         }
     }
@@ -258,13 +266,15 @@ public class EosGlassController implements FeatureListener {
     }
 
     private void handleStatusbarColorChange() {
+        if (mStatusBarView == null)
+            return;
         updateStatusbarColorValue();
         // For themes
         mStatusBarView.setBackground(mContext.getResources().getDrawable(
                 R.drawable.status_bar_background));
         if (mStatusbarColor != -1) {
             // we don't want alpha here
-            mWindowView.setBackground(null);
+            if (mWindowView != null) mWindowView.setBackground(null);
             mStatusbarColor = removeAlphaFromColor(mStatusbarColor);
             mStatusBarView.setBackgroundColor(mStatusbarColor);
         }

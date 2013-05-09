@@ -358,6 +358,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mSettingsView = infl.inflate(R.layout.system_bar_settings_view, mContentFrame, false);
         mSettingsView.setVisibility(View.GONE);
         mContentFrame.addView(mSettingsView);
+        mBar.getEos().setTabletSettingsView(mSettingsView);
     }
 
     private class Choreographer implements Animator.AnimatorListener {

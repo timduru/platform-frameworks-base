@@ -169,7 +169,7 @@ public class NavigationBarView extends LinearLayout {
 
                     }
                 });
-        ArrayList<View> children = getAllChildren(this);
+        ArrayList<View> children = mBar.getEos().getAllChildren(this);
         for (View child : children) {
             if (child instanceof FeatureListener) {
                 mBar.getEosObserver().registerClass((FeatureListener) (child));
@@ -622,29 +622,5 @@ public class NavigationBarView extends LinearLayout {
                 .setVisibility(mShowMenuPersist ? View.VISIBLE : View.INVISIBLE);
         findViewById(R.id.rot90).findViewById(R.id.menu)
                 .setVisibility(mShowMenuPersist ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    private ArrayList<View> getAllChildren(View v) {
-
-        if (!(v instanceof ViewGroup)) {
-            ArrayList<View> viewArrayList = new ArrayList<View>();
-            viewArrayList.add(v);
-            return viewArrayList;
-        }
-
-        ArrayList<View> result = new ArrayList<View>();
-
-        ViewGroup vg = (ViewGroup) v;
-        for (int i = 0; i < vg.getChildCount(); i++) {
-
-            View child = vg.getChildAt(i);
-
-            ArrayList<View> viewArrayList = new ArrayList<View>();
-            viewArrayList.add(v);
-            viewArrayList.addAll(getAllChildren(child));
-
-            result.addAll(viewArrayList);
-        }
-        return result;
     }
 }

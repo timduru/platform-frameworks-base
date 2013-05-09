@@ -581,14 +581,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_BAR_SIZE_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_USE_GLASS), false, this);
-            setNavigationBarSize();
-            setGlassMode();
+            resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_USE_TABLET_BAR), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_FORCE_NAVBAR), false, this);
+            synchronized (mLock) {
+                setNavigationBarSize();
+                setGlassMode();
+            }
         }
 
         @Override
         public void onChange(boolean selfChange) {
-            if (mHasNavigationBar) setNavigationBarSize();
-            setGlassMode();
+            synchronized (mLock) {
+                updateBarSettings();
+                setNavigationBarSize();
+                setGlassMode();
+            }
             mContext.sendBroadcast(new Intent().setAction(Intent.ACTION_CONFIGURATION_CHANGED));
         }
     }
@@ -1110,13 +1117,63 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 EOSConstants.SYSTEMUI_USE_GLASS_DEF) == 1;
     }
 
+    private void updateBarSettings() {
+        /*
+         * we start with the idea that the device has only 2 natural ui states
+         * either a cap key device with only a phone style statbar and a device
+         * which uses software navigation bar.
+         */
+        final boolean mForceTabletUi = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_USE_TABLET_BAR, 0) == 1;
+        final boolean mForceNavbar = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_FORCE_NAVBAR, 0) == 1;
+        final boolean mIsCapkey = !mContext.getResources().getBoolean(
+                R.bool.config_showNavigationBar);
+
+        // capkey devices
+        if (mIsCapkey) {
+            if (mForceNavbar) {
+                mHasNavigationBar = true;
+                mHasSystemNavBar = false;
+                mNavigationBarCanMove = true;
+            } else {
+                mHasNavigationBar = false;
+                mHasSystemNavBar = false;
+                mNavigationBarCanMove = false;
+            }
+            return;
+        }
+
+        // can only be set true on large and xlarge atm
+        if (mForceTabletUi) {
+            mHasNavigationBar = false;
+            mHasSystemNavBar = true;
+            mNavigationBarCanMove = false;
+        } else {
+            mHasNavigationBar = true;
+            mHasSystemNavBar = false;
+            mNavigationBarCanMove = EOSUtils.isNormalScreen();
+        }
+
+        // keep this around just for now
+        if (!mHasSystemNavBar) {
+            // Allow a system property to override this. Used by the emulator.
+            // See also hasNavigationBar().
+            String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
+            if (!"".equals(navBarOverride)) {
+                if (navBarOverride.equals("1")) {
+                    mHasNavigationBar = false;
+                    mNavigationBarCanMove = false;
+                } else if (navBarOverride.equals("0"))
+                    mHasNavigationBar = true;
+            }
+        }
+    }
+
     public void setInitialDisplaySize(Display display, int width, int height, int density) {
         mDisplay = display;
 
-        int shortSize, longSize;
         if (width > height) {
-            shortSize = height;
-            longSize = width;
             mLandscapeRotation = Surface.ROTATION_0;
             mSeascapeRotation = Surface.ROTATION_180;
             if (mContext.getResources().getBoolean(
@@ -1128,8 +1185,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mUpsideDownRotation = Surface.ROTATION_90;
             }
         } else {
-            shortSize = width;
-            longSize = height;
             mPortraitRotation = Surface.ROTATION_0;
             mUpsideDownRotation = Surface.ROTATION_180;
             if (mContext.getResources().getBoolean(
@@ -1145,58 +1200,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
 
-        // SystemUI (status bar) layout policy
-        int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
-
-        if (shortSizeDp < 600) {
-            // 0-599dp: "phone" UI with a separate status & navigation bar
-            mHasSystemNavBar = false;
-            mNavigationBarCanMove = true;
-        } else if (shortSizeDp < 720) {
-            // 600+dp: "phone" UI with modifications for larger screens
-            mHasSystemNavBar = false;
-            mNavigationBarCanMove = false;
-        }
-
-        if (!mHasSystemNavBar) {
-            mHasNavigationBar = mContext.getResources().getBoolean(com.android.internal.R.bool.config_showNavigationBar);
-            // Allow a system property to override this. Used by the emulator.
-            // See also hasNavigationBar().
-            String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
-            if (!"".equals(navBarOverride)) {
-                if (navBarOverride.equals("1")) mHasNavigationBar = false;
-                else if (navBarOverride.equals("0")) mHasNavigationBar = true;
-            }
-        } else {
-            mHasNavigationBar = false;
-        }
+        // figure out what kind of bar we want first
+        updateBarSettings();
 
         // set it here once all the bar state
         // bools have been initialized
         setNavigationBarSize();
 
-        if (mHasSystemNavBar) {
-            // The system bar is always at the bottom.  If you are watching
-            // a video in landscape, we don't need to hide it if we can still
-            // show a 16:9 aspect ratio with it.
-            int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / density;
-            int barHeightDp = mNavigationBarHeightForRotation[mLandscapeRotation]
-                    * DisplayMetrics.DENSITY_DEFAULT / density;
-            int aspect = ((shortSizeDp-barHeightDp) * 16) / longSizeDp;
-            // We have computed the aspect ratio with the bar height taken
-            // out to be 16:aspect.  If this is less than 9, then hiding
-            // the navigation bar will provide more useful space for wide
-            // screen movies.
-            mCanHideNavigationBar = aspect < 9;
-        } else if (mHasNavigationBar) {
-            // The navigation bar is at the right in landscape; it seems always
-            // useful to hide it for showing a video.
-            mCanHideNavigationBar = true;
-        } else {
-            mCanHideNavigationBar = false;
-        }
+        // always hide the bar
+        mCanHideNavigationBar = true;
 
-        // For demo purposes, allow the rotation of the HDMI display to be controlled.
+        // For demo purposes, allow the rotation of the HDMI display to be
+        // controlled.
         // By default, HDMI locks rotation to landscape.
         if ("portrait".equals(SystemProperties.get("persist.demo.hdmirotation"))) {
             mHdmiRotation = mPortraitRotation;

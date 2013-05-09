@@ -3,6 +3,7 @@ package com.android.systemui.statusbar;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.app.ActivityManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -10,6 +11,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +27,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.preferences.EosSettings;
+import com.android.systemui.statusbar.tablet.TabletStatusBarView;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -48,7 +51,13 @@ public class EosUiController implements FeatureListener {
 
     private Context mContext;
 
-    private PhoneStatusBarView mStatusBarView;
+    /* View that contains the statusbar or systembar */
+    private View mStatusBarView;
+    private View mClockView;
+
+    // holds legacy toggles on tablets (temporary)
+    private View mTabletSettingsView;
+
     private PhoneStatusBar mService;
     private NavigationBarView mNavigationBarView;
     private StatusBarWindowView mStatusBarWindow;
@@ -61,6 +70,8 @@ public class EosUiController implements FeatureListener {
     private int MSG_CLOCK_COLOR_SETTINGS;
     private int MSG_LEGACY_TOGGLES_SETTINGS;
     private int MSG_HYBRID_BAR_SETTINGS;
+    private int MSG_TABLET_BAR_MODE_SETTINGS;
+    private int MSG_FORCE_NAVBAR_SETTINGS;
 
     // Eos classes
     private SystembarStateHandler mSystembarHandler;
@@ -75,12 +86,19 @@ public class EosUiController implements FeatureListener {
 
     private boolean mIsClockVisible = true;
     private int mCurrentNavLayout;
+    
+    private boolean mIsTabletUi = false;
 
     public EosUiController(Context context, SystembarStateHandler handler, EosObserver observer) {
         mContext = context;
         mSystembarHandler = handler;
         mObserver = observer;
         mResolver = mContext.getContentResolver();
+        mIsTabletUi = Settings.System.getInt(mResolver, EOSConstants.SYSTEMUI_USE_TABLET_BAR, 0) == 1;
+        if (getEccRestartFlag()) {
+            setEccRestartFlag(false);
+            mContext.startActivityAsUser(getEccIntent(), new UserHandle(UserHandle.USER_CURRENT));
+        }
     }
 
     @Override
@@ -93,6 +111,8 @@ public class EosUiController implements FeatureListener {
         uris.add(EOSConstants.SYSTEMUI_CLOCK_COLOR);
         uris.add(EOSConstants.SYSTEMUI_SETTINGS_ENABLED);
         uris.add(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR);
+        uris.add(EOSConstants.SYSTEMUI_USE_TABLET_BAR);
+        uris.add(EOSConstants.SYSTEMUI_FORCE_NAVBAR);
         return uris;
     }
 
@@ -112,6 +132,10 @@ public class EosUiController implements FeatureListener {
             MSG_LEGACY_TOGGLES_SETTINGS = msg;
         } else if (uri.equals(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR)) {
             MSG_HYBRID_BAR_SETTINGS = msg;
+        } else if (uri.equals(EOSConstants.SYSTEMUI_USE_TABLET_BAR)) {
+            MSG_TABLET_BAR_MODE_SETTINGS = msg;
+        } else if (uri.equals(EOSConstants.SYSTEMUI_FORCE_NAVBAR)) {
+            MSG_FORCE_NAVBAR_SETTINGS = msg;
         }
     }
 
@@ -129,7 +153,9 @@ public class EosUiController implements FeatureListener {
         } else if (msg == MSG_LEGACY_TOGGLES_SETTINGS) {
             handleLegacyTogglesChange();
             return;
-        } else if (msg == MSG_HYBRID_BAR_SETTINGS) {
+        } else if (msg == MSG_HYBRID_BAR_SETTINGS
+                || msg == MSG_TABLET_BAR_MODE_SETTINGS
+                || msg == MSG_FORCE_NAVBAR_SETTINGS) {
             restartSystemUIServce();
             return;
         }
@@ -155,6 +181,21 @@ public class EosUiController implements FeatureListener {
         lp.setTitle("NavigationBar");
         lp.windowAnimations = 0;
         return lp;
+    }
+
+    public int getNavbarHeightResource() {
+        int barMode = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0);
+        switch (barMode) {
+            case 0:
+                return com.android.internal.R.dimen.navigation_bar_height;
+            case 1:
+                return com.android.internal.R.dimen.navigation_bar_width_low_profile;
+            case 2:
+                return com.android.internal.R.dimen.navigation_bar_width_tiny_profile;
+            default:
+                return com.android.internal.R.dimen.navigation_bar_width;
+        }
     }
 
     public NavigationBarView setNavigationBarView() {
@@ -194,28 +235,32 @@ public class EosUiController implements FeatureListener {
     }
 
     public void setBarWindow(StatusBarWindowView window) {
+        if (mIsTabletUi)
+            return;
         mStatusBarWindow = window;
         handleLegacyTogglesChange();
         mStatusBarWindow.setEosSettings(mEosLegacyToggles);
     }
+    
+    public void setTabletSettingsView(View v) {
+        mTabletSettingsView = v;
+        handleLegacyTogglesChange();
+    }
 
     // we need this to be set when the theme engine creates new view
-    public void setStatusBarView(PhoneStatusBarView bar) {
+    public void setStatusBarView(View bar) {
         mStatusBarView = bar;
 
         // now we're sure we're getting the correct batteries
         View text = mStatusBarView
-                .findViewById(R.id.signal_battery_cluster)
+                .findViewById(mIsTabletUi ? R.id.notificationArea : R.id.signal_battery_cluster)
                 .findViewById(R.id.battery_text);
         text.setTag(EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG);
         mBatteryList.add(text);
 
         mBatteryList.add(mStatusBarView
-                .findViewById(R.id.signal_battery_cluster)
+                .findViewById(mIsTabletUi ? R.id.notificationArea : R.id.signal_battery_cluster)
                 .findViewById(R.id.battery));
-
-        mClockCenter = mStatusBarView.findViewById(R.id.clock_center);
-        mClockCluster = mStatusBarView.findViewById(R.id.clock);
 
         // start here to include cap key devices
         mGlass = new EosGlassController(mContext, mStatusBarView,
@@ -226,7 +271,26 @@ public class EosUiController implements FeatureListener {
 
         mObserver.registerClass((FeatureListener) mStatusBarView.findViewById(R.id.clock));
         mObserver.registerClass((FeatureListener) mStatusBarView.findViewById(R.id.clock_center));
+        handleBatteryChange();
+
+        mClockCluster = mStatusBarView.findViewById(
+                mIsTabletUi ? R.id.notificationArea : R.id.system_icon_area).findViewById(
+                R.id.clock);
+
+        mClockCenter = mStatusBarView.findViewById(R.id.clock_center);
+
+        mObserver.registerClass((FeatureListener) mClockCluster);
+        mObserver.registerClass((FeatureListener) mClockCenter);
         handleClockChange();
+
+        if (mIsTabletUi) {
+            mGlass = new EosGlassController(mContext);
+            mGlass.setNavigationBar(mStatusBarView);
+        } else {
+            mGlass = new EosGlassController(mContext, mStatusBarView,
+                    mStatusBarWindow);
+        }
+        mObserver.registerClass((FeatureListener) mGlass);
     }
 
     public void updateGlass() {
@@ -248,19 +312,21 @@ public class EosUiController implements FeatureListener {
         // time to die, but i shall return again soon
         // before we go let's set our flag
         Settings.System.putInt(mResolver, EOS_KILLED_ME, 1);
+        setEccRestartFlag(true);
+        System.runFinalizersOnExit(true);
         System.exit(0);
     }
 
     private void handleBatteryChange() {
-        int icon_visible = (Settings.System.getInt(mContext.getContentResolver(),
+        int icon_visible = (Settings.System.getInt(mResolver,
                 EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE,
                 EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE_DEF) == 1) ? View.VISIBLE : View.GONE;
 
-        int text_visible = (Settings.System.getInt(mContext.getContentResolver(),
+        int text_visible = (Settings.System.getInt(mResolver,
                 EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE,
                 EOSConstants.SYSTEMUI_BATTERY_TEXT_VISIBLE_DEF) == 1) ? View.VISIBLE : View.GONE;
 
-        int color = Settings.System.getInt(mContext.getContentResolver(),
+        int color = Settings.System.getInt(mResolver,
                 EOSConstants.SYSTEMUI_BATTERY_TEXT_COLOR,
                 EOSConstants.SYSTEMUI_BATTERY_TEXT_COLOR_DEF);
         if (color == -1) {
@@ -282,10 +348,13 @@ public class EosUiController implements FeatureListener {
     }
 
     public void showClock(boolean show) {
-        if (mIsClockVisible) {
-            mCurrentClockView.setVisibility(show ? View.VISIBLE : View.GONE);
-        } else {
-            mCurrentClockView.setVisibility(View.GONE);
+        final View clock = mClockView;
+        if (clock != null) {
+            if (mIsClockVisible) {
+                clock.setVisibility(show ? View.VISIBLE : View.GONE);
+            } else {
+                clock.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -336,9 +405,11 @@ public class EosUiController implements FeatureListener {
                 EOSConstants.SYSTEMUI_SETTINGS_ENABLED,
                 EOSConstants.SYSTEMUI_SETTINGS_ENABLED_DEF) == 1;
 
+        final View toggleView = mStatusBarWindow == null ? mTabletSettingsView : mStatusBarWindow;
+
         if (isTogglesEnabled) {
             mEosLegacyToggles = new EosSettings(
-                    (ViewGroup) mStatusBarWindow.findViewById(R.id.eos_toggles),
+                    (ViewGroup) toggleView.findViewById(R.id.eos_toggles),
                     mContext, mObserver);
             mEosLegacyToggles.setEnabled(isTogglesEnabled);
         } else {
@@ -347,6 +418,31 @@ public class EosUiController implements FeatureListener {
                 mEosLegacyToggles = null;
             }
         }
+    }
+
+    /* utility to iterate a viewgroup and return a list of child views */
+    public ArrayList<View> getAllChildren(View v) {
+
+        if (!(v instanceof ViewGroup)) {
+            ArrayList<View> viewArrayList = new ArrayList<View>();
+            viewArrayList.add(v);
+            return viewArrayList;
+        }
+
+        ArrayList<View> result = new ArrayList<View>();
+
+        ViewGroup vg = (ViewGroup) v;
+        for (int i = 0; i < vg.getChildCount(); i++) {
+
+            View child = vg.getChildAt(i);
+
+            ArrayList<View> viewArrayList = new ArrayList<View>();
+            viewArrayList.add(v);
+            viewArrayList.addAll(getAllChildren(child));
+
+            result.addAll(viewArrayList);
+        }
+        return result;
     }
 
     // utility to help bigclearbutton feature
@@ -363,5 +459,22 @@ public class EosUiController implements FeatureListener {
         drawable.draw(canvas);
 
         return bitmap;
+    }
+
+    private void setEccRestartFlag(boolean restart) {
+        mContext.getSharedPreferences("ecc_restart_flag", Context.MODE_PRIVATE).edit()
+                .putBoolean("ecc_flag", restart).commit();
+    }
+
+    private boolean getEccRestartFlag() {
+        return mContext.getSharedPreferences("ecc_restart_flag", Context.MODE_PRIVATE).getBoolean(
+                "ecc_flag", false);
+    }
+
+    private Intent getEccIntent() {
+        return new Intent()
+        .setClassName("org.eos.controlcenter",
+                "org.eos.controlcenter.Main")
+        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
     }
 }

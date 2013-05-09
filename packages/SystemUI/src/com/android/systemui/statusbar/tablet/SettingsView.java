@@ -83,6 +83,24 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
         mDoNotDisturb = new DoNotDisturbController(context,
                 (CompoundButton) findViewById(R.id.do_not_disturb_checkbox));
         findViewById(R.id.settings).setOnClickListener(this);
+        findViewById(R.id.settings).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Intent controlPanelIntent = new Intent();
+                controlPanelIntent.setClassName("org.eos.controlcenter",
+                        "org.eos.controlcenter.Main");
+                controlPanelIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivityAsUser(controlPanelIntent, new UserHandle(
+                        UserHandle.USER_CURRENT));
+                getStatusBarManager().collapsePanels();
+                return true;
+            }
+        });
+
+        findViewById(R.id.airplane).setVisibility(View.GONE);
+        findViewById(R.id.network).setVisibility(View.GONE);
+        findViewById(R.id.rotate).setVisibility(View.GONE);
+        findViewById(R.id.do_not_disturb).setVisibility(View.GONE);
     }
 
     @Override
