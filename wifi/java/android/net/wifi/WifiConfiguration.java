@@ -333,11 +333,13 @@ public class WifiConfiguration implements Parcelable {
 
    /**
      * This is an Ad-Hoc (IBSS) network
+     * {@hide}
      */
     public boolean isIBSS;
 
     /**
      * Frequency of the Ad-Hoc (IBSS) network, if newly created
+     * {@hide}
      */
     public int frequency;
 
