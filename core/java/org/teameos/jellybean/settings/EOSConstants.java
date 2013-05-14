@@ -69,7 +69,22 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final int SYSTEMUI_CLOCK_VISIBLE_DEF = 1;
+    public static final int SYSTEMUI_CLOCK_GONE = 0;
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_CLOCK_CLUSTER = 1;
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_CLOCK_CENTER = 2;
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_CLOCK_LEFT = 3;
 
     /**
      * @hide
@@ -576,6 +591,30 @@ public final class EOSConstants {
      * @hide
      */
     public static final int SYSTEMUI_USE_HYBRID_STATBAR_DEF = 0;
+
+    /**
+     * Force tablet ui on large and xlarge screen devices
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_USE_TABLET_BAR = "eos_systemui_use_tablet_statbar";
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_USE_TABLET_BAR_DEF = 0;
+
+    /**
+     * force a navigation bar on capacitive key devices
+     * 
+     * @hide
+     */
+    public static final String SYSTEMUI_FORCE_NAVBAR = "eos_systemui_force_navbar";
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_FORCE_NAVBAR_DEF = 0;
 
     /**
      * We got some bomb glass baby ;P

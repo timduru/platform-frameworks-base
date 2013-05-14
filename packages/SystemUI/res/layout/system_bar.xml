@@ -23,7 +23,7 @@
     <FrameLayout
         android:id="@+id/bar_contents_holder"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/system_bar_height"
+        android:layout_height="match_parent"
         android:layout_gravity="bottom" >
 
         <RelativeLayout
@@ -41,7 +41,26 @@
                 android:layout_marginTop="1dp"
                 layout="@layout/system_bar_notification_area" />
 
-            <!-- navigation controls -->
+            <LinearLayout
+                android:id="@+id/clock_center_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingLeft="6.0dip"
+                android:paddingRight="6.0dip" >
+
+                <com.android.systemui.statusbar.policy.Clock
+                    android:id="@+id/clock_center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:tag="@string/eos_statusbar_clock_center_tag"
+                    android:textAppearance="@style/TextAppearance.StatusBar.Clock" />
+            </LinearLayout>
+<!-- navigation controls -->
 
             <LinearLayout
                 android:id="@+id/navigationArea"
@@ -62,7 +81,10 @@
                     systemui:glowScaleFactorHeight="0.75"
                     systemui:glowScaleFactorWidth="0.65"
                     systemui:keyCode="4"
-                    systemui:keyIdentifier="0" />
+                    systemui:keyIdentifier="0"
+                    systemui:keyConfigUri="eos_systemui_softkey_back"
+                    systemui:keyColorUri="eos_systemui_back_key_color"
+                    systemui:keyGlowColorUri="eos_systemui_back_glow_color" /> />
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/home"
@@ -74,7 +96,11 @@
                     systemui:glowScaleFactorHeight="0.75"
                     systemui:glowScaleFactorWidth="0.65"
                     systemui:keyCode="3"
-                    systemui:keyIdentifier="1" />
+                    systemui:keyIdentifier="1"
+                    systemui:keyConfigUri="eos_systemui_softkey_home"
+                    systemui:keyRepeat="false"
+                    systemui:keyColorUri="eos_systemui_home_key_color"
+                    systemui:keyGlowColorUri="eos_systemui_home_glow_color" />
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/recent_apps"
@@ -85,7 +111,10 @@
                     systemui:glowBackground="@drawable/ic_sysbar_highlight"
                     systemui:glowScaleFactorHeight="0.75"
                     systemui:glowScaleFactorWidth="0.65"
-                    systemui:keyIdentifier="2" />
+                    systemui:keyIdentifier="2"
+                    systemui:keyConfigUri="eos_systemui_softkey_recent"
+                    systemui:keyColorUri="eos_systemui_recent_key_color"
+                    systemui:keyGlowColorUri="eos_systemui_recent_glow_color" />
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/menu"
@@ -98,16 +127,19 @@
                     systemui:glowScaleFactorHeight="0.45"
                     systemui:glowScaleFactorWidth="0.15"
                     systemui:keyCode="82"
-                    systemui:keyIdentifier="3" />
+                    systemui:keyIdentifier="3"
+                    systemui:keyConfigUri="eos_systemui_softkey_menu"
+                    systemui:keyColorUri="eos_systemui_menu_key_color"
+                    systemui:keyGlowColorUri="eos_systemui_menu_glow_color" />
             </LinearLayout>
 
-            <!-- fake space bar zone -->
+<!-- fake space bar zone -->
 
             <com.android.systemui.statusbar.policy.EventHole
                 android:id="@+id/fake_space_bar"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_toLeftOf="@+id/notificationArea"
+                android:layout_toLeftOf="@+id/clock_center"
                 android:layout_toRightOf="@+id/navigationArea"
                 android:paddingLeft="8dip"
                 android:paddingRight="8dip"
@@ -118,7 +150,7 @@
     <FrameLayout
         android:id="@+id/bar_shadow_holder"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/system_bar_height"
+        android:layout_height="match_parent"
         android:layout_gravity="bottom" >
 
         <!-- lights out shade -->

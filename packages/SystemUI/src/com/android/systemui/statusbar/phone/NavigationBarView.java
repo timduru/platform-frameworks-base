@@ -43,14 +43,14 @@ import android.widget.LinearLayout;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
-import com.android.systemui.statusbar.EosNxHandler;
-import com.android.systemui.statusbar.EosObserverHandler;
-import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
+import com.android.systemui.statusbar.EosObserver.FeatureListener;
+import com.android.systemui.statusbar.NX;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
@@ -90,6 +90,8 @@ public class NavigationBarView extends LinearLayout {
     private DeadZone mDeadZone;
 
     private Context mContext;
+    private PhoneStatusBar mBar;
+    private NX mNx;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state
     // (bug 5549288)
@@ -125,8 +127,54 @@ public class NavigationBarView extends LinearLayout {
         mDelegateHelper.setDelegateView(view);
     }
 
+    public void setNx(NX nx) {
+        mNx = nx;
+    }
+
+    private boolean isNxEnabled() {
+        return mNx != null ? mNx.isNxEnabled() : false;
+    }
+
+    private boolean isSearchLightOn() {
+        return mNx != null ? mNx.mSearchLightOn : false;
+    }
+
+    private void setSearchLightOn(boolean state) {
+        if (mNx != null)
+            mNx.mSearchLightOn = state;
+    }
+
     public void setBar(BaseStatusBar phoneStatusBar) {
         mDelegateHelper.setBar(phoneStatusBar);
+        mBar = (PhoneStatusBar) phoneStatusBar;
+        MSG_MENU_PERSIST_CHANGED = mBar.getEosObserver().registerUri(
+                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST);
+        mBar.getEosObserver().setFeatureListener(
+                new FeatureListener() {
+                    @Override
+                    public void onFeatureStateChanged(int msg) {
+                        if (msg == MSG_MENU_PERSIST_CHANGED) {
+                            updateMenuPersist();
+                        }
+                    }
+
+                    @Override
+                    public ArrayList<String> onRegisterClass() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void onSetMessage(String uri, int msg) {
+
+                    }
+                });
+        ArrayList<View> children = mBar.getEos().getAllChildren(this);
+        for (View child : children) {
+            if (child instanceof FeatureListener) {
+                mBar.getEosObserver().registerClass((FeatureListener) (child));
+            }
+        }
     }
 
     @Override
@@ -134,9 +182,9 @@ public class NavigationBarView extends LinearLayout {
         if (mDeadZone != null && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
             mDeadZone.poke(event);
         }
-        if (EosNxHandler.isSearchLightOn() || !EosNxHandler.isNxEnabled()) {
+        if (isSearchLightOn() || !isNxEnabled()) {
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                EosNxHandler.setSearchLightOn(false);
+                setSearchLightOn(false);
             }
             if (mDelegateHelper != null) {               
                 boolean ret = mDelegateHelper.onInterceptTouchEvent(event);                                
@@ -150,7 +198,7 @@ public class NavigationBarView extends LinearLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         boolean ret = false;
-        if (EosNxHandler.isSearchLightOn() || !EosNxHandler.isNxEnabled()) {
+        if (isSearchLightOn() || !isNxEnabled()) {
             ret = mDelegateHelper.onInterceptTouchEvent(event);
         }
         return ret;
@@ -201,19 +249,6 @@ public class NavigationBarView extends LinearLayout {
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
         mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
         mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
-
-        MSG_MENU_PERSIST_CHANGED = EosObserverHandler.getEosObserverHandler().registerUri(
-                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST);
-
-        EosObserverHandler.getEosObserverHandler().setOnFeatureStateChangedListener(
-                new OnFeatureStateChangedListener() {
-                    @Override
-                    public void onFeatureStateChanged(int msg) {
-                        if (msg == MSG_MENU_PERSIST_CHANGED) {
-                            updateMenuPersist();
-                        }
-                    }
-                });
     }
 
     public void notifyScreenOn(boolean screenOn) {
@@ -279,7 +314,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setDisabledFlags(int disabledFlags, boolean force) {
-        if (EosNxHandler.isNxEnabled())
+        if (isNxEnabled())
             return;
         if (!force && mDisabledFlags == disabledFlags)
             return;
@@ -346,7 +381,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setMenuVisibility(final boolean show, final boolean force) {
-        if (EosNxHandler.isNxEnabled())
+        if (isNxEnabled())
             return;
         if (mShowMenuPersist)
             return;
@@ -363,7 +398,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setLowProfile(final boolean lightsOut, final boolean animate, final boolean force) {
-        if (EosNxHandler.isNxEnabled())
+        if (isNxEnabled())
             return;
         if (!force && lightsOut == mLowProfile)
             return;
@@ -457,7 +492,7 @@ public class NavigationBarView extends LinearLayout {
         }
 
         setNavigationIconHints(mNavigationIconHints, true);
-        if (EosNxHandler.isNxEnabled()) 
+        if (isNxEnabled())
             setNxLayout();
     }
 

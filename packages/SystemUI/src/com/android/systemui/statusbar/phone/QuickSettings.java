@@ -693,9 +693,10 @@ class QuickSettings {
     private void addVolSliderTile(ViewGroup parent, LayoutInflater inflater) {
         // Seekbar
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
+                inflater.inflate(R.layout.quick_settings_tile_more_slim, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setIsSeekbar(true);
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(
+                R.dimen.quick_settings_more_slim_cell_height));
         seekbarTile.setContent(R.layout.quick_settings_tile_vol_seekbar, inflater);
 
         final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
@@ -754,9 +755,10 @@ class QuickSettings {
     private void addBrightSliderTile(ViewGroup parent, LayoutInflater inflater) {
         // Seekbar
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
+                inflater.inflate(R.layout.quick_settings_tile_more_slim, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setIsSeekbar(true);
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(
+                R.dimen.quick_settings_more_slim_cell_height));
         seekbarTile.setContent(R.layout.quick_settings_tile_bright_seekbar, inflater);
 
         final SeekBar sbBrightness = (SeekBar) seekbarTile.findViewById(R.id.brightness_seekbar);
@@ -843,7 +845,8 @@ class QuickSettings {
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setIsSeekbar(true);
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(
+                R.dimen.quick_settings_slim_cell_height));
         seekbarTile.setContent(R.layout.quick_settings_tile_seekbar, inflater);
 
         final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
@@ -1326,6 +1329,7 @@ class QuickSettings {
                     ConnectivityManager cm = (ConnectivityManager) mContext
                             .getSystemService(Context.CONNECTIVITY_SERVICE);
                     cm.setMobileDataEnabled(!cm.getMobileDataEnabled());
+                    mModel.refreshRSSI();
                 }
             });
             rssiTile.setOnLongClickListener(new View.OnLongClickListener() {
@@ -1354,19 +1358,12 @@ class QuickSettings {
                     } else {
                         iov.setImageDrawable(null);
                     }
-                    tv.setText(state.label);
                     view.setContentDescription(mContext.getResources().getString(
                             R.string.accessibility_quick_settings_mobile,
                             rssiState.signalContentDescription, rssiState.dataContentDescription,
                             state.label));
 
-                    if (Settings.Global.getInt(mContext.getContentResolver(),
-                            Settings.Global.MOBILE_DATA, 0) == 1) {
-                        tv.setTextColor(mContext.getResources().getColor(
-                                com.android.internal.R.color.holo_blue_light));
-                    } else {
-                        tv.setTextColor(Color.parseColor("#CCCCCC"));
-                    }
+                    tv.setText(rssiState.enabledByUser ? state.label : "Disabled");
                 }
             });
             parent.addView(rssiTile);

@@ -52,6 +52,19 @@ PackageRedirectionMap::~PackageRedirectionMap()
     }
 }
 
+unsigned int roundUpPower2(unsigned int val)
+{
+    val--;
+    val |= val >> 1;
+    val |= val >> 2;
+    val |= val >> 4;
+    val |= val >> 8;
+    val |= val >> 16;
+    val++;
+
+    return val;
+}
+
 static void* ensureCapacity(void* data, size_t nmemb, size_t size)
 {
     SharedBuffer* buf;

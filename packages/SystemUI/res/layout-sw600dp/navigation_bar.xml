@@ -63,6 +63,7 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="4"
                 systemui:keyIdentifier="0"
+                systemui:keyConfigUri="eos_systemui_softkey_back"
                 systemui:keyColorUri="eos_systemui_back_key_color"
                 systemui:keyGlowColorUri="eos_systemui_back_glow_color" />
 
@@ -78,7 +79,8 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="3"
                 systemui:keyIdentifier="1"
-                systemui:keyRepeat="true"
+                systemui:keyConfigUri="eos_systemui_softkey_home"
+                systemui:keyRepeat="false"
                 systemui:keyColorUri="eos_systemui_home_key_color"
                 systemui:keyGlowColorUri="eos_systemui_home_glow_color" />
 
@@ -93,6 +95,7 @@
                 android:src="@drawable/ic_sysbar_recent"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyIdentifier="2"
+                systemui:keyConfigUri="eos_systemui_softkey_recent"
                 systemui:keyColorUri="eos_systemui_recent_key_color"
                 systemui:keyGlowColorUri="eos_systemui_recent_glow_color" />
 
@@ -113,6 +116,7 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="82"
                 systemui:keyIdentifier="3"
+                systemui:keyConfigUri="eos_systemui_softkey_menu"
                 systemui:keyColorUri="eos_systemui_menu_key_color"
                 systemui:keyGlowColorUri="eos_systemui_menu_glow_color" />
         </LinearLayout>
@@ -229,6 +233,7 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="4"
                 systemui:keyIdentifier="0"
+                systemui:keyConfigUri="eos_systemui_softkey_back"
                 systemui:keyColorUri="eos_systemui_back_key_color"
                 systemui:keyGlowColorUri="eos_systemui_back_glow_color" />
 
@@ -244,7 +249,8 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="3"
                 systemui:keyIdentifier="1"
-                systemui:keyRepeat="true"
+                systemui:keyConfigUri="eos_systemui_softkey_home"
+                systemui:keyRepeat="false"
                 systemui:keyColorUri="eos_systemui_home_key_color"
                 systemui:keyGlowColorUri="eos_systemui_home_glow_color" />
 
@@ -259,6 +265,7 @@
                 android:src="@drawable/ic_sysbar_recent"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyIdentifier="2"
+                systemui:keyConfigUri="eos_systemui_softkey_recent"
                 systemui:keyColorUri="eos_systemui_recent_key_color"
                 systemui:keyGlowColorUri="eos_systemui_recent_glow_color" />
 
@@ -279,6 +286,7 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="82"
                 systemui:keyIdentifier="3"
+                systemui:keyConfigUri="eos_systemui_softkey_menu"
                 systemui:keyColorUri="eos_systemui_menu_key_color"
                 systemui:keyGlowColorUri="eos_systemui_menu_glow_color" />
         </LinearLayout>

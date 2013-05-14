@@ -32,6 +32,8 @@
         <attr name="keyIdentifier" format="integer" />
         <attr name="keyColorUri" format="string" />
         <attr name="keyGlowColorUri" format="string" />
+        <!-- used for longpress action, click action, or other info -->
+        <attr name="keyConfigUri" format="string" />
     </declare-styleable>
     <declare-styleable name="ToggleSlider">
         <attr name="text" format="string" />

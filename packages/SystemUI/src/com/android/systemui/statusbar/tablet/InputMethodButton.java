@@ -119,6 +119,9 @@ public class InputMethodButton extends ImageView {
     }
 
     private boolean needsToShowIMEButton() {
+        return false;
+
+        /* problem solved
         if (!mShowButton || mScreenLocked)
             return false;
 
@@ -136,6 +139,7 @@ public class InputMethodButton extends ImageView {
                 return false;
         }
         return false;
+        */
     }
 
     private void refreshStatusIcon() {

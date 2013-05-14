@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-
 import android.animation.Animator.AnimatorListener;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -45,12 +44,14 @@ import android.view.ViewConfiguration;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.EosObserverHandler;
-import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
+import com.android.systemui.statusbar.EosObserver.FeatureListener;
 
+import org.teameos.jellybean.settings.ActionHandler;
 import org.teameos.jellybean.settings.EOSConstants;
 
-public class KeyButtonView extends ImageView {
+import java.util.ArrayList;
+
+public class KeyButtonView extends ImageView implements FeatureListener {
     private static final String TAG = "StatusBar.KeyButtonView";
     private static Mode mMode = Mode.SRC_ATOP;
 
@@ -66,20 +67,21 @@ public class KeyButtonView extends ImageView {
     boolean mSupportsLongpress = true;
     RectF mRect = new RectF(0f, 0f, 0f, 0f);
     AnimatorSet mPressedAnim;
-    boolean mDisabled = false;
+    boolean mCustomLongpressEnabled = false;
     boolean mIsLongPressing = false;
-    boolean mIsTabletMode = false;
     boolean mAnimRunning = false;
     float glowScaleWidth;
     float glowScaleHeight;
     IWindowManager mWindowManager;
-    
+
     // Eos feature
     int mKeyFilterColor;
     int mGlowFilterColor;
     String mKeyColorUri;
     String mGlowColorUri;
-    int mKeyIndex;
+    String mConfigUri;
+
+    private int MSG_SOFTKEY_CUSTOM_CONFIG_CHANGED;
     private int MSG_KEY_COLOR_CHANGED;
     private int MSG_GLOW_COLOR_CHANGED;
 
@@ -87,25 +89,19 @@ public class KeyButtonView extends ImageView {
         public void run() {
             if (isPressed()) {
                 // Slog.d("KeyButtonView", "longpressed: " + this);
-                if (mCode != 0 && !mDisabled) {
+                if (mCode != 0 && !mCustomLongpressEnabled) {
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
                 } else {
                     // Just an old-fashioned ImageView
-                    mIsLongPressing = true;
-                    if (mDisabled) {
-                        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                        playSoundEffect(SoundEffectConstants.CLICK);
+                    if (mCustomLongpressEnabled) {
+                        mIsLongPressing = true;
+                        performLongClick();
                     }
-                    performLongClick();
                 }
             }
         }
     };
-
-    public void disableLongPressIntercept(Boolean disable) {
-        mDisabled = disable;
-    }
 
     public KeyButtonView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -118,9 +114,9 @@ public class KeyButtonView extends ImageView {
                 defStyle, 0);
 
         mCode = a.getInteger(R.styleable.KeyButtonView_keyCode, 0);
-        mKeyIndex = a.getInteger(R.styleable.KeyButtonView_keyIdentifier, 0);
         glowScaleWidth = a.getFloat(R.styleable.KeyButtonView_glowScaleFactorWidth, 1.0f);
         glowScaleHeight = a.getFloat(R.styleable.KeyButtonView_glowScaleFactorHeight, 1.0f);
+        mConfigUri = a.getString(R.styleable.KeyButtonView_keyConfigUri);
         mKeyColorUri = a.getString(R.styleable.KeyButtonView_keyColorUri);
         mGlowColorUri = a.getString(R.styleable.KeyButtonView_keyGlowColorUri);
 
@@ -138,22 +134,47 @@ public class KeyButtonView extends ImageView {
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
-        MSG_KEY_COLOR_CHANGED = EosObserverHandler.getEosObserverHandler().registerUri(mKeyColorUri);
-        MSG_GLOW_COLOR_CHANGED = EosObserverHandler.getEosObserverHandler().registerUri(mGlowColorUri);
-
-        EosObserverHandler.getEosObserverHandler().setOnFeatureStateChangedListener(
-                new OnFeatureStateChangedListener() {
-                    @Override
-                    public void onFeatureStateChanged(int msg) {
-                        if (msg == MSG_KEY_COLOR_CHANGED) {
-                            updateKeyFilter();
-                        } else if (msg == MSG_GLOW_COLOR_CHANGED) {
-                            updateGlowFilter();
-                        }
-                    }
-                });
+        updateCustomConfig();
         updateKeyFilter();
         updateGlowFilter();
+    }
+
+    private class CustomLongClick extends ActionHandler implements View.OnLongClickListener {
+        String mAction;
+
+        public CustomLongClick(Context context, String action) {
+            super(context);
+            mAction = action;
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            playSoundEffect(SoundEffectConstants.CLICK);
+            performTask(mAction);
+            return false;
+        }
+
+        @Override
+        public boolean handleAction(String action) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+    }
+
+    private void updateCustomConfig() {
+        String action = Settings.System.getString(mContext.getContentResolver(), mConfigUri);
+        if (action == null)
+            return;
+        if (mSupportsLongpress) {
+            if (action.equals("none")) {
+                setOnLongClickListener(null);
+                mCustomLongpressEnabled = false;
+            } else {
+                setOnLongClickListener(new CustomLongClick(mContext, action));
+                mCustomLongpressEnabled = true;
+            }
+        }
     }
 
     private void updateKeyFilter() {
@@ -196,7 +217,8 @@ public class KeyButtonView extends ImageView {
     protected void onDraw(Canvas canvas) {
         if (mGlowBG != null) {
             canvas.save();
-            if (mAnimRunning) applyGlowFilter();
+            if (mAnimRunning)
+                applyGlowFilter();
             final int w = getWidth();
             final int h = getHeight();
             final float aspect = (float) mGlowWidth / mGlowHeight;
@@ -211,24 +233,9 @@ public class KeyButtonView extends ImageView {
             mRect.right = w;
             mRect.bottom = h;
         }
-        if (mAnimRunning) applyKeyFilter();
+        if (mAnimRunning)
+            applyKeyFilter();
         super.onDraw(canvas);
-    }
-
-    public int getKeyCode() {
-        return mCode;
-    }
-
-    public void setKeyCode(int keyCode) {
-        mCode = keyCode;
-    }
-
-    public boolean getSupportsLongPress() {
-        return mSupportsLongpress;
-    }
-
-    public void setSupportsLongPress(boolean longPress) {
-        mSupportsLongpress = longPress;
     }
 
     public float getDrawingAlpha() {
@@ -423,5 +430,36 @@ public class KeyButtonView extends ImageView {
                 InputDevice.SOURCE_KEYBOARD);
         InputManager.getInstance().injectInputEvent(ev,
                 InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+    }
+
+    @Override
+    public ArrayList<String> onRegisterClass() {
+        ArrayList<String> uris = new ArrayList<String>();
+        uris.add(mConfigUri);
+        uris.add(mKeyColorUri);
+        uris.add(mGlowColorUri);
+        return uris;
+    }
+
+    @Override
+    public void onSetMessage(String uri, int msg) {
+        if (uri.equals(mConfigUri)) {
+            MSG_SOFTKEY_CUSTOM_CONFIG_CHANGED = msg;
+        } else if (uri.equals(mGlowColorUri)) {
+            MSG_GLOW_COLOR_CHANGED = msg;
+        } else if (uri.equals(mKeyColorUri)) {
+            MSG_KEY_COLOR_CHANGED = msg;
+        }
+    }
+
+    @Override
+    public void onFeatureStateChanged(int msg) {
+        if (msg == MSG_KEY_COLOR_CHANGED) {
+            updateKeyFilter();
+        } else if (msg == MSG_GLOW_COLOR_CHANGED) {
+            updateGlowFilter();
+        } else if (msg == MSG_SOFTKEY_CUSTOM_CONFIG_CHANGED) {
+            updateCustomConfig();
+        }
     }
 }

@@ -83,13 +83,12 @@ import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.EosGlassController;
-import com.android.systemui.statusbar.EosNxHandler;
-import com.android.systemui.statusbar.EosObserverHandler;
+import com.android.systemui.statusbar.EosObserver;
+import com.android.systemui.statusbar.EosObserver.FeatureListener;
 import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.NX;
 import com.android.systemui.statusbar.NotificationData;
-import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -358,6 +357,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     SystembarStateHandler mSystembarHandler;
     EosUiController mEosController;
+    EosObserver mEosObserver;
+    NX mNx;
     int MSG_QS_ENBLED_SETTINGS;
     int MSG_QS_TILES_SETTINGS;
     int MSG_QS_COLUMN_SETTINGS;
@@ -365,9 +366,41 @@ public class PhoneStatusBar extends BaseStatusBar {
     SystembarStateHandler.OnBarStateChangedListener mBarListener = new SystembarStateHandler.OnBarStateChangedListener() {
         @Override
         public void onBarStateChanged(int state) {
-            mIsNavbarHidden = state == View.GONE;            
-        }        
+            mIsNavbarHidden = state == View.GONE;
+        }
     };
+
+    public EosObserver getEosObserver() {
+        return mEosObserver;
+    }
+
+    public EosUiController getEos() {
+        return mEosController;
+    }
+
+    public void setNx(NX nx) {
+        mNx = nx;
+    }
+
+    private boolean isNxEnabled() {
+        return mNx != null ? mNx.isNxEnabled() : false;
+    }
+
+    private boolean isSearchLightLongPress() {
+        return mNx != null ? mNx.mSearchLightLongPress : false;
+    }
+
+    private void setSearchLightOn(boolean state) {
+        if (mNx != null) {
+            mNx.mSearchLightOn = state;
+        }
+    }
+
+    private void setSearchLightLongPress(boolean state) {
+        if (mNx != null) {
+            mNx.mSearchLightLongPress = state;
+        }
+    }
 
     @Override
     public void start() {
@@ -383,8 +416,39 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         // initialize bar settings before anything else happens
-        SystembarStateHandler.initHandler(mContext, mBarListener);
-        mSystembarHandler = SystembarStateHandler.getSystembarStateHandler();
+        mSystembarHandler = new SystembarStateHandler(mContext, mBarListener);
+        mEosObserver = new EosObserver(mContext);
+        mEosController = new EosUiController(mContext, mSystembarHandler, mEosObserver);
+        mEosObserver.registerClass(mEosController);
+
+        // let's get Eos fired up
+
+        MSG_QS_ENBLED_SETTINGS = mEosObserver.registerUri(EOSConstants.SYSTEMUI_PANEL_DISABLED);
+        MSG_QS_TILES_SETTINGS = mEosObserver.registerUri(EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES);
+        MSG_QS_COLUMN_SETTINGS = mEosObserver.registerUri(EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT);
+
+        mEosObserver.setFeatureListener(new FeatureListener() {
+            @Override
+            public void onFeatureStateChanged(int msg) {
+                if (msg == MSG_QS_ENBLED_SETTINGS
+                        || msg == MSG_QS_TILES_SETTINGS
+                        || msg == MSG_QS_COLUMN_SETTINGS) {
+                    processEosQsChange();
+                }
+            }
+
+            @Override
+            public ArrayList<String> onRegisterClass() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void onSetMessage(String uri, int msg) {
+                // TODO Auto-generated method stub
+
+            }
+        });
 
         super.start(); // calls createAndAddWindows()
 
@@ -402,29 +466,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     // ================================================================================
     protected PhoneStatusBarView makeStatusBarView() {
         final Context context = mContext;
-
-        // let's get Eos fired up
-        EosUiController.initEos(mContext, mSystembarHandler);
-        mEosController = EosUiController.getEosUiController();
-
-        MSG_QS_ENBLED_SETTINGS = EosObserverHandler.getEosObserverHandler()
-                .registerUri(EOSConstants.SYSTEMUI_PANEL_DISABLED);
-        MSG_QS_TILES_SETTINGS = EosObserverHandler.getEosObserverHandler()
-                .registerUri(EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES);
-        MSG_QS_COLUMN_SETTINGS = EosObserverHandler.getEosObserverHandler()
-                .registerUri(EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT);
-
-        EosObserverHandler.getEosObserverHandler()
-        .setOnFeatureStateChangedListener(new OnFeatureStateChangedListener() {
-            @Override
-            public void onFeatureStateChanged(int msg) {
-               if (msg == MSG_QS_ENBLED_SETTINGS
-                       || msg == MSG_QS_TILES_SETTINGS
-                       || msg == MSG_QS_COLUMN_SETTINGS) {
-                   processEosQsChange();
-               }                
-            }            
-        });
 
         Resources res = context.getResources();
 
@@ -593,6 +634,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mLocationController = new LocationController(mContext); // will post a
                                                                 // notification
         mBatteryController = new BatteryController(mContext);
+        mEosObserver.registerClass(mBatteryController);
         mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));
         mBatteryController.addLabelView((TextView)mStatusBarView.findViewById(R.id.battery_text));
 
@@ -827,7 +869,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private int mShowSearchHoldoff = 0;
     public Runnable mShowSearchPanel = new Runnable() {
         public void run() {
-            if (EosNxHandler.isSearchLightLongPress()|| !EosNxHandler.isNxEnabled()) {
+            if (isSearchLightLongPress()|| !isNxEnabled()) {
                 showSearchPanel();
                 awakenDreams();
             }
@@ -839,10 +881,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     if (!shouldDisableNavbarGestures()) {
-                        EosNxHandler.setSearchLightOn(true);
-                        EosNxHandler.setSearchLightLongPress(true);
+                        setSearchLightOn(true);
+                        setSearchLightLongPress(true);
                         mHandler.removeCallbacks(mShowSearchPanel);
-                        mHandler.postDelayed(mShowSearchPanel, EosNxHandler.isNxEnabled() ? ViewConfiguration.getLongPressTimeout() : mShowSearchHoldoff);
+                        mHandler.postDelayed(mShowSearchPanel, isNxEnabled() ? ViewConfiguration.getLongPressTimeout() : mShowSearchHoldoff);
                     }
                     break;
 
@@ -1388,7 +1430,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
-        if (EosGlassController.isGlassEnabled()) EosGlassController.applyGlassEffect();
+        mEosController.updateGlass();
     }
 
     @Override
@@ -2039,7 +2081,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             final View systemIcons = mStatusBarView.findViewById(R.id.statusIcons);
             final View signal = mStatusBarView.findViewById(R.id.signal_cluster);
             final View battery = mStatusBarView.findViewById(R.id.battery);
-            final View clock = mStatusBarView.findViewById(R.id.clock);
+            final View clock_cluster = mStatusBarView.findViewById(R.id.clock);
+            final View clock_center = mStatusBarView.findViewById(R.id.clock_center);
 
             final AnimatorSet lightsOutAnim = new AnimatorSet();
             lightsOutAnim.playTogether(
@@ -2047,7 +2090,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 0),
                     ObjectAnimator.ofFloat(signal, View.ALPHA, 0),
                     ObjectAnimator.ofFloat(battery, View.ALPHA, 0.5f),
-                    ObjectAnimator.ofFloat(clock, View.ALPHA, 0.5f)
+                    ObjectAnimator.ofFloat(clock_cluster, View.ALPHA, 0.5f),
+                    ObjectAnimator.ofFloat(clock_center, View.ALPHA, 0.5f)
                     );
             lightsOutAnim.setDuration(750);
 
@@ -2057,7 +2101,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 1),
                     ObjectAnimator.ofFloat(signal, View.ALPHA, 1),
                     ObjectAnimator.ofFloat(battery, View.ALPHA, 1),
-                    ObjectAnimator.ofFloat(clock, View.ALPHA, 1)
+                    ObjectAnimator.ofFloat(clock_cluster, View.ALPHA, 1),
+                    ObjectAnimator.ofFloat(clock_center, View.ALPHA, 1)
                     );
             lightsOnAnim.setDuration(250);
 
@@ -2095,7 +2140,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void topAppWindowChanged(boolean showMenu) {
-        if (EosGlassController.isGlassEnabled()) EosGlassController.applyGlassEffect();
+        mEosController.updateGlass();
 
         if (DEBUG) {
             Slog.d(TAG, (showMenu ? "showing" : "hiding") + " the MENU button");
@@ -2160,26 +2205,38 @@ public class PhoneStatusBar extends BaseStatusBar {
         public void tickerStarting() {
             mTicking = true;
             mStatusBarContents.setVisibility(View.GONE);
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .setVisibility(View.GONE);
             mTickerView.setVisibility(View.VISIBLE);
             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_up_in, null));
             mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_up_out,
                     null));
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .startAnimation(loadAnim(com.android.internal.R.anim.push_up_out, null));
         }
 
         @Override
         public void tickerDone() {
             mStatusBarContents.setVisibility(View.VISIBLE);
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
             mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in,
                     null));
             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_down_out,
                     mTickingDoneListener));
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
         }
 
         public void tickerHalting() {
             mStatusBarContents.setVisibility(View.VISIBLE);
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
             mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
+            ((LinearLayout) mStatusBarView.findViewById(R.id.clock_center_layout))
+                    .startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
             // we do not animate the ticker away at this point, just get rid of
             // it (b/6992707)
         }

@@ -86,6 +86,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         String signalContentDescription;
         int dataTypeIconId;
         String dataContentDescription;
+        boolean enabledByUser;
     }
 
     static class WifiState extends State {
@@ -345,6 +346,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private VolumeObserver mVolumeObserver;
     private NetworkStateObserver mNetworkObserver;
+    private ConnectivityManager mConnMan;
     private boolean mHasMobileData = false;
 
     // keep aosp constructor just in case
@@ -380,6 +382,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mNetworkObserver = new NetworkStateObserver(mHandler);
             mNetworkObserver.startObserving();
         }
+
+        mConnMan = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(Intent.ACTION_ALARM_CHANGED);
@@ -693,6 +697,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     void addRSSITile(QuickSettingsTileView view, RefreshCallback cb) {
         mRSSITile = view;
         mRSSICallback = cb;
+        mRSSIState.enabledByUser = mConnMan.getMobileDataEnabled();
         mRSSICallback.refreshView(mRSSITile, mRSSIState);
     }
 
@@ -729,6 +734,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 mRSSICallback.refreshView(mRSSITile, mRSSIState);
             }
         }
+    }
+
+    void refreshRSSI() {
+        mRSSIState.enabledByUser = mConnMan.getMobileDataEnabled();
+        mRSSICallback.refreshView(mRSSITile, mRSSIState);
     }
 
     // Bluetooth
@@ -1123,7 +1133,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             if (isToggleEnabled(DATA)) {
-                mRSSICallback.refreshView(mRSSITile, mRSSIState);
+                refreshRSSI();
             }
         }
     }

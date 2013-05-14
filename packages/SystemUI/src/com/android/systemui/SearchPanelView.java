@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.teameos.jellybean.settings.ActionHandler;
 import org.teameos.jellybean.settings.EOSConstants;
+import org.teameos.jellybean.settings.EOSUtils;
 
 import android.animation.LayoutTransition;
 import android.app.ActivityManagerNative;
@@ -216,15 +217,15 @@ public class SearchPanelView extends FrameLayout implements
         int startPosOffset;
         int endPosOffset;
 
-        boolean isHybridUi = mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_isHybridUiDevice);
-        boolean forcedTablet = isHybridUi && Settings.System.getInt(mContext.getContentResolver(),
+        boolean hybridBar = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR,
                 EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF) == 1;
-        if (screenLayout() == Configuration.SCREENLAYOUT_SIZE_XLARGE || forcedTablet) {
+        boolean isTabletUi = EOSUtils.hasSystemBar(mContext);
+
+        if (hybridBar || isTabletUi) {
             startPosOffset = 1;
             endPosOffset = 8;
-        } else if (screenLayout() == Configuration.SCREENLAYOUT_SIZE_LARGE) {
+        } else if (EOSUtils.isLargeScreen()) {
             startPosOffset = 1;
             endPosOffset = 4;
         } else {

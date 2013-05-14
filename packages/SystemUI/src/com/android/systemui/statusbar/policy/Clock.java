@@ -30,20 +30,20 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import com.android.internal.R;
-import com.android.systemui.statusbar.EosObserverHandler;
-import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
+import com.android.systemui.statusbar.EosObserver.FeatureListener;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
 /**
  * Digital clock for the status bar.
  */
-public class Clock extends TextView {
+public class Clock extends TextView implements FeatureListener {
     private boolean mAttached;
     private Calendar mCalendar;
     private String mClockFormatString;
@@ -82,19 +82,6 @@ public class Clock extends TextView {
                 mIsCenterView = true;
             }
         }
-
-        MSG_CLOCK_AMPM_SETTINGS = EosObserverHandler.getEosObserverHandler()
-                .registerUri(EOSConstants.SYSTEMUI_CLOCK_AMPM);
-
-        EosObserverHandler.getEosObserverHandler()
-                .setOnFeatureStateChangedListener(new OnFeatureStateChangedListener() {
-                    @Override
-                    public void onFeatureStateChanged(int msg) {
-                        if (msg == MSG_CLOCK_AMPM_SETTINGS) {
-                            updateAmPmStyle();
-                        }
-                    }
-                });
     }
 
     @Override
@@ -257,5 +244,26 @@ public class Clock extends TextView {
                 EOSConstants.SYSTEMUI_CLOCK_AMPM,
                 EOSConstants.SYSTEMUI_CLOCK_AMPM_DEF);
         updateAmPm();
+    }
+
+    @Override
+    public ArrayList<String> onRegisterClass() {
+        ArrayList<String> uris = new ArrayList<String>();
+        uris.add(EOSConstants.SYSTEMUI_CLOCK_AMPM);
+        return uris;
+    }
+
+    @Override
+    public void onSetMessage(String uri, int msg) {
+        if (uri.equals(EOSConstants.SYSTEMUI_CLOCK_AMPM)) {
+            MSG_CLOCK_AMPM_SETTINGS = msg;
+        }
+    }
+
+    @Override
+    public void onFeatureStateChanged(int msg) {
+        if (msg == MSG_CLOCK_AMPM_SETTINGS) {
+            updateAmPmStyle();
+        }
     }
 }

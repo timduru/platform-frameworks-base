@@ -31,12 +31,11 @@ import android.widget.TextView;
 import android.view.View;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.EosObserverHandler;
-import com.android.systemui.statusbar.EosObserverHandler.OnFeatureStateChangedListener;
+import com.android.systemui.statusbar.EosObserver.FeatureListener;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
-public class BatteryController extends BroadcastReceiver {
+public class BatteryController extends BroadcastReceiver implements FeatureListener {
     private static final String TAG = "StatusBar.BatteryController";
 
     private Context mContext;
@@ -78,19 +77,6 @@ public class BatteryController extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         context.registerReceiver(this, filter);
-
-        MSG_BATTERY_PERCENT_SETTINGS = EosObserverHandler.getEosObserverHandler()
-                .registerUri(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE);
-
-        EosObserverHandler.getEosObserverHandler()
-        .setOnFeatureStateChangedListener(new OnFeatureStateChangedListener() {
-            @Override
-            public void onFeatureStateChanged(int msg) {
-                if (msg == MSG_BATTERY_PERCENT_SETTINGS) {
-                    updateLabelPercent();
-                }
-            }
-        });
     }
 
     public void addIconView(ImageView v) {
@@ -163,5 +149,26 @@ public class BatteryController extends BroadcastReceiver {
                 cb.onBatteryLevelChanged(mLastPercentage, mCharging);
             }
         }
+    }
+
+    @Override
+    public ArrayList<String> onRegisterClass() {
+        ArrayList<String> uris = new ArrayList<String>();
+        uris.add(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE);
+        return uris;
+    }
+
+    @Override
+    public void onSetMessage(String uri, int msg) {
+        if(uri.equals(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE)) {
+            MSG_BATTERY_PERCENT_SETTINGS = msg;
+        }        
+    }
+
+    @Override
+    public void onFeatureStateChanged(int msg) {
+        if (msg == MSG_BATTERY_PERCENT_SETTINGS) {
+            updateLabelPercent();
+        }        
     }
 }

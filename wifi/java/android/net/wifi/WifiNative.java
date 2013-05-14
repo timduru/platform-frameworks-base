@@ -61,7 +61,7 @@ public class WifiNative {
 
     /* Sends a kill signal to supplicant. To be used when we have lost connection
        or when the supplicant is hung */
-    public native static boolean killSupplicant();
+    public native static boolean killSupplicant(boolean p2pSupported);
 
     private native boolean connectToSupplicant(String iface);
 
@@ -814,7 +814,7 @@ public class WifiNative {
     public List<WifiChannel> getSupportedChannels() {
         boolean ibssAllowed;
         List<WifiChannel> channels = new ArrayList<WifiChannel>();
-        String ret = doStringCommand("GET_CAPABILITY channels");
+        String ret = doStringCommand("GET_CAPABILITY freq");
 
         if (!TextUtils.isEmpty(ret)) {
             String[] lines = ret.split("\n");
