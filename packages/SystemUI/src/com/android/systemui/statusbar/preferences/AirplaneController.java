@@ -22,11 +22,11 @@ public class AirplaneController extends SettingsController {
     }
 
     protected int getPreferenceStatus() {
-        return Settings.System.getInt(mContentResolver, Settings.Global.AIRPLANE_MODE_ON, 0);
+        return Settings.Global.getInt(mContentResolver, Settings.Global.AIRPLANE_MODE_ON, 0);
     }
 
     protected void setPreferenceStatus(int status) {
-        Settings.System.putInt(mContentResolver, Settings.Global.AIRPLANE_MODE_ON, status);
+        Settings.Global.putInt(mContentResolver, Settings.Global.AIRPLANE_MODE_ON, status);
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         intent.putExtra("state", status == 1);
         mContext.sendBroadcast(intent);
