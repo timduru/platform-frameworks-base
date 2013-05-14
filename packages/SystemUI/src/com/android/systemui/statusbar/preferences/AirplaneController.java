@@ -22,11 +22,11 @@ public class AirplaneController extends SettingsController {
     }
 
     protected int getPreferenceStatus() {
-        return Settings.System.getInt(mContentResolver, Settings.System.AIRPLANE_MODE_ON, 0);
+        return Settings.System.getInt(mContentResolver, Settings.Global.AIRPLANE_MODE_ON, 0);
     }
 
     protected void setPreferenceStatus(int status) {
-        Settings.System.putInt(mContentResolver, Settings.System.AIRPLANE_MODE_ON, status);
+        Settings.System.putInt(mContentResolver, Settings.Global.AIRPLANE_MODE_ON, status);
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         intent.putExtra("state", status == 1);
         mContext.sendBroadcast(intent);
@@ -43,7 +43,7 @@ public class AirplaneController extends SettingsController {
 
     protected List<Uri> getObservedUris() {
         ArrayList<Uri> uris = new ArrayList<Uri>();
-        uris.add(Settings.Secure.getUriFor(Settings.System.AIRPLANE_MODE_ON));
+        uris.add(Settings.Secure.getUriFor(Settings.Global.AIRPLANE_MODE_ON));
 
         return uris;
     }
