@@ -60,7 +60,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Collections;
 
-class QuickSettingsModel implements BluetoothStateChangeCallback,
+public class QuickSettingsModel implements BluetoothStateChangeCallback,
         NetworkSignalChangedCallback,
         BatteryStateChangeCallback,
         LocationGpsStateChangeCallback,

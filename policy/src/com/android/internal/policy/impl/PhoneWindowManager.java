@@ -592,11 +592,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void onChange(boolean selfChange) {
             synchronized (mLock) {
-                updateBarSettings();
+                updateCustomUiMode();
                 setNavigationBarSize();
                 setGlassMode();
             }
-            mContext.sendBroadcast(new Intent().setAction(Intent.ACTION_CONFIGURATION_CHANGED));
+            Intent intent = new Intent()
+            .setAction(Intent.ACTION_CONFIGURATION_CHANGED)
+            .putExtra("get_eos", "came_from_windowManager");
+            mContext.sendBroadcastAsUser(intent, new UserHandle(
+                    UserHandle.USER_ALL));
         }
     }
 
@@ -1117,7 +1121,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 EOSConstants.SYSTEMUI_USE_GLASS_DEF) == 1;
     }
 
-    private void updateBarSettings() {
+    private void updateCustomUiMode() {
         /*
          * we start with the idea that the device has only 2 natural ui states
          * either a cap key device with only a phone style statbar and a device
@@ -1129,30 +1133,37 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 EOSConstants.SYSTEMUI_FORCE_NAVBAR, 0) == 1;
         final boolean mIsCapkey = !mContext.getResources().getBoolean(
                 R.bool.config_showNavigationBar);
+        mCanHideNavigationBar = true;
 
         // capkey devices
         if (mIsCapkey) {
             if (mForceNavbar) {
-                mHasNavigationBar = true;
-                mHasSystemNavBar = false;
-                mNavigationBarCanMove = true;
+                if (mForceTabletUi) {
+                    mHasNavigationBar = false;
+                    mHasSystemNavBar = true;
+                    mNavigationBarCanMove = false;
+                } else {
+                    mHasNavigationBar = true;
+                    mHasSystemNavBar = false;
+                    mNavigationBarCanMove = true;
+                }
             } else {
                 mHasNavigationBar = false;
                 mHasSystemNavBar = false;
                 mNavigationBarCanMove = false;
+                mCanHideNavigationBar = false;
             }
             return;
-        }
-
-        // can only be set true on large and xlarge atm
-        if (mForceTabletUi) {
-            mHasNavigationBar = false;
-            mHasSystemNavBar = true;
-            mNavigationBarCanMove = false;
         } else {
-            mHasNavigationBar = true;
-            mHasSystemNavBar = false;
-            mNavigationBarCanMove = EOSUtils.isNormalScreen();
+            if (mForceTabletUi) {
+                mHasNavigationBar = false;
+                mHasSystemNavBar = true;
+                mNavigationBarCanMove = false;
+            } else {
+                mHasNavigationBar = true;
+                mHasSystemNavBar = false;
+                mNavigationBarCanMove = EOSUtils.isNormalScreen();
+            }
         }
 
         // keep this around just for now
@@ -1200,15 +1211,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
 
-        // figure out what kind of bar we want first
-        updateBarSettings();
+        // figure out custom ui mode here
+        updateCustomUiMode();
 
-        // set it here once all the bar state
-        // bools have been initialized
+        // set size after ui config set
         setNavigationBarSize();
-
-        // always hide the bar
-        mCanHideNavigationBar = true;
 
         // For demo purposes, allow the rotation of the HDMI display to be
         // controlled.

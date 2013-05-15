@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.res.Resources;
 import android.provider.Settings;
@@ -28,11 +27,12 @@ import android.widget.FrameLayout;
 import com.android.systemui.R;
 
 import org.teameos.jellybean.settings.EOSConstants;
+import org.teameos.jellybean.settings.EOSUtils;
 
 /**
  *
  */
-class QuickSettingsContainerView extends FrameLayout {
+public class QuickSettingsContainerView extends FrameLayout {
 
     // The number of columns in the QuickSettings grid
     private int mNumColumns;
@@ -40,35 +40,25 @@ class QuickSettingsContainerView extends FrameLayout {
     // The gap between tiles in the QuickSettings grid
     private float mCellGap;
 
-    // The difference in height between normal cells
-    // and seekbar cells needed to properly measure height
-    private float mHeightDiff;
-
     // we need a context
     Context mContext;
+    
+    private boolean mIsTabletUi;
 
     public QuickSettingsContainerView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
+        mIsTabletUi = EOSUtils.hasSystemBar(getContext());
         updateResources();
     }
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-
-        // TODO: Setup the layout transitions
-        LayoutTransition transitions = getLayoutTransition();
-    }
-
-    void updateResources() {
+    public void updateResources() {
         Resources r = getContext().getResources();
-        mCellGap = r.getDimension(R.dimen.quick_settings_cell_gap);
         mNumColumns = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT,
                 EOSConstants.SYSTEMUI_PANEL_COLUMNS_DEF);
-        mHeightDiff = r.getDimension(R.dimen.quick_settings_cell_height)
-                - r.getDimension(R.dimen.quick_settings_slim_cell_height);
+        mCellGap = r.getDimension(mIsTabletUi ? R.dimen.quick_settings_cell_gap_tablet
+                : R.dimen.quick_settings_cell_gap);
         requestLayout();
     }
 
@@ -76,7 +66,6 @@ class QuickSettingsContainerView extends FrameLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // Calculate the cell width dynamically
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
         int availableWidth = (int) (width - getPaddingLeft() - getPaddingRight() -
                 (mNumColumns - 1) * mCellGap);
         float cellWidth = (float) Math.ceil(((float) availableWidth) / mNumColumns);
@@ -123,6 +112,7 @@ class QuickSettingsContainerView extends FrameLayout {
         // compensate for seekbar height variance
         // then shave the difference from newHeight
         int seekbarDiff = (int) Math.ceil((numCustomRows * cellHeight) - customHeight - mCellGap);
+
         int newHeight = (int) ((numRows * cellHeight) + ((numRows - 1) * mCellGap)) +
                 getPaddingTop() + getPaddingBottom() - seekbarDiff;
         setMeasuredDimension(width, newHeight);

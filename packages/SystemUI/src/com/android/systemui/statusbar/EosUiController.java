@@ -24,12 +24,11 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.EosObserver.FeatureListener;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.preferences.EosSettings;
-import com.android.systemui.statusbar.tablet.TabletStatusBarView;
 
 import org.teameos.jellybean.settings.EOSConstants;
+import org.teameos.jellybean.settings.EOSUtils;
 
 import java.util.ArrayList;
 
@@ -44,6 +43,11 @@ public class EosUiController implements FeatureListener {
 
     static final int STOCK_NAV_BAR = com.android.systemui.R.layout.navigation_bar;
     static final int EOS_NAV_BAR = com.android.systemui.R.layout.eos_navigation_bar;
+
+    private static final int max_notification_normal_ui = 5;
+    private static final int max_notification_tablets_on_tablet_ui_port = 3;
+    private static final int max_notification_phones_on_tablet_ui_port = 1;
+    private static final int max_notification_phones_on_tablet_ui_land = 2;
 
     private ArrayList<View> mBatteryList = new ArrayList<View>();
 
@@ -87,14 +91,23 @@ public class EosUiController implements FeatureListener {
     private boolean mIsClockVisible = true;
     private int mCurrentNavLayout;
     
-    private boolean mIsTabletUi = false;
+    private boolean mIsTabletUi;
+    private boolean mIsNormalScreen;
+
+    /*
+     * special case for large screen max icons
+     * keep it clean
+     */
+    private boolean mIsLargeScreen;
 
     public EosUiController(Context context, SystembarStateHandler handler, EosObserver observer) {
         mContext = context;
         mSystembarHandler = handler;
         mObserver = observer;
         mResolver = mContext.getContentResolver();
-        mIsTabletUi = Settings.System.getInt(mResolver, EOSConstants.SYSTEMUI_USE_TABLET_BAR, 0) == 1;
+        mIsTabletUi = EOSUtils.hasSystemBar(context);
+        mIsNormalScreen = EOSUtils.isNormalScreen();
+        mIsLargeScreen = EOSUtils.isLargeScreen();
         if (getEccRestartFlag()) {
             setEccRestartFlag(false);
             mContext.startActivityAsUser(getEccIntent(), new UserHandle(UserHandle.USER_CURRENT));
@@ -183,6 +196,14 @@ public class EosUiController implements FeatureListener {
         return lp;
     }
 
+    public boolean isNormalScreen() {
+        return mIsNormalScreen;
+    }
+
+    public boolean isTabletUi() {
+        return mIsTabletUi;
+    }
+
     public int getNavbarHeightResource() {
         int barMode = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0);
@@ -195,6 +216,63 @@ public class EosUiController implements FeatureListener {
                 return com.android.internal.R.dimen.navigation_bar_width_tiny_profile;
             default:
                 return com.android.internal.R.dimen.navigation_bar_width;
+        }
+    }
+
+    public int getNotificationPanelMinHeight() {
+        return R.dimen.notification_panel_min_height;
+    }
+
+    public int getNotificationPanelWidth() {
+        return mIsNormalScreen ? R.dimen.notification_panel_width_tablet_mode
+                : R.dimen.notification_panel_width;
+    }
+
+    public int getNotificationIconSize() {
+        int barMode = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0);
+        switch (barMode) {
+            case 0:
+                return R.dimen.system_bar_icon_size_normal;
+            case 1:
+                return R.dimen.system_bar_icon_size_slim;
+            case 2:
+                return R.dimen.system_bar_icon_size_tiny;
+            default:
+                return R.dimen.system_bar_icon_size_normal;
+        }
+    }
+
+    public int getNavigationKeyWidth() {
+        return mIsNormalScreen ? R.dimen.navigation_key_width_tablet_mode_on_phones
+                : R.dimen.navigation_key_width;
+    }
+
+    public int getMenuKeyWidth() {
+        return mIsNormalScreen ? R.dimen.navigation_menu_key_width_tablet_mode_on_phones
+                : R.dimen.navigation_menu_key_width;
+    }
+
+    public int getMaxNotificationIcons() {
+        final boolean isPortrait = !EOSUtils.isLandscape(mContext);
+        if (mIsTabletUi) {
+            if (mIsNormalScreen) {
+                if (isPortrait) {
+                    return max_notification_phones_on_tablet_ui_port;
+                } else {
+                    return max_notification_phones_on_tablet_ui_land;
+                }
+            } else if (mIsLargeScreen) {
+                if (isPortrait) {
+                    return max_notification_tablets_on_tablet_ui_port;
+                } else {
+                    return max_notification_normal_ui;
+                }
+            } else {
+                return max_notification_normal_ui;
+            }
+        } else {
+            return max_notification_normal_ui;
         }
     }
 

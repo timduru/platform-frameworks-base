@@ -2921,7 +2921,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (mSettingsPanel != null) {
                 mSettingsPanel.setQuickSettings(mQS);
             }
-            mQS.setService(this);
+//            mQS.setService(this);
             mQS.setBar(mStatusBarView);
             mQS.setEnabledTiles(tiles);
             mQS.setup(mNetworkController, mBluetoothController, mBatteryController,

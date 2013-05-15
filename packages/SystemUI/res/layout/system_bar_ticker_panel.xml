@@ -20,8 +20,9 @@
     android:layout_height="match_parent" >
 
     <View
+        android:id="@+id/system_bar_ticker_background_view"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/system_bar_height"
+        android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:background="@drawable/system_bar_ticker_background"
@@ -39,7 +40,7 @@
     <FrameLayout
         android:id="@+id/ticker_expanded"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/system_bar_height"
+        android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignWithParentIfMissing="true"
         android:layout_toRightOf="@id/large_icon"

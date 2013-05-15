@@ -24,18 +24,15 @@ import android.widget.FrameLayout;
 /**
  *
  */
-class QuickSettingsTileView extends FrameLayout {
+public class QuickSettingsTileView extends FrameLayout {
 
     private int mColSpan;
-    private int mRowSpan;
-    private int mCellWidth;
     private float mCustomHeight;
 
     public QuickSettingsTileView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mColSpan = 1;
-        mRowSpan = 1;
     }
 
     void setColumnSpan(int span) {

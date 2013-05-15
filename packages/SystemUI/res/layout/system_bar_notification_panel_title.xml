@@ -22,8 +22,8 @@
     android:background="@drawable/system_bar_notification_header_bg"
     android:clickable="true"
     android:orientation="vertical"
-    android:paddingLeft="26dp"
-    android:paddingRight="26dp"
+    android:paddingLeft="13dp"
+    android:paddingRight="13dp"
     android:paddingTop="14dp" >
 
     <TableLayout

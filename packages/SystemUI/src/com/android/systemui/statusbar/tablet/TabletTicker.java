@@ -38,6 +38,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -45,6 +46,8 @@ import com.android.internal.statusbar.StatusBarNotification;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
+
+import org.teameos.jellybean.settings.EOSUtils;
 
 public class TabletTicker
         extends Handler
@@ -216,7 +219,9 @@ public class TabletTicker
     private ViewGroup makeWindow() {
         final Resources res = mContext.getResources();
         final FrameLayout view = new FrameLayout(mContext);
-        final int width = res.getDimensionPixelSize(R.dimen.notification_ticker_width);
+        final int width = res
+                .getDimensionPixelSize(EOSUtils.isNormalScreen() ? R.dimen.notification_ticker_width_tablet_mode
+                        : R.dimen.notification_ticker_width);
         int windowFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -253,6 +258,13 @@ public class TabletTicker
         }
     }
 
+    /* easy way to override xml */
+    private void setCustomBarHeight(View group) {
+        ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) group.getLayoutParams();
+        params.height = mBar.getStatusBarHeight();
+        group.setLayoutParams(params);
+    }
+
     private View makeTickerView(StatusBarNotification notification) {
         final Notification n = notification.notification;
 
@@ -268,8 +280,10 @@ public class TabletTicker
             iconId = R.id.left_icon;
         }
         if (n.tickerView != null) {
-            group = (ViewGroup) inflater.inflate(R.layout.system_bar_ticker_panel, null, false);
+            group = (ViewGroup) inflater.inflate(R.layout.system_bar_ticker_panel, null, false);            
             ViewGroup content = (FrameLayout) group.findViewById(R.id.ticker_expanded);
+            setCustomBarHeight(group.findViewById(R.id.system_bar_ticker_background_view));
+            setCustomBarHeight(content);
             View expanded = null;
             Exception exception = null;
             try {
@@ -293,6 +307,7 @@ public class TabletTicker
                     new StatusBarIcon(notification.pkg, notification.user, n.icon, n.iconLevel, 0,
                             n.tickerText));
             ImageView iv = (ImageView) group.findViewById(iconId);
+            setCustomBarHeight(iv);
             iv.setImageDrawable(icon);
             iv.setVisibility(View.VISIBLE);
             TextView tv = (TextView) group.findViewById(R.id.text);

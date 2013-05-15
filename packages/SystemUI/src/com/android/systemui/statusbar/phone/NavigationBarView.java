@@ -76,7 +76,6 @@ public class NavigationBarView extends LinearLayout {
     View mCurrentView = null;
     View[] mRotatedViews = new View[4];
 
-    int mBarSize;
     boolean mVertical;
     boolean mScreenOn;
 
@@ -238,7 +237,6 @@ public class NavigationBarView extends LinearLayout {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         final Resources res = mContext.getResources();
-        mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
         mVertical = false;
         mShowMenu = false;
         mShowMenuPersist = Settings.System.getInt(mContext.getContentResolver(),

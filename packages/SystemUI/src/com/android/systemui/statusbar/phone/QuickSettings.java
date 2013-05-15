@@ -31,8 +31,11 @@ import com.android.systemui.statusbar.policy.BrightnessController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.ToggleSlider;
+import com.android.systemui.statusbar.tablet.NotificationPanel;
+import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 import org.teameos.jellybean.settings.EOSConstants;
+import org.teameos.jellybean.settings.EOSUtils;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -105,7 +108,7 @@ import java.util.List;
 /**
  *
  */
-class QuickSettings {
+public class QuickSettings {
     private static final String TAG = "QuickSettings";
     public static final boolean SHOW_IME_TILE = false;
 
@@ -113,6 +116,7 @@ class QuickSettings {
 
     private Context mContext;
     private PanelBar mBar;
+    private TabletStatusBar mTabletBar;
     private QuickSettingsModel mModel;
     private ViewGroup mContainerView;
 
@@ -133,6 +137,9 @@ class QuickSettings {
     private LevelListDrawable mChargingBatteryLevels;
 
     boolean mTilesSetUp = false;
+    private int mQsTileRes;
+    boolean mIsTabletUi = false;
+    private int mQsHeight_slim;    
 
     private Handler mHandler;
 
@@ -186,6 +193,9 @@ class QuickSettings {
         mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
         mContext = context;
         mContainerView = container;
+        mIsTabletUi = EOSUtils.hasSystemBar(context);
+        mQsHeight_slim = mIsTabletUi ? R.dimen.quick_settings_slim_cell_height_tablet : R.dimen.quick_settings_slim_cell_height;
+        mQsTileRes = mIsTabletUi ? R.layout.quick_settings_tablet_tile : R.layout.quick_settings_tile;
     }
 
     public void setEnabledTiles(List<String> tiles) {
@@ -234,6 +244,10 @@ class QuickSettings {
         mBar = bar;
     }
 
+    public void setTabletPanel(TabletStatusBar tabletBar) {
+        mTabletBar = tabletBar;
+    }
+
     public void setService(PhoneStatusBar phoneStatusBar) {
         mStatusBarService = phoneStatusBar;
     }
@@ -246,7 +260,27 @@ class QuickSettings {
         mModel.onImeWindowStatusChanged(visible);
     }
 
-    void setup(NetworkController networkController, BluetoothController bluetoothController,
+    private boolean isDeviceProvisioned() {
+        if (mStatusBarService != null) {
+            return mStatusBarService.isDeviceProvisioned();
+        } else if (mTabletBar != null) {
+            return mTabletBar.isDeviceProvisioned();
+        } else {
+            return true;
+        }
+    }
+
+    private void collapsePanels() {
+        if (mBar != null) {
+            mBar.collapseAllPanels(true);
+        } else {
+            if (mTabletBar != null) {
+                mTabletBar.animateCollapsePanels();
+            }
+        }
+    }
+
+    public void setup(NetworkController networkController, BluetoothController bluetoothController,
             BatteryController batteryController, LocationController locationController) {
 
         setupQuickSettings();
@@ -354,7 +388,7 @@ class QuickSettings {
     }
 
     private void startSettingsActivity(Intent intent, boolean onlyProvisioned) {
-        if (onlyProvisioned && !getService().isDeviceProvisioned())
+        if (onlyProvisioned && !isDeviceProvisioned())
             return;
         try {
             // Dismiss the lock screen when Settings starts.
@@ -363,18 +397,18 @@ class QuickSettings {
         }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-        getService().animateCollapsePanels();
+        collapsePanels();
     }
 
     private void addUserTiles(ViewGroup parent, LayoutInflater inflater) {
         // User
         QuickSettingsTileView userTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                inflater.inflate(mQsTileRes, parent, false);
         userTile.setContent(R.layout.quick_settings_tile_user, inflater);
         userTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBar.collapseAllPanels(true);
+                collapsePanels();
                 final UserManager um =
                         (UserManager) mContext.getSystemService(Context.USER_SERVICE);
                 if (um.getUsers(true).size() > 1) {
@@ -446,7 +480,7 @@ class QuickSettings {
     private void addTemporaryTiles(final ViewGroup parent, final LayoutInflater inflater) {
         // Alarm tile
         QuickSettingsTileView alarmTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                inflater.inflate(mQsTileRes, parent, false);
         alarmTile.setContent(R.layout.quick_settings_tile_alarm, inflater);
         alarmTile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -469,7 +503,7 @@ class QuickSettings {
 
         // Wifi Display
         QuickSettingsTileView wifiDisplayTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                inflater.inflate(mQsTileRes, parent, false);
         wifiDisplayTile.setContent(R.layout.quick_settings_tile_wifi_display, inflater);
         wifiDisplayTile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -491,13 +525,13 @@ class QuickSettings {
         if (SHOW_IME_TILE) {
             // IME
             QuickSettingsTileView imeTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             imeTile.setContent(R.layout.quick_settings_tile_ime, inflater);
             imeTile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     try {
-                        mBar.collapseAllPanels(true);
+                        collapsePanels();
                         Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
                                 intent, 0);
@@ -521,12 +555,12 @@ class QuickSettings {
 
         // Bug reports
         QuickSettingsTileView bugreportTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                inflater.inflate(mQsTileRes, parent, false);
         bugreportTile.setContent(R.layout.quick_settings_tile_bugreport, inflater);
         bugreportTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBar.collapseAllPanels(true);
+                collapsePanels();
                 showBugreportDialog();
             }
         });
@@ -551,7 +585,7 @@ class QuickSettings {
          */
     }
 
-    void updateResources() {
+    public void updateResources() {
         Resources r = mContext.getResources();
 
         // Update the model
@@ -695,8 +729,7 @@ class QuickSettings {
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile_more_slim, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setCustomHeight(mContext.getResources().getDimension(
-                R.dimen.quick_settings_more_slim_cell_height));
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(mQsHeight_slim));
         seekbarTile.setContent(R.layout.quick_settings_tile_vol_seekbar, inflater);
 
         final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
@@ -757,8 +790,7 @@ class QuickSettings {
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile_more_slim, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setCustomHeight(mContext.getResources().getDimension(
-                R.dimen.quick_settings_more_slim_cell_height));
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(mQsHeight_slim));
         seekbarTile.setContent(R.layout.quick_settings_tile_bright_seekbar, inflater);
 
         final SeekBar sbBrightness = (SeekBar) seekbarTile.findViewById(R.id.brightness_seekbar);
@@ -845,8 +877,7 @@ class QuickSettings {
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setCustomHeight(mContext.getResources().getDimension(
-                R.dimen.quick_settings_slim_cell_height));
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(mQsHeight_slim));
         seekbarTile.setContent(R.layout.quick_settings_tile_seekbar, inflater);
 
         final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
@@ -979,7 +1010,7 @@ class QuickSettings {
         } else if (tile.equals(SETTINGS)) {
             // Settings
             QuickSettingsTileView settingsTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             settingsTile.setContent(R.layout.quick_settings_tile_settings, inflater);
             settingsTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -996,7 +1027,7 @@ class QuickSettings {
                     controlPanelIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(controlPanelIntent);
 
-                    mBar.collapseAllPanels(true);
+                    collapsePanels();
                     return true;
                 }
             });
@@ -1012,7 +1043,7 @@ class QuickSettings {
         } else if (tile.equals(RINGER)) {
             // Ringer
             QuickSettingsTileView ringerTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             ringerTile.setContent(R.layout.quick_settings_tile_ringer, inflater);
             ringerTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1066,7 +1097,7 @@ class QuickSettings {
             parent.addView(ringerTile);
         } else if (tile.equals(LTE)) {
             QuickSettingsTileView lteTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             lteTile.setContent(R.layout.quick_settings_tile_lte, inflater);
             lteTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1096,8 +1127,7 @@ class QuickSettings {
                     intent.setClassName("com.android.phone", "com.android.phone.MobileNetworkSettings");
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
-                    StatusBarManager statusbar = (StatusBarManager) mContext.getSystemService("statusbar");
-                    statusbar.collapsePanels();
+                    collapsePanels();
                     return true;
                 }
             });
@@ -1120,7 +1150,7 @@ class QuickSettings {
             parent.addView(lteTile);
         } else if (tile.equals(TWOGEEZ)) {
             QuickSettingsTileView twoGeezTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             twoGeezTile.setContent(R.layout.quick_settings_tile_2g3g, inflater);
             twoGeezTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1147,8 +1177,7 @@ class QuickSettings {
                     intent.setClassName("com.android.phone", "com.android.phone.MobileNetworkSettings");
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
-                    StatusBarManager statusbar = (StatusBarManager) mContext.getSystemService("statusbar");
-                    statusbar.collapsePanels();
+                    collapsePanels();
                     return true;
                 }
             });
@@ -1169,7 +1198,7 @@ class QuickSettings {
             parent.addView(twoGeezTile);
         } else if (tile.equals(SYNC)) {
             QuickSettingsTileView syncTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             syncTile.setContent(R.layout.quick_settings_tile_sync, inflater);
             syncTile.setOnClickListener(new View.OnClickListener() {
 
@@ -1205,7 +1234,7 @@ class QuickSettings {
         } else if (tile.equals(BATTERY)) {
             // Battery
             QuickSettingsTileView batteryTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             batteryTile.setContent(R.layout.quick_settings_tile_battery, inflater);
             batteryTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1246,7 +1275,7 @@ class QuickSettings {
         } else if (tile.equals(ROTATION)) {
             // Rotation Lock
             QuickSettingsTileView rotationLockTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             rotationLockTile.setContent(R.layout.quick_settings_tile_rotation_lock, inflater);
             rotationLockTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1267,7 +1296,7 @@ class QuickSettings {
         } else if (tile.equals(AIRPLANE)) {
             // Airplane
             QuickSettingsTileView airplaneTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             airplaneTile.setContent(R.layout.quick_settings_tile_airplane, inflater);
             mModel.addAirplaneModeTile(airplaneTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
@@ -1288,7 +1317,7 @@ class QuickSettings {
         } else if (tile.equals(WIFI)) {
             // Wi-fi
             QuickSettingsTileView wifiTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             wifiTile.setContent(R.layout.quick_settings_tile_wifi, inflater);
             wifiTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1321,7 +1350,7 @@ class QuickSettings {
         } else if (mModel.deviceSupportsTelephony() && tile.equals(DATA)) {
             // RSSI
             QuickSettingsTileView rssiTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             rssiTile.setContent(R.layout.quick_settings_tile_rssi, inflater);
             rssiTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1340,7 +1369,7 @@ class QuickSettings {
                     roamingMenuIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(roamingMenuIntent);
 
-                    mBar.collapseAllPanels(true);
+                    collapsePanels();
                     return true;
                 }
             });
@@ -1370,7 +1399,7 @@ class QuickSettings {
         } else if (mModel.deviceSupportsBluetooth() && tile.equals(BT)) {
             // Bluetooth
             QuickSettingsTileView bluetoothTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             bluetoothTile.setContent(R.layout.quick_settings_tile_bluetooth, inflater);
             bluetoothTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1420,7 +1449,7 @@ class QuickSettings {
         } else if (tile.equals(LOCATION)) {
             // Location
             QuickSettingsTileView locationTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             locationTile.setContent(R.layout.quick_settings_tile_location, inflater);
             locationTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1462,7 +1491,7 @@ class QuickSettings {
         } else if (tile.equals(WIFIAP)) {
             // Wifi AP
             QuickSettingsTileView WifiApTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             WifiApTile.setContent(R.layout.quick_settings_tile_wifiap, inflater);
             WifiApTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1506,7 +1535,7 @@ class QuickSettings {
         } else if (tile.equals(TORCH)) {
             // Torch
             QuickSettingsTileView torchTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             torchTile.setContent(R.layout.quick_settings_tile_torch, inflater);
             torchTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1536,7 +1565,7 @@ class QuickSettings {
         } else if (tile.equals(SCREEN)) {
             // Screen
             QuickSettingsTileView screenTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             screenTile.setContent(R.layout.quick_settings_tile_screen, inflater);
             screenTile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1556,12 +1585,12 @@ class QuickSettings {
             parent.addView(screenTile);
         } else if (tile.equals(BRIGHTNESS)) {
             QuickSettingsTileView brightnessTile = (QuickSettingsTileView)
-                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                    inflater.inflate(mQsTileRes, parent, false);
             brightnessTile.setContent(R.layout.quick_settings_tile_brightness, inflater);
             brightnessTile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mBar.collapseAllPanels(true);
+                    collapsePanels();
                     showBrightnessDialog();
                 }
             });

@@ -225,7 +225,7 @@ public class SearchPanelView extends FrameLayout implements
         if (hybridBar || isTabletUi) {
             startPosOffset = 1;
             endPosOffset = 8;
-        } else if (EOSUtils.isLargeScreen()) {
+        } else if (EOSUtils.isLargeScreen() || EOSUtils.isXLargeScreen()) {
             startPosOffset = 1;
             endPosOffset = 4;
         } else {

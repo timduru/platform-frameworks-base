@@ -57,10 +57,7 @@
     
     <!-- full tablet bar stuffs -->
         <!-- The minimum height of the notification panel window -->
-    <dimen name="notification_panel_min_height">770dp</dimen>
-        <!-- Bottom margin (from display edge) for status bar panels -->
-    <dimen name="panel_float">56dp</dimen>
+    <dimen name="notification_panel_min_height">225dp</dimen>
     <!-- The width of the ticker, including the icon -->
     <dimen name="notification_ticker_width">360dp</dimen>
-
 </resources>

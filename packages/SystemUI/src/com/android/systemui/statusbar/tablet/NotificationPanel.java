@@ -21,12 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
@@ -45,10 +40,19 @@ import android.widget.RelativeLayout;
 
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.EosUiController;
+import com.android.systemui.statusbar.phone.QuickSettings;
+import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
+import com.android.systemui.statusbar.phone.QuickSettingsScrollView;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
 import org.teameos.jellybean.settings.EOSConstants;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         View.OnClickListener {
@@ -64,20 +68,26 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     boolean mHasClearableNotifications = false;
     int mNotificationCount = 0;
     NotificationPanelTitle mTitleArea;
+    View mFloatSpace;
     View mSettingsButton;
     View mNotificationButton;
     View mNotificationScroller;
     ViewGroup mContentFrame;
     Rect mContentArea = new Rect();
-    View mSettingsView;
+
+    QuickSettingsScrollView mSettingsContainer;
+    QuickSettingsContainerView mSettingsView;
+    QuickSettings mQS;
+    BatteryController mBatteryController;
+    BluetoothController mBluetoothController;
+    LocationController mLocationController;
+    NetworkController mNetworkController;
+
     ViewGroup mContentParent;
     TabletStatusBar mBar;
     ImageView mClearButton;
     static Interpolator sAccelerateInterpolator = new AccelerateInterpolator();
     static Interpolator sDecelerateInterpolator = new DecelerateInterpolator();
-
-    Drawable mBigButton;
-    Drawable mStockButton;
 
     // amount to slide mContentParent down by when mContentFrame is missing
     float mContentFrameMissingTranslation;
@@ -104,6 +114,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
         mContentParent = (ViewGroup) findViewById(R.id.content_parent);
         mContentParent.bringToFront();
+        mFloatSpace = (View) findViewById(R.id.system_bar_notification_panel_bottom_space);
         mTitleArea = (NotificationPanelTitle) findViewById(R.id.title_area);
         mTitleArea.setPanel(this);
 
@@ -120,12 +131,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mClearButton.setOnClickListener(mClearButtonListener);
 
         mClearButton.setAdjustViewBounds(true);
-        mStockButton = mClearButton.getDrawable();
-        int mBigX = Math.round(mStockButton.getIntrinsicWidth() * 1.5f);
-        int mBigY = Math.round(mStockButton.getIntrinsicHeight() * 1.5f);
-        Bitmap bigButton = Bitmap.createScaledBitmap(
-                EosUiController.drawableToBitmap(mStockButton), mBigX, mBigY, true);
-        mBigButton = new BitmapDrawable(getResources(), bigButton);
 
         mShowing = false;
     }
@@ -136,14 +141,13 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         latestItems = (NotificationRowLayout) findViewById(R.id.content);
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
+        int panelHeightOffset = getResources().getDimensionPixelSize(R.dimen.notification_panel_start_offset);
         mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
         mExpandHelper.setGravity(Gravity.BOTTOM);
-
-        // also set here for initial view
-        boolean mBigClearButton = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_TABLET_BIG_CLEAR_BUTTON, 0) == 1 ? true : false;
-        mClearButton.setImageDrawable(mBigClearButton ? mBigButton : mStockButton);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mFloatSpace.getLayoutParams();
+        params.height = mBar.getStatusBarHeight() + panelHeightOffset;
+        mFloatSpace.setLayoutParams(params);
     }
 
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
@@ -202,15 +206,9 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     @Override
     public void onVisibilityChanged(View v, int vis) {
         super.onVisibilityChanged(v, vis);
-        // I think this is better than registering yet another observer
-        if (vis == View.VISIBLE) {
-            boolean mBigClearButton = Settings.System.getInt(mContext.getContentResolver(),
-                    EOSConstants.SYSTEMUI_TABLET_BIG_CLEAR_BUTTON, 0) == 1 ? true : false;
-            mClearButton.setImageDrawable(mBigClearButton ? mBigButton : mStockButton);
-        }
         // when we hide, put back the notifications
         if (vis != View.VISIBLE) {
-            if (mSettingsView != null)
+            if (mSettingsContainer != null)
                 removeSettingsView();
             mNotificationScroller.setVisibility(View.VISIBLE);
             mNotificationScroller.setAlpha(1f);
@@ -279,13 +277,13 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
     public void swapPanels() {
         final View toShow, toHide;
-        if (mSettingsView == null) {
+        if (mSettingsContainer == null) {
             addSettingsView();
-            toShow = mSettingsView;
+            toShow = mSettingsContainer;
             toHide = mNotificationScroller;
         } else {
             toShow = mNotificationScroller;
-            toHide = mSettingsView;
+            toHide = mSettingsContainer;
         }
         Animator a = ObjectAnimator.ofFloat(toHide, "alpha", 1f, 0f)
                 .setDuration(PANEL_FADE_DURATION);
@@ -295,13 +293,13 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                 toHide.setVisibility(View.GONE);
                 if (toShow != null) {
                     toShow.setVisibility(View.VISIBLE);
-                    if (toShow == mSettingsView || mNotificationCount > 0) {
+                    if (toShow == mSettingsContainer || mNotificationCount > 0) {
                         ObjectAnimator.ofFloat(toShow, "alpha", 0f, 1f)
                                 .setDuration(PANEL_FADE_DURATION)
                                 .start();
                     }
 
-                    if (toHide == mSettingsView) {
+                    if (toHide == mSettingsContainer) {
                         removeSettingsView();
                     }
                 }
@@ -326,7 +324,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public void updatePanelModeButtons() {
-        final boolean settingsVisible = (mSettingsView != null);
+        final boolean settingsVisible = (mSettingsContainer != null);
         mSettingsButton
                 .setVisibility(!settingsVisible && mSettingsButton.isEnabled() ? View.VISIBLE
                         : View.GONE);
@@ -346,19 +344,72 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     void removeSettingsView() {
-        if (mSettingsView != null) {
-            mContentFrame.removeView(mSettingsView);
+        if (mSettingsContainer != null) {
+            mContentFrame.removeView(mSettingsContainer);
+            mSettingsContainer = null;
             mSettingsView = null;
         }
+    }
+    
+
+    public void setImeWindowStatus(boolean visible) {
+        if (mQS != null) {
+            mQS.setImeWindowStatus(visible);
+        }
+    }
+
+    public void setQsControllers(NetworkController networkController, BluetoothController bluetoothController,
+            BatteryController batteryController, LocationController locationController) {
+        mNetworkController = networkController;
+        mBluetoothController = bluetoothController;
+        mBatteryController = batteryController;
+        mLocationController = locationController;
+        if (mQS != null) {
+            mQS.setup(networkController, bluetoothController, batteryController,
+                    locationController);
+        }
+    }
+    
+
+    void updateResources() {
+        if (mQS != null) {
+            mQS.updateResources();
+        }
+        if (mSettingsView != null) {
+            mSettingsView.updateResources();
+        }
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mFloatSpace.getLayoutParams();
+        params.height = mBar.getStatusBarHeight();
+        mFloatSpace.setLayoutParams(params);
+        mFloatSpace.
+        requestLayout();
     }
 
     // NB: it will be invisible until you show it
     void addSettingsView() {
         LayoutInflater infl = LayoutInflater.from(getContext());
-        mSettingsView = infl.inflate(R.layout.system_bar_settings_view, mContentFrame, false);
-        mSettingsView.setVisibility(View.GONE);
-        mContentFrame.addView(mSettingsView);
-        mBar.getEos().setTabletSettingsView(mSettingsView);
+        mSettingsContainer = (QuickSettingsScrollView) infl.inflate(
+                R.layout.system_bar_settings_view, mContentFrame, false);
+        mSettingsView = (QuickSettingsContainerView) mSettingsContainer
+                .findViewById(R.id.quick_settings_container);
+
+        mQS = new QuickSettings(mContext, mSettingsView);
+
+        List<String> tiles;
+        String tempTilesString = Settings.System.getString(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES);
+        if (tempTilesString != null) {
+            tiles = Arrays.asList(tempTilesString.split("\\|"));
+        } else {
+            tiles = Arrays.asList(EOSConstants.SYSTEMUI_PANEL_DEFAULTS);
+        }
+
+        mQS.setTabletPanel(mBar);
+        mQS.setEnabledTiles(tiles);
+        mQS.setup(mNetworkController, mBluetoothController, mBatteryController,
+                mLocationController);
+        mSettingsContainer.setVisibility(View.GONE);
+        mContentFrame.addView(mSettingsContainer);
     }
 
     private class Choreographer implements Animator.AnimatorListener {
