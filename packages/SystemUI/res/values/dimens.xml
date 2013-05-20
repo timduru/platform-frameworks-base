@@ -134,13 +134,9 @@
 
     <!-- The width of the view containing non-menu status bar icons -->
     <dimen name="navigation_key_width">80dip</dimen>
-    <dimen name="navigation_key_width_tablet_mode_on_tablets">60dip</dimen>
-    <dimen name="navigation_key_width_tablet_mode_on_phones">50dip</dimen>
 
     <!-- The width of the view containing the menu status bar icon -->
     <dimen name="navigation_menu_key_width">40dip</dimen>
-    <dimen name="navigation_menu_key_width_tablet_mode_on_tablets">20dip</dimen>
-    <dimen name="navigation_menu_key_width_tablet_mode_on_phones">20dip</dimen>
 
     <!-- Default distance beyond which snaps to the matching target -->
     <dimen name="navbar_search_snap_margin">40dip</dimen>
@@ -225,27 +221,34 @@
     <dimen name="peek_height">84dp</dimen>
     
     <!-- dimensions for tabletstatusbar on normal screens -->
-
+    
     <!-- The width of the notification panel window: 446 + 16 + 16 (padding in the bg drawable) -->
     <dimen name="notification_panel_width_tablet_mode">325dp</dimen>
-            <!-- The minimum height of the notification panel window -->
+    <!-- The minimum height of the notification panel window -->
     <dimen name="notification_panel_min_height">100dp</dimen>
     <!-- The width of the ticker, including the icon -->
     <dimen name="notification_ticker_width_tablet_mode">180dp</dimen>
-    
-        <!-- Height of notification icons in the system bar -->
+    <!-- distance above system bar notification panel floats -->
+    <dimen name="notification_panel_start_offset">20dp</dimen>
+
+    <!-- Height of notification icons in the system bar -->
     <dimen name="system_bar_icon_size_normal">32dip</dimen>
     <dimen name="system_bar_icon_size_slim">24dip</dimen>
     <dimen name="system_bar_icon_size_tiny">16dip</dimen>
-    
+
     <!-- The fixed height of each tile in tablet mode -->
     <dimen name="quick_settings_cell_height_tablet">90dp</dimen>
-
+    <!-- height for seekbar tiles -->
         <!-- height for seekbar tiles -->
-    <dimen name="quick_settings_slim_cell_height_tablet">50dp</dimen>
+    <dimen name="quick_settings_slim_cell_height_tablet">65dp</dimen>
+    <dimen name="quick_settings_more_slim_cell_height_tablet">40dp</dimen>
     <!-- The padding between each tile within the QuickSettings layout -->
-    <dimen name="quick_settings_cell_gap_tablet">2dp</dimen>
-    <!-- distance above system bar notification panel floats -->
-    <dimen name="notification_panel_start_offset">20dp</dimen>
+    <dimen name="quick_settings_cell_gap_tablet">4dp</dimen>
+
+    <!-- navigation area key spacing -->
+    <dimen name="navigation_menu_key_width_tablet_mode_on_tablets">20dip</dimen>
+    <dimen name="navigation_menu_key_width_tablet_mode_on_phones">20dip</dimen>
+    <dimen name="navigation_key_width_tablet_mode_on_tablets">60dip</dimen>
+    <dimen name="navigation_key_width_tablet_mode_on_phones">50dip</dimen>
 
 </resources>

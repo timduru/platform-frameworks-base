@@ -164,7 +164,7 @@ public class EosUiController implements FeatureListener {
             handleClockChange();
             return;
         } else if (msg == MSG_LEGACY_TOGGLES_SETTINGS) {
-            handleLegacyTogglesChange();
+            // handleLegacyTogglesChange();
             return;
         } else if (msg == MSG_HYBRID_BAR_SETTINGS
                 || msg == MSG_TABLET_BAR_MODE_SETTINGS
@@ -245,12 +245,12 @@ public class EosUiController implements FeatureListener {
 
     public int getNavigationKeyWidth() {
         return mIsNormalScreen ? R.dimen.navigation_key_width_tablet_mode_on_phones
-                : R.dimen.navigation_key_width;
+                : R.dimen.navigation_key_width_tablet_mode_on_tablets;
     }
 
     public int getMenuKeyWidth() {
         return mIsNormalScreen ? R.dimen.navigation_menu_key_width_tablet_mode_on_phones
-                : R.dimen.navigation_menu_key_width;
+                : R.dimen.navigation_menu_key_width_tablet_mode_on_tablets;
     }
 
     public int getMaxNotificationIcons() {
@@ -312,17 +312,11 @@ public class EosUiController implements FeatureListener {
         mService = service;
     }
 
+
     public void setBarWindow(StatusBarWindowView window) {
         if (mIsTabletUi)
             return;
         mStatusBarWindow = window;
-        handleLegacyTogglesChange();
-        mStatusBarWindow.setEosSettings(mEosLegacyToggles);
-    }
-    
-    public void setTabletSettingsView(View v) {
-        mTabletSettingsView = v;
-        handleLegacyTogglesChange();
     }
 
     // we need this to be set when the theme engine creates new view
@@ -380,10 +374,6 @@ public class EosUiController implements FeatureListener {
     static void log(String s) {
         if (DEBUG)
             Log.i(TAG, s);
-    }
-
-    public EosSettings getEosSettings() {
-        return mEosLegacyToggles;
     }
 
     private void restartSystemUIServce() {

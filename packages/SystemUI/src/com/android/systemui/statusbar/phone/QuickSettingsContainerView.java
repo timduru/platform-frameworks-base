@@ -48,7 +48,7 @@ public class QuickSettingsContainerView extends FrameLayout {
     public QuickSettingsContainerView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        mIsTabletUi = EOSUtils.hasSystemBar(getContext());
+        mIsTabletUi = EOSUtils.hasSystemBar(context);
         updateResources();
     }
 
@@ -75,6 +75,7 @@ public class QuickSettingsContainerView extends FrameLayout {
         int cellHeight = 0;
         int cursor = 0;
         int numCustomRows = 0;
+        int seekbarDiff = 0;
         float customHeight = 0;
         for (int i = 0; i < N; ++i) {
             // Update the child's width
@@ -111,7 +112,12 @@ public class QuickSettingsContainerView extends FrameLayout {
         int numRows = (int) Math.ceil((float) cursor / mNumColumns);
         // compensate for seekbar height variance
         // then shave the difference from newHeight
-        int seekbarDiff = (int) Math.ceil((numCustomRows * cellHeight) - customHeight - mCellGap);
+
+        // this is a good formula for height
+        if (numCustomRows > 0) {
+            int sizeOfNormalRows = (int) ((numCustomRows * cellHeight));
+            seekbarDiff = (int) (sizeOfNormalRows - customHeight);
+        }
 
         int newHeight = (int) ((numRows * cellHeight) + ((numRows - 1) * mCellGap)) +
                 getPaddingTop() + getPaddingBottom() - seekbarDiff;

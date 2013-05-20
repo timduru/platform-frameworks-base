@@ -114,7 +114,8 @@ public class StatusBarWindowView extends FrameLayout
         }
         return handled;
     }
-
+    
+    /* disable for now, but keep this code around
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         // TODO Auto-generated method stub
@@ -127,6 +128,7 @@ public class StatusBarWindowView extends FrameLayout
                 mEosSettings.detach();
         }
     }
+    */
 
     @Override
     public void onDraw(Canvas canvas) {
@@ -146,7 +148,9 @@ public class StatusBarWindowView extends FrameLayout
         }
     }
 
+    /*
     public void setEosSettings(EosSettings settings) {
         mEosSettings = settings;
     }
+    */
 }

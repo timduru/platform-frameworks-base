@@ -137,9 +137,13 @@ public class QuickSettings {
     private LevelListDrawable mChargingBatteryLevels;
 
     boolean mTilesSetUp = false;
-    private int mQsTileRes;
     boolean mIsTabletUi = false;
-    private int mQsHeight_slim;    
+
+    private int mQsTileRes;
+    private int mQsSlimTileRes;
+    private int mQsSlimmerTileRes;
+    private int mQsHeight_slim;
+    private int mQsHeight_more_slim;
 
     private Handler mHandler;
 
@@ -193,9 +197,14 @@ public class QuickSettings {
         mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
         mContext = context;
         mContainerView = container;
+
+        // get our resources accordingly
         mIsTabletUi = EOSUtils.hasSystemBar(context);
         mQsHeight_slim = mIsTabletUi ? R.dimen.quick_settings_slim_cell_height_tablet : R.dimen.quick_settings_slim_cell_height;
+        mQsHeight_more_slim = mIsTabletUi ? R.dimen.quick_settings_more_slim_cell_height_tablet : R.dimen.quick_settings_more_slim_cell_height;
         mQsTileRes = mIsTabletUi ? R.layout.quick_settings_tablet_tile : R.layout.quick_settings_tile;
+        mQsSlimTileRes = mIsTabletUi ? R.layout.quick_settings_tile_slim_tablet : R.layout.quick_settings_tile_slim;
+        mQsSlimmerTileRes = mIsTabletUi ? R.layout.quick_settings_tile_more_slim_tablet : R.layout.quick_settings_tile_more_slim;
     }
 
     public void setEnabledTiles(List<String> tiles) {
@@ -727,9 +736,9 @@ public class QuickSettings {
     private void addVolSliderTile(ViewGroup parent, LayoutInflater inflater) {
         // Seekbar
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile_more_slim, parent, false);
+                inflater.inflate(mQsSlimmerTileRes, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setCustomHeight(mContext.getResources().getDimension(mQsHeight_slim));
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(mQsHeight_more_slim));
         seekbarTile.setContent(R.layout.quick_settings_tile_vol_seekbar, inflater);
 
         final SeekBar sbVolume = (SeekBar) seekbarTile.findViewById(R.id.volume_seekbar);
@@ -788,9 +797,9 @@ public class QuickSettings {
     private void addBrightSliderTile(ViewGroup parent, LayoutInflater inflater) {
         // Seekbar
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile_more_slim, parent, false);
+                inflater.inflate(mQsSlimmerTileRes, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
-        seekbarTile.setCustomHeight(mContext.getResources().getDimension(mQsHeight_slim));
+        seekbarTile.setCustomHeight(mContext.getResources().getDimension(mQsHeight_more_slim));
         seekbarTile.setContent(R.layout.quick_settings_tile_bright_seekbar, inflater);
 
         final SeekBar sbBrightness = (SeekBar) seekbarTile.findViewById(R.id.brightness_seekbar);
@@ -875,7 +884,7 @@ public class QuickSettings {
     private void addSliderTile(ViewGroup parent, LayoutInflater inflater) {
         // Seekbar
         QuickSettingsTileView seekbarTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile_slim, parent, false);
+                inflater.inflate(mQsSlimTileRes, parent, false);
         seekbarTile.setColumnSpan(mSeekbarSpan);
         seekbarTile.setCustomHeight(mContext.getResources().getDimension(mQsHeight_slim));
         seekbarTile.setContent(R.layout.quick_settings_tile_seekbar, inflater);
