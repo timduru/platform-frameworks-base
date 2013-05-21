@@ -275,6 +275,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHasNavigationBar = false;
     boolean mCanHideNavigationBar = false;
     boolean mNavigationBarCanMove = false; // can the navigation bar ever move to the side?
+    boolean mNavigationBarCanMoveDefaultState = false; // store device initial factory state
     boolean mNavigationBarOnBottom = true; // is the navigation bar on the bottom *right now*?
     int[] mNavigationBarHeightForRotation = new int[4];
     int[] mNavigationBarWidthForRotation = new int[4];
@@ -1145,15 +1146,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 } else {
                     mHasNavigationBar = true;
                     mHasSystemNavBar = false;
-                    mNavigationBarCanMove = true;
+                    mNavigationBarCanMove = mNavigationBarCanMoveDefaultState;
                 }
             } else {
                 mHasNavigationBar = false;
                 mHasSystemNavBar = false;
-                mNavigationBarCanMove = false;
                 mCanHideNavigationBar = false;
+                mNavigationBarCanMove = false;
             }
-            return;
         } else {
             if (mForceTabletUi) {
                 mHasNavigationBar = false;
@@ -1162,21 +1162,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else {
                 mHasNavigationBar = true;
                 mHasSystemNavBar = false;
-                mNavigationBarCanMove = EOSUtils.isNormalScreen();
-            }
-        }
-
-        // keep this around just for now
-        if (!mHasSystemNavBar) {
-            // Allow a system property to override this. Used by the emulator.
-            // See also hasNavigationBar().
-            String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
-            if (!"".equals(navBarOverride)) {
-                if (navBarOverride.equals("1")) {
-                    mHasNavigationBar = false;
-                    mNavigationBarCanMove = false;
-                } else if (navBarOverride.equals("0"))
-                    mHasNavigationBar = true;
+                mNavigationBarCanMove = mNavigationBarCanMoveDefaultState;
             }
         }
     }
@@ -1184,7 +1170,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void setInitialDisplaySize(Display display, int width, int height, int density) {
         mDisplay = display;
 
+        int shortSize, longSize;
+
         if (width > height) {
+            shortSize = height;
+            longSize = width;
             mLandscapeRotation = Surface.ROTATION_0;
             mSeascapeRotation = Surface.ROTATION_180;
             if (mContext.getResources().getBoolean(
@@ -1196,6 +1186,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mUpsideDownRotation = Surface.ROTATION_90;
             }
         } else {
+            shortSize = width;
+            longSize = height;
             mPortraitRotation = Surface.ROTATION_0;
             mUpsideDownRotation = Surface.ROTATION_180;
             if (mContext.getResources().getBoolean(
@@ -1211,8 +1203,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
 
+        // keep bar "movability" default state
+        int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
+
+        if (shortSizeDp < 600) {
+            mNavigationBarCanMoveDefaultState = true;
+        } else if (shortSizeDp < 720) {
+            mNavigationBarCanMoveDefaultState = false;
+        }
+
         // figure out custom ui mode here
         updateCustomUiMode();
+
+        // keep this around just for now
+        if (!mHasSystemNavBar) {
+            // Allow a system property to override this. Used by the emulator.
+            // See also hasNavigationBar().
+            String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
+            if (!"".equals(navBarOverride)) {
+                if (navBarOverride.equals("1")) {
+                    mHasNavigationBar = false;
+                    mNavigationBarCanMove = false;
+                } else if (navBarOverride.equals("0"))
+                    mHasNavigationBar = true;
+            }
+        }
 
         // set size after ui config set
         setNavigationBarSize();
