@@ -756,10 +756,8 @@ public class TabletStatusBar extends BaseStatusBar {
 
     public int getStatusBarHeight() {
         final Resources res = mContext.getResources();
-        return mEosController != null ? res.getDimensionPixelSize(mEosController
-                .getNavbarHeightResource())
-                : mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height);
+        return res.getDimensionPixelSize(mEosController
+                .getNavbarHeightResource());
     }
 
     protected int getStatusBarGravity() {

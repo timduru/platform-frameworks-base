@@ -211,11 +211,11 @@ public class EosUiController implements FeatureListener {
             case 0:
                 return com.android.internal.R.dimen.navigation_bar_height;
             case 1:
-                return com.android.internal.R.dimen.navigation_bar_width_low_profile;
+                return com.android.internal.R.dimen.navigation_bar_height_low_profile;
             case 2:
-                return com.android.internal.R.dimen.navigation_bar_width_tiny_profile;
+                return com.android.internal.R.dimen.navigation_bar_height_tiny_profile;
             default:
-                return com.android.internal.R.dimen.navigation_bar_width;
+                return com.android.internal.R.dimen.navigation_bar_height;
         }
     }
 
