@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.SystembarStateHandler;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CompatModeButton;
@@ -131,8 +132,10 @@ public class TabletStatusBar extends BaseStatusBar {
     TabletStatusBarView mStatusBarView;
     View mNotificationArea;
     View mNotificationTrigger;
+    LinearLayout mStatusIcons;
     NotificationIconArea mNotificationIconArea;
     ViewGroup mNavigationArea;
+    PhoneStatusBarPolicy mIconPolicy;
 
     boolean mNotificationDNDMode;
     NotificationData.Entry mNotificationDNDDummyEntry;
@@ -220,6 +223,8 @@ public class TabletStatusBar extends BaseStatusBar {
     protected void createAndAddWindows() {
         addStatusBarWindow();
         addPanelWindows();
+        // Lastly, call to the icon policy to install/update all the icons.
+        mIconPolicy = new PhoneStatusBarPolicy(mContext);
     }
 
     private void addStatusBarWindow() {
@@ -380,6 +385,16 @@ public class TabletStatusBar extends BaseStatusBar {
         mRecreating = true;
         mStatusBarContainer.removeAllViews();
 
+        // extract icons from the soon-to-be recreated viewgroup.
+        int nIcons = mStatusIcons.getChildCount();
+        ArrayList<StatusBarIcon> icons = new ArrayList<StatusBarIcon>(nIcons);
+        ArrayList<String> iconSlots = new ArrayList<String>(nIcons);
+        for (int i = 0; i < nIcons; i++) {
+            StatusBarIconView iconView = (StatusBarIconView) mStatusIcons.getChildAt(i);
+            icons.add(iconView.getStatusBarIcon());
+            iconSlots.add(iconView.getStatusBarSlot());
+        }
+
         // extract notifications.
         int nNotifs = mNotificationData.size();
         ArrayList<Pair<IBinder, StatusBarNotification>> notifications =
@@ -391,6 +406,13 @@ public class TabletStatusBar extends BaseStatusBar {
 
         makeStatusBarView();
         addPanelWindows();
+
+        // recreate StatusBarIconViews.
+        for (int i = 0; i < nIcons; i++) {
+            StatusBarIcon icon = icons.get(i);
+            String slot = iconSlots.get(i);
+            addIcon(slot, i, i, icon);
+        }
 
         // recreate notifications.
         for (int i = 0; i < nNotifs; i++) {
@@ -490,6 +512,8 @@ public class TabletStatusBar extends BaseStatusBar {
 
         // the button to open the notification area
         mNotificationTrigger = sb.findViewById(R.id.notificationTrigger);
+
+        mStatusIcons = (LinearLayout) mNotificationTrigger.findViewById(R.id.statusIcons);
 
         // the more notifications icon
         mNotificationIconArea = (NotificationIconArea) sb.findViewById(R.id.notificationIcons);
@@ -883,17 +907,23 @@ public class TabletStatusBar extends BaseStatusBar {
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
         if (DEBUG)
             Slog.d(TAG, "addIcon(" + slot + ") -> " + icon);
+        StatusBarIconView view = new StatusBarIconView(mContext, slot, null);
+        view.set(icon);
+        mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }
 
     public void updateIcon(String slot, int index, int viewIndex,
             StatusBarIcon old, StatusBarIcon icon) {
         if (DEBUG)
             Slog.d(TAG, "updateIcon(" + slot + ") -> " + icon);
+        StatusBarIconView view = (StatusBarIconView) mStatusIcons.getChildAt(viewIndex);
+        view.set(icon);
     }
 
     public void removeIcon(String slot, int index, int viewIndex) {
         if (DEBUG)
             Slog.d(TAG, "removeIcon(" + slot + ")");
+        mStatusIcons.removeViewAt(viewIndex);
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {

@@ -21,7 +21,7 @@
 <!-- android:background="@drawable/system_bar_closed_default_background" -->
 <com.android.systemui.statusbar.tablet.NotificationPeekPanel xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@*android:drawable/dialog_full_holo_dark"
     android:orientation="vertical" >
 

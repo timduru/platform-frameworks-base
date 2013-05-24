@@ -46,6 +46,8 @@ import com.android.internal.telephony.cdma.TtyIntent;
 import com.android.server.am.BatteryStatsService;
 import com.android.systemui.R;
 
+import org.teameos.jellybean.settings.EOSUtils;
+
 /**
  * This class contains all of the policy about which icons are installed in the
  * status bar at boot time. It goes through the normal API for icons, even
@@ -84,6 +86,11 @@ public class PhoneStatusBarPolicy {
     // bluetooth device status
     private boolean mBluetoothEnabled = false;
 
+    // tweak the policy based on device config
+    // tablet mode phones only get volume state
+    private boolean mIsTabletUi = false;
+    private boolean mIsNormalScreen = false;
+
     // wifi
     private static final int[][] sWifiSignalImages = {
             {
@@ -119,23 +126,23 @@ public class PhoneStatusBarPolicy {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_ALARM_CHANGED)) {
-                updateAlarm(intent);
+                if (!isIconRestricted()) updateAlarm(intent);
             }
             else if (action.equals(Intent.ACTION_SYNC_STATE_CHANGED)) {
-                updateSyncState(intent);
+                if (!isIconRestricted()) updateSyncState(intent);
             }
             else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED) ||
                     action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-                updateBluetooth(intent);
+                if (!isIconRestricted()) updateBluetooth(intent);
             }
             else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
                 updateVolume();
             }
             else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
-                updateSimState(intent);
+                if (!isIconRestricted()) updateSimState(intent);
             }
             else if (action.equals(TtyIntent.TTY_ENABLED_CHANGE_ACTION)) {
-                updateTTY(intent);
+                if (!isIconRestricted()) updateTTY(intent);
             }
         }
     };
@@ -143,6 +150,8 @@ public class PhoneStatusBarPolicy {
     public PhoneStatusBarPolicy(Context context) {
         mContext = context;
         mService = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
+        mIsTabletUi = EOSUtils.hasSystemBar(context);
+        mIsNormalScreen = EOSUtils.isNormalScreen();
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -194,6 +203,10 @@ public class PhoneStatusBarPolicy {
         mService.setIcon("volume", R.drawable.stat_sys_ringer_silent, 0, null);
         mService.setIconVisibility("volume", false);
         updateVolume();
+    }
+
+    private boolean isIconRestricted() {
+        return mIsTabletUi && mIsNormalScreen;
     }
 
     private final void updateAlarm(Intent intent) {

@@ -77,8 +77,6 @@ public class TabletTicker
     private StatusBarNotification[] mQueue = new StatusBarNotification[QUEUE_LENGTH];
     private int mQueuePos;
 
-    private final int mLargeIconHeight;
-
     private TabletStatusBar mBar;
 
     private LayoutTransition mLayoutTransition;
@@ -88,9 +86,6 @@ public class TabletTicker
         mBar = bar;
         mContext = bar.getContext();
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        final Resources res = mContext.getResources();
-        mLargeIconHeight = res.getDimensionPixelSize(
-                android.R.dimen.notification_large_icon_height);
     }
 
     public void add(IBinder key, StatusBarNotification notification) {
@@ -220,8 +215,12 @@ public class TabletTicker
         final Resources res = mContext.getResources();
         final FrameLayout view = new FrameLayout(mContext);
         final int width = res
-                .getDimensionPixelSize(EOSUtils.isNormalScreen() ? R.dimen.notification_ticker_width_tablet_mode
+                .getDimensionPixelSize(mBar.getEos().isNormalScreen() ? R.dimen.notification_ticker_width_tablet_mode
                         : R.dimen.notification_ticker_width);
+
+        // height of large icon based on set bar size
+        final int height = res
+                .getDimensionPixelSize(mBar.getEos().getTickerIconSize());
         int windowFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -230,7 +229,7 @@ public class TabletTicker
         } else {
             windowFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         }
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, mLargeIconHeight,
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL, windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
@@ -258,13 +257,6 @@ public class TabletTicker
         }
     }
 
-    /* easy way to override xml */
-    private void setCustomBarHeight(View group) {
-        ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) group.getLayoutParams();
-        params.height = mBar.getStatusBarHeight();
-        group.setLayoutParams(params);
-    }
-
     private View makeTickerView(StatusBarNotification notification) {
         final Notification n = notification.notification;
 
@@ -274,16 +266,15 @@ public class TabletTicker
         ViewGroup group;
         int layoutId;
         int iconId;
+        final int barHeight = mBar.getStatusBarHeight();
         if (n.largeIcon != null) {
             iconId = R.id.right_icon;
         } else {
             iconId = R.id.left_icon;
         }
         if (n.tickerView != null) {
-            group = (ViewGroup) inflater.inflate(R.layout.system_bar_ticker_panel, null, false);            
+            group = (ViewGroup) inflater.inflate(R.layout.system_bar_ticker_panel, null, false);
             ViewGroup content = (FrameLayout) group.findViewById(R.id.ticker_expanded);
-            setCustomBarHeight(group.findViewById(R.id.system_bar_ticker_background_view));
-            setCustomBarHeight(content);
             View expanded = null;
             Exception exception = null;
             try {
@@ -297,9 +288,10 @@ public class TabletTicker
                 Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
                 return null;
             }
+
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT);
+                    ViewGroup.LayoutParams.MATCH_PARENT, barHeight);
+
             content.addView(expanded, lp);
         } else if (n.tickerText != null) {
             group = (ViewGroup) inflater.inflate(R.layout.system_bar_ticker_compat, mWindow, false);
@@ -307,7 +299,6 @@ public class TabletTicker
                     new StatusBarIcon(notification.pkg, notification.user, n.icon, n.iconLevel, 0,
                             n.tickerText));
             ImageView iv = (ImageView) group.findViewById(iconId);
-            setCustomBarHeight(iv);
             iv.setImageDrawable(icon);
             iv.setVisibility(View.VISIBLE);
             TextView tv = (TextView) group.findViewById(R.id.text);
@@ -320,15 +311,15 @@ public class TabletTicker
             largeIcon.setImageBitmap(n.largeIcon);
             largeIcon.setVisibility(View.VISIBLE);
             final ViewGroup.LayoutParams lp = largeIcon.getLayoutParams();
-            final int statusBarHeight = mBar.getStatusBarHeight();
-            if (n.largeIcon.getHeight() <= statusBarHeight) {
+            if (n.largeIcon.getHeight() <= barHeight) {
                 // for smallish largeIcons, it looks a little odd to have them
                 // floating halfway up
                 // the ticker, so we vertically center them in the status bar
                 // area instead
-                lp.height = statusBarHeight;
+                lp.height = barHeight;
             } else {
-                lp.height = mLargeIconHeight;
+                lp.height = mContext.getResources().getDimensionPixelSize(
+                        mBar.getEos().getTickerIconSize());
             }
             largeIcon.setLayoutParams(lp);
         }

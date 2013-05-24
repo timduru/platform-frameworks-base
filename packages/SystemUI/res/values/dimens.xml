@@ -221,28 +221,33 @@
     <dimen name="peek_height">84dp</dimen>
     
     <!-- dimensions for tabletstatusbar on normal screens -->
-    
-    <!-- The width of the notification panel window: 446 + 16 + 16 (padding in the bg drawable) -->
+
     <dimen name="notification_panel_width_tablet_mode">325dp</dimen>
-    <!-- The minimum height of the notification panel window -->
     <dimen name="notification_panel_min_height">100dp</dimen>
-    <!-- The width of the ticker, including the icon -->
-    <dimen name="notification_ticker_width_tablet_mode">180dp</dimen>
-    <!-- distance above system bar notification panel floats -->
     <dimen name="notification_panel_start_offset">20dp</dimen>
+    
+        <!-- Height of a small notification in the status bar -->
+    <dimen name="notification_ticker_width_tablet_mode">220dp</dimen>
+    <dimen name="notification_min_height_tablet">64dp</dimen>
+    <dimen name="notification_max_height_tablet">256dp</dimen>
+    <dimen name="notification_large_icon_height">64dp</dimen>
+    <dimen name="notification_large_icon_height_slim">48dp</dimen>
+    <dimen name="notification_large_icon_height_tiny">36dp</dimen>
 
     <!-- Height of notification icons in the system bar -->
     <dimen name="system_bar_icon_size_normal">32dip</dimen>
     <dimen name="system_bar_icon_size_slim">24dip</dimen>
     <dimen name="system_bar_icon_size_tiny">16dip</dimen>
 
+        <!-- bar clock size based on bar size profile -->
+    <dimen name="system_bar_clock_size_normal">10dp</dimen>
+    <dimen name="system_bar_clock_size_slim">8dp</dimen>
+    <dimen name="system_bar_clock_size_tiny">6dp</dimen>
+
     <!-- The fixed height of each tile in tablet mode -->
     <dimen name="quick_settings_cell_height_tablet">90dp</dimen>
-    <!-- height for seekbar tiles -->
-        <!-- height for seekbar tiles -->
     <dimen name="quick_settings_slim_cell_height_tablet">65dp</dimen>
     <dimen name="quick_settings_more_slim_cell_height_tablet">40dp</dimen>
-    <!-- The padding between each tile within the QuickSettings layout -->
     <dimen name="quick_settings_cell_gap_tablet">4dp</dimen>
 
     <!-- navigation area key spacing -->

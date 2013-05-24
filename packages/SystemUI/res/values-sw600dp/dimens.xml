@@ -56,8 +56,11 @@
     <dimen name="peek_height">@dimen/close_handle_height</dimen>
     
     <!-- full tablet bar stuffs -->
-        <!-- The minimum height of the notification panel window -->
     <dimen name="notification_panel_min_height">225dp</dimen>
-    <!-- The width of the ticker, including the icon -->
     <dimen name="notification_ticker_width">360dp</dimen>
+
+    <!-- bar clock size based on bar size profile -->
+    <dimen name="system_bar_clock_size_normal">20dp</dimen>
+    <dimen name="system_bar_clock_size_slim">16dp</dimen>
+    <dimen name="system_bar_clock_size_tiny">12dp</dimen>
 </resources>

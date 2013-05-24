@@ -22,9 +22,9 @@
     android:background="@drawable/system_bar_notification_header_bg"
     android:clickable="true"
     android:orientation="vertical"
-    android:paddingLeft="13dp"
-    android:paddingRight="13dp"
-    android:paddingTop="14dp" >
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
+    android:paddingTop="8dp" >
 
     <TableLayout
         android:id="@+id/icons"

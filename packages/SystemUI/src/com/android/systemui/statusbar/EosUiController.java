@@ -251,6 +251,31 @@ public class EosUiController implements FeatureListener, ActivityListener {
         }
     }
 
+    public int getTickerIconSize() {
+        int barMode = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0);
+        switch (barMode) {
+            case 0:
+                return R.dimen.notification_large_icon_height;
+            case 1:
+                return R.dimen.notification_large_icon_height_slim;
+            case 2:
+                return R.dimen.notification_large_icon_height_tiny;
+            default:
+                return R.dimen.notification_large_icon_height;
+        }
+    }
+
+    public int getNotificationHeightMax() {
+        return mIsTabletUi ? getNavbarHeightResource()
+                : R.dimen.notification_max_height;
+    }
+
+    public int getNotificationHeightMin() {
+        return mIsTabletUi ? getNavbarHeightResource()
+                : R.dimen.notification_min_height;
+    }
+
     public int getNavigationKeyWidth() {
         return mIsNormalScreen ? R.dimen.navigation_key_width_tablet_mode_on_phones
                 : R.dimen.navigation_key_width_tablet_mode_on_tablets;

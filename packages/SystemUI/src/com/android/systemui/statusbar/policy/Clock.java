@@ -39,6 +39,7 @@ import com.android.internal.R;
 import com.android.systemui.statusbar.EosObserver.FeatureListener;
 
 import org.teameos.jellybean.settings.EOSConstants;
+import org.teameos.jellybean.settings.EOSUtils;
 
 /**
  * Digital clock for the status bar.
@@ -63,6 +64,7 @@ public class Clock extends TextView implements FeatureListener {
     // set bools at init for easy management
     private boolean mIsSignalView = false;
     private boolean mIsCenterView = false;
+    private boolean mIsTabletUi;
     private int MSG_CLOCK_AMPM_SETTINGS;
 
     public Clock(Context context) {
@@ -81,6 +83,14 @@ public class Clock extends TextView implements FeatureListener {
             } else if (TAG_CENTER_VIEW.equals(getTag())) {
                 mIsCenterView = true;
             }
+        }
+        mIsTabletUi = EOSUtils.hasSystemBar(context);
+        updateClockSize();
+    }
+
+    private void updateClockSize() {
+        if (mIsTabletUi && (mIsSignalView || mIsCenterView)) {
+            setTextSize(getClockSize());
         }
     }
 
@@ -142,6 +152,10 @@ public class Clock extends TextView implements FeatureListener {
                 if (! newLocale.equals(mLocale)) {
                     mLocale = newLocale;
                     mClockFormatString = ""; // force refresh
+                }
+                String source = (String) intent.getStringExtra("get_eos");
+                if (source != null && source.equals("came_from_windowManager")) {
+                    updateClockSize();
                 }
             }
             updateAmPm();
@@ -244,6 +258,20 @@ public class Clock extends TextView implements FeatureListener {
                 EOSConstants.SYSTEMUI_CLOCK_AMPM,
                 EOSConstants.SYSTEMUI_CLOCK_AMPM_DEF);
         updateAmPm();
+    }
+
+    private float getClockSize() {
+        final int barSize = Settings.System.getInt(getContext().getContentResolver(),
+                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0);
+        if (barSize == 0) {
+            return getResources().getDimension(com.android.systemui.R.dimen.system_bar_clock_size_normal);
+        } else if (barSize == 1) {
+            return getResources().getDimension(com.android.systemui.R.dimen.system_bar_clock_size_slim);
+        } else if (barSize == 2) {
+            return getResources().getDimension(com.android.systemui.R.dimen.system_bar_clock_size_tiny);
+        } else {
+            return getResources().getDimension(com.android.systemui.R.dimen.system_bar_clock_size_normal);
+        }
     }
 
     @Override

@@ -53,6 +53,13 @@
         android:layout_height="match_parent"
         android:gravity="center" >
 
+        <LinearLayout
+            android:id="@+id/statusIcons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" />
+
         <com.android.systemui.statusbar.policy.Clock
             android:id="@+id/clock"
             android:layout_width="wrap_content"
@@ -62,7 +69,7 @@
             android:paddingLeft="6dip"
             android:singleLine="true"
             android:tag="@string/eos_statusbar_clock_signal_cluster_tag"
-            android:textAppearance="@style/TextAppearance.StatusBar.Clock" />
+            android:textAppearance="@style/TextAppearance.SystemBar.Clock" />
 
         <TextView
             android:id="@+id/network_text"

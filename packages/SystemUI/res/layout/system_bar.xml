@@ -58,7 +58,7 @@
                     android:layout_height="wrap_content"
                     android:singleLine="true"
                     android:tag="@string/eos_statusbar_clock_center_tag"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Clock" />
+                    android:textAppearance="@style/TextAppearance.SystemBar.Clock" />
             </LinearLayout>
 <!-- navigation controls -->
 
