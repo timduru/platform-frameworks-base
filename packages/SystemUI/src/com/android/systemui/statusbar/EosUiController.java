@@ -45,9 +45,9 @@ public class EosUiController implements FeatureListener {
     static final int EOS_NAV_BAR = com.android.systemui.R.layout.eos_navigation_bar;
 
     private static final int max_notification_normal_ui = 5;
-    private static final int max_notification_tablets_on_tablet_ui_port = 3;
-    private static final int max_notification_phones_on_tablet_ui_port = 1;
-    private static final int max_notification_phones_on_tablet_ui_land = 2;
+    private static final int max_notification_tablets_on_tablet_ui_port = 4;
+    private static final int max_notification_phones_on_tablet_ui_port = 2;
+    private static final int max_notification_phones_on_tablet_ui_land = 3;
 
     private ArrayList<View> mBatteryList = new ArrayList<View>();
 
