@@ -246,9 +246,9 @@
     <dimen name="quick_settings_cell_gap_tablet">4dp</dimen>
 
     <!-- navigation area key spacing -->
-    <dimen name="navigation_menu_key_width_tablet_mode_on_tablets">20dip</dimen>
+    <dimen name="navigation_menu_key_width_tablet_mode_on_tablets">40dip</dimen>
     <dimen name="navigation_menu_key_width_tablet_mode_on_phones">20dip</dimen>
-    <dimen name="navigation_key_width_tablet_mode_on_tablets">60dip</dimen>
+    <dimen name="navigation_key_width_tablet_mode_on_tablets">80dip</dimen>
     <dimen name="navigation_key_width_tablet_mode_on_phones">50dip</dimen>
 
 </resources>
