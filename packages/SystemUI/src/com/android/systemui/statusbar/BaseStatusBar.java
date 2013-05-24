@@ -146,6 +146,36 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private boolean mDeviceProvisioned = false;
 
+    // Eos features
+    private boolean mIsNavbarHidden;
+
+    private SystembarStateHandler mSystembarHandler;
+    private EosUiController mEosController;
+    private EosObserver mEosObserver;
+
+    private SystembarStateHandler.OnBarStateChangedListener mBarListener = new SystembarStateHandler.OnBarStateChangedListener() {
+        @Override
+        public void onBarStateChanged(int state) {
+            mIsNavbarHidden = state == View.GONE;
+        }
+    };
+
+    protected SystembarStateHandler getBarAttachedHandler() {
+        return mSystembarHandler;
+    }
+
+    protected boolean isNavbarHidden() {
+        return mIsNavbarHidden;
+    }
+
+    public EosUiController getEos() {
+        return mEosController;
+    }
+
+    public EosObserver getEosObserver() {
+        return mEosObserver;
+    }
+
     public IStatusBarService getStatusBarService() {
         return mBarService;
     }
@@ -228,6 +258,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
+
+        mSystembarHandler = new SystembarStateHandler(mContext, mBarListener);
+        mEosObserver = new EosObserver(mContext);
+        mEosController = new EosUiController(mContext, mSystembarHandler, mEosObserver);
+        mEosObserver.registerClass(mEosController);
 
         createAndAddWindows();
 

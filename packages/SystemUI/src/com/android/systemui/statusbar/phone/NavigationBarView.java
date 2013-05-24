@@ -28,7 +28,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ServiceManager;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.animation.AccelerateInterpolator;
@@ -54,8 +53,6 @@ import com.android.systemui.statusbar.NX;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
-import org.teameos.jellybean.settings.EOSConstants;
-
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
     final static String TAG = "PhoneStatusBar/NavigationBarView";
@@ -79,7 +76,7 @@ public class NavigationBarView extends LinearLayout {
     boolean mVertical;
     boolean mScreenOn;
 
-    boolean mHidden, mLowProfile, mShowMenu, mShowMenuPersist;
+    boolean mHidden, mLowProfile, mShowMenu;
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
 
@@ -89,15 +86,12 @@ public class NavigationBarView extends LinearLayout {
     private DeadZone mDeadZone;
 
     private Context mContext;
-    private PhoneStatusBar mBar;
     private NX mNx;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state
     // (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
     final static int MSG_CHECK_INVALID_LAYOUT = 8686;
-
-    private int MSG_MENU_PERSIST_CHANGED;
 
     private class H extends Handler {
         public void handleMessage(Message m) {
@@ -145,33 +139,10 @@ public class NavigationBarView extends LinearLayout {
 
     public void setBar(BaseStatusBar phoneStatusBar) {
         mDelegateHelper.setBar(phoneStatusBar);
-        mBar = (PhoneStatusBar) phoneStatusBar;
-        MSG_MENU_PERSIST_CHANGED = mBar.getEosObserver().registerUri(
-                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST);
-        mBar.getEosObserver().setFeatureListener(
-                new FeatureListener() {
-                    @Override
-                    public void onFeatureStateChanged(int msg) {
-                        if (msg == MSG_MENU_PERSIST_CHANGED) {
-                            updateMenuPersist();
-                        }
-                    }
-
-                    @Override
-                    public ArrayList<String> onRegisterClass() {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-
-                    @Override
-                    public void onSetMessage(String uri, int msg) {
-
-                    }
-                });
-        ArrayList<View> children = mBar.getEos().getAllChildren(this);
+        ArrayList<View> children = phoneStatusBar.getEos().getAllChildren(this);
         for (View child : children) {
             if (child instanceof FeatureListener) {
-                mBar.getEosObserver().registerClass((FeatureListener) (child));
+                phoneStatusBar.getEosObserver().registerClass((FeatureListener) (child));
             }
         }
     }
@@ -239,8 +210,6 @@ public class NavigationBarView extends LinearLayout {
         final Resources res = mContext.getResources();
         mVertical = false;
         mShowMenu = false;
-        mShowMenuPersist = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST, 0) == 1 ? true : false;
         mDelegateHelper = new DelegateViewHelper(this);
 
         mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
@@ -342,10 +311,6 @@ public class NavigationBarView extends LinearLayout {
         getBackButton().setVisibility(disableBack ? View.INVISIBLE : View.VISIBLE);
         getHomeButton().setVisibility(disableHome ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
-        if (mShowMenuPersist) {
-            getMenuButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
-        }
-
         getSearchLight().setVisibility((disableHome && !disableSearch) ? View.VISIBLE : View.GONE);
     }
 
@@ -380,8 +345,6 @@ public class NavigationBarView extends LinearLayout {
 
     public void setMenuVisibility(final boolean show, final boolean force) {
         if (isNxEnabled())
-            return;
-        if (mShowMenuPersist)
             return;
         if (!force && mShowMenu == show)
             return;
@@ -467,7 +430,6 @@ public class NavigationBarView extends LinearLayout {
                 : findViewById(R.id.rot270);
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
-        updateMenuPersist();
     }
 
     public void reorient() {
@@ -611,14 +573,5 @@ public class NavigationBarView extends LinearLayout {
                 + " " + visibilityToString(menu.getVisibility())
                 );
         pw.println("    }");
-    }
-
-    private void updateMenuPersist() {
-        mShowMenuPersist = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST, 0) == 1 ? true : false;
-        findViewById(R.id.rot0).findViewById(R.id.menu)
-                .setVisibility(mShowMenuPersist ? View.VISIBLE : View.INVISIBLE);
-        findViewById(R.id.rot90).findViewById(R.id.menu)
-                .setVisibility(mShowMenuPersist ? View.VISIBLE : View.INVISIBLE);
     }
 }

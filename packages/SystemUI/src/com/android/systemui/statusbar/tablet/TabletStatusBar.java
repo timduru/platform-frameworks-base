@@ -142,7 +142,6 @@ public class TabletStatusBar extends BaseStatusBar {
     View mMenuButton;
     View mRecentButton;
     private boolean mAltBackButtonEnabledForIme;
-    private boolean mShowMenuPersist = false;
 
     ViewGroup mFeedbackIconArea; // notification icons, IME icon, compat icon
 
@@ -187,29 +186,6 @@ public class TabletStatusBar extends BaseStatusBar {
     private int mNavigationIconHints = 0;
 
     private int mShowSearchHoldoff = 0;
-
-
-    // Eos feature observers
-    private boolean mIsNavbarHidden;
-
-    SystembarStateHandler mSystembarHandler;
-    EosUiController mEosController;
-    EosObserver mEosObserver;
-
-    SystembarStateHandler.OnBarStateChangedListener mBarListener = new SystembarStateHandler.OnBarStateChangedListener() {
-        @Override
-        public void onBarStateChanged(int state) {
-            mIsNavbarHidden = state == View.GONE;
-        }
-    };
-
-    public EosObserver getEosObserver() {
-        return mEosObserver;
-    }
-
-    public EosUiController getEos() {
-        return mEosController;
-    }
 
     public Context getContext() {
         return mContext;
@@ -336,7 +312,7 @@ public class TabletStatusBar extends BaseStatusBar {
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
         WindowManager.LayoutParams lp = mNotificationPanelParams = new WindowManager.LayoutParams(
-                res.getDimensionPixelSize(mEosController.getNotificationPanelWidth()),
+                res.getDimensionPixelSize(getEos().getNotificationPanelWidth()),
                 getNotificationPanelHeight(),
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -382,7 +358,7 @@ public class TabletStatusBar extends BaseStatusBar {
         final Point size = new Point();
         d.getRealSize(size);
         return Math
-                .max(res.getDimensionPixelSize(mEosController.getNotificationPanelMinHeight()),
+                .max(res.getDimensionPixelSize(getEos().getNotificationPanelMinHeight()),
                         size.y);
     }
 
@@ -453,14 +429,14 @@ public class TabletStatusBar extends BaseStatusBar {
 
         if (mNavigationArea != null) {
             mNavIconWidth = res
-                    .getDimensionPixelSize(mEosController.getNavigationKeyWidth());
+                    .getDimensionPixelSize(getEos().getNavigationKeyWidth());
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     mNavIconWidth, ViewGroup.LayoutParams.MATCH_PARENT);
             mBackButton.setLayoutParams(lp);
             mHomeButton.setLayoutParams(lp);
             mRecentButton.setLayoutParams(lp);
             mMenuNavIconWidth = res
-                    .getDimensionPixelSize(mEosController.getMenuKeyWidth());
+                    .getDimensionPixelSize(getEos().getMenuKeyWidth());
             lp = new LinearLayout.LayoutParams(
                     mMenuNavIconWidth, ViewGroup.LayoutParams.MATCH_PARENT);
             mMenuButton.setLayoutParams(lp);
@@ -469,7 +445,7 @@ public class TabletStatusBar extends BaseStatusBar {
         mIconHPadding = res.getDimensionPixelSize(
                 R.dimen.status_bar_icon_padding);
 
-        mMaxNotificationIcons = mEosController.getMaxNotificationIcons();
+        mMaxNotificationIcons = getEos().getMaxNotificationIcons();
         reloadAllNotificationIcons();
     }
 
@@ -480,12 +456,6 @@ public class TabletStatusBar extends BaseStatusBar {
 
     protected View makeStatusBarView() {
         final Context context = mContext;
-
-        // initialize bar settings before anything else happens
-        mSystembarHandler = new SystembarStateHandler(mContext, mBarListener);
-        mEosObserver = new EosObserver(mContext);
-        mEosController = new EosUiController(mContext, mSystembarHandler, mEosObserver);
-        mEosObserver.registerClass(mEosController);
 
         CustomTheme currentTheme = mContext.getResources().getConfiguration().customTheme;
         if (currentTheme != null) {
@@ -498,7 +468,7 @@ public class TabletStatusBar extends BaseStatusBar {
                 context, R.layout.system_bar, null);
         mStatusBarView = sb;
 
-        mEosController.setStatusBarView(mStatusBarView);
+        getEos().setStatusBarView(mStatusBarView);
 
         sb.setHandler(mHandler);
 
@@ -543,7 +513,7 @@ public class TabletStatusBar extends BaseStatusBar {
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView) sb.findViewById(R.id.battery));
         mBatteryController.addLabelView((TextView)mStatusBarView.findViewById(R.id.battery_text));
-        mEosObserver.registerClass(mBatteryController);
+        getEosObserver().registerClass(mBatteryController);
 
         mHasDockBattery = mContext.getResources().getBoolean(com.android.internal.R.bool.config_hasDockBattery);
         if (mHasDockBattery) {
@@ -567,18 +537,6 @@ public class TabletStatusBar extends BaseStatusBar {
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
         mRecentButton.setOnClickListener(mOnClickListener);
-        mShowMenuPersist = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST, 0) == 1 ? true : false;
-
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST), false,
-                new ContentObserver(new Handler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateMenuPersist();
-                    }
-                });
-        updateMenuPersist();
 
         LayoutTransition lt = new LayoutTransition();
         lt.setDuration(250);
@@ -756,7 +714,7 @@ public class TabletStatusBar extends BaseStatusBar {
 
     public int getStatusBarHeight() {
         final Resources res = mContext.getResources();
-        return res.getDimensionPixelSize(mEosController
+        return res.getDimensionPixelSize(getEos()
                 .getNavbarHeightResource());
     }
 
@@ -970,9 +928,9 @@ public class TabletStatusBar extends BaseStatusBar {
     }    
 
     public void showClock(boolean show) {
-        if (mStatusBarView == null || mEosController == null)
+        if (mStatusBarView == null)
             return;
-        mEosController.showClock(show);
+        getEos().showClock(show);
     }
 
     public void disable(int state) {
@@ -1030,7 +988,7 @@ public class TabletStatusBar extends BaseStatusBar {
             }
         }
 
-        mEosController.updateGlass();
+        getEos().updateGlass();
     }
 
     private void setNavigationVisibility(int visibility) {
@@ -1041,9 +999,6 @@ public class TabletStatusBar extends BaseStatusBar {
         mBackButton.setVisibility(disableBack ? View.INVISIBLE : View.VISIBLE);
         mHomeButton.setVisibility(disableHome ? View.INVISIBLE : View.VISIBLE);
         mRecentButton.setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
-        if (mShowMenuPersist) {
-            mMenuButton.setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
-        }
     }
 
     private boolean hasTicker(Notification n) {
@@ -1193,14 +1148,14 @@ public class TabletStatusBar extends BaseStatusBar {
     }
 
     public void topAppWindowChanged(boolean showMenu) {
-        mEosController.updateGlass();
-        mEosController.notifyTopAppChanged();
+        getEos().updateGlass();
+        getEos().notifyTopAppChanged();
 
         if (DEBUG) {
             Slog.d(TAG, (showMenu ? "showing" : "hiding") + " the MENU button");
         }
-        if (!mShowMenuPersist)
-            mMenuButton.setVisibility(showMenu ? View.VISIBLE : View.GONE);
+
+        mMenuButton.setVisibility(showMenu ? View.VISIBLE : View.GONE);
 
         // See above re: lights-out policy for legacy apps.
         if (showMenu)
@@ -1378,7 +1333,7 @@ public class TabletStatusBar extends BaseStatusBar {
         loadNotificationPanel();
 
         final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(mContext
-                .getResources().getDimensionPixelSize(mEosController.getNotificationIconSize()) + 2
+                .getResources().getDimensionPixelSize(getEos().getNotificationIconSize()) + 2
                 * mIconHPadding, getStatusBarHeight());
 
         // alternate behavior in DND mode
@@ -1570,12 +1525,6 @@ public class TabletStatusBar extends BaseStatusBar {
     protected boolean shouldDisableNavbarGestures() {
         return mNotificationPanel.getVisibility() == View.VISIBLE
                 || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
-    }
-
-    private void updateMenuPersist() {
-        mShowMenuPersist = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_SOFTKEY_MENU_PERSIST, 0) == 1 ? true : false;
-        mMenuButton.setVisibility(mShowMenuPersist ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
