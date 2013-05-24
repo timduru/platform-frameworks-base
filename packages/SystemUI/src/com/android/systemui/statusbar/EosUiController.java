@@ -21,6 +21,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.ActivityWatcher.ActivityListener;
 import com.android.systemui.statusbar.EosObserver.FeatureListener;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -32,7 +33,7 @@ import org.teameos.jellybean.settings.EOSUtils;
 
 import java.util.ArrayList;
 
-public class EosUiController implements FeatureListener {
+public class EosUiController implements FeatureListener, ActivityListener {
 
     static final String TAG = "EosUiController";
 
@@ -83,6 +84,7 @@ public class EosUiController implements FeatureListener {
     private EosGlassController mGlass;
     private NX mNx;
     private EosSettings mEosLegacyToggles;
+    private ActivityWatcher mActivityWatcher;
 
     private View mClockCenter;
     private View mClockCluster;
@@ -104,6 +106,8 @@ public class EosUiController implements FeatureListener {
         mContext = context;
         mSystembarHandler = handler;
         mObserver = observer;
+        mActivityWatcher = new ActivityWatcher(mContext);
+        mActivityWatcher.setActivityListener((ActivityListener) this);
         mResolver = mContext.getContentResolver();
         mIsTabletUi = EOSUtils.hasSystemBar(context);
         mIsNormalScreen = EOSUtils.isNormalScreen();
@@ -202,6 +206,10 @@ public class EosUiController implements FeatureListener {
 
     public boolean isTabletUi() {
         return mIsTabletUi;
+    }
+
+    public void notifyTopAppChanged() {
+        mActivityWatcher.notifyTopAppChanged();
     }
 
     public int getNavbarHeightResource() {
@@ -341,8 +349,6 @@ public class EosUiController implements FeatureListener {
 
         handleBatteryChange();
 
-        mObserver.registerClass((FeatureListener) mStatusBarView.findViewById(R.id.clock));
-        mObserver.registerClass((FeatureListener) mStatusBarView.findViewById(R.id.clock_center));
         handleBatteryChange();
 
         mClockCluster = mStatusBarView.findViewById(
@@ -544,5 +550,11 @@ public class EosUiController implements FeatureListener {
         .setClassName("org.eos.controlcenter",
                 "org.eos.controlcenter.Main")
         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    }
+
+    @Override
+    public void onActivityChanged(String componentName) {
+        boolean enabled = componentName.equals(getEccIntent().getComponent().flattenToString());
+        mObserver.setEnabled(enabled);
     }
 }

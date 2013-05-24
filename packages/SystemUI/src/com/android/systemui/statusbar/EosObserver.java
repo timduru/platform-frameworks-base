@@ -1,19 +1,14 @@
 
 package com.android.systemui.statusbar;
 
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
-
-import org.teameos.jellybean.settings.EOSConstants;
 
 import java.util.ArrayList;
 
@@ -33,8 +28,6 @@ public class EosObserver {
     private ContentResolver mResolver;
     private UriObserver mObserver;
     private EosFeatureHandler mHandler;
-    private BroadcastReceiver mReceiver;
-    private IntentFilter mFilter;
 
     public interface FeatureListener {
         public ArrayList<String> onRegisterClass();
@@ -48,28 +41,6 @@ public class EosObserver {
         mResolver = context.getContentResolver();
         mHandler = new EosFeatureHandler();
         mObserver = new UriObserver(mHandler);
-        mFilter = new IntentFilter();
-        mFilter.addAction(EOSConstants.INTENT_EOS_CONTROL_CENTER);
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (EOSConstants.INTENT_EOS_CONTROL_CENTER.equals(action)) {
-                    boolean state = intent
-                            .getBooleanExtra(
-                                    EOSConstants.INTENT_EOS_CONTROL_CENTER_EXTRAS_STATE,
-                                    UriObserver.STATE_ON);
-                    log("message from control center " + String.valueOf(state));
-                    if (UriObserver.STATE_ON == state) {
-                        mObserver.startListening();
-                    } else if (UriObserver.STATE_OFF == state) {
-                        mObserver.stopListening();
-                    }
-                }
-            }
-        };
-        context.registerReceiver(mReceiver, mFilter);
-
     }
 
     /* when we want to register an entire class */
@@ -113,6 +84,14 @@ public class EosObserver {
         mHandler.sendEmptyMessage(MESSAGE_UPDATE_LISTENERS);
     }
 
+    public void setEnabled(boolean enabled) {
+        if (enabled) {
+            mObserver.startListening();
+        } else {
+            mObserver.stopListening();
+        }
+    }
+
     private class EosFeatureHandler extends Handler {
         public void handleMessage(Message m) {
             super.handleMessage(m);
@@ -129,8 +108,8 @@ public class EosObserver {
     }
 
     private class UriObserver extends ContentObserver {
-        public static final boolean STATE_ON = true;
-        public static final boolean STATE_OFF = false;
+        private static final boolean STATE_ON = true;
+        private static final boolean STATE_OFF = false;
 
         private Handler handler;
         private ArrayList<HandlerObject> observers = new ArrayList<HandlerObject>();

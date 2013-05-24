@@ -1194,6 +1194,7 @@ public class TabletStatusBar extends BaseStatusBar {
 
     public void topAppWindowChanged(boolean showMenu) {
         mEosController.updateGlass();
+        mEosController.notifyTopAppChanged();
 
         if (DEBUG) {
             Slog.d(TAG, (showMenu ? "showing" : "hiding") + " the MENU button");
