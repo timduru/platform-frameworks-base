@@ -11,7 +11,6 @@ import android.graphics.Bitmap.Config;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -74,9 +73,6 @@ public class EosUiController implements FeatureListener, ActivityListener {
     private int MSG_CLOCK_VISIBLE_SETTINGS;
     private int MSG_CLOCK_COLOR_SETTINGS;
     private int MSG_LEGACY_TOGGLES_SETTINGS;
-    private int MSG_HYBRID_BAR_SETTINGS;
-    private int MSG_TABLET_BAR_MODE_SETTINGS;
-    private int MSG_FORCE_NAVBAR_SETTINGS;
 
     // Eos classes
     private SystembarStateHandler mSystembarHandler;
@@ -92,13 +88,12 @@ public class EosUiController implements FeatureListener, ActivityListener {
 
     private boolean mIsClockVisible = true;
     private int mCurrentNavLayout;
-    
+
     private boolean mIsTabletUi;
     private boolean mIsNormalScreen;
 
     /*
-     * special case for large screen max icons
-     * keep it clean
+     * special case for large screen max icons keep it clean
      */
     private boolean mIsLargeScreen;
 
@@ -112,10 +107,6 @@ public class EosUiController implements FeatureListener, ActivityListener {
         mIsTabletUi = EOSUtils.hasSystemBar(context);
         mIsNormalScreen = EOSUtils.isNormalScreen();
         mIsLargeScreen = EOSUtils.isLargeScreen();
-        if (getEccRestartFlag()) {
-            setEccRestartFlag(false);
-            mContext.startActivityAsUser(getEccIntent(), new UserHandle(UserHandle.USER_CURRENT));
-        }
     }
 
     @Override
@@ -127,9 +118,6 @@ public class EosUiController implements FeatureListener, ActivityListener {
         uris.add(EOSConstants.SYSTEMUI_CLOCK_VISIBLE);
         uris.add(EOSConstants.SYSTEMUI_CLOCK_COLOR);
         uris.add(EOSConstants.SYSTEMUI_SETTINGS_ENABLED);
-        uris.add(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR);
-        uris.add(EOSConstants.SYSTEMUI_USE_TABLET_BAR);
-        uris.add(EOSConstants.SYSTEMUI_FORCE_NAVBAR);
         return uris;
     }
 
@@ -147,12 +135,6 @@ public class EosUiController implements FeatureListener, ActivityListener {
             MSG_CLOCK_COLOR_SETTINGS = msg;
         } else if (uri.equals(EOSConstants.SYSTEMUI_SETTINGS_ENABLED)) {
             MSG_LEGACY_TOGGLES_SETTINGS = msg;
-        } else if (uri.equals(EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR)) {
-            MSG_HYBRID_BAR_SETTINGS = msg;
-        } else if (uri.equals(EOSConstants.SYSTEMUI_USE_TABLET_BAR)) {
-            MSG_TABLET_BAR_MODE_SETTINGS = msg;
-        } else if (uri.equals(EOSConstants.SYSTEMUI_FORCE_NAVBAR)) {
-            MSG_FORCE_NAVBAR_SETTINGS = msg;
         }
     }
 
@@ -169,11 +151,6 @@ public class EosUiController implements FeatureListener, ActivityListener {
             return;
         } else if (msg == MSG_LEGACY_TOGGLES_SETTINGS) {
             // handleLegacyTogglesChange();
-            return;
-        } else if (msg == MSG_HYBRID_BAR_SETTINGS
-                || msg == MSG_TABLET_BAR_MODE_SETTINGS
-                || msg == MSG_FORCE_NAVBAR_SETTINGS) {
-            restartSystemUIServce();
             return;
         }
     }
@@ -311,9 +288,9 @@ public class EosUiController implements FeatureListener, ActivityListener {
 
     public NavigationBarView setNavigationBarView() {
         mCurrentNavLayout = Settings.System.getInt(mResolver,
-                EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR,
-                EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF)
-                == EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF
+                EOSConstants.SYSTEMUI_UI_MODE,
+                EOSConstants.SYSTEMUI_UI_MODE_NAVBAR)
+                == EOSConstants.SYSTEMUI_UI_MODE_NAVBAR
                         ? STOCK_NAV_BAR
                         : EOS_NAV_BAR;
         mNavigationBarView = (NavigationBarView) View.inflate(mContext, mCurrentNavLayout, null);
@@ -344,7 +321,6 @@ public class EosUiController implements FeatureListener, ActivityListener {
     public void setBar(PhoneStatusBar service) {
         mService = service;
     }
-
 
     public void setBarWindow(StatusBarWindowView window) {
         if (mIsTabletUi)
@@ -407,15 +383,6 @@ public class EosUiController implements FeatureListener, ActivityListener {
             Log.i(TAG, s);
     }
 
-    private void restartSystemUIServce() {
-        // time to die, but i shall return again soon
-        // before we go let's set our flag
-        Settings.System.putInt(mResolver, EOS_KILLED_ME, 1);
-        setEccRestartFlag(true);
-        System.runFinalizersOnExit(true);
-        System.exit(0);
-    }
-
     private void handleBatteryChange() {
         int icon_visible = (Settings.System.getInt(mResolver,
                 EOSConstants.SYSTEMUI_BATTERY_ICON_VISIBLE,
@@ -461,13 +428,14 @@ public class EosUiController implements FeatureListener, ActivityListener {
         if (mStatusBarView == null)
             return;
 
-        if (mCurrentClockView == null) mCurrentClockView = mClockCluster;
+        if (mCurrentClockView == null)
+            mCurrentClockView = mClockCluster;
 
         int clock_state = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_CLOCK_VISIBLE,
                 EOSConstants.SYSTEMUI_CLOCK_CLUSTER);
 
-        switch(clock_state) {
+        switch (clock_state) {
             case EOSConstants.SYSTEMUI_CLOCK_GONE:
                 mIsClockVisible = false;
                 mClockCenter.setVisibility(View.GONE);
@@ -560,26 +528,15 @@ public class EosUiController implements FeatureListener, ActivityListener {
         return bitmap;
     }
 
-    private void setEccRestartFlag(boolean restart) {
-        mContext.getSharedPreferences("ecc_restart_flag", Context.MODE_PRIVATE).edit()
-                .putBoolean("ecc_flag", restart).commit();
-    }
-
-    private boolean getEccRestartFlag() {
-        return mContext.getSharedPreferences("ecc_restart_flag", Context.MODE_PRIVATE).getBoolean(
-                "ecc_flag", false);
-    }
-
     private Intent getEccIntent() {
         return new Intent()
-        .setClassName("org.eos.controlcenter",
-                "org.eos.controlcenter.Main")
-        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                .setClassName("org.eos.controlcenter",
+                        "org.eos.controlcenter.Main")
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
     }
 
     @Override
     public void onActivityChanged(String componentName) {
-        boolean enabled = componentName.equals(getEccIntent().getComponent().flattenToString());
-        mObserver.setEnabled(enabled);
+        mObserver.setEnabled(componentName.equals(getEccIntent().getComponent().flattenToString()));
     }
 }

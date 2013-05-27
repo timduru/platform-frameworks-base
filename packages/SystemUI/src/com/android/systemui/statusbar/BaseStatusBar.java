@@ -490,9 +490,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         /* load the left aligned tablet version for systembar or hybrid ui configs */
         int currentSearchView = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR,
-                EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF)
-                == 1 || EOSUtils.hasSystemBar(mContext)
+                EOSConstants.SYSTEMUI_UI_MODE,
+                EOSConstants.SYSTEMUI_UI_MODE_NAVBAR)
+                == EOSConstants.SYSTEMUI_UI_MODE_NAVBAR_LEFT || EOSUtils.hasSystemBar(mContext)
                         ? R.layout.status_bar_search_panel_tablet
                         : R.layout.status_bar_search_panel;
         mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(

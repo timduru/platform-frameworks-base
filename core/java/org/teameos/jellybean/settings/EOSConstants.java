@@ -415,18 +415,6 @@ public final class EOSConstants {
     public static final String ACTION_TORCH_OFF = "android.intent.action.TORCH_OFF";
 
     /**
-     * Broadcast Action: Notify listeners control center is running or stopped
-     * 
-     * @hide
-     */
-    public static final String INTENT_EOS_CONTROL_CENTER = "org.teameos.intent.CONTROL_CENTER";
-
-    /**
-     * @hide
-     */
-    public static final String INTENT_EOS_CONTROL_CENTER_EXTRAS_STATE = "org.teameos.intent.CONTROL_CENTER_STATE";
-
-    /**
      * @hide
      */
     public static final String INTENT_TELEPHONY_LTE_TOGGLE = "org.teameos.intent.action.TOGGLE_LTE";
@@ -449,11 +437,6 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final String INTENT_SYSTEMUI_KILL_SERVICE = "org.teameos.intent.action.KILL_SYSTEMUI";
-
-    /**
-     * @hide
-     */
     public static final String INTENT_SYSTEMUI_BAR_STATE = "org.teameos.intent.action.BAR_STATE";
 
     /**
@@ -470,11 +453,6 @@ public final class EOSConstants {
      * @hide
      */
     public static final String INTENT_SYSTEMUI_BAR_STATE_CHANGED_EXCEPTION = "org.teameos.intent.action.BAR_STATE_CHANGED_EXCEPTION";
-
-    /**
-     * @hide
-     */
-    public static final String INTENT_SETTINGS_RESTART_INTERFACE_SETTINGS = "org.teameos.intent.action.RESTART_EOS_INTERFACE";
 
     /**
      * @hide
@@ -580,41 +558,65 @@ public final class EOSConstants {
     public static final int SYSTEMUI_HIDE_STATBAR_TOO_DEF = 0;
 
     /**
-     * Use a modified eos style navigation bar to help tablet users adjust to
-     * new ui
-     * 
      * @hide
      */
-    public static final String SYSTEMUI_USE_HYBRID_STATBAR = "eos_systemui_use_hybrid_statbar";
+    public static final String SYSTEMUI_UI_MODE = "eos_systemui_ui_mode";
 
     /**
      * @hide
      */
-    public static final int SYSTEMUI_USE_HYBRID_STATBAR_DEF = 0;
-
-    /**
-     * Force tablet ui on large and xlarge screen devices
-     * 
-     * @hide
-     */
-    public static final String SYSTEMUI_USE_TABLET_BAR = "eos_systemui_use_tablet_statbar";
+    public static final int SYSTEMUI_UI_MODE_NO_NAVBAR = 0;
 
     /**
      * @hide
      */
-    public static final int SYSTEMUI_USE_TABLET_BAR_DEF = 0;
-
-    /**
-     * force a navigation bar on capacitive key devices
-     * 
-     * @hide
-     */
-    public static final String SYSTEMUI_FORCE_NAVBAR = "eos_systemui_force_navbar";
+    public static final int SYSTEMUI_UI_MODE_NAVBAR = 1;
 
     /**
      * @hide
      */
-    public static final int SYSTEMUI_FORCE_NAVBAR_DEF = 0;
+    public static final int SYSTEMUI_UI_MODE_NAVBAR_LEFT = 2;
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_UI_MODE_SYSTEMBAR = 3;
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_EOS_UI_CHANGED = "intent_eos_ui_changed";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_EOS_UI_CHANGED_REASON = "intent_eos_ui_changed_reason";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_EOS_UI_CHANGED_KEY_MODE = "intent_eos_ui_changed_key_mode";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_EOS_UI_CHANGED_KEY_RESTART_SYSTEMUI = "intent_eos_ui_changed_key_restart_systemui";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_EOS_UI_CHANGED_KEY_GLASS_ENABLED = "intent_eos_ui_changed_key_glass_enabled";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_EOS_UI_CHANGED_KEY_BAR_SIZE = "intent_eos_ui_changed_key_bar_size";
+
+    /**
+     * @hide
+     */
+    public static final String INTENT_EOS_UI_CHANGED_KEY_REFRESH_UI = "intent_eos_ui_changed_key_refresh_ui";
+
 
     /**
      * We got some bomb glass baby ;P

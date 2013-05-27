@@ -83,9 +83,7 @@ import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.EosObserver;
 import com.android.systemui.statusbar.EosObserver.FeatureListener;
-import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.NX;
 import com.android.systemui.statusbar.NotificationData;
@@ -721,6 +719,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(EOSConstants.INTENT_EOS_UI_CHANGED_KEY_REFRESH_UI);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
@@ -2334,9 +2333,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         // 2: navbar is hidden but the statusbar does not hide with it
         // StateHandler handles checks
         getBarAttachedHandler().addStatusbarWindow();
-        // let ECC know systemui is back online
-        mContext.sendBroadcast(new
-        Intent().setAction(EOSConstants.INTENT_SETTINGS_RESTART_INTERFACE_SETTINGS));
     }
 
     private WindowManager.LayoutParams getStatusBarWindowParams() {
@@ -2569,7 +2565,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 if (DEBUG) {
                     Slog.v(TAG, "configuration changed: "
-                        + mContext.getResources().getConfiguration());
+                            + mContext.getResources().getConfiguration());
                 }
                 mDisplay.getSize(mCurrentDisplaySize);
 
@@ -2577,6 +2573,12 @@ public class PhoneStatusBar extends BaseStatusBar {
                     addNavigationBar();
                     return;
                 }
+                updateResources();
+                repositionNavigationBar();
+                updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+                updateShowSearchHoldoff();
+            } else if (EOSConstants.INTENT_EOS_UI_CHANGED_KEY_REFRESH_UI.equals(action)) {
+                mDisplay.getSize(mCurrentDisplaySize);
                 updateResources();
                 repositionNavigationBar();
                 updateExpandedViewPos(EXPANDED_LEAVE_ALONE);

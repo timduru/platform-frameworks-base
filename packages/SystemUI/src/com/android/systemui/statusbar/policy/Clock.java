@@ -27,6 +27,7 @@ import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -107,6 +108,7 @@ public class Clock extends TextView implements FeatureListener {
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
+            filter.addAction(EOSConstants.INTENT_EOS_UI_CHANGED_KEY_REFRESH_UI);
 
             getContext().registerReceiver(mIntentReceiver, filter, null, getHandler());
         }
@@ -149,14 +151,12 @@ public class Clock extends TextView implements FeatureListener {
                 }
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 final Locale newLocale = getResources().getConfiguration().locale;
-                if (! newLocale.equals(mLocale)) {
+                if (!newLocale.equals(mLocale)) {
                     mLocale = newLocale;
                     mClockFormatString = ""; // force refresh
                 }
-                String source = (String) intent.getStringExtra("get_eos");
-                if (source != null && source.equals("came_from_windowManager")) {
-                    updateClockSize();
-                }
+            } else if (action.equals(EOSConstants.INTENT_EOS_UI_CHANGED_KEY_REFRESH_UI)) {
+                updateClockSize();
             }
             updateAmPm();
         }

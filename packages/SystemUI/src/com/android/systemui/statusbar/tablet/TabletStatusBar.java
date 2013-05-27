@@ -43,6 +43,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
@@ -62,6 +63,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
@@ -654,7 +656,7 @@ public class TabletStatusBar extends BaseStatusBar {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        filter.addAction(EOSConstants.INTENT_EOS_UI_CHANGED_KEY_REFRESH_UI);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         return sb;
@@ -1516,13 +1518,10 @@ public class TabletStatusBar extends BaseStatusBar {
                     }
                 }
                 animateCollapsePanels(flags);
-            } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                String source = (String)intent.getStringExtra("get_eos");
-                if (source != null && source.equals("came_from_windowManager")) {
-                    loadDimens();
-                    if (mNotificationPanel != null) {
-                        mNotificationPanel.updateResources();
-                    }
+            } else if (EOSConstants.INTENT_EOS_UI_CHANGED_KEY_REFRESH_UI.equals(action)) {
+                loadDimens();
+                if (mNotificationPanel != null) {
+                    mNotificationPanel.updateResources();
                 }
             }
         }

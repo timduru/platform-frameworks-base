@@ -17,6 +17,7 @@ package com.android.internal.policy.impl;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.app.UiModeManager;
@@ -571,63 +572,54 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    class EosBarModeObserver extends ContentObserver {
-        ContentResolver resolver;
-
-        EosBarModeObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_BAR_SIZE_MODE), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_USE_GLASS), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_USE_TABLET_BAR), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor( EOSConstants.SYSTEMUI_FORCE_NAVBAR), false, this);
-            synchronized (mLock) {
-                setNavigationBarSize();
-                setGlassMode();
-            }
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            synchronized (mLock) {
-                updateCustomUiMode();
-                setNavigationBarSize();
-                setGlassMode();
-            }
-            Intent intent = new Intent()
-            .setAction(Intent.ACTION_CONFIGURATION_CHANGED)
-            .putExtra("get_eos", "came_from_windowManager");
-            mContext.sendBroadcastAsUser(intent, new UserHandle(
-                    UserHandle.USER_ALL));
-        }
-    }
-
     class EosIntentReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            // got perms or return right off the bat
-            // since this is only used for custom lockscreen action launching
-            if (!(context
-                    .checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
+            String action = intent.getAction();
+            if (action.equals(EOSConstants.SYSTEMUI_KEYGUARD_INTENT_KEY)) {
+                if (!(context
+                        .checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
                     == PackageManager.PERMISSION_GRANTED)) {
-                return;
-            }
-
-            if (!intent.getAction().equals(EOSConstants.SYSTEMUI_KEYGUARD_INTENT_KEY)) {
-                return;
-            }
-            // get requested action from glowring or lockring
-            String action = intent.getStringExtra(EOSConstants.SYSTEMUI_KEYGUARD_INTENT_REQUEST);
-            if (action != null) {
-                // make sure Keyguard is in a state where it is sane to allow
-                // intent
-                if (!mKeyguardMediator.isSecure() && mKeyguardMediator.isDismissable()) {
-                    final WMActionHandler handler = new WMActionHandler(context);
-                    handler.performTask(action);
+                    return;
+                }
+                String component = intent
+                        .getStringExtra(EOSConstants.SYSTEMUI_KEYGUARD_INTENT_REQUEST);
+                if (component != null) {
+                    if (!mKeyguardMediator.isSecure() && mKeyguardMediator.isDismissable()) {
+                        final WMActionHandler handler = new WMActionHandler(context);
+                        handler.performTask(component);
+                    }
+                }
+            } else if (action.equals(EOSConstants.INTENT_EOS_UI_CHANGED)) {
+                String reason = intent.getStringExtra(EOSConstants.INTENT_EOS_UI_CHANGED_REASON);
+                if (reason == null)
+                    return;
+                if (reason.equals(EOSConstants.INTENT_EOS_UI_CHANGED_KEY_MODE)) {
+                    updateUiMode();
+                } else if (reason.equals(EOSConstants.INTENT_EOS_UI_CHANGED_KEY_BAR_SIZE)) {
+                    setNavigationBarSize();
+                    mContext.sendBroadcastAsUser(
+                            new Intent()
+                                    .setAction(EOSConstants.INTENT_EOS_UI_CHANGED_KEY_REFRESH_UI)
+                                    .putExtra(EOSConstants.INTENT_EOS_UI_CHANGED_REASON,
+                                            EOSConstants.INTENT_EOS_UI_CHANGED_KEY_BAR_SIZE)
+                            , new UserHandle(UserHandle.myUserId()));
+                } else if (reason.equals(EOSConstants.INTENT_EOS_UI_CHANGED_KEY_GLASS_ENABLED)) {
+                    setGlassMode();
+                }
+                if (intent.getBooleanExtra(EOSConstants.INTENT_EOS_UI_CHANGED_KEY_RESTART_SYSTEMUI,
+                        false)) {
+                    closeApplication("com.android.systemui");
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mContext.startServiceAsUser(new Intent().setComponent(ComponentName
+                                    .unflattenFromString("com.android.systemui/.SystemUIService")),
+                                    new UserHandle(
+                                            UserHandle.myUserId()));
+                        }
+                    }, 250);
                 }
             }
         }
@@ -658,7 +650,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         MyOrientationListener(Context context) {
             super(context);
         }
-        
+
         @Override
         public void onProposedRotationChanged(int rotation) {
             if (localLOGV) Log.v(TAG, "onProposedRotationChanged, rotation=" + rotation);
@@ -965,10 +957,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } catch (RemoteException ex) { }
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
-
-        EosBarModeObserver eosBarModeObserver = new EosBarModeObserver(mHandler);
-        eosBarModeObserver.observe();
-
         EosIntentReceiver mEosIntentReceiver = new EosIntentReceiver();
 
         mShortcutManager = new ShortcutManager(context, mHandler);
@@ -1033,6 +1021,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // register for Eos lockscreen action requests
         filter = new IntentFilter();
         filter.addAction(EOSConstants.SYSTEMUI_KEYGUARD_INTENT_KEY);
+        filter.addAction(EOSConstants.INTENT_EOS_UI_CHANGED);
         context.registerReceiver(mEosIntentReceiver, filter);
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -1053,6 +1042,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Controls rotation and the like.
         initializeHdmiState();
 
+        // set initial glass value
+        setGlassMode();
+
         // Match current screen state.
         if (mPowerManager.isScreenOn()) {
             screenTurningOn(null);
@@ -1061,12 +1053,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void closeApplication(String packageName) {
+        try {
+            ActivityManagerNative.getDefault().killApplicationProcess(
+                    packageName, AppGlobals.getPackageManager().getPackageUid(
+                    packageName, UserHandle.myUserId()));
+        } catch (RemoteException e) {
+            // Good luck next time!
+        }
+    }
+
     private void setNavigationBarSize() {
         /*
-         * get desired bar size 
-         * 0 = normal 
-         * 1 = low profile 
-         * 2 = tiny
+         * get desired bar size 0 = normal 1 = low profile 2 = tiny
          */
 
         int barHeight;
@@ -1097,72 +1096,71 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 barWidth = com.android.internal.R.dimen.navigation_bar_width;
                 break;
         }
+        synchronized (mLock) {
             mNavigationBarHeightForRotation[mPortraitRotation] =
-            mNavigationBarHeightForRotation[mUpsideDownRotation] =
-                mContext.getResources()
-                    .getDimensionPixelSize(barHeight);
+                    mNavigationBarHeightForRotation[mUpsideDownRotation] =
+                            mContext.getResources()
+                                    .getDimensionPixelSize(barHeight);
             mNavigationBarHeightForRotation[mLandscapeRotation] =
-            mNavigationBarHeightForRotation[mSeascapeRotation] =
-                mContext.getResources()
-                     .getDimensionPixelSize(barHeightLandscape);
+                    mNavigationBarHeightForRotation[mSeascapeRotation] =
+                            mContext.getResources()
+                                    .getDimensionPixelSize(barHeightLandscape);
 
             // Width of the navigation bar when presented vertically along
             // one side
             mNavigationBarWidthForRotation[mPortraitRotation] =
-            mNavigationBarWidthForRotation[mUpsideDownRotation] =
-            mNavigationBarWidthForRotation[mLandscapeRotation] =
-            mNavigationBarWidthForRotation[mSeascapeRotation] =
-                mContext.getResources()
-                    .getDimensionPixelSize(barWidth);
+                    mNavigationBarWidthForRotation[mUpsideDownRotation] =
+                            mNavigationBarWidthForRotation[mLandscapeRotation] =
+                                    mNavigationBarWidthForRotation[mSeascapeRotation] =
+                                            mContext.getResources()
+                                                    .getDimensionPixelSize(barWidth);
+        }
     }
 
     private void setGlassMode() {
-        mGlassEnabled = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_USE_GLASS,
-                EOSConstants.SYSTEMUI_USE_GLASS_DEF) == 1;
+        synchronized (mLock) {
+            mGlassEnabled = Settings.System.getInt(mContext.getContentResolver(),
+                    EOSConstants.SYSTEMUI_USE_GLASS,
+                    EOSConstants.SYSTEMUI_USE_GLASS_DEF) == 1;
+        }
     }
 
-    private void updateCustomUiMode() {
-        /*
-         * we start with the idea that the device has only 2 natural ui states
-         * either a cap key device with only a phone style statbar and a device
-         * which uses software navigation bar.
-         */
-        final boolean mForceTabletUi = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_USE_TABLET_BAR, 0) == 1;
-        final boolean mForceNavbar = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_FORCE_NAVBAR, 0) == 1;
+    private void updateUiMode() {
         final boolean mIsCapkey = !mContext.getResources().getBoolean(
                 R.bool.config_showNavigationBar);
-        mCanHideNavigationBar = true;
+        final int uiMode = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_UI_MODE, mIsCapkey ? EOSConstants.SYSTEMUI_UI_MODE_NO_NAVBAR
+                        : EOSConstants.SYSTEMUI_UI_MODE_NAVBAR);
+        synchronized (mLock) {
 
-        // capkey devices
-        if (mIsCapkey) {
-            if (mForceNavbar) {
-                if (mForceTabletUi) {
+            mCanHideNavigationBar = true;
+
+            switch (uiMode) {
+                case EOSConstants.SYSTEMUI_UI_MODE_NO_NAVBAR:
                     mHasNavigationBar = false;
-                    mHasSystemNavBar = true;
+                    mHasSystemNavBar = false;
+                    mCanHideNavigationBar = false;
                     mNavigationBarCanMove = false;
-                } else {
+                    break;
+                case EOSConstants.SYSTEMUI_UI_MODE_NAVBAR:
                     mHasNavigationBar = true;
                     mHasSystemNavBar = false;
                     mNavigationBarCanMove = mNavigationBarCanMoveDefaultState;
-                }
-            } else {
-                mHasNavigationBar = false;
-                mHasSystemNavBar = false;
-                mCanHideNavigationBar = false;
-                mNavigationBarCanMove = false;
-            }
-        } else {
-            if (mForceTabletUi) {
-                mHasNavigationBar = false;
-                mHasSystemNavBar = true;
-                mNavigationBarCanMove = false;
-            } else {
-                mHasNavigationBar = true;
-                mHasSystemNavBar = false;
-                mNavigationBarCanMove = mNavigationBarCanMoveDefaultState;
+                    break;
+                case EOSConstants.SYSTEMUI_UI_MODE_NAVBAR_LEFT:
+                    mHasNavigationBar = true;
+                    mHasSystemNavBar = false;
+                    mNavigationBarCanMove = mNavigationBarCanMoveDefaultState;
+                    break;
+                case EOSConstants.SYSTEMUI_UI_MODE_SYSTEMBAR:
+                    mHasNavigationBar = false;
+                    mHasSystemNavBar = true;
+                    mNavigationBarCanMove = false;
+                    break;
+                default:
+                    mHasNavigationBar = true;
+                    mHasSystemNavBar = false;
+                    mNavigationBarCanMove = mNavigationBarCanMoveDefaultState;
             }
         }
     }
@@ -1213,7 +1211,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // figure out custom ui mode here
-        updateCustomUiMode();
+        updateUiMode();
 
         // keep this around just for now
         if (!mHasSystemNavBar) {

@@ -217,12 +217,13 @@ public class SearchPanelView extends FrameLayout implements
         int startPosOffset;
         int endPosOffset;
 
-        boolean hybridBar = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR,
-                EOSConstants.SYSTEMUI_USE_HYBRID_STATBAR_DEF) == 1;
+        int barmode = Settings.System.getInt(mContext.getContentResolver(),
+                EOSConstants.SYSTEMUI_UI_MODE,
+                EOSConstants.SYSTEMUI_UI_MODE_NAVBAR);
+
         boolean isTabletUi = EOSUtils.hasSystemBar(mContext);
 
-        if (hybridBar || isTabletUi) {
+        if (barmode == EOSConstants.SYSTEMUI_UI_MODE_NAVBAR_LEFT || isTabletUi) {
             startPosOffset = 1;
             endPosOffset = 8;
         } else if (EOSUtils.isLargeScreen() || EOSUtils.isXLargeScreen()) {

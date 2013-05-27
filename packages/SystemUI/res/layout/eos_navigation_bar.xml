@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2012, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License"); 
+** you may not use this file except in compliance with the License. 
+** You may obtain a copy of the License at 
+**
+**     http://www.apache.org/licenses/LICENSE-2.0 
+**
+** Unless required by applicable law or agreed to in writing, software 
+** distributed under the License is distributed on an "AS IS" BASIS, 
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+** See the License for the specific language governing permissions and 
+** limitations under the License.
+-->
+
+<!-- navigation bar for sw600dp (small tablets) -->
+<com.android.systemui.statusbar.phone.NavigationBarView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF000000" >
+
+    <FrameLayout
+        android:id="@+id/rot0"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:id="@+id/nav_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal" >
+
+            <View
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="2dp"
+                android:layout_weight="0"
+                android:visibility="invisible" />
+
+            <!-- navigation controls -->
+
+            <com.android.systemui.statusbar.policy.KeyButtonView
+                android:id="@+id/back"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:contentDescription="@string/accessibility_back"
+                android:src="@drawable/ic_sysbar_back"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyCode="4"
+                systemui:keyIdentifier="0"
+                systemui:keyConfigUri="eos_systemui_softkey_back"
+                systemui:keyColorUri="eos_systemui_back_key_color"
+                systemui:keyGlowColorUri="eos_systemui_back_glow_color" />
+
+            <com.android.systemui.statusbar.policy.KeyButtonView
+                android:id="@+id/home"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:contentDescription="@string/accessibility_home"
+                android:src="@drawable/ic_sysbar_home"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyCode="3"
+                systemui:keyIdentifier="1"
+                systemui:keyConfigUri="eos_systemui_softkey_home"
+                systemui:keyRepeat="false"
+                systemui:keyColorUri="eos_systemui_home_key_color"
+                systemui:keyGlowColorUri="eos_systemui_home_glow_color" />
+
+            <com.android.systemui.statusbar.policy.KeyButtonView
+                android:id="@+id/recent_apps"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:contentDescription="@string/accessibility_recent"
+                android:src="@drawable/ic_sysbar_recent"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyIdentifier="2"
+                systemui:keyConfigUri="eos_systemui_softkey_recent"
+                systemui:keyColorUri="eos_systemui_recent_key_color"
+                systemui:keyGlowColorUri="eos_systemui_recent_glow_color" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <com.android.systemui.statusbar.policy.KeyButtonView
+                android:id="@+id/menu"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="2dp"
+                android:layout_weight="0"
+                android:contentDescription="@string/accessibility_menu"
+                android:src="@drawable/ic_sysbar_menu"
+                android:visibility="invisible"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyCode="82"
+                systemui:keyIdentifier="3"
+                systemui:keyConfigUri="eos_systemui_softkey_menu"
+                systemui:keyColorUri="eos_systemui_menu_key_color"
+                systemui:keyGlowColorUri="eos_systemui_menu_glow_color" />
+        </LinearLayout>
+
+        <!-- lights out layout to match exactly -->
+
+        <LinearLayout
+            android:id="@+id/lights_out"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:scaleType="center"
+                android:src="@drawable/ic_sysbar_lights_out_dot_small" />
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:scaleType="center"
+                android:src="@drawable/ic_sysbar_lights_out_dot_large" />
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="40dp"
+                android:layout_weight="0"
+                android:scaleType="center"
+                android:src="@drawable/ic_sysbar_lights_out_dot_small" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/search_light"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:scaleType="center"
+            android:src="@drawable/search_light"
+            android:visibility="gone" />
+
+        <com.android.systemui.statusbar.policy.DeadZone
+            android:id="@+id/deadzone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            systemui:decayTime="@integer/navigation_bar_deadzone_decay"
+            systemui:holdTime="@integer/navigation_bar_deadzone_hold"
+            systemui:maxSize="@dimen/navigation_bar_deadzone_size_max"
+            systemui:minSize="@dimen/navigation_bar_deadzone_size"
+            systemui:orientation="horizontal" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/rot90"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="0dp"
+        android:visibility="gone" >
+
+        <LinearLayout
+            android:id="@+id/nav_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal" >
+
+            <View
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="2dp"
+                android:layout_weight="0"
+                android:visibility="invisible" />
+
+            <!-- navigation controls -->
+
+            <com.android.systemui.statusbar.policy.KeyButtonView
+                android:id="@+id/back"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:contentDescription="@string/accessibility_back"
+                android:src="@drawable/ic_sysbar_back"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyCode="4"
+                systemui:keyIdentifier="0"
+                systemui:keyConfigUri="eos_systemui_softkey_back"
+                systemui:keyColorUri="eos_systemui_back_key_color"
+                systemui:keyGlowColorUri="eos_systemui_back_glow_color" />
+
+            <com.android.systemui.statusbar.policy.KeyButtonView
+                android:id="@+id/home"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:contentDescription="@string/accessibility_home"
+                android:src="@drawable/ic_sysbar_home"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyCode="3"
+                systemui:keyIdentifier="1"
+                systemui:keyConfigUri="eos_systemui_softkey_home"
+                systemui:keyRepeat="false"
+                systemui:keyColorUri="eos_systemui_home_key_color"
+                systemui:keyGlowColorUri="eos_systemui_home_glow_color" />
+
+            <com.android.systemui.statusbar.policy.KeyButtonView
+                android:id="@+id/recent_apps"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:contentDescription="@string/accessibility_recent"
+                android:src="@drawable/ic_sysbar_recent"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyIdentifier="2"
+                systemui:keyConfigUri="eos_systemui_softkey_recent"
+                systemui:keyColorUri="eos_systemui_recent_key_color"
+                systemui:keyGlowColorUri="eos_systemui_recent_glow_color" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <com.android.systemui.statusbar.policy.KeyButtonView
+                android:id="@+id/menu"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="2dp"
+                android:layout_weight="0"
+                android:contentDescription="@string/accessibility_menu"
+                android:src="@drawable/ic_sysbar_menu"
+                android:visibility="invisible"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyCode="82"
+                systemui:keyIdentifier="3"
+                systemui:keyConfigUri="eos_systemui_softkey_menu"
+                systemui:keyColorUri="eos_systemui_menu_key_color"
+                systemui:keyGlowColorUri="eos_systemui_menu_glow_color" />
+        </LinearLayout>
+
+        <!-- lights out layout to match exactly -->
+
+        <LinearLayout
+            android:id="@+id/lights_out"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+		
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:scaleType="center"
+                android:src="@drawable/ic_sysbar_lights_out_dot_small" />
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:scaleType="center"
+                android:src="@drawable/ic_sysbar_lights_out_dot_large" />
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="40dp"
+                android:layout_weight="0"
+                android:scaleType="center"
+                android:src="@drawable/ic_sysbar_lights_out_dot_small" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/search_light"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:scaleType="center"
+            android:src="@drawable/search_light"
+            android:visibility="gone" />
+
+        <com.android.systemui.statusbar.policy.DeadZone
+            android:id="@+id/deadzone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            systemui:decayTime="@integer/navigation_bar_deadzone_decay"
+            systemui:holdTime="@integer/navigation_bar_deadzone_hold"
+            systemui:maxSize="@dimen/navigation_bar_deadzone_size_max"
+            systemui:minSize="@dimen/navigation_bar_deadzone_size"
+            systemui:orientation="vertical" />
+    </FrameLayout>
+
+    <!-- not used -->
+
+    <View
+        android:id="@+id/rot270"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+</com.android.systemui.statusbar.phone.NavigationBarView>
