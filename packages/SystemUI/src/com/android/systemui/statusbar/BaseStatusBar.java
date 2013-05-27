@@ -323,6 +323,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
             }
         }, filter);
+        mEosObserver.setEnabled(true);
     }
 
     public void userSwitched(int newUserId) {

@@ -448,7 +448,7 @@ public class TabletStatusBar extends BaseStatusBar {
         updateSearchPanel();
     }
 
-    protected void loadDimens() {
+    private void loadSoftkeyDimens() {
         final Resources res = mContext.getResources();
 
         if (mNavigationArea != null) {
@@ -465,6 +465,12 @@ public class TabletStatusBar extends BaseStatusBar {
                     mMenuNavIconWidth, ViewGroup.LayoutParams.MATCH_PARENT);
             mMenuButton.setLayoutParams(lp);
         }
+    }
+
+    protected void loadDimens() {
+        final Resources res = mContext.getResources();
+
+        loadSoftkeyDimens();
 
         mIconHPadding = res.getDimensionPixelSize(
                 R.dimen.status_bar_icon_padding);
@@ -557,12 +563,13 @@ public class TabletStatusBar extends BaseStatusBar {
         mNetworkController.addSignalCluster(signalCluster);
 
         // The navigation buttons
-        mBackButton = (ImageView) sb.findViewById(R.id.back);
         mNavigationArea = (ViewGroup) sb.findViewById(R.id.navigationArea);
+        mBackButton = (ImageView) sb.findViewById(R.id.back);
         mHomeButton = mNavigationArea.findViewById(R.id.home);
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
         mRecentButton.setOnClickListener(mOnClickListener);
+        loadSoftkeyDimens();
 
         LayoutTransition lt = new LayoutTransition();
         lt.setDuration(250);

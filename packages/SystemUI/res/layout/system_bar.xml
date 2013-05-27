@@ -73,7 +73,7 @@
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/back"
-                    android:layout_width="@dimen/navigation_key_width"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/accessibility_back"
                     android:src="@drawable/ic_sysbar_back"
@@ -84,11 +84,11 @@
                     systemui:keyIdentifier="0"
                     systemui:keyConfigUri="eos_systemui_softkey_back"
                     systemui:keyColorUri="eos_systemui_back_key_color"
-                    systemui:keyGlowColorUri="eos_systemui_back_glow_color" /> />
+                    systemui:keyGlowColorUri="eos_systemui_back_glow_color" />
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/home"
-                    android:layout_width="@dimen/navigation_key_width"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/accessibility_home"
                     android:src="@drawable/ic_sysbar_home"
@@ -104,7 +104,7 @@
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/recent_apps"
-                    android:layout_width="@dimen/navigation_key_width"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/accessibility_recent"
                     android:src="@drawable/ic_sysbar_recent"
@@ -118,7 +118,7 @@
 
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/menu"
-                    android:layout_width="@dimen/navigation_menu_key_width"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/accessibility_menu"
                     android:src="@drawable/ic_sysbar_menu"

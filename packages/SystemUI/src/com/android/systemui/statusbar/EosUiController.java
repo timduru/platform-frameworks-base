@@ -11,6 +11,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -153,6 +154,13 @@ public class EosUiController implements FeatureListener, ActivityListener {
             // handleLegacyTogglesChange();
             return;
         }
+    }
+
+    public void notifyEosUiOnline() {
+        mContext.sendBroadcastAsUser(new Intent()
+                .setAction(EOSConstants.INTENT_EOS_UI_CHANGED)
+                .putExtra(EOSConstants.INTENT_EOS_UI_CHANGED_REASON, "eos_ui_online"),
+                new UserHandle(UserHandle.USER_ALL));
     }
 
     public WindowManager.LayoutParams getNavigationBarLayoutParams() {
