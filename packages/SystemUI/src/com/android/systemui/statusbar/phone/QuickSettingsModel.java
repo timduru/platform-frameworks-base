@@ -738,7 +738,8 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     void refreshRSSI() {
         mRSSIState.enabledByUser = mConnMan.getMobileDataEnabled();
-        mRSSICallback.refreshView(mRSSITile, mRSSIState);
+        if (isToggleEnabled(DATA) && mRSSITile != null && mHasMobileData)
+            mRSSICallback.refreshView(mRSSITile, mRSSIState);
     }
 
     // Bluetooth
