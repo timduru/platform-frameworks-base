@@ -163,7 +163,7 @@ public class SystembarStateHandler {
         IntentFilter filter = new IntentFilter();
         filter.addAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE);
         filter.addAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE_REQUEST_TOGGLE);
-        mContext.registerReceiver(mReceiver, filter);
+        //mContext.registerReceiver(mReceiver, filter);
     }
 
     public void setNavigationBar(NavigationBarView view, WindowManager.LayoutParams lp) {
