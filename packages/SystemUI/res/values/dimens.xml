@@ -227,6 +227,9 @@
     <dimen name="notification_panel_start_offset">20dp</dimen>
     
         <!-- Height of a small notification in the status bar -->
+    <dimen name="notification_ticker_text_size_normal">16sp</dimen>
+    <dimen name="notification_ticker_text_size_slim">14sp</dimen>
+    <dimen name="notification_ticker_text_size_tiny">12sp</dimen>
     <dimen name="notification_ticker_width_tablet_mode">220dp</dimen>
     <dimen name="notification_min_height_tablet">64dp</dimen>
     <dimen name="notification_max_height_tablet">256dp</dimen>

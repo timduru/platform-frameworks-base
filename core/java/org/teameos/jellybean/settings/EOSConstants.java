@@ -585,6 +585,21 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final int SYSTEMUI_BARSIZE_MODE_NORMAL = 0;
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_BARSIZE_MODE_SLIM = 1;
+
+    /**
+     * @hide
+     */
+    public static final int SYSTEMUI_BARSIZE_MODE_TINY = 2;
+
+    /**
+     * @hide
+     */
     public static final String INTENT_EOS_UI_CHANGED = "intent_eos_ui_changed";
 
     /**

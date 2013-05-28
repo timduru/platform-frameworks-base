@@ -89,6 +89,7 @@ public class EosUiController implements FeatureListener, ActivityListener {
 
     private boolean mIsClockVisible = true;
     private int mCurrentNavLayout;
+    private int mCurrentBarSizeMode;
 
     private boolean mIsTabletUi;
     private boolean mIsNormalScreen;
@@ -108,6 +109,7 @@ public class EosUiController implements FeatureListener, ActivityListener {
         mIsTabletUi = EOSUtils.hasSystemBar(context);
         mIsNormalScreen = EOSUtils.isNormalScreen();
         mIsLargeScreen = EOSUtils.isLargeScreen();
+        updateBarSizeMode();
     }
 
     @Override
@@ -156,11 +158,9 @@ public class EosUiController implements FeatureListener, ActivityListener {
         }
     }
 
-    public void notifyEosUiOnline() {
-        mContext.sendBroadcastAsUser(new Intent()
-                .setAction(EOSConstants.INTENT_EOS_UI_CHANGED)
-                .putExtra(EOSConstants.INTENT_EOS_UI_CHANGED_REASON, "eos_ui_online"),
-                new UserHandle(UserHandle.USER_ALL));
+    public void updateBarSizeMode() {
+        mCurrentBarSizeMode = Settings.System.getInt(mResolver,
+                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, EOSConstants.SYSTEMUI_BARSIZE_MODE_NORMAL);
     }
 
     public WindowManager.LayoutParams getNavigationBarLayoutParams() {
@@ -197,15 +197,17 @@ public class EosUiController implements FeatureListener, ActivityListener {
         mActivityWatcher.notifyTopAppChanged();
     }
 
+    public int getBarSizeMode() {
+        return mCurrentBarSizeMode;
+    }
+
     public int getNavbarHeightResource() {
-        int barMode = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0);
-        switch (barMode) {
-            case 0:
+        switch (mCurrentBarSizeMode) {
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_NORMAL:
                 return com.android.internal.R.dimen.navigation_bar_height;
-            case 1:
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_SLIM:
                 return com.android.internal.R.dimen.navigation_bar_height_low_profile;
-            case 2:
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_TINY:
                 return com.android.internal.R.dimen.navigation_bar_height_tiny_profile;
             default:
                 return com.android.internal.R.dimen.navigation_bar_height;
@@ -222,14 +224,12 @@ public class EosUiController implements FeatureListener, ActivityListener {
     }
 
     public int getNotificationIconSize() {
-        int barMode = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0);
-        switch (barMode) {
-            case 0:
+        switch (mCurrentBarSizeMode) {
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_NORMAL:
                 return R.dimen.system_bar_icon_size_normal;
-            case 1:
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_SLIM:
                 return R.dimen.system_bar_icon_size_slim;
-            case 2:
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_TINY:
                 return R.dimen.system_bar_icon_size_tiny;
             default:
                 return R.dimen.system_bar_icon_size_normal;
@@ -237,14 +237,12 @@ public class EosUiController implements FeatureListener, ActivityListener {
     }
 
     public int getTickerIconSize() {
-        int barMode = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0);
-        switch (barMode) {
-            case 0:
+        switch (mCurrentBarSizeMode) {
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_NORMAL:
                 return R.dimen.notification_large_icon_height;
-            case 1:
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_SLIM:
                 return R.dimen.notification_large_icon_height_slim;
-            case 2:
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_TINY:
                 return R.dimen.notification_large_icon_height_tiny;
             default:
                 return R.dimen.notification_large_icon_height;

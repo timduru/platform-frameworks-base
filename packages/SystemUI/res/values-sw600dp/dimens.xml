@@ -63,4 +63,7 @@
     <dimen name="system_bar_clock_size_normal">20dp</dimen>
     <dimen name="system_bar_clock_size_slim">16dp</dimen>
     <dimen name="system_bar_clock_size_tiny">12dp</dimen>
+    <dimen name="notification_ticker_text_size_normal">16sp</dimen>
+    <dimen name="notification_ticker_text_size_slim">14sp</dimen>
+    <dimen name="notification_ticker_text_size_tiny">12sp</dimen>
 </resources>

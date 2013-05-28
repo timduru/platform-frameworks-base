@@ -30,8 +30,8 @@
 
     <ImageView
         android:id="@+id/large_icon"
-        android:layout_width="@android:dimen/notification_large_icon_height"
-        android:layout_height="@android:dimen/notification_large_icon_width"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:scaleType="center"

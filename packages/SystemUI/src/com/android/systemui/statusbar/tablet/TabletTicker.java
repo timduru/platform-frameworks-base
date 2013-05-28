@@ -23,7 +23,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -37,8 +36,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -46,8 +43,6 @@ import com.android.internal.statusbar.StatusBarNotification;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
-
-import org.teameos.jellybean.settings.EOSUtils;
 
 public class TabletTicker
         extends Handler
@@ -218,9 +213,9 @@ public class TabletTicker
                 .getDimensionPixelSize(mBar.getEos().isNormalScreen() ? R.dimen.notification_ticker_width_tablet_mode
                         : R.dimen.notification_ticker_width);
 
-        // height of large icon based on set bar size
-        final int height = res
-                .getDimensionPixelSize(mBar.getEos().getTickerIconSize());
+        // window size will be size of system bar
+        final int height = mBar.getStatusBarHeight();
+
         int windowFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -257,6 +252,12 @@ public class TabletTicker
         }
     }
 
+    private void setParamHeightToStatusbar(View group) {
+        ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) group.getLayoutParams();
+        params.height = mBar.getStatusBarHeight();
+        group.setLayoutParams(params);
+    }
+
     private View makeTickerView(StatusBarNotification notification) {
         final Notification n = notification.notification;
 
@@ -289,6 +290,11 @@ public class TabletTicker
                 return null;
             }
 
+            // slim down all views
+            setParamHeightToStatusbar(group.findViewById(R.id.system_bar_ticker_background_view));
+            setParamHeightToStatusbar(content);
+            setParamHeightToStatusbar(expanded);
+
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, barHeight);
 
@@ -301,8 +307,10 @@ public class TabletTicker
             ImageView iv = (ImageView) group.findViewById(iconId);
             iv.setImageDrawable(icon);
             iv.setVisibility(View.VISIBLE);
+            setParamHeightToStatusbar(iv);
             TextView tv = (TextView) group.findViewById(R.id.text);
             tv.setText(n.tickerText);
+            setParamHeightToStatusbar(tv);
         } else {
             throw new RuntimeException("tickerView==null && tickerText==null");
         }
@@ -310,18 +318,9 @@ public class TabletTicker
         if (n.largeIcon != null) {
             largeIcon.setImageBitmap(n.largeIcon);
             largeIcon.setVisibility(View.VISIBLE);
-            final ViewGroup.LayoutParams lp = largeIcon.getLayoutParams();
             if (n.largeIcon.getHeight() <= barHeight) {
-                // for smallish largeIcons, it looks a little odd to have them
-                // floating halfway up
-                // the ticker, so we vertically center them in the status bar
-                // area instead
-                lp.height = barHeight;
-            } else {
-                lp.height = mContext.getResources().getDimensionPixelSize(
-                        mBar.getEos().getTickerIconSize());
+                setParamHeightToStatusbar(largeIcon);
             }
-            largeIcon.setLayoutParams(lp);
         }
 
         if (CLICKABLE_TICKER) {

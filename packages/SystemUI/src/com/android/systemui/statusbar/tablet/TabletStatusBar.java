@@ -1526,6 +1526,7 @@ public class TabletStatusBar extends BaseStatusBar {
                 }
                 animateCollapsePanels(flags);
             } else if (EOSConstants.INTENT_EOS_UI_CHANGED_KEY_REFRESH_UI.equals(action)) {
+                getEos().updateBarSizeMode();
                 loadDimens();
                 if (mNotificationPanel != null) {
                     mNotificationPanel.updateResources();

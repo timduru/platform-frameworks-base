@@ -23,8 +23,8 @@
 
     <ImageView
         android:id="@+id/large_icon"
-        android:layout_width="@android:dimen/notification_large_icon_width"
-        android:layout_height="@android:dimen/notification_large_icon_height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:scaleType="center"
         android:visibility="gone" />
 
@@ -37,15 +37,15 @@
 
         <ImageView
             android:id="@+id/left_icon"
-            android:layout_width="64dp"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:scaleType="center"
             android:visibility="gone" />
 
         <TextView
             android:id="@+id/text"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="12dp"
             android:gravity="center_vertical"
@@ -54,8 +54,8 @@
 
         <ImageView
             android:id="@+id/right_icon"
-            android:layout_width="64dp"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:scaleType="center"
             android:visibility="gone" />
     </LinearLayout>

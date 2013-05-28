@@ -1073,19 +1073,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int barWidth;
 
         int barMode = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, 0);
+                EOSConstants.SYSTEMUI_BAR_SIZE_MODE, EOSConstants.SYSTEMUI_BARSIZE_MODE_NORMAL);
         switch (barMode) {
-            case 0:
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_NORMAL:
                 barHeight = com.android.internal.R.dimen.navigation_bar_height;
                 barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape;
                 barWidth = com.android.internal.R.dimen.navigation_bar_width;
                 break;
-            case 1:
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_SLIM:
                 barHeight = com.android.internal.R.dimen.navigation_bar_height_low_profile;
                 barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape_low_profile;
                 barWidth = com.android.internal.R.dimen.navigation_bar_width_low_profile;
                 break;
-            case 2:
+            case EOSConstants.SYSTEMUI_BARSIZE_MODE_TINY:
                 barHeight = com.android.internal.R.dimen.navigation_bar_height_tiny_profile;
                 barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape_tiny_profile;
                 barWidth = com.android.internal.R.dimen.navigation_bar_width_tiny_profile;
