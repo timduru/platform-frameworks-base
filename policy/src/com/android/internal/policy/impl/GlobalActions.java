@@ -73,11 +73,8 @@ import android.widget.TextView;
 
 import com.android.internal.app.ThemeUtils;
 
-import org.teameos.jellybean.settings.EOSConstants;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 
 /**
@@ -104,7 +101,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
-    private SystemBarsToggleAction mSystemBarsToggleAction;
+    private ToggleAction mExpandDesktopModeOn;
 
     private MyAdapter mAdapter;
 
@@ -115,8 +112,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mHasTelephony;
     private boolean mHasVibrator;
     private boolean mRebootMenu = false;
-    private boolean mHasNavBar = false;
-    private boolean mHasStatBarOnly = false;
 
     /**
      * @param context everything needs a context :(
@@ -149,13 +144,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mAirplaneModeObserver);
         Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = vibrator != null && vibrator.hasVibrator();
-        try {
-            mHasNavBar = getWindowManager().hasNavigationBar();
-        } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        mHasStatBarOnly = !mHasNavBar;
     }
 
     /**
@@ -205,38 +193,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mUiContext = ThemeUtils.createUiContext(mContext);
         }
         return mUiContext != null ? mUiContext : mContext;
-    }
-
-    // helper methods to help properly initialize the show/hide bars feature
-    // based on the proper device configuration
-    private int getTitle() {
-        if (mHasNavBar) {
-            return R.string.eos_globalactions_hide_bars_title;
-        } else if (mHasStatBarOnly) {
-            return R.string.eos_globalactions_hide_statusbar_title;
-        } else {
-            return R.string.eos_globalactions_hide_statusbar_title;
-        }
-    }
-
-    private int getStatusOn() {
-        if (mHasNavBar) {
-            return R.string.eos_globalactions_hide_bars_hidden;
-        } else if (mHasStatBarOnly) {
-            return R.string.eos_globalactions_hide_statusbar_hidden;
-        } else {
-            return R.string.eos_globalactions_hide_statusbar_hidden;
-        }
-    }
-
-    private int getStatusOff() {
-        if (mHasNavBar) {
-            return R.string.eos_globalactions_hide_bars_visible;
-        } else if (mHasStatBarOnly) {
-            return R.string.eos_globalactions_hide_statusbar_visible;
-        } else {
-            return R.string.eos_globalactions_hide_statusbar_visible;
-        }
     }
 
     /**
@@ -333,7 +289,26 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 		};
 		onAirplaneModeChanged();
 
-		mSystemBarsToggleAction = new SystemBarsToggleAction();
+        mExpandDesktopModeOn = new ToggleAction(
+                R.drawable.ic_lock_expanded_desktop,
+                R.drawable.ic_lock_expanded_desktop_off,
+                R.string.global_actions_toggle_expanded_desktop_mode,
+                R.string.global_actions_expanded_desktop_mode_on_status,
+                R.string.global_actions_expanded_desktop_mode_off_status) {
+
+            void onToggle(boolean on) {
+                changeExpandDesktopModeSystemSetting(on);
+            }
+
+            public boolean showDuringKeyguard() {
+                return false;
+            }
+
+            public boolean showBeforeProvisioning() {
+                return false;
+            }
+        };
+        onExpandDesktopModeChanged();
 
 		mItems = new ArrayList<Action>();
 
@@ -453,7 +428,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 		if (SystemProperties.getBoolean("fw.power_user_switcher", false)) {
 			addUsersToMenu(mItems);
 		}
-		mItems.add(mSystemBarsToggleAction);
+
+        // next: expanded desktop toggle
+        // only shown if enabled, disabled by default
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.EXPANDED_DESKTOP_STYLE, 0) != 0){
+            mItems.add(mExpandDesktopModeOn);
+        }
 	}
 
 	private void createRebootMenuItems() {
@@ -572,19 +553,22 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     }
 
-	private void refreshBarMode() {
-        try {
-            mHasNavBar = getWindowManager().hasNavigationBar();
-        } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        mHasStatBarOnly = !mHasNavBar;
-        final boolean mBarHidden = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_HIDE_BARS,
-                EOSConstants.SYSTEMUI_HIDE_BARS_DEF) == 1 ? true : false;
-        ((ToggleAction) mSystemBarsToggleAction).updateState(
-                mBarHidden ? ToggleAction.State.On : ToggleAction.State.Off);
+    /**
+     * Change the expand desktop mode system setting
+     */
+    private void changeExpandDesktopModeSystemSetting(boolean on) {
+        Settings.System.putInt(
+                mContext.getContentResolver(),
+                Settings.System.EXPANDED_DESKTOP_STATE,
+                on ? 1 : 0);
+    }
+
+    private void onExpandDesktopModeChanged() {
+        boolean expandDesktopModeOn = Settings.System.getInt(
+                mContext.getContentResolver(),
+                Settings.System.EXPANDED_DESKTOP_STATE,
+                0) == 1;
+        mExpandDesktopModeOn.updateState(expandDesktopModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
     }
 
     /** {@inheritDoc} */
@@ -923,33 +907,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             return false;
         }
     }
-    
-    private class SystemBarsToggleAction extends ToggleAction {
-        public SystemBarsToggleAction() {
-            super(com.android.internal.R.drawable.ic_lock_reboot_recovery,
-                    com.android.internal.R.drawable.ic_lock_reboot_recovery,
-                    getTitle(), getStatusOn(), getStatusOff());
-        }
-
-        @Override
-        public boolean showDuringKeyguard() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean showBeforeProvisioning() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        void onToggle(boolean on) {
-            // TODO Auto-generated method stub
-            mContext.sendBroadcast(new Intent()
-            .setAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE_REQUEST_TOGGLE));
-        }
-    }
 
     private static class SilentModeTriStateAction implements Action, View.OnClickListener {
 
@@ -1075,13 +1032,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     };
 
-    private ContentObserver mHybridUiObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            mHandler.sendEmptyMessage(MESSAGE_REFRESH);
-        }
-    };
-
     private static final int MESSAGE_DISMISS = 0;
     private static final int MESSAGE_REFRESH = 1;
     private static final int MESSAGE_SHOW = 2;
@@ -1097,7 +1047,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 break;
             case MESSAGE_REFRESH:
                 refreshSilentMode();
-                refreshBarMode();
                 mAdapter.notifyDataSetChanged();
                 break;
             case MESSAGE_SHOW:
