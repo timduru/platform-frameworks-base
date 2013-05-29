@@ -1063,6 +1063,9 @@
         wallpaper suggestion is too large for CPU to handle -->
     <integer name="config_wallpaperMaxWidth">-1</integer>
 
+    <!-- Device has proprietary illumination bar i.e. Sony Xperia -->
+    <bool name="config_hasIlluminationBar">false</bool>
+
     <!-- Vibrator pattern to be used as the default for notifications
          that specify DEFAULT_VIBRATE.
      -->
