@@ -516,10 +516,10 @@ public class TabletStatusBar extends BaseStatusBar {
 
         // the whole right-hand side of the bar
         mNotificationArea = sb.findViewById(R.id.notificationArea);
-        mNotificationArea.setOnTouchListener(new NotificationTriggerTouchListener());
 
         // the button to open the notification area
         mNotificationTrigger = sb.findViewById(R.id.notificationTrigger);
+        mNotificationTrigger.setOnTouchListener(new NotificationTriggerTouchListener());
 
         mStatusIcons = (LinearLayout) mNotificationTrigger.findViewById(R.id.statusIcons);
 
