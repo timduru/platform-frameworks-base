@@ -3,7 +3,6 @@ package com.android.systemui.statusbar;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.app.ActivityManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -11,7 +10,6 @@ import android.graphics.Bitmap.Config;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -534,15 +532,9 @@ public class EosUiController implements FeatureListener, ActivityListener {
         return bitmap;
     }
 
-    private Intent getEccIntent() {
-        return new Intent()
-                .setClassName("org.eos.controlcenter",
-                        "org.eos.controlcenter.Main")
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    }
-
     @Override
     public void onActivityChanged(String componentName) {
-        mObserver.setEnabled(componentName.equals(getEccIntent().getComponent().flattenToString()));
+        mObserver.setEnabled(componentName.contains("org.eos.controlcenter")
+                || componentName.contains("com.android.settings"));
     }
 }
