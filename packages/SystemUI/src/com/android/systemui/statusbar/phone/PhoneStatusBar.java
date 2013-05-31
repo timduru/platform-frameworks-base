@@ -90,7 +90,6 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.SystembarStateHandler;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ExternalBatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
@@ -795,8 +794,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void showSearchPanel() {
         super.showSearchPanel();
-        if (isNavbarHidden())
-            return;
         mHandler.removeCallbacks(mShowSearchPanel);
 
         // we want to freeze the sysui state wherever it is
@@ -811,8 +808,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void hideSearchPanel() {
         super.hideSearchPanel();
-        if (isNavbarHidden())
-            return;
         WindowManager.LayoutParams lp =
                 (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -896,7 +891,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private void addNavigationBar() {
         if (DEBUG)
             Slog.v(TAG, "addNavigationBar: about to add " + mNavigationBarView);
-        if (mNavigationBarView == null || getBarAttachedHandler().isBarPreviouslyHiddenByConf())
+        if (mNavigationBarView == null)
             return;
 
         prepareNavigationBarView();
@@ -906,7 +901,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private void repositionNavigationBar() {
-        if (mNavigationBarView == null || isNavbarHidden())
+        if (mNavigationBarView == null)
             return;
 
         CustomTheme newTheme = mContext.getResources().getConfiguration().customTheme;
@@ -1459,7 +1454,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mExpandedVisible = true;
         mPile.setLayoutTransitionsEnabled(true);
-        if (mNavigationBarView != null && !isNavbarHidden())
+        if (mNavigationBarView != null)
             mNavigationBarView.setSlippery(true);
 
         updateCarrierLabelVisibility(true);
@@ -1837,7 +1832,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mExpandedVisible = false;
         mPile.setLayoutTransitionsEnabled(false);
-        if (mNavigationBarView != null && !isNavbarHidden())
+        if (mNavigationBarView != null)
             mNavigationBarView.setSlippery(false);
         visibilityChanged(false);
 
@@ -2336,13 +2331,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private void addStatusBarWindow() {
         makeStatusBarView();
         mStatusBarContainer.addView(mStatusBarWindow);
-        getBarAttachedHandler().setStatusBar(mStatusBarContainer, getStatusBarWindowParams());
-
-        // two conditions in which we add statusbar on boot
-        // 1: navbar is visible, statusbar must be visible
-        // 2: navbar is hidden but the statusbar does not hide with it
-        // StateHandler handles checks
-        getBarAttachedHandler().addStatusbarWindow();
+        mWindowManager.addView(mStatusBarContainer, getStatusBarWindowParams());
     }
 
     private WindowManager.LayoutParams getStatusBarWindowParams() {
@@ -2578,11 +2567,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                             + mContext.getResources().getConfiguration());
                 }
                 mDisplay.getSize(mCurrentDisplaySize);
-
-                if (intent.getBooleanExtra(SystembarStateHandler.EOS_ADD_NAVBAR_KEY, false)) {
-                    addNavigationBar();
-                    return;
-                }
                 updateResources();
                 repositionNavigationBar();
                 updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
@@ -2674,10 +2658,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         copyNotifications(notifications, mNotificationData);
         mNotificationData.clear();
         
-        // note: on theme change we let it refresh resources
-        // but we only let must make sure the navigation bar
-        // is not already removed by user
-        if (mNavigationBarView != null && !isNavbarHidden()) {
+        // note: device could be in cap key mode
+        if (mNavigationBarView != null) {
             mWindowManager.removeViewImmediate(mNavigationBarView);
         }
         makeStatusBarView();
@@ -2699,9 +2681,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mStatusBarContainer.addView(mStatusBarWindow);
 
-        // if we let the theme change remove the bar
-        // we are safe letting it add it back
-        if (!isNavbarHidden()) addNavigationBar();
+        addNavigationBar();
 
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         mRecreating = false;

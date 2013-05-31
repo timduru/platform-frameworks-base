@@ -94,8 +94,6 @@ public abstract class ActionHandler {
             screenOff();
         } else if (action.equals(EOSConstants.SYSTEMUI_TASK_ASSIST)) {
             startAssistActivity();
-        } else if (action.equals(EOSConstants.SYSTEMUI_TASK_HIDE_BARS)) {
-            hideBars();
         } else if (action.equals(EOSConstants.SYSTEMUI_TASK_POWER_MENU)) {
             showPowerMenu();
         } else if (action.startsWith("app:")) {
@@ -291,15 +289,6 @@ public abstract class ActionHandler {
                 Slog.w(TAG, "Activity not found for " + intent.getAction());
             }
         }
-    }
-
-    private void hideBars() {
-        // the only way to call this is if
-        // the navigationbar was visible to start with
-        // but we send the toggle intent and the handler
-        // should get it right
-        mContext.sendBroadcast(new Intent()
-        .setAction(EOSConstants.INTENT_SYSTEMUI_BAR_STATE_REQUEST_TOGGLE));
     }
 
     private void showPowerMenu() {

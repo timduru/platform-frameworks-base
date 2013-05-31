@@ -84,7 +84,6 @@ public class SearchPanelView extends FrameLayout implements
     private View mSearchTargetsContainer;
     private GlowPadView mGlowPadView;
     private PackageManager mPackageManager;
-    private IWindowManager mWm;
     private Resources mResources;
     private TargetObserver mTargetObserver;
     private ContentResolver mContentResolver;
@@ -103,7 +102,6 @@ public class SearchPanelView extends FrameLayout implements
 
         mContentResolver = mContext.getContentResolver();
         mTargetObserver = new TargetObserver(new Handler());
-        mWm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
         targetList = Arrays.asList(EOSConstants.SYSTEMUI_NAVRING_1,
                 EOSConstants.SYSTEMUI_NAVRING_2, EOSConstants.SYSTEMUI_NAVRING_3);
         for (int i = 0; i < targetList.size(); i++) {
@@ -276,9 +274,6 @@ public class SearchPanelView extends FrameLayout implements
             } else if (targetActivities.get(i).equals(EOSConstants.SYSTEMUI_TASK_ASSIST)) {
                 storedDraw.add(new TargetDrawable(mResources,
                         com.android.internal.R.drawable.ic_action_assist_generic));
-            } else if (targetActivities.get(i).equals(EOSConstants.SYSTEMUI_TASK_HIDE_BARS)) {
-                storedDraw.add(new TargetDrawable(mResources,
-                        com.android.internal.R.drawable.ic_dialog_info));
             } else if (targetActivities.get(i).startsWith("app:")) {
                 try {
                     ActivityInfo activityInfo = mPackageManager

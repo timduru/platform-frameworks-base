@@ -74,7 +74,6 @@ import com.android.systemui.statusbar.DoNotDisturb;
 import com.android.systemui.statusbar.EosObserver;
 import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.NotificationData;
-import com.android.systemui.statusbar.SystembarStateHandler;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -734,11 +733,6 @@ public class TabletStatusBar extends BaseStatusBar {
     @Override
     public void hideSearchPanel() {
         super.hideSearchPanel();
-        boolean hideBar = (Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_HIDE_BARS,
-                EOSConstants.SYSTEMUI_HIDE_BARS_DEF) == 1) ? true : false;
-        if (hideBar)
-            return;
         WindowManager.LayoutParams lp =
                 (android.view.WindowManager.LayoutParams) mStatusBarContainer.getLayoutParams();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;

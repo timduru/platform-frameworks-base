@@ -35,11 +35,6 @@ public class EosUiController implements FeatureListener, ActivityListener {
 
     static final String TAG = "EosUiController";
 
-    // we set a flag in settingsProvider indicating
-    // that we intentionally killed systemui. so we
-    // can restore states if need be
-    public static final String EOS_KILLED_ME = "eos_killed_me";
-
     static final int STOCK_NAV_BAR = com.android.systemui.R.layout.navigation_bar;
     static final int EOS_NAV_BAR = com.android.systemui.R.layout.eos_navigation_bar;
 
@@ -74,7 +69,6 @@ public class EosUiController implements FeatureListener, ActivityListener {
     private int MSG_LEGACY_TOGGLES_SETTINGS;
 
     // Eos classes
-    private SystembarStateHandler mSystembarHandler;
     private EosObserver mObserver;
     private EosGlassController mGlass;
     private NX mNx;
@@ -97,9 +91,8 @@ public class EosUiController implements FeatureListener, ActivityListener {
      */
     private boolean mIsLargeScreen;
 
-    public EosUiController(Context context, SystembarStateHandler handler, EosObserver observer) {
+    public EosUiController(Context context, EosObserver observer) {
         mContext = context;
-        mSystembarHandler = handler;
         mObserver = observer;
         mActivityWatcher = new ActivityWatcher(mContext);
         mActivityWatcher.setActivityListener((ActivityListener) this);
@@ -303,9 +296,6 @@ public class EosUiController implements FeatureListener, ActivityListener {
          * at this point, all views are now set except for navbar, which we now
          * have
          */
-
-        // send bar to visibility handler first
-        mSystembarHandler.setNavigationBar(mNavigationBarView, getNavigationBarLayoutParams());
 
         // startNX the instance handles all states
         if (mCurrentNavLayout == STOCK_NAV_BAR) {

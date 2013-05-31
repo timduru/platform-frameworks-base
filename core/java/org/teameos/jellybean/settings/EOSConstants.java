@@ -6,15 +6,6 @@ import java.util.Map;
 
 public final class EOSConstants {
     /* EOS SETTINGS STRINGS */
-    /**
-     * @hide
-     */
-    public static final String SYSTEMUI_HIDE_BARS = "eos_systemui_hide_bars";
-
-    /**
-     * @hide
-     */
-    public static final int SYSTEMUI_HIDE_BARS_DEF = 0;
 
     /**
      * @hide
@@ -437,26 +428,6 @@ public final class EOSConstants {
     /**
      * @hide
      */
-    public static final String INTENT_SYSTEMUI_BAR_STATE = "org.teameos.intent.action.BAR_STATE";
-
-    /**
-     * @hide
-     */
-    public static final String INTENT_SYSTEMUI_BAR_STATE_KEY = "org.teameos.intent.action.BAR_STATE_KEY";
-
-    /**
-     * @hide
-     */
-    public static final String INTENT_SYSTEMUI_BAR_STATE_REQUEST_TOGGLE = "org.teameos.intent.action.BAR_STATE_REQUEST_TOGGLE";
-
-    /**
-     * @hide
-     */
-    public static final String INTENT_SYSTEMUI_BAR_STATE_CHANGED_EXCEPTION = "org.teameos.intent.action.BAR_STATE_CHANGED_EXCEPTION";
-
-    /**
-     * @hide
-     */
     public static final String SYSTEMUI_SETTINGS_STANDARD_WIFI = "eos_systemui_settings_standard_wifi";
     /**
      * @hide
@@ -536,26 +507,6 @@ public final class EOSConstants {
      * @hide
      */
     public static final int DEVICE_SETTINGS_TOUCHPAD_ENABLED = 1;
-
-    /**
-     * @hide
-     */
-    public static final String SYSTEMUI_HIDE_NAVBAR_ON_BOOT = "eos_systemui_hide_navbar_on_boot";
-
-    /**
-     * @hide
-     */
-    public static final int SYSTEMUI_HIDE_NAVBAR_ON_BOOT_DEF = 0;
-
-    /**
-     * @hide
-     */
-    public static final String SYSTEMUI_HIDE_STATBAR_TOO = "eos_systemui_hide_statbar_too";
-
-    /**
-     * @hide
-     */
-    public static final int SYSTEMUI_HIDE_STATBAR_TOO_DEF = 0;
 
     /**
      * @hide
@@ -767,11 +718,6 @@ public final class EOSConstants {
      * @hide
      */
     public static final String SYSTEMUI_TASK_ASSIST = "assist";
-
-    /**
-     * @hide
-     */
-    public static final String SYSTEMUI_TASK_HIDE_BARS = "hidebars";
 
     /**
      * @hide
