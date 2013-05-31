@@ -867,6 +867,11 @@ public final class EOSConstants {
     /**
      * @hide
      */
+    public static final String SYSTEMUI_PANEL_EXPANDED_DESKTOP_TILE = "QS_Expanded_Desktop";
+
+    /**
+     * @hide
+     */
     public static final String SYSTEMUI_PANEL_TORCH_INTENT = "QuickSettingsMod.UPDATE_TORCH_TILE";
 
     /**

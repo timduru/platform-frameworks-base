@@ -321,6 +321,10 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mSyncCallback;
     private State mSyncState = new State();
 
+    private QuickSettingsTileView mExpandedDesktopTile;
+    private RefreshCallback mExpandedDesktopCallback;
+    private State mExpandedDesktopState = new State();
+
     private final String AVATAR = EOSConstants.SYSTEMUI_PANEL_USER_TILE;
     private final String SETTINGS = EOSConstants.SYSTEMUI_PANEL_SETTINGS_TILE;
     private final String SEEKBAR = EOSConstants.SYSTEMUI_PANEL_SEEKBAR_TILE;
@@ -341,6 +345,7 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final String TWOGEEZ = EOSConstants.SYSTEMUI_PANEL_2G3G_TILE;
     private final String BRIGHTNESS = EOSConstants.SYSTEMUI_PANEL_BRIGHTNESS_TILE;
     private final String SYNC = EOSConstants.SYSTEMUI_PANEL_SYNC_TILE;
+    private final String EXPANDED_DESKTOP = EOSConstants.SYSTEMUI_PANEL_EXPANDED_DESKTOP_TILE;
     private final String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
     private final String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
 
@@ -406,6 +411,11 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
         mContext.getContentResolver()
                 .registerContentObserver(Settings.Global.getUriFor(Settings.Global.MOBILE_DATA),
                         false, mdo);
+
+        ExpandedDesktopObserver edo = new ExpandedDesktopObserver(new Handler());
+        mContext.getContentResolver()
+                .registerContentObserver(Settings.System.getUriFor(Settings.System.EXPANDED_DESKTOP_STATE),
+                        false, edo);
 
         mHasMobileData = deviceSupportsTelephony();
     }
@@ -497,6 +507,13 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshSyncTile();
     }
 
+
+    void addExpandedDesktopTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mExpandedDesktopTile = view;
+        mExpandedDesktopCallback = cb;
+        refreshExpandedDesktopTile();
+    }
+
     // Settings
     void addSettingsTile(QuickSettingsTileView view, RefreshCallback cb) {
         mSettingsTile = view;
@@ -509,6 +526,14 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
         mSettingsState.label = r.getString(R.string.quick_settings_settings_label);
         if (isToggleEnabled(SETTINGS)) {
             mSettingsCallback.refreshView(mSettingsTile, mSettingsState);
+        }
+    }
+
+    void refreshExpandedDesktopTile() {
+        mExpandedDesktopState.enabled = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
+        if (isToggleEnabled(EXPANDED_DESKTOP)) {
+            mExpandedDesktopCallback.refreshView(mExpandedDesktopTile, mExpandedDesktopState);
         }
     }
 
@@ -1135,6 +1160,25 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
             super.onChange(selfChange);
             if (isToggleEnabled(DATA)) {
                 refreshRSSI();
+            }
+        }
+    }
+
+    private class ExpandedDesktopObserver extends ContentObserver {
+        public ExpandedDesktopObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public boolean deliverSelfNotifications() {
+            return super.deliverSelfNotifications();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
+            if (isToggleEnabled(EXPANDED_DESKTOP)) {
+                refreshExpandedDesktopTile();
             }
         }
     }

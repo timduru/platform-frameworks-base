@@ -175,6 +175,7 @@ public class QuickSettings {
     private final String LTE = EOSConstants.SYSTEMUI_PANEL_LTE_TILE;
     private final String TWOGEEZ = EOSConstants.SYSTEMUI_PANEL_2G3G_TILE;
     private final String SYNC = EOSConstants.SYSTEMUI_PANEL_SYNC_TILE;
+    private final String EXPANDED_DESKTOP = EOSConstants.SYSTEMUI_PANEL_EXPANDED_DESKTOP_TILE;
     private final String BRIGHTNESS = EOSConstants.SYSTEMUI_PANEL_BRIGHTNESS_TILE;
     private final String INTENT_UPDATE_TORCH_TILE = EOSConstants.SYSTEMUI_PANEL_TORCH_INTENT;
     private final String INTENT_UPDATE_VOLUME_OBSERVER_STREAM = EOSConstants.SYSTEMUI_PANEL_VOLUME_OBSERVER_STREAM_INTENT;
@@ -1613,6 +1614,47 @@ public class QuickSettings {
                 }
             });
             parent.addView(brightnessTile);   
+        } else if (tile.equals(EXPANDED_DESKTOP)) {
+            QuickSettingsTileView expanded_desktop_Tile = (QuickSettingsTileView)
+                    inflater.inflate(mQsTileRes, parent, false);
+            expanded_desktop_Tile.setContent(R.layout.quick_settings_tile_expanded_desktop,
+                    inflater);
+            expanded_desktop_Tile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean enabled = Settings.System.getInt(mContext.getContentResolver(),
+                            Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
+                    Settings.System.putInt(mContext.getContentResolver(),
+                            Settings.System.EXPANDED_DESKTOP_STATE, enabled ? 0 : 1);
+                }
+            });
+            mModel.addExpandedDesktopTile(expanded_desktop_Tile,
+                    new QuickSettingsModel.RefreshCallback() {
+                        @Override
+                        public void refreshView(QuickSettingsTileView view, State state) {
+                            TextView tv = (TextView) view
+                                    .findViewById(R.id.expanded_desktop_textview);
+                            ImageView iv = (ImageView) view
+                                    .findViewById(R.id.expanded_desktop_image);
+                            if (state.enabled) {
+                                iv.setImageResource(R.drawable.ic_qs_expanded_desktop_on);
+                                tv.setText(mContext
+                                        .getString(R.string.quick_settings_expanded_desktop));
+                                // collapse panel if tablet ui or statusbar hides
+                                // otherwise we have a lingering panel without a bar
+                                if (EOSUtils.hasSystemBar(mContext)
+                                        || Settings.System.getInt(mContext.getContentResolver(),
+                                                Settings.System.EXPANDED_DESKTOP_STYLE, 0) == 2) {
+                                    collapsePanels();
+                                }
+                            } else {
+                                iv.setImageResource(R.drawable.ic_qs_expanded_desktop_off);
+                                tv.setText(mContext
+                                        .getString(R.string.quick_settings_expanded_desktop_off));
+                            }
+                        }
+                    });
+            parent.addView(expanded_desktop_Tile);
         }
     }
 
