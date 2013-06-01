@@ -82,6 +82,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CompatModeButton;
 import com.android.systemui.statusbar.policy.ExternalBatteryController;
+import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
@@ -1134,6 +1135,8 @@ public class TabletStatusBar extends BaseStatusBar {
                 (0 != (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT))
                         ? R.drawable.ic_sysbar_back_ime
                         : R.drawable.ic_sysbar_back);
+
+        ((KeyButtonView) mBackButton).applyKeyFilter();
     }
 
     private void notifyUiVisibilityChanged() {

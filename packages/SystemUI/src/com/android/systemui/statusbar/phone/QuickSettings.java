@@ -1294,6 +1294,13 @@ public class QuickSettings {
                     RotationPolicy.setRotationLock(mContext, !locked);
                 }
             });
+            rotationLockTile.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    startSettingsActivity("android.settings.DISPLAY_SETTINGS");
+                    return true;
+                }
+            });
             mModel.addRotationLockTile(rotationLockTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
@@ -1308,6 +1315,13 @@ public class QuickSettings {
             QuickSettingsTileView airplaneTile = (QuickSettingsTileView)
                     inflater.inflate(mQsTileRes, parent, false);
             airplaneTile.setContent(R.layout.quick_settings_tile_airplane, inflater);
+            airplaneTile.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    startSettingsActivity("android.settings.AIRPLANE_MODE_SETTINGS");
+                    return true;
+                }
+            });
             mModel.addAirplaneModeTile(airplaneTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
@@ -1520,6 +1534,13 @@ public class QuickSettings {
                     }
                 }
             });
+            WifiApTile.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    startSettingsActivity("android.settings.TETHER_SETTINGS");
+                    return true;
+                }
+            });
             mModel.addWifiApTile(WifiApTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
@@ -1626,6 +1647,18 @@ public class QuickSettings {
                             Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
                     Settings.System.putInt(mContext.getContentResolver(),
                             Settings.System.EXPANDED_DESKTOP_STATE, enabled ? 0 : 1);
+                }
+            });
+            expanded_desktop_Tile.setOnLongClickListener(new View.OnLongClickListener() {
+
+                @Override
+                public boolean onLongClick(View v) {
+                    startSettingsActivity(new Intent()
+                            .setAction(Intent.ACTION_MAIN)
+                            .addCategory(Intent.CATEGORY_DEFAULT)
+                            .setClassName("org.eos.controlcenter", "org.eos.controlcenter.Main")
+                            .putExtra("eos_incoming_last_frag_viewed", 1));
+                    return true;
                 }
             });
             mModel.addExpandedDesktopTile(expanded_desktop_Tile,
