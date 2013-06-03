@@ -81,6 +81,7 @@ import android.widget.TextView;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.BarUiController;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.EosObserver.FeatureListener;
@@ -293,6 +294,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     CustomTheme mCurrentTheme;
     private boolean mRecreating = false;
 
+    private PhoneUiController mPhoneController;
+
     // for disabling the status bar
     int mDisabled = 0;
 
@@ -395,13 +398,13 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         addNavigationBar();
 
-        MSG_QS_ENBLED_SETTINGS = getEosObserver().registerUri(EOSConstants.SYSTEMUI_PANEL_DISABLED);
-        MSG_QS_TILES_SETTINGS = getEosObserver().registerUri(
+        MSG_QS_ENBLED_SETTINGS = mPhoneController.getObserver().registerUri(EOSConstants.SYSTEMUI_PANEL_DISABLED);
+        MSG_QS_TILES_SETTINGS = mPhoneController.getObserver().registerUri(
                 EOSConstants.SYSTEMUI_PANEL_ENABLED_TILES);
-        MSG_QS_COLUMN_SETTINGS = getEosObserver().registerUri(
+        MSG_QS_COLUMN_SETTINGS = mPhoneController.getObserver().registerUri(
                 EOSConstants.SYSTEMUI_PANEL_COLUMN_COUNT);
 
-        getEosObserver().setFeatureListener(new FeatureListener() {
+        mPhoneController.getObserver().setFeatureListener(new FeatureListener() {
             @Override
             public void onFeatureStateChanged(int msg) {
                 if (msg == MSG_QS_ENBLED_SETTINGS
@@ -461,9 +464,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
         mStatusBarView.setBar(this);
-        getEos().setBar(this);
-        getEos().setBarWindow(mStatusBarWindow);
-        getEos().setStatusBarView(mStatusBarView);
+        mPhoneController.setBar(this);
+        mPhoneController.setBarWindow(mStatusBarWindow);
+        mPhoneController.registerIndicatorView(mStatusBarView);
 
         PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
         mStatusBarView.setPanelHolder(holder);
@@ -507,7 +510,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (DEBUG)
                 Slog.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
-                mNavigationBarView = getEos().setNavigationBarView();
+                mNavigationBarView = mPhoneController.setNavigationBarView();
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
             }
@@ -604,7 +607,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mLocationController = new LocationController(mContext); // will post a
                                                                 // notification
         mBatteryController = new BatteryController(mContext);
-        getEosObserver().registerClass(mBatteryController);
+        mPhoneController.getObserver().registerClass(mBatteryController);
         mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));
         mBatteryController.addLabelView((TextView)mStatusBarView.findViewById(R.id.battery_text));
 
@@ -897,7 +900,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         prepareNavigationBarView();
 
         mWindowManager.addView(mNavigationBarView,
-                getEos().getNavigationBarLayoutParams());
+                mPhoneController.getNavigationBarLayoutParams());
     }
 
     private void repositionNavigationBar() {
@@ -913,7 +916,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         prepareNavigationBarView();
 
         mWindowManager.updateViewLayout(mNavigationBarView,
-                getEos().getNavigationBarLayoutParams());
+                mPhoneController.getNavigationBarLayoutParams());
     }
 
     private void notifyNavigationBarScreenOn(boolean screenOn) {
@@ -1276,7 +1279,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public void showClock(boolean show) {
         if (mStatusBarView == null)
             return;
-        getEos().showClock(show);
+        mPhoneController.showClock(show);
     }
 
     /**
@@ -1397,7 +1400,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
-        getEos().updateGlass();
+        mPhoneController.updateGlass();
     }
 
     @Override
@@ -2117,8 +2120,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void topAppWindowChanged(boolean showMenu) {
-        getEos().updateGlass();
-        getEos().notifyTopAppChanged();
+        mPhoneController.updateGlass();
+        mPhoneController.notifyTopAppChanged();
 
         if (DEBUG) {
             Slog.d(TAG, (showMenu ? "showing" : "hiding") + " the MENU button");
@@ -2895,5 +2898,13 @@ public class PhoneStatusBar extends BaseStatusBar {
         } else {
             mQS = null; // fly away, be free
         }
+    }
+
+    @Override
+    public BarUiController getUiController() {
+        if (mPhoneController == null) {
+            mPhoneController = new PhoneUiController(mContext);
+        }
+        return mPhoneController;
     }
 }

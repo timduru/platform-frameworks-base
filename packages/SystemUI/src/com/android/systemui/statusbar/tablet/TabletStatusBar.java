@@ -31,19 +31,15 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.CustomTheme;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.inputmethodservice.InputMethodService;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
@@ -58,21 +54,19 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.BarUiController;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.BaseUiController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DoNotDisturb;
-import com.android.systemui.statusbar.EosObserver;
-import com.android.systemui.statusbar.EosUiController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
@@ -80,7 +74,6 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.CompatModeButton;
 import com.android.systemui.statusbar.policy.ExternalBatteryController;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -93,7 +86,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import org.teameos.jellybean.settings.EOSConstants;
-import org.teameos.jellybean.settings.EOSUtils;
 
 public class TabletStatusBar extends BaseStatusBar {
     public static final boolean DEBUG = false;
@@ -191,6 +183,8 @@ public class TabletStatusBar extends BaseStatusBar {
     private int mNavigationIconHints = 0;
 
     private int mShowSearchHoldoff = 0;
+
+    private TabletUiController mUiController;
 
     public Context getContext() {
         return mContext;
@@ -319,7 +313,7 @@ public class TabletStatusBar extends BaseStatusBar {
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
         WindowManager.LayoutParams lp = mNotificationPanelParams = new WindowManager.LayoutParams(
-                res.getDimensionPixelSize(getEos().getNotificationPanelWidth()),
+                res.getDimensionPixelSize(mUiController.getNotificationPanelWidth()),
                 getNotificationPanelHeight(),
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -365,7 +359,7 @@ public class TabletStatusBar extends BaseStatusBar {
         final Point size = new Point();
         d.getRealSize(size);
         return Math
-                .max(res.getDimensionPixelSize(getEos().getNotificationPanelMinHeight()),
+                .max(res.getDimensionPixelSize(mUiController.getNotificationPanelMinHeight()),
                         size.y);
     }
 
@@ -453,14 +447,14 @@ public class TabletStatusBar extends BaseStatusBar {
 
         if (mNavigationArea != null) {
             mNavIconWidth = res
-                    .getDimensionPixelSize(getEos().getNavigationKeyWidth());
+                    .getDimensionPixelSize(mUiController.getNavigationKeyWidth());
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     mNavIconWidth, ViewGroup.LayoutParams.MATCH_PARENT);
             mBackButton.setLayoutParams(lp);
             mHomeButton.setLayoutParams(lp);
             mRecentButton.setLayoutParams(lp);
             mMenuNavIconWidth = res
-                    .getDimensionPixelSize(getEos().getMenuKeyWidth());
+                    .getDimensionPixelSize(mUiController.getMenuKeyWidth());
             lp = new LinearLayout.LayoutParams(
                     mMenuNavIconWidth, ViewGroup.LayoutParams.MATCH_PARENT);
             mMenuButton.setLayoutParams(lp);
@@ -475,7 +469,7 @@ public class TabletStatusBar extends BaseStatusBar {
         mIconHPadding = res.getDimensionPixelSize(
                 R.dimen.status_bar_icon_padding);
 
-        mMaxNotificationIcons = getEos().getMaxNotificationIcons();
+        mMaxNotificationIcons = mUiController.getMaxNotificationIcons();
         reloadAllNotificationIcons();
     }
 
@@ -498,7 +492,7 @@ public class TabletStatusBar extends BaseStatusBar {
                 context, R.layout.system_bar, null);
         mStatusBarView = sb;
 
-        getEos().setStatusBarView(mStatusBarView);
+        mUiController.registerIndicatorView(mStatusBarView);
 
         sb.setHandler(mHandler);
 
@@ -545,7 +539,7 @@ public class TabletStatusBar extends BaseStatusBar {
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView) sb.findViewById(R.id.battery));
         mBatteryController.addLabelView((TextView)mStatusBarView.findViewById(R.id.battery_text));
-        getEosObserver().registerClass(mBatteryController);
+        mUiController.getObserver().registerClass(mBatteryController);
 
         mHasDockBattery = mContext.getResources().getBoolean(com.android.internal.R.bool.config_hasDockBattery);
         if (mHasDockBattery) {
@@ -742,7 +736,7 @@ public class TabletStatusBar extends BaseStatusBar {
 
     public int getStatusBarHeight() {
         final Resources res = mContext.getResources();
-        return res.getDimensionPixelSize(getEos()
+        return res.getDimensionPixelSize(mUiController
                 .getNavbarHeightResource());
     }
 
@@ -964,7 +958,7 @@ public class TabletStatusBar extends BaseStatusBar {
     public void showClock(boolean show) {
         if (mStatusBarView == null)
             return;
-        getEos().showClock(show);
+        mUiController.showClock(show);
     }
 
     public void disable(int state) {
@@ -1022,7 +1016,7 @@ public class TabletStatusBar extends BaseStatusBar {
             }
         }
 
-        getEos().updateGlass();
+        mUiController.updateGlass();
     }
 
     private void setNavigationVisibility(int visibility) {
@@ -1184,8 +1178,8 @@ public class TabletStatusBar extends BaseStatusBar {
     }
 
     public void topAppWindowChanged(boolean showMenu) {
-        getEos().updateGlass();
-        getEos().notifyTopAppChanged();
+        mUiController.updateGlass();
+        mUiController.notifyTopAppChanged();
 
         if (DEBUG) {
             Slog.d(TAG, (showMenu ? "showing" : "hiding") + " the MENU button");
@@ -1369,7 +1363,7 @@ public class TabletStatusBar extends BaseStatusBar {
         loadNotificationPanel();
 
         final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(mContext
-                .getResources().getDimensionPixelSize(getEos().getNotificationIconSize()) + 2
+                .getResources().getDimensionPixelSize(mUiController.getNotificationIconSize()) + 2
                 * mIconHPadding, getStatusBarHeight());
 
         // alternate behavior in DND mode
@@ -1523,7 +1517,7 @@ public class TabletStatusBar extends BaseStatusBar {
                 }
                 animateCollapsePanels(flags);
             } else if (EOSConstants.INTENT_EOS_UI_CHANGED_KEY_REFRESH_UI.equals(action)) {
-                getEos().updateBarSizeMode();
+                mUiController.updateBarSizeMode();
                 loadDimens();
                 if (mNotificationPanel != null) {
                     mNotificationPanel.updateResources();
@@ -1565,5 +1559,13 @@ public class TabletStatusBar extends BaseStatusBar {
     public void setHardKeyboardStatus(boolean available, boolean enabled) {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public BarUiController getUiController() {
+        if (mUiController == null) {
+            mUiController = new TabletUiController(mContext);
+        }
+        return mUiController;
     }
 }

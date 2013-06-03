@@ -139,10 +139,10 @@ public class NavigationBarView extends LinearLayout {
 
     public void setBar(BaseStatusBar phoneStatusBar) {
         mDelegateHelper.setBar(phoneStatusBar);
-        ArrayList<View> children = phoneStatusBar.getEos().getAllChildren(this);
+        ArrayList<View> children = phoneStatusBar.getUiController().getAllChildren(this);
         for (View child : children) {
             if (child instanceof FeatureListener) {
-                phoneStatusBar.getEosObserver().registerClass((FeatureListener) (child));
+                phoneStatusBar.getUiController().getObserver().registerClass((FeatureListener) (child));
             }
         }
     }

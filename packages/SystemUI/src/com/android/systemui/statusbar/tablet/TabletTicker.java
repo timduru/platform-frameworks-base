@@ -40,6 +40,7 @@ import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
+import com.android.systemui.statusbar.BarUiController;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -210,7 +211,7 @@ public class TabletTicker
         final Resources res = mContext.getResources();
         final FrameLayout view = new FrameLayout(mContext);
         final int width = res
-                .getDimensionPixelSize(mBar.getEos().isNormalScreen() ? R.dimen.notification_ticker_width_tablet_mode
+                .getDimensionPixelSize(mBar.getUiController().isNormalScreen() ? R.dimen.notification_ticker_width_tablet_mode
                         : R.dimen.notification_ticker_width);
 
         // window size will be size of system bar

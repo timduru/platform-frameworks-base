@@ -57,10 +57,10 @@ public class TabletStatusBarView extends FrameLayout {
         mDelegateHelper.setBar(phoneStatusBar);
 
         /* register soft keys here */
-        ArrayList<View> children = phoneStatusBar.getEos().getAllChildren(this);
+        ArrayList<View> children = phoneStatusBar.getUiController().getAllChildren(this);
         for (View child : children) {
             if (child instanceof FeatureListener) {
-                phoneStatusBar.getEosObserver().registerClass(
+                phoneStatusBar.getUiController().getObserver().registerClass(
                         (FeatureListener) child);
             }
         }

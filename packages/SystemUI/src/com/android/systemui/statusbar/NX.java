@@ -22,6 +22,7 @@ import android.view.View.OnTouchListener;
 import com.android.systemui.statusbar.EosObserver.FeatureListener;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.PhoneUiController;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -33,7 +34,7 @@ public class NX implements FeatureListener {
     private NavigationBarView mNavigationBarView;
     private PhoneStatusBar mService;
     private WindowManager mWindowManager;
-    private EosUiController mEos;
+    private PhoneUiController mEos;
 
     private OnTouchListener mNxNavbarTouchListener;
     public boolean mSearchLightOn = false;
@@ -43,7 +44,7 @@ public class NX implements FeatureListener {
 
     private int MSG_NX_BAR_SETTINGS;
 
-    public NX(Context context, NavigationBarView view, PhoneStatusBar bar, EosUiController eos) {
+    public NX(Context context, NavigationBarView view, PhoneStatusBar bar, PhoneUiController eos) {
         mContext = context;
         mNavigationBarView = view;
         mService = bar;

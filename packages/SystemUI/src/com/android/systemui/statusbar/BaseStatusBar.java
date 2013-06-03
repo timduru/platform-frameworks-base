@@ -27,7 +27,6 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.recent.TaskDescription;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
@@ -75,7 +74,6 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.WindowManagerImpl;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -147,16 +145,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private boolean mDeviceProvisioned = false;
 
-    private EosUiController mEosController;
-    private EosObserver mEosObserver;
-
-    public EosUiController getEos() {
-        return mEosController;
-    }
-
-    public EosObserver getEosObserver() {
-        return mEosObserver;
-    }
+    public abstract BarUiController getUiController();
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -241,9 +230,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             // If the system process isn't there we're doomed anyway.
         }
 
-        mEosObserver = new EosObserver(mContext);
-        mEosController = new EosUiController(mContext, mEosObserver);
-        mEosObserver.registerClass(mEosController);
+        // initialized required eos ui controller nice and early
+        getUiController();
 
         createAndAddWindows();
 
@@ -304,7 +292,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
             }
         }, filter);
-        mEosObserver.setEnabled(true);
+        getUiController().wakeObserver(true);
     }
 
     public void userSwitched(int newUserId) {

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.tv;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
+import com.android.systemui.statusbar.BarUiController;
 import com.android.systemui.statusbar.BaseStatusBar;
 
 import android.os.IBinder;
@@ -145,5 +146,11 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void animateExpandSettingsPanel() {
+    }
+
+    @Override
+    public BarUiController getUiController() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
