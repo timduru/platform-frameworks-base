@@ -126,6 +126,7 @@ public class NX implements FeatureListener {
                                 injectKey(KeyEvent.KEYCODE_BACK);
                             }
                         }
+                        /* disable bar glow haptic feedback for now
                         final int holoColor = mContext.getResources()
                                 .getColor(com.android.internal.R.color.holo_blue_light);
                         mNavigationBarView.setBackgroundColor(Color.argb(125, Color.red(holoColor),
@@ -138,6 +139,7 @@ public class NX implements FeatureListener {
                                 mEos.updateGlass();
                             }
                         }, 100);
+                        */
 
                         mNavigationBarView
                                 .performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
