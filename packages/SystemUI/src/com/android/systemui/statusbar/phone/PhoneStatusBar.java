@@ -466,7 +466,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mStatusBarView.setBar(this);
         mPhoneController.setBar(this);
         mPhoneController.setBarWindow(mStatusBarWindow);
-        mPhoneController.registerIndicatorView(mStatusBarView);
+        mPhoneController.registerBarView(mStatusBarView);
 
         PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
         mStatusBarView.setPanelHolder(holder);
@@ -1399,8 +1399,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 haltTicker();
             }
         }
-
-        mPhoneController.updateGlass();
     }
 
     @Override
@@ -2120,7 +2118,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void topAppWindowChanged(boolean showMenu) {
-        mPhoneController.updateGlass();
         mPhoneController.notifyTopAppChanged();
 
         if (DEBUG) {

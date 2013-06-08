@@ -492,7 +492,7 @@ public class TabletStatusBar extends BaseStatusBar {
                 context, R.layout.system_bar, null);
         mStatusBarView = sb;
 
-        mUiController.registerIndicatorView(mStatusBarView);
+        mUiController.registerBarView(mStatusBarView);
 
         sb.setHandler(mHandler);
 
@@ -1015,8 +1015,6 @@ public class TabletStatusBar extends BaseStatusBar {
                 mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
             }
         }
-
-        mUiController.updateGlass();
     }
 
     private void setNavigationVisibility(int visibility) {
@@ -1178,7 +1176,6 @@ public class TabletStatusBar extends BaseStatusBar {
     }
 
     public void topAppWindowChanged(boolean showMenu) {
-        mUiController.updateGlass();
         mUiController.notifyTopAppChanged();
 
         if (DEBUG) {

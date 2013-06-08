@@ -3,6 +3,8 @@ package com.android.systemui.statusbar;
 
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
+import android.app.WallpaperInfo;
+import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -10,13 +12,11 @@ import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
 import android.os.UserHandle;
 
-import com.android.systemui.recent.RecentsActivity;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityWatcher {
-    public static final String WINDOW_TYPE_RECENT = "recent";
+    public static final String WINDOW_TYPE_RECENT = "com.android.systemui.recent.RecentsActivity";
     public static final String WINDOW_TYPE_KEYGUARD = "keyguard";
     public static final String WINDOW_TYPE_HOME = "home";
     public static final String PACKAGE_NAME_ERROR = "Could not acquire front app";
@@ -40,16 +40,17 @@ public class ActivityWatcher {
     }
 
     public void notifyTopAppChanged() {
-        final String frontComponentName = getFrontAppComponent();
+        final String frontApp = getFrontAppComponent();
+
         String frontAppType;
         if (isKeyguardForeground()) {
             frontAppType = WINDOW_TYPE_KEYGUARD;
-        } else if (isRecentsForeground()) {
+        } else if (isRecentsForeground(frontApp)) {
             frontAppType = WINDOW_TYPE_RECENT;
-        } else if (isLauncherForeground(frontComponentName)) {
+        } else if (isLauncherForeground(frontApp)) {
             frontAppType = WINDOW_TYPE_HOME;
         } else {
-            frontAppType = frontComponentName;
+            frontAppType = frontApp;
         }
         for (ActivityListener listener : mListeners) {
             listener.onActivityChanged(frontAppType);
@@ -94,8 +95,15 @@ public class ActivityWatcher {
         return km.isKeyguardLocked();
     }
 
-    private boolean isRecentsForeground() {
-        return RecentsActivity.isForeground();
+    private boolean isRecentsForeground(String componentName) {
+        return componentName.contains(WINDOW_TYPE_RECENT);
+    }
+
+    public boolean isLiveWallsOn() {
+        final WallpaperManager wm = (WallpaperManager) mContext
+                .getSystemService(Context.WALLPAPER_SERVICE);
+        WallpaperInfo info = wm.getWallpaperInfo();
+        return info == null ? false : true;
     }
 
     private class LauncherList extends AsyncTask<Void, Void, Void> {

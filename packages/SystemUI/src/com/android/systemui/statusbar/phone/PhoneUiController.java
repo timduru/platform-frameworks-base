@@ -13,8 +13,9 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BarUiController;
-import com.android.systemui.statusbar.EosGlassController;
+import com.android.systemui.statusbar.BottomBarGlassController;
 import com.android.systemui.statusbar.NX;
+import com.android.systemui.statusbar.StatusBarGlassController;
 
 import org.teameos.jellybean.settings.EOSConstants;
 
@@ -29,6 +30,8 @@ public class PhoneUiController extends BarUiController {
     private PhoneStatusBar mService;
     private NavigationBarView mNavigationBarView;
     private StatusBarWindowView mStatusBarWindow;
+    private StatusBarGlassController mStatusBarColorController;
+    private BottomBarGlassController mBottomBarColorController;
 
     private int mCurrentNavLayout;
 
@@ -85,7 +88,9 @@ public class PhoneUiController extends BarUiController {
         }
 
         // send view to glass
-        mGlass.setNavigationBar(mNavigationBarView);
+        mBottomBarColorController = new BottomBarGlassController(mContext, mObserver,
+                mNavigationBarView);
+        mActivityWatcher.setActivityListener(mBottomBarColorController);
 
         // give it back to SystemUI
         return mNavigationBarView;
@@ -139,16 +144,11 @@ public class PhoneUiController extends BarUiController {
     }
 
     @Override
-    protected void registerIndicatorView(View v) {
+    protected void registerBarView(View v) {
         mStatusBarView = v;
-        mGlass = new EosGlassController(mContext, mStatusBarView,
-                mStatusBarWindow);
-        mObserver.registerClass(mGlass);
-        notifyIndicatorViewRegistered();
-    }
-
-    @Override
-    protected EosGlassController getGlass() {
-        return mGlass;
+        mStatusBarColorController = new StatusBarGlassController(mContext, mObserver,
+                mStatusBarView, mStatusBarWindow);
+        mActivityWatcher.setActivityListener(mStatusBarColorController);
+        notifyBarViewRegistered();
     }
 }

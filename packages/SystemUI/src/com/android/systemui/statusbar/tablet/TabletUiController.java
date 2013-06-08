@@ -8,8 +8,7 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BarUiController;
-import com.android.systemui.statusbar.EosGlassController;
-import com.android.systemui.statusbar.EosObserver.FeatureListener;
+import com.android.systemui.statusbar.BottomBarGlassController;
 
 import org.teameos.jellybean.settings.EOSConstants;
 import org.teameos.jellybean.settings.EOSUtils;
@@ -21,7 +20,7 @@ public class TabletUiController extends BarUiController {
     private static final int max_notification_phones_on_tablet_ui_land = 3;
 
     private View mIndicatorView;
-    private EosGlassController mGlass;
+    private BottomBarGlassController mBottomBarColorController;
 
     public TabletUiController(Context context) {
         super(context);
@@ -123,16 +122,11 @@ public class TabletUiController extends BarUiController {
     }
 
     @Override
-    protected void registerIndicatorView(View v) {
+    protected void registerBarView(View v) {
         mIndicatorView = v;
-        mGlass = new EosGlassController(mContext);
-        mGlass.setNavigationBar(v);
-        mObserver.registerClass((FeatureListener) mGlass);
-        notifyIndicatorViewRegistered();
-    }
-
-    @Override
-    protected EosGlassController getGlass() {
-        return mGlass;
+        mBottomBarColorController = new BottomBarGlassController(mContext, mObserver,
+                mIndicatorView);
+        mActivityWatcher.setActivityListener(mBottomBarColorController);
+        notifyBarViewRegistered();
     }
 }

@@ -44,7 +44,6 @@ public abstract class BarUiController extends BaseUiController implements Featur
 
     private View mCurrentClockView;
     protected ContentResolver mResolver;
-    protected EosGlassController mGlass;
 
     public BarUiController(Context context) {
         super(context);
@@ -63,9 +62,7 @@ public abstract class BarUiController extends BaseUiController implements Featur
 
     protected abstract TextView getClockClusterView();
 
-    protected abstract void registerIndicatorView(View v);
-
-    protected abstract EosGlassController getGlass();
+    protected abstract void registerBarView(View v);
 
     public boolean isNormalScreen() {
         return mIsNormalScreen;
@@ -79,7 +76,7 @@ public abstract class BarUiController extends BaseUiController implements Featur
         return mIsLargeScreen;
     }
 
-    protected void notifyIndicatorViewRegistered() {
+    protected void notifyBarViewRegistered() {
         getBatteryTextView().setTag(EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG);
         mBatteryList.add(getBatteryIconView());
         mBatteryList.add(getBatteryTextView());
@@ -168,12 +165,6 @@ public abstract class BarUiController extends BaseUiController implements Featur
             } else {
                 clock.setVisibility(View.GONE);
             }
-        }
-    }
-
-    public void updateGlass() {
-        if (getGlass() != null && getGlass().isGlassEnabled()) {
-            getGlass().applyGlassEffect();
         }
     }
 
