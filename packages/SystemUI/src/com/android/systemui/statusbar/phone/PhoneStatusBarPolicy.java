@@ -133,7 +133,7 @@ public class PhoneStatusBarPolicy {
             }
             else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED) ||
                     action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-                if (!isIconRestricted()) updateBluetooth(intent);
+                if (!mIsTabletUi) updateBluetooth(intent);
             }
             else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
                 updateVolume();
