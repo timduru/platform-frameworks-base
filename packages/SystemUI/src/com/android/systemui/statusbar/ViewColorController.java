@@ -102,15 +102,15 @@ public abstract class ViewColorController implements ActivityListener {
     }
 
     public static int removeAlphaFromColor(int color) {
-        return color += 255 << 24;
+        return color | 0xFF000000;
     }
 
     public static int applyAlphaToColor(int alpha, int color) {
-        return color += alpha << 24;
+        return (color & 0x00FFFFFF) | alpha << 24;
     }
 
     public static int glassLevelToColor(int glass) {
-        return glass += glass << 24 + 0 << 16 + 0 << 8 + 0;
+        return glass << 24;
     }
 
     public void animateBarColor(View v, int colorFrom, int colorTo) {
