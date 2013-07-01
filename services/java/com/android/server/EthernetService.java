@@ -196,14 +196,6 @@ public class EthernetService extends IEthernetManager.Stub {
                 String name = ei.getName();
                 if(DBG) Slog.d(TAG, "INTERFACE_STATE_CHANGED_ACTION: "  + name);
 
-                // If it's the utility interface or not our active interface,
-                // do nothing:
-                if (name.equals(getUtilityInterface())
-                        || mAvailableInterface == null
-                        || ! name.equals(mAvailableInterface.getInfo().getName())) {
-                    return;
-                }
-
                 // Forward it up to ConnectivityService (via EthernetManager)
                 // Don't forward events for inactive interface
                 Intent newIntent = new Intent(EthernetManager.NETWORK_STATE_CHANGED_ACTION);
@@ -211,6 +203,14 @@ public class EthernetService extends IEthernetManager.Stub {
                 newIntent.putExtra(EthernetManager.EXTRA_ETHERNET_INFO, ei);
                 if(DBG) Slog.d(TAG, "Sending EthernetManager.NETWORK_STATE_CHANGED_ACTION");
                 mContext.sendBroadcast(newIntent);
+
+                // If it's the utility interface or not our active interface,
+                // do nothing:
+                if (name.equals(getUtilityInterface())
+                        || mAvailableInterface == null
+                        || ! name.equals(mAvailableInterface.getInfo().getName())) {
+                    return;
+                }
 
                 saveConfig();
                 evaluateTrafficStatsPolling();
