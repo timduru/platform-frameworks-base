@@ -589,4 +589,6 @@
     <string name="eos_dream_mob_bad_value">Value must be between 1 and 50</string>
     <!-- Eos dream transparent title -->
     <string name="eos_dream_transparent_title">Transparent images</string>
+    <string name="recents_kill_all_button_text">Kill All</string>
+
 </resources>
