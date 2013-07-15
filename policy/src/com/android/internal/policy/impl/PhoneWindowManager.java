@@ -1135,7 +1135,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 R.bool.config_showNavigationBar);
         final int uiMode = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_UI_MODE, mIsCapkey ? EOSConstants.SYSTEMUI_UI_MODE_NO_NAVBAR
-                        : EOSConstants.SYSTEMUI_UI_MODE_NAVBAR);
+                        : EOSConstants.SYSTEMUI_UI_MODE_SYSTEMBAR);
         synchronized (mLock) {
 
             mCanHideNavigationBar = true;
