@@ -37,7 +37,7 @@ public abstract class BaseUiController implements ActivityListener {
 
     @Override
     public void onActivityChanged(String componentName) {
-        mObserver.setEnabled(componentName.contains("org.eos.controlcenter")
+        mObserver.setEnabled(componentName.contains("org.kat.controlcenter")
                 || componentName.contains("com.android.settings"));
     }
 }

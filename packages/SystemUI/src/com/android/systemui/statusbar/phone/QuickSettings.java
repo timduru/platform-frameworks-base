@@ -1032,8 +1032,8 @@ public class QuickSettings {
                 @Override
                 public boolean onLongClick(View v) {
                     Intent controlPanelIntent = new Intent();
-                    controlPanelIntent.setClassName("org.eos.controlcenter",
-                            "org.eos.controlcenter.Main");
+                    controlPanelIntent.setClassName("org.kat.controlcenter",
+                            "org.kat.controlcenter.Main");
                     controlPanelIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(controlPanelIntent);
 
@@ -1656,7 +1656,7 @@ public class QuickSettings {
                     startSettingsActivity(new Intent()
                             .setAction(Intent.ACTION_MAIN)
                             .addCategory(Intent.CATEGORY_DEFAULT)
-                            .setClassName("org.eos.controlcenter", "org.eos.controlcenter.Main")
+                            .setClassName("org.kat.controlcenter", "org.kat.controlcenter.Main")
                             .putExtra("eos_incoming_last_frag_viewed", 1));
                     return true;
                 }
