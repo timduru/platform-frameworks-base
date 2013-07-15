@@ -104,7 +104,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private int mRecentItemLayoutId;
     private boolean mHighEndGfx;
 
-    private ImageView mRecentsKillAllButton;
+    private Button mRecentsKillAllButton;
     private ContentObserver mRecentsKillAllButtonObserver;
     private TextView mMemoryText;
     private ProgressBar mMemoryBar;
@@ -853,7 +853,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         boolean enableKillallButton = Settings.System.getInt(mContext.getContentResolver(),
                 EOSConstants.SYSTEMUI_RECENTS_KILLALL_BUTTON, 0) == 1;
 
-        mRecentsKillAllButton = (ImageView) findViewById(R.id.recents_kill_all_button);
+        mRecentsKillAllButton = (Button) findViewById(R.id.recents_kill_all_button);
         if (mRecentsKillAllButton != null) {
             if (enableKillallButton) {
                 mRecentsKillAllButton.setVisibility(View.VISIBLE);
