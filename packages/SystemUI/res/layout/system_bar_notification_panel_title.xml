@@ -92,6 +92,42 @@
                 android:singleLine="true"
                 android:text="@string/status_bar_settings_settings_button" />
 
+            <!-- ethernet -->
+            <FrameLayout
+                    android:id="@+id/ethernet_icon"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:paddingRight="6dp"
+                    >
+
+                <ImageView
+                        android:id="@+id/ethernet_status"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:contentDescription="@null"
+                        />
+
+                <ImageView
+                        android:id="@+id/ethernet_direction"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:contentDescription="@null"
+                        />
+
+            </FrameLayout>
+            <TextView
+                    android:id="@+id/ethernet_text"
+                    style="@style/SystemBarNotificationText"
+                    android:layout_gravity="left|center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="12dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:text="@string/status_bar_settings_settings_button"
+                    />
+
             <!-- wifi -->
 
             <FrameLayout
@@ -130,7 +166,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@id/wifi_signal"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="right|center_vertical"
                 android:contentDescription="@null"
                 android:paddingRight="6dp"
                 android:scaleType="centerInside" />

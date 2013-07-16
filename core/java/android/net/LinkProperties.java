@@ -26,6 +26,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * Describes the properties of a network link.
@@ -108,6 +109,13 @@ public class LinkProperties implements Parcelable {
         if (address != null) mLinkAddresses.add(address);
     }
 
+    public void setLinkAddress(LinkAddress address) {
+        if (address != null) {
+            mLinkAddresses.clear();
+            addLinkAddress(address);
+        }
+    }
+
     public Collection<LinkAddress> getLinkAddresses() {
         return Collections.unmodifiableCollection(mLinkAddresses);
     }
@@ -120,9 +128,24 @@ public class LinkProperties implements Parcelable {
         return Collections.unmodifiableCollection(mDnses);
     }
 
+    public void setDnses(Collection<InetAddress> dnses) {
+        mDnses =  dnses;
+    }
+
     public void addRoute(RouteInfo route) {
         if (route != null) mRoutes.add(route);
     }
+
+    public void setDefaultGateway(InetAddress gw) {
+        Iterator<RouteInfo> iter = mRoutes.iterator();
+        while (iter.hasNext()) {
+            RouteInfo route = iter.next();
+            if (route.isDefaultRoute()) {
+                iter.remove();
+            }
+        }
+    }
+
     public Collection<RouteInfo> getRoutes() {
         return Collections.unmodifiableCollection(mRoutes);
     }
