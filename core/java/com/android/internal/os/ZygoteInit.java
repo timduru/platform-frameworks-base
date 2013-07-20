@@ -486,7 +486,6 @@ public class ZygoteInit {
             "--setuid=1000",
             "--setgid=1000",
             "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,3001,3002,3003,3004,3006,3007",
->>>>>>> c73e35b... gps: added 1021 gid for gpsone_daemon
             "--capabilities=130104352,130104352",
             "--runtime-init",
             "--nice-name=system_server",
