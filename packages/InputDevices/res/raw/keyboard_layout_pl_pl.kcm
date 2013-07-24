@@ -1,4 +1,4 @@
-type FULL
+type OVERLAY
 
 key GRAVE {
     label, number:                      '`'
