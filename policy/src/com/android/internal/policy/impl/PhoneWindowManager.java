@@ -1020,9 +1020,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // SystemUI (status bar) layout policy
         int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
 
+	Log.v(TAG, "shortSizeDp:"+shortSizeDp);
+
         if (shortSizeDp < 600) {
             // 0-599dp: "phone" UI with a separate status & navigation bar
-            mHasSystemNavBar = false;
+            mHasSystemNavBar = true;
             mNavigationBarCanMove = true;
         } else if (shortSizeDp < 720) {
             // 600+dp: "phone" UI with modifications for larger screens
