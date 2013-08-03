@@ -556,7 +556,7 @@ public class StorageManager {
          if (mMountService == null) return Environment.MEDIA_REMOVED;
         try {
             return mMountService.getVolumeState(mountPoint);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Failed to get volume state", e);
             return null;
         }
