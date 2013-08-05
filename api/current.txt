@@ -16695,6 +16695,11 @@ package android.os {
     field public static final int BATTERY_STATUS_FULL = 5; // 0x5
     field public static final int BATTERY_STATUS_NOT_CHARGING = 4; // 0x4
     field public static final int BATTERY_STATUS_UNKNOWN = 1; // 0x1
+    field public static final int DOCK_STATE_CHARGING = 2; // 0x2
+    field public static final int DOCK_STATE_DISCHARGING = 4; // 0x4
+    field public static final int DOCK_STATE_DOCKED = 3; // 0x3
+    field public static final int DOCK_STATE_UNDOCKED = 1; // 0x1
+    field public static final int DOCK_STATE_UNKNOWN = 0; // 0x0
     field public static final java.lang.String EXTRA_HEALTH = "health";
     field public static final java.lang.String EXTRA_ICON_SMALL = "icon-small";
     field public static final java.lang.String EXTRA_LEVEL = "level";
@@ -25093,10 +25098,12 @@ package android.view {
     field public static final int KEYCODE_B = 30; // 0x1e
     field public static final int KEYCODE_BACK = 4; // 0x4
     field public static final int KEYCODE_BACKSLASH = 73; // 0x49
+    field public static final int KEYCODE_BLUETOOTH = 221; // 0xdd
     field public static final int KEYCODE_BOOKMARK = 174; // 0xae
     field public static final int KEYCODE_BREAK = 121; // 0x79
-    field public static final int KEYCODE_BRIGHTNESS_DOWN = 220; // 0xdc
-    field public static final int KEYCODE_BRIGHTNESS_UP = 221; // 0xdd
+    field public static final int KEYCODE_BRIGHTNESS_AUTO = 225; // 0xe1
+    field public static final int KEYCODE_BRIGHTNESS_DOWN = 224; // 0xe0
+    field public static final int KEYCODE_BRIGHTNESS_UP = 223; // 0xdf
     field public static final int KEYCODE_BUTTON_1 = 188; // 0xbc
     field public static final int KEYCODE_BUTTON_10 = 197; // 0xc5
     field public static final int KEYCODE_BUTTON_11 = 198; // 0xc6
@@ -25135,6 +25142,7 @@ package android.view {
     field public static final int KEYCODE_CAMERA = 27; // 0x1b
     field public static final int KEYCODE_CAPS_LOCK = 115; // 0x73
     field public static final int KEYCODE_CAPTIONS = 175; // 0xaf
+    field public static final int KEYCODE_CAPTURE = 226; // 0xe2
     field public static final int KEYCODE_CHANNEL_DOWN = 167; // 0xa7
     field public static final int KEYCODE_CHANNEL_UP = 166; // 0xa6
     field public static final int KEYCODE_CLEAR = 28; // 0x1c
@@ -25157,6 +25165,8 @@ package android.view {
     field public static final int KEYCODE_ENVELOPE = 65; // 0x41
     field public static final int KEYCODE_EQUALS = 70; // 0x46
     field public static final int KEYCODE_ESCAPE = 111; // 0x6f
+    field public static final int KEYCODE_EUROPE_1 = 227; // 0xe3
+    field public static final int KEYCODE_EUROPE_2 = 228; // 0xe4
     field public static final int KEYCODE_EXPLORER = 64; // 0x40
     field public static final int KEYCODE_F = 34; // 0x22
     field public static final int KEYCODE_F1 = 131; // 0x83
@@ -25263,6 +25273,7 @@ package android.view {
     field public static final int KEYCODE_SHIFT_LEFT = 59; // 0x3b
     field public static final int KEYCODE_SHIFT_RIGHT = 60; // 0x3c
     field public static final int KEYCODE_SLASH = 76; // 0x4c
+    field public static final int KEYCODE_SLEEP = 229; // 0xe5
     field public static final int KEYCODE_SOFT_LEFT = 1; // 0x1
     field public static final int KEYCODE_SOFT_RIGHT = 2; // 0x2
     field public static final int KEYCODE_SPACE = 62; // 0x3e
@@ -25274,6 +25285,7 @@ package android.view {
     field public static final int KEYCODE_SYSRQ = 120; // 0x78
     field public static final int KEYCODE_T = 48; // 0x30
     field public static final int KEYCODE_TAB = 61; // 0x3d
+    field public static final int KEYCODE_TOUCHPAD = 222; // 0xde
     field public static final int KEYCODE_TV = 170; // 0xaa
     field public static final int KEYCODE_TV_INPUT = 178; // 0xb2
     field public static final int KEYCODE_TV_POWER = 177; // 0xb1
@@ -25285,6 +25297,7 @@ package android.view {
     field public static final int KEYCODE_VOLUME_UP = 24; // 0x18
     field public static final int KEYCODE_W = 51; // 0x33
     field public static final int KEYCODE_WINDOW = 171; // 0xab
+    field public static final int KEYCODE_WIRELESS = 220; // 0xdc
     field public static final int KEYCODE_X = 52; // 0x34
     field public static final int KEYCODE_Y = 53; // 0x35
     field public static final int KEYCODE_YEN = 216; // 0xd8
