@@ -106,7 +106,8 @@ enum PowerSupplyType {
      ANDROID_POWER_SUPPLY_TYPE_AC,
      ANDROID_POWER_SUPPLY_TYPE_USB,
      ANDROID_POWER_SUPPLY_TYPE_WIRELESS,
-     ANDROID_POWER_SUPPLY_TYPE_BATTERY
+     ANDROID_POWER_SUPPLY_TYPE_BATTERY,
+     ANDROID_POWER_SUPPLY_TYPE_DOCKBATTERY
 };
 
 static jint getBatteryStatus(const char* status)
@@ -245,6 +246,8 @@ static PowerSupplyType readPowerSupplyType(const String8& path) {
         buf[length - 1] = 0;
     if (strcmp(buf, "Battery") == 0)
         return ANDROID_POWER_SUPPLY_TYPE_BATTERY;
+    else if (strcmp(buf, "DockBattery") == 0)
+        return ANDROID_POWER_SUPPLY_TYPE_DOCKBATTERY;
     else if (strcmp(buf, "Mains") == 0 || strcmp(buf, "USB_DCP") == 0 ||
              strcmp(buf, "USB_CDP") == 0 || strcmp(buf, "USB_ACA") == 0)
         return ANDROID_POWER_SUPPLY_TYPE_AC;
@@ -413,9 +416,10 @@ int register_android_server_BatteryService(JNIEnv* env)
                 if (access(path, R_OK) == 0)
                     gPaths.batteryTechnologyPath = path;
 
+                break;
 
 #ifdef HAS_DOCK_BATTERY
-                else if(strcmp(buf, "DockBattery") == 0) {
+            case ANDROID_POWER_SUPPLY_TYPE_DOCKBATTERY:
                     path.clear();
                     path.appendFormat("%s/%s/status", POWER_SUPPLY_PATH, name);
                     if (access(path, R_OK) == 0)
@@ -428,10 +432,8 @@ int register_android_server_BatteryService(JNIEnv* env)
                     path.appendFormat("%s/%s/device/ec_dock", POWER_SUPPLY_PATH, name);
                     if (access(path, R_OK) == 0)
                         gPaths.dockbatteryPresentPath = path;
-                }
-#endif
-
                 break;
+#endif
             }
         }
         closedir(dir);
