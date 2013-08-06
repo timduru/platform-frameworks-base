@@ -22,6 +22,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.R;
 
+import android.os.PowerManager;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -306,6 +307,24 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     }
                 });
         }
+
+       final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+
+       mItems.add(
+                new SinglePressAction( R.drawable.ic_lock_reboot_recovery, R.string.global_action_reboot_recovery) {
+                    public void onPress() {
+                        pm.reboot("recovery");
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return true;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return true;
+                    }
+                });
+
 
         // next: airplane mode
         if (Settings.System.getInt(mContext.getContentResolver(),
