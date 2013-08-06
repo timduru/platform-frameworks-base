@@ -250,7 +250,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     mWindowManagerFuncs.rebootSafeMode(true);
                     return true;
                 }
-
                 public boolean showDuringKeyguard() {
                     return true;
                 }
@@ -260,8 +259,36 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 }
             });
 
+        // next: reboot
+        // only shown if enabled, enabled by default
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.POWER_MENU_REBOOT_ENABLED, 1) == 1) {
+            mItems.add(
+                new SinglePressAction(R.drawable.ic_lock_reboot, R.string.global_action_reboot) {
+                    public void onPress() {
+                        mWindowManagerFuncs.reboot(null, false);
+                    }
+
+                    public boolean onLongPress() {
+                        mWindowManagerFuncs.rebootSafeMode(true);
+                        return true;
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return true;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return true;
+                    }
+                });
+        }
+
         // next: airplane mode
-        mItems.add(mAirplaneModeOn);
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.POWER_MENU_AIRPLANE_ENABLED, 1) == 1) {
+            mItems.add(mAirplaneModeOn);
+        }
 
         // next: bug report, if enabled
         if (Settings.Global.getInt(mContext.getContentResolver(),
@@ -322,6 +349,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             addUsersToMenu(mItems);
         }
 
+        // last: silent mode
+        if ((Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.POWER_MENU_SILENT_ENABLED, 1) == 1) &&
+                (SHOW_SILENT_TOGGLE)) {
+            mItems.add(mSilentModeAction);
+        }
+
         mAdapter = new MyAdapter();
 
         AlertParams params = new AlertParams(mContext);
@@ -342,6 +376,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                         return mAdapter.getItem(position).onLongPress();
                     }
         });
+
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
 
         dialog.setOnDismissListener(this);
