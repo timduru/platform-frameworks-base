@@ -1065,15 +1065,14 @@ public class NotificationManagerService extends INotificationManager.Stub
             // XXX to be totally correct, the caller should tell us which user
             // this is for.
             cancelNotification(pkg, tag, id, Notification.FLAG_AUTO_CANCEL,
-                    Notification.FLAG_FOREGROUND_SERVICE, false,
+                    0, false,
                     ActivityManager.getCurrentUser());
         }
 
         public void onNotificationClear(String pkg, String tag, int id) {
             // XXX to be totally correct, the caller should tell us which user
             // this is for.
-            cancelNotification(pkg, tag, id, 0,
-                Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
+            cancelNotification(pkg, tag, id, 0, 0,
                 true, ActivityManager.getCurrentUser());
         }
 
@@ -1710,11 +1709,11 @@ public class NotificationManagerService extends INotificationManager.Stub
 
             // Ensure if this is a foreground service that the proper additional
             // flags are set.
-            if ((notification.flags&Notification.FLAG_FOREGROUND_SERVICE) != 0) {
-                notification.flags |= Notification.FLAG_ONGOING_EVENT
+/*            if ((notification.flags&Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+                notification.flags |= Notification.FLAG_ONGOING_EVENT;
                         | Notification.FLAG_NO_CLEAR;
             }
-
+*/
             final int currentUser;
             final long token = Binder.clearCallingIdentity();
             try {
