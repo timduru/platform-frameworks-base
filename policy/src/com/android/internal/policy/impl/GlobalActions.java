@@ -95,6 +95,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
     private ToggleAction mExpandDesktopModeOn;
+    private ToggleAction mExpandDesktopModeOnlyNavBar;
 
     private MyAdapter mAdapter;
 
@@ -193,25 +194,24 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mSilentModeAction = new SilentModeTriStateAction(mContext, mAudioManager, mHandler);
         }
 
-        mExpandDesktopModeOn = new ToggleAction(
-                R.drawable.ic_lock_expanded_desktop,
-                R.drawable.ic_lock_expanded_desktop,
+        mExpandDesktopModeOn = new ToggleAction( R.drawable.ic_lock_expanded_desktop, R.drawable.ic_lock_expanded_desktop,
                 R.string.global_actions_toggle_expanded_desktop_mode,
-                R.string.global_actions_expanded_desktop_mode_on_status,
-                R.string.global_actions_expanded_desktop_mode_off_status) {
+                R.string.global_actions_expanded_desktop_mode_on_status, R.string.global_actions_expanded_desktop_mode_off_status) {
 
-            void onToggle(boolean on) {
-                changeExpandDesktopModeSystemSetting(on);
-            }
-
-            public boolean showDuringKeyguard() {
-                return false;
-            }
-
-            public boolean showBeforeProvisioning() {
-                return false;
-            }
+            void onToggle(boolean on) { changeExpandDesktopModeSystemSetting(on,2); /* hide both bars */ }
+            public boolean showDuringKeyguard() { return false; }
+            public boolean showBeforeProvisioning() { return false; }
         };
+
+        mExpandDesktopModeOnlyNavBar = new ToggleAction( R.drawable.ic_lock_expanded_desktop, R.drawable.ic_lock_expanded_desktop,
+                R.string.global_actions_toggle_expanded_desktop_mode_keepstatusbar,
+                R.string.global_actions_expanded_desktop_mode_on_status, R.string.global_actions_expanded_desktop_mode_off_status) {
+
+            void onToggle(boolean on) { changeExpandDesktopModeSystemSetting(on,1); /* hide only nav bar */ }
+            public boolean showDuringKeyguard() { return false; }
+            public boolean showBeforeProvisioning() { return false; }
+        };
+
         onExpandDesktopModeChanged();
 
         mAirplaneModeOn = new ToggleAction(
@@ -388,9 +388,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         // next: expanded desktop toggle
         // only shown if enabled, disabled by default
-        if(Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 1) == 1){
+        if(Settings.System.getInt(mContext.getContentResolver(), Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 1) == 1){
             mItems.add(mExpandDesktopModeOn);
+        }
+
+        if(Settings.System.getInt(mContext.getContentResolver(), Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 1) == 1){
+            mItems.add(mExpandDesktopModeOnlyNavBar);
         }
 
         // one more thing: optionally add a list of users to switch to
@@ -982,11 +985,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private void onExpandDesktopModeChanged() {
-        boolean expandDesktopModeOn = Settings.System.getInt(
-                mContext.getContentResolver(),
-                Settings.System.EXPANDED_DESKTOP_STATE,
-                0) == 1;
-        mExpandDesktopModeOn.updateState(expandDesktopModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
+        boolean expandDesktopModeOn = Settings.System.getInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
+        boolean expandDesktopStyleKeepNavBar = Settings.System.getInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, 0) ==1;
+        mExpandDesktopModeOn.updateState(expandDesktopModeOn && !expandDesktopStyleKeepNavBar ? ToggleAction.State.On : ToggleAction.State.Off);
+        mExpandDesktopModeOnlyNavBar.updateState(expandDesktopModeOn && expandDesktopStyleKeepNavBar ? ToggleAction.State.On : ToggleAction.State.Off);
     }
 
     /**
@@ -1009,11 +1011,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     /**
      * Change the expand desktop mode system setting
      */
-    private void changeExpandDesktopModeSystemSetting(boolean on) {
-        Settings.System.putInt(
-                mContext.getContentResolver(),
-                Settings.System.EXPANDED_DESKTOP_STATE,
-                on ? 1 : 0);
+    private void changeExpandDesktopModeSystemSetting(boolean expandedDesktopON, int expandedDesktopStyle) {
+        Settings.System.putInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, expandedDesktopON ? 1 : 0);
+        Settings.System.putInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, expandedDesktopStyle);
     }
 
     private static final class GlobalActionsDialog extends Dialog implements DialogInterface {

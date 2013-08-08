@@ -2055,6 +2055,7 @@
 
   <java-symbol type="string" name="global_action_reboot" />
   <java-symbol type="string" name="global_actions_toggle_expanded_desktop_mode" />
+  <java-symbol type="string" name="global_actions_toggle_expanded_desktop_mode_keepstatusbar" />
   <java-symbol type="string" name="global_actions_expanded_desktop_mode_off_status" />
   <java-symbol type="string" name="global_actions_expanded_desktop_mode_on_status" />
   <java-symbol type="string" name="global_actions" />
