@@ -879,7 +879,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         long identity = Binder.clearCallingIdentity();
         try {
             cancelNotification(pkg, tag, id, 0,
-                    Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
+                    Notification.FLAG_ONGOING_EVENT ,
                     true,
                     info.userid);
         } finally {
@@ -1784,11 +1784,12 @@ public class NotificationManagerService extends INotificationManager.Stub
 
                     // Ensure if this is a foreground service that the proper additional
                     // flags are set.
-                    if ((notification.flags&Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+/*                    if ((notification.flags&Notification.FLAG_FOREGROUND_SERVICE) != 0) {
                         notification.flags |= Notification.FLAG_ONGOING_EVENT
                                 | Notification.FLAG_NO_CLEAR;
                     }
 
+*/
                     if (notification.icon != 0) {
                         if (old != null && old.statusBarKey != null) {
                             r.statusBarKey = old.statusBarKey;
@@ -2157,8 +2158,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 Binder.getCallingUid(), userId, true, false, "cancelNotificationWithTag", pkg);
         // Don't allow client applications to cancel foreground service notis.
         cancelNotification(pkg, tag, id, 0,
-                Binder.getCallingUid() == Process.SYSTEM_UID
-                ? 0 : Notification.FLAG_FOREGROUND_SERVICE, false, userId);
+                 0 , false, userId);
     }
 
     public void cancelAllNotifications(String pkg, int userId) {
@@ -2169,7 +2169,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         // Calling from user space, don't allow the canceling of actively
         // running foreground services.
-        cancelAllNotificationsInt(pkg, 0, Notification.FLAG_FOREGROUND_SERVICE, true, userId);
+        cancelAllNotificationsInt(pkg, 0, 0, true, userId);
     }
 
     // Return true if the UID is a system or phone UID and therefore should not have
