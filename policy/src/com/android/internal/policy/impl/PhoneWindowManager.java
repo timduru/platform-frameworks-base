@@ -15,6 +15,7 @@
 
 package com.android.internal.policy.impl;
 
+import android.app.AppGlobals;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
@@ -116,6 +117,7 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 
 import org.teameos.jellybean.settings.EOSConstants;
+import org.meerkats.katkiss.KKC;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -507,6 +509,36 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
+    class GlobalIntentReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(KKC.I.UI_CHANGED)) {
+                String cmd = intent.getStringExtra(KKC.I.CMD);
+                if (cmd == null)
+                    return;
+
+                if (cmd.equals(KKC.I.CMD_BARTYPE_CHANGED))
+                    refreshBarType();
+
+                if (intent.getBooleanExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, false)) {
+                    closeApplication("com.android.systemui");
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mContext.startServiceAsUser(new Intent().setComponent(ComponentName
+                                    .unflattenFromString("com.android.systemui/.SystemUIService")),
+                                    new UserHandle(
+                                            UserHandle.myUserId()));
+                        }
+                    }, 250);
+                }
+            }
+        }
+    }
+
+
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
             super(handler);
@@ -849,6 +881,49 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         });
     }
 
+    private void closeApplication(String packageName) {
+        try {
+            ActivityManagerNative.getDefault().killApplicationProcess(
+                    packageName, AppGlobals.getPackageManager().getPackageUid(
+                    packageName, UserHandle.myUserId()));
+        } catch (RemoteException e) { }
+    }
+
+    private void refreshBarType() {
+        final boolean mIsCapkey = !mContext.getResources().getBoolean( R.bool.config_showNavigationBar);
+        final int barType = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_MODE, 
+                           mIsCapkey ? KKC.S.SYSTEMUI_UI_MODE_NO_NAVBAR : KKC.S.SYSTEMUI_UI_MODE_SYSTEMBAR);
+        synchronized (mLock) {
+
+            mCanHideNavigationBar = true;
+
+            switch (barType) {
+                case KKC.S.SYSTEMUI_UI_MODE_NO_NAVBAR:
+                    mHasNavigationBar = false;
+                    mHasSystemNavBar = false;
+                    mCanHideNavigationBar = false;
+                    break;
+                case KKC.S.SYSTEMUI_UI_MODE_NAVBAR:
+                    mHasNavigationBar = true;
+                    mHasSystemNavBar = false;
+                    break;
+                case KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT:
+                    mHasNavigationBar = true;
+                    mHasSystemNavBar = false;
+                    break;
+                case KKC.S.SYSTEMUI_UI_MODE_SYSTEMBAR:
+                    mHasNavigationBar = false;
+                    mHasSystemNavBar = true;
+                    break;
+                default:
+                    mHasNavigationBar = true;
+                    mHasSystemNavBar = false;
+                    mNavigationBarCanMove = false;;
+            }
+        }
+    }
+
+
     /** {@inheritDoc} */
     @Override
     public void init(Context context, IWindowManager windowManager,
@@ -868,6 +943,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } catch (RemoteException ex) { }
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
+        GlobalIntentReceiver mGlobalIntentReceiver = new GlobalIntentReceiver();
+
         mShortcutManager = new ShortcutManager(context, mHandler);
         mShortcutManager.observe();
         mUiMode = context.getResources().getInteger(
@@ -932,6 +1009,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // register for multiuser-relevant broadcasts
         filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
         context.registerReceiver(mMultiuserReceiver, filter);
+
+        filter = new IntentFilter();
+        filter.addAction(KKC.I.UI_CHANGED);
+        context.registerReceiver(mGlobalIntentReceiver, filter);
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
@@ -1053,6 +1134,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mHasSystemNavBar = false;
             mNavigationBarCanMove = false;
         }
+
+        refreshBarType();
+
 
         if (!mHasSystemNavBar) {
             mHasNavigationBar = mContext.getResources().getBoolean(
