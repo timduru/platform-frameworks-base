@@ -82,6 +82,10 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.ExternalBatteryController;
+
+
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks {
     public static final String TAG = "StatusBar";
@@ -127,6 +131,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mLayoutDirection;
     private Locale mLocale;
+
+
+    protected BatteryController mBatteryController, mDockBatteryController;
+    private boolean mHasDockBattery;
+
 
     // UI-specific methods
 
@@ -1171,5 +1180,22 @@ public abstract class BaseStatusBar extends SystemUI implements
     public boolean inKeyguardRestrictedInputMode() {
         KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         return km.inKeyguardRestrictedInputMode();
+    }
+
+
+    protected void initBatteryController() {
+        View statusBarView = getStatusBarView();
+        if(statusBarView == null) { Slog.w(TAG, "initBattery: statusBarView == null"); return; }
+
+        mBatteryController = new BatteryController(mContext);
+        mBatteryController.addIconView((ImageView)statusBarView.findViewById(R.id.battery));
+        mBatteryController.addLabelView((TextView)statusBarView.findViewById(R.id.battery_text));
+
+        mHasDockBattery = mContext.getResources().getBoolean(com.android.internal.R.bool.config_hasDockBattery);
+        if (mHasDockBattery) {
+            mDockBatteryController = new ExternalBatteryController(mContext);
+            mDockBatteryController.addIconView((ImageView)statusBarView.findViewById(R.id.dock_battery));
+            mDockBatteryController.addLabelView((TextView)statusBarView.findViewById(R.id.dock_battery_text));
+        }
     }
 }

@@ -152,11 +152,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // These are no longer handled by the policy, because we need custom strategies for them
     BluetoothController mBluetoothController;
-    BatteryController mBatteryController, mDockBatteryController;
     LocationController mLocationController;
     NetworkController mNetworkController;
-
-    private boolean mHasDockBattery;
 
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
@@ -488,16 +485,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         // Other icons
         mLocationController = new LocationController(mContext); // will post a notification
-        mBatteryController = new BatteryController(mContext);
-        mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));
-        mBatteryController.addLabelView((TextView)mStatusBarView.findViewById(R.id.battery_text));
 
-        mHasDockBattery = mContext.getResources().getBoolean(com.android.internal.R.bool.config_hasDockBattery);
-        if (mHasDockBattery) {
-            mDockBatteryController = new ExternalBatteryController(mContext);
-            mDockBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.dock_battery));
-            mDockBatteryController.addLabelView((TextView)mStatusBarView.findViewById(R.id.dock_battery_text));
-        }
+        super.initBatteryController();
+
 
         mNetworkController = new NetworkController(mContext);
         mBluetoothController = new BluetoothController(mContext);
