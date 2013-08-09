@@ -523,6 +523,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     refreshBarType();
 
                 if (intent.getBooleanExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, false)) {
+                    closeApplication("com.android.settings");
                     closeApplication("com.android.systemui");
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -890,20 +891,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void refreshBarType() {
-        final boolean mIsCapkey = !mContext.getResources().getBoolean( R.bool.config_showNavigationBar);
-        final int barType = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_MODE, 
-                           mIsCapkey ? KKC.S.SYSTEMUI_UI_MODE_NO_NAVBAR : KKC.S.SYSTEMUI_UI_MODE_SYSTEMBAR);
+        final int barType = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_SYSTEMBAR);
         synchronized (mLock) {
+        boolean expandedDesktop = false;
+        int expandedStyle = KKC.S.SYSTEMUI_UI_MODE_PHABLETUI;
 
-            mCanHideNavigationBar = true;
+        mCanHideNavigationBar = true;
+        Log.v(TAG, "refreshBarType:barType="+barType);
+
 
             switch (barType) {
-                case KKC.S.SYSTEMUI_UI_MODE_NO_NAVBAR:
+                case KKC.S.SYSTEMUI_UI_MODE_PHABLETUI_NO_NAVBAR:
+                    expandedDesktop = true;
+                    expandedStyle = barType;
+
                     mHasNavigationBar = false;
                     mHasSystemNavBar = false;
                     mCanHideNavigationBar = false;
                     break;
-                case KKC.S.SYSTEMUI_UI_MODE_NAVBAR:
+                case KKC.S.SYSTEMUI_UI_MODE_PHABLETUI:
                     mHasNavigationBar = true;
                     mHasSystemNavBar = false;
                     break;
@@ -915,11 +921,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mHasNavigationBar = false;
                     mHasSystemNavBar = true;
                     break;
+                case KKC.S.SYSTEMUI_UI_MODE_NOBAR:
+                    expandedDesktop = true;
+                    expandedStyle = barType;
+                break;
                 default:
                     mHasNavigationBar = true;
                     mHasSystemNavBar = false;
                     mNavigationBarCanMove = false;;
             }
+
+            Settings.System.putInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, expandedDesktop ? 1 : 0);
+            Settings.System.putInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, expandedStyle);
         }
     }
 
@@ -3473,7 +3486,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (topIsFullscreen || (Settings.System.getInt(mContext.getContentResolver(),
                                         Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1 &&
                                         Settings.System.getInt(mContext.getContentResolver(),
-                                        Settings.System.EXPANDED_DESKTOP_STYLE, 0) == 2)) {
+                                        Settings.System.EXPANDED_DESKTOP_STYLE, 0) == KKC.S.SYSTEMUI_UI_MODE_NOBAR)) {
                     if (DEBUG_LAYOUT) Log.v(TAG, "** HIDING status bar");
                     if (mStatusBar.hideLw(true)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;

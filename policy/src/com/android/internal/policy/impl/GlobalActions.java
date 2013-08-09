@@ -95,7 +95,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
     private ToggleAction mExpandDesktopModeOn;
-    private ToggleAction mExpandDesktopModeOnlyNavBar;
+    private ToggleAction mExpandDesktopModeNoNavBar;
 
     private MyAdapter mAdapter;
 
@@ -203,7 +203,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             public boolean showBeforeProvisioning() { return false; }
         };
 
-        mExpandDesktopModeOnlyNavBar = new ToggleAction( R.drawable.ic_lock_expanded_desktop, R.drawable.ic_lock_expanded_desktop,
+        mExpandDesktopModeNoNavBar = new ToggleAction( R.drawable.ic_lock_expanded_desktop, R.drawable.ic_lock_expanded_desktop,
                 R.string.global_actions_toggle_expanded_desktop_mode_keepstatusbar,
                 R.string.global_actions_expanded_desktop_mode_on_status, R.string.global_actions_expanded_desktop_mode_off_status) {
 
@@ -393,7 +393,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         if(Settings.System.getInt(mContext.getContentResolver(), Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 1) == 1){
-            mItems.add(mExpandDesktopModeOnlyNavBar);
+            mItems.add(mExpandDesktopModeNoNavBar);
         }
 
         // one more thing: optionally add a list of users to switch to
@@ -986,9 +986,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private void onExpandDesktopModeChanged() {
         boolean expandDesktopModeOn = Settings.System.getInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
-        boolean expandDesktopStyleKeepNavBar = Settings.System.getInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, 0) ==1;
+        boolean expandDesktopStyleKeepNavBar = Settings.System.getInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, 0) == 1 /* KKC.S.SYSTEMUI_UI_MODE_PHABLETUI*/;
         mExpandDesktopModeOn.updateState(expandDesktopModeOn && !expandDesktopStyleKeepNavBar ? ToggleAction.State.On : ToggleAction.State.Off);
-        mExpandDesktopModeOnlyNavBar.updateState(expandDesktopModeOn && expandDesktopStyleKeepNavBar ? ToggleAction.State.On : ToggleAction.State.Off);
+        mExpandDesktopModeNoNavBar.updateState(expandDesktopModeOn && expandDesktopStyleKeepNavBar ? ToggleAction.State.On : ToggleAction.State.Off);
     }
 
     /**
