@@ -101,7 +101,13 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import org.meerkats.katkiss.KKC;
+
 public class PhoneStatusBar extends BaseStatusBar {
+
+    static final int LAYOUT_NAV_BAR_STOCK = com.android.systemui.R.layout.navigation_bar;
+    static final int LAYOUT_NAV_BAR_LEFT = com.android.systemui.R.layout.navigation_bar_left;
+
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = DEBUG;
@@ -391,8 +397,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Slog.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
-                mNavigationBarView =
-                    (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+                int navBarLayout = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT)
+                    == KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT ? LAYOUT_NAV_BAR_LEFT : LAYOUT_NAV_BAR_STOCK;
+
+                mNavigationBarView = (NavigationBarView) View.inflate(context, navBarLayout, null);
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
