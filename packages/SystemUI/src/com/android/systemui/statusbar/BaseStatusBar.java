@@ -103,6 +103,8 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
+import android.content.ContentResolver;
+import org.meerkats.katkiss.KKC;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
@@ -186,6 +188,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     private boolean mLockscreenPublicMode = false;
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
     private NotificationColorUtil mNotificationColorUtil;
+    protected ContentResolver mResolver;
+
 
     private UserManager mUserManager;
 
@@ -442,6 +446,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void start() {
+        mResolver = mContext.getContentResolver();
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
         mDisplay = mWindowManager.getDefaultDisplay();
@@ -996,8 +1001,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Provide SearchPanel with a temporary parent to allow layout params to work.
         LinearLayout tmpRoot = new LinearLayout(mContext);
-        mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
-                 R.layout.status_bar_search_panel, tmpRoot, false);
+        mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(getSearchLayout(), tmpRoot, false);
         mSearchPanelView.setOnTouchListener(
                  new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
         mSearchPanelView.setVisibility(View.GONE);
@@ -2088,5 +2092,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         } catch (RemoteException e) {
             // Ignore.
         }
+    }
+
+    private int getSearchLayout()
+    {
+        int uiMode =  Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT);
+        return (uiMode  == KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT || uiMode == KKC.S.SYSTEMUI_UI_MODE_SYSTEMBAR) ? R.layout.status_bar_search_panel_left : R.layout.status_bar_search_panel;
     }
 }
