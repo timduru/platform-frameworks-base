@@ -116,7 +116,6 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 
-import org.teameos.jellybean.settings.EOSConstants;
 import org.meerkats.katkiss.KKC;
 
 /**
@@ -521,6 +520,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
                 if (cmd.equals(KKC.I.CMD_BARTYPE_CHANGED))
                     refreshBarType();
+                else if(cmd.equals(KKC.I.CMD_BARSIZE_CHANGED))
+                    refreshNavigationBarSize();
 
                 if (intent.getBooleanExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, false)) {
                     closeApplication("com.android.settings");
@@ -1115,24 +1116,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
 
-        // Height of the navigation bar when presented horizontally at bottom
-        mNavigationBarHeightForRotation[mPortraitRotation] =
-        mNavigationBarHeightForRotation[mUpsideDownRotation] =
-                mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height);
-        mNavigationBarHeightForRotation[mLandscapeRotation] =
-        mNavigationBarHeightForRotation[mSeascapeRotation] =
-                mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height_landscape);
-
-        // Width of the navigation bar when presented vertically along one side
-        mNavigationBarWidthForRotation[mPortraitRotation] =
-        mNavigationBarWidthForRotation[mUpsideDownRotation] =
-        mNavigationBarWidthForRotation[mLandscapeRotation] =
-        mNavigationBarWidthForRotation[mSeascapeRotation] =
-                mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_width);
-
         // SystemUI (status bar) layout policy
         int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
 
@@ -1149,6 +1132,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         refreshBarType();
+        refreshNavigationBarSize();
 
 
         if (!mHasSystemNavBar) {
@@ -1272,23 +1256,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         = mNavigationBarHeightForRotation[mLandscapeRotation]
                         = mNavigationBarHeightForRotation[mSeascapeRotation] = 0;
             } else {
-                // Height of the navigation bar when presented horizontally at bottom
-                mNavigationBarHeightForRotation[mPortraitRotation] =
-                mNavigationBarHeightForRotation[mUpsideDownRotation] =
-                        mContext.getResources().getDimensionPixelSize(
-                                com.android.internal.R.dimen.navigation_bar_height);
-                mNavigationBarHeightForRotation[mLandscapeRotation] =
-                mNavigationBarHeightForRotation[mSeascapeRotation] =
-                        mContext.getResources().getDimensionPixelSize(
-                                com.android.internal.R.dimen.navigation_bar_height_landscape);
-
-                // Width of the navigation bar when presented vertically along one side
-                mNavigationBarWidthForRotation[mPortraitRotation] =
-                mNavigationBarWidthForRotation[mUpsideDownRotation] =
-                mNavigationBarWidthForRotation[mLandscapeRotation] =
-                mNavigationBarWidthForRotation[mSeascapeRotation] =
-                        mContext.getResources().getDimensionPixelSize(
-                                com.android.internal.R.dimen.navigation_bar_width);
+                refreshNavigationBarSize();
             }
         }
 
@@ -4271,18 +4239,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void touchpadToggle() {
-        int touchpadStatus = EOSConstants.DEVICE_SETTINGS_TOUCHPAD_ENABLED;
-        // Check whether touchpad input is currently enabled (default).
-        if (android.provider.Settings.System.getInt(
-                mContext.getContentResolver(),
-                EOSConstants.DEVICE_SETTINGS_TOUCHPAD_STATUS, touchpadStatus) == EOSConstants.DEVICE_SETTINGS_TOUCHPAD_ENABLED) {
-            // ...and if so prepare to disable it.
-            touchpadStatus = EOSConstants.DEVICE_SETTINGS_TOUCHPAD_DISABLED;
-        }
-        android.provider.Settings.System.putInt(mContext.getContentResolver(),
-                EOSConstants.DEVICE_SETTINGS_TOUCHPAD_STATUS, touchpadStatus);
-        String status = (touchpadStatus == EOSConstants.DEVICE_SETTINGS_TOUCHPAD_ENABLED) ? "Enabled" : "Disabled";
-        Toast.makeText(mContext, "Touchpad " + status, Toast.LENGTH_SHORT).show();
+        int touchpadEnabled = android.provider.Settings.System.getInt( mContext.getContentResolver(), KKC.S.DEVICE_SETTINGS_TOUCHPAD_ENABLED, 1);
+        touchpadEnabled = (touchpadEnabled == 1 ? 0:1);
+        android.provider.Settings.System.putInt(mContext.getContentResolver(), KKC.S.DEVICE_SETTINGS_TOUCHPAD_ENABLED, touchpadEnabled);
+
+        Toast.makeText(mContext, "Touchpad " + (touchpadEnabled ==1 ? "Enabled" : "Disabled"), Toast.LENGTH_SHORT).show();
     }
 
     /** {@inheritDoc} */
@@ -5136,348 +5097,397 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (newOrientation != mCurrentAppOrientation) {
                 mCurrentAppOrientation = newOrientation;
                 updateOrientationListenerLp();
-            }
-        }
-    }
+		    }
+		}
+	    }
 
-    private void performAuditoryFeedbackForAccessibilityIfNeed() {
-        if (!isGlobalAccessibilityGestureEnabled()) {
-            return;
-        }
-        AudioManager audioManager = (AudioManager) mContext.getSystemService(
-                Context.AUDIO_SERVICE);
-        if (audioManager.isSilentMode()) {
-            return;
-        }
-        Ringtone ringTone = RingtoneManager.getRingtone(mContext,
-                Settings.System.DEFAULT_NOTIFICATION_URI);
-        ringTone.setStreamType(AudioManager.STREAM_MUSIC);
-        ringTone.play();
-    }
-    private boolean isGlobalAccessibilityGestureEnabled() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED, 0) == 1;
-    }
+	    private void performAuditoryFeedbackForAccessibilityIfNeed() {
+		if (!isGlobalAccessibilityGestureEnabled()) {
+		    return;
+		}
+		AudioManager audioManager = (AudioManager) mContext.getSystemService(
+			Context.AUDIO_SERVICE);
+		if (audioManager.isSilentMode()) {
+		    return;
+		}
+		Ringtone ringTone = RingtoneManager.getRingtone(mContext,
+			Settings.System.DEFAULT_NOTIFICATION_URI);
+		ringTone.setStreamType(AudioManager.STREAM_MUSIC);
+		ringTone.play();
+	    }
+	    private boolean isGlobalAccessibilityGestureEnabled() {
+		return Settings.Global.getInt(mContext.getContentResolver(),
+			Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED, 0) == 1;
+	    }
 
-    public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always) {
-        if (!mVibrator.hasVibrator()) {
-            return false;
-        }
-        final boolean hapticsDisabled = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
-        if (!always && (hapticsDisabled || mKeyguardMediator.isShowingAndNotHidden())) {
-            return false;
-        }
-        long[] pattern = null;
-        switch (effectId) {
-            case HapticFeedbackConstants.LONG_PRESS:
-                pattern = mLongPressVibePattern;
-                break;
-            case HapticFeedbackConstants.VIRTUAL_KEY:
-                pattern = mVirtualKeyVibePattern;
-                break;
-            case HapticFeedbackConstants.KEYBOARD_TAP:
-                pattern = mKeyboardTapVibePattern;
-                break;
-            case HapticFeedbackConstants.SAFE_MODE_DISABLED:
-                pattern = mSafeModeDisabledVibePattern;
-                break;
-            case HapticFeedbackConstants.SAFE_MODE_ENABLED:
-                pattern = mSafeModeEnabledVibePattern;
-                break;
-            default:
-                return false;
-        }
-        int owningUid;
-        String owningPackage;
-        if (win != null) {
-            owningUid = win.getOwningUid();
-            owningPackage = win.getOwningPackage();
-        } else {
-            owningUid = android.os.Process.myUid();
-            owningPackage = mContext.getBasePackageName();
-        }
-        if (pattern.length == 1) {
-            // One-shot vibration
-            mVibrator.vibrate(owningUid, owningPackage, pattern[0]);
-        } else {
-            // Pattern vibration
-            mVibrator.vibrate(owningUid, owningPackage, pattern, -1);
-        }
-        return true;
-    }
+	    public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always) {
+		if (!mVibrator.hasVibrator()) {
+		    return false;
+		}
+		final boolean hapticsDisabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+			Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
+		if (!always && (hapticsDisabled || mKeyguardMediator.isShowingAndNotHidden())) {
+		    return false;
+		}
+		long[] pattern = null;
+		switch (effectId) {
+		    case HapticFeedbackConstants.LONG_PRESS:
+			pattern = mLongPressVibePattern;
+			break;
+		    case HapticFeedbackConstants.VIRTUAL_KEY:
+			pattern = mVirtualKeyVibePattern;
+			break;
+		    case HapticFeedbackConstants.KEYBOARD_TAP:
+			pattern = mKeyboardTapVibePattern;
+			break;
+		    case HapticFeedbackConstants.SAFE_MODE_DISABLED:
+			pattern = mSafeModeDisabledVibePattern;
+			break;
+		    case HapticFeedbackConstants.SAFE_MODE_ENABLED:
+			pattern = mSafeModeEnabledVibePattern;
+			break;
+		    default:
+			return false;
+		}
+		int owningUid;
+		String owningPackage;
+		if (win != null) {
+		    owningUid = win.getOwningUid();
+		    owningPackage = win.getOwningPackage();
+		} else {
+		    owningUid = android.os.Process.myUid();
+		    owningPackage = mContext.getBasePackageName();
+		}
+		if (pattern.length == 1) {
+		    // One-shot vibration
+		    mVibrator.vibrate(owningUid, owningPackage, pattern[0]);
+		} else {
+		    // Pattern vibration
+		    mVibrator.vibrate(owningUid, owningPackage, pattern, -1);
+		}
+		return true;
+	    }
 
-    @Override
-    public void keepScreenOnStartedLw() {
-    }
+	    @Override
+	    public void keepScreenOnStartedLw() {
+	    }
 
-    @Override
-    public void keepScreenOnStoppedLw() {
-        if (mKeyguardMediator != null && !mKeyguardMediator.isShowingAndNotHidden()) {
-            long curTime = SystemClock.uptimeMillis();
-            mPowerManager.userActivity(curTime, false);
-        }
-    }
+	    @Override
+	    public void keepScreenOnStoppedLw() {
+		if (mKeyguardMediator != null && !mKeyguardMediator.isShowingAndNotHidden()) {
+		    long curTime = SystemClock.uptimeMillis();
+		    mPowerManager.userActivity(curTime, false);
+		}
+	    }
 
-    private int updateSystemUiVisibilityLw() {
-        // If there is no window focused, there will be nobody to handle the events
-        // anyway, so just hang on in whatever state we're in until things settle down.
-        if (mFocusedWindow == null) {
-            return 0;
-        }
-        if (mFocusedWindow.getAttrs().type == TYPE_KEYGUARD && mHideLockScreen == true) {
-            // We are updating at a point where the keyguard has gotten
-            // focus, but we were last in a state where the top window is
-            // hiding it.  This is probably because the keyguard as been
-            // shown while the top window was displayed, so we want to ignore
-            // it here because this is just a very transient change and it
-            // will quickly lose focus once it correctly gets hidden.
-            return 0;
-        }
-        int tmpVisibility = mFocusedWindow.getSystemUiVisibility()
-                & ~mResettingSystemUiFlags
-                & ~mForceClearedSystemUiFlags;
-        if (mForcingShowNavBar && mFocusedWindow.getSurfaceLayer() < mForcingShowNavBarLayer) {
-            tmpVisibility &= ~View.SYSTEM_UI_CLEARABLE_FLAGS;
-        }
-        final int visibility = tmpVisibility;
-        int diff = visibility ^ mLastSystemUiFlags;
-        final boolean needsMenu = mFocusedWindow.getNeedsMenuLw(mTopFullscreenOpaqueWindowState);
-        if (diff == 0 && mLastFocusNeedsMenu == needsMenu
-                && mFocusedApp == mFocusedWindow.getAppToken()) {
-            return 0;
-        }
-        mLastSystemUiFlags = visibility;
-        mLastFocusNeedsMenu = needsMenu;
-        mFocusedApp = mFocusedWindow.getAppToken();
-        mHandler.post(new Runnable() {
-                public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.setSystemUiVisibility(visibility, 0xffffffff);
-                            statusbar.topAppWindowChanged(needsMenu);
-                        }
-                    } catch (RemoteException e) {
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
-                    }
-                }
-            });
-        return diff;
-    }
+	    private int updateSystemUiVisibilityLw() {
+		// If there is no window focused, there will be nobody to handle the events
+		// anyway, so just hang on in whatever state we're in until things settle down.
+		if (mFocusedWindow == null) {
+		    return 0;
+		}
+		if (mFocusedWindow.getAttrs().type == TYPE_KEYGUARD && mHideLockScreen == true) {
+		    // We are updating at a point where the keyguard has gotten
+		    // focus, but we were last in a state where the top window is
+		    // hiding it.  This is probably because the keyguard as been
+		    // shown while the top window was displayed, so we want to ignore
+		    // it here because this is just a very transient change and it
+		    // will quickly lose focus once it correctly gets hidden.
+		    return 0;
+		}
+		int tmpVisibility = mFocusedWindow.getSystemUiVisibility()
+			& ~mResettingSystemUiFlags
+			& ~mForceClearedSystemUiFlags;
+		if (mForcingShowNavBar && mFocusedWindow.getSurfaceLayer() < mForcingShowNavBarLayer) {
+		    tmpVisibility &= ~View.SYSTEM_UI_CLEARABLE_FLAGS;
+		}
+		final int visibility = tmpVisibility;
+		int diff = visibility ^ mLastSystemUiFlags;
+		final boolean needsMenu = mFocusedWindow.getNeedsMenuLw(mTopFullscreenOpaqueWindowState);
+		if (diff == 0 && mLastFocusNeedsMenu == needsMenu
+			&& mFocusedApp == mFocusedWindow.getAppToken()) {
+		    return 0;
+		}
+		mLastSystemUiFlags = visibility;
+		mLastFocusNeedsMenu = needsMenu;
+		mFocusedApp = mFocusedWindow.getAppToken();
+		mHandler.post(new Runnable() {
+			public void run() {
+			    try {
+				IStatusBarService statusbar = getStatusBarService();
+				if (statusbar != null) {
+				    statusbar.setSystemUiVisibility(visibility, 0xffffffff);
+				    statusbar.topAppWindowChanged(needsMenu);
+				}
+			    } catch (RemoteException e) {
+				// re-acquire status bar service next time it is needed.
+				mStatusBarService = null;
+			    }
+			}
+		    });
+		return diff;
+	    }
 
-    // Use this instead of checking config_showNavigationBar so that it can be consistently
-    // overridden by qemu.hw.mainkeys in the emulator.
-    public boolean hasNavigationBar() {
-        return mHasNavigationBar;
-    }
+	    // Use this instead of checking config_showNavigationBar so that it can be consistently
+	    // overridden by qemu.hw.mainkeys in the emulator.
+	    public boolean hasNavigationBar() {
+		return mHasNavigationBar;
+	    }
 
-    @Override
-    public void setLastInputMethodWindowLw(WindowState ime, WindowState target) {
-        mLastInputMethodWindow = ime;
-        mLastInputMethodTargetWindow = target;
-    }
+	    @Override
+	    public void setLastInputMethodWindowLw(WindowState ime, WindowState target) {
+		mLastInputMethodWindow = ime;
+		mLastInputMethodTargetWindow = target;
+	    }
 
-    @Override
-    public void setCurrentUserLw(int newUserId) {
-        if (mKeyguardMediator != null) {
-            mKeyguardMediator.setCurrentUser(newUserId);
-        }
-        if (mStatusBarService != null) {
-            try {
-                mStatusBarService.setCurrentUser(newUserId);
-            } catch (RemoteException e) {
-                // oh well
-            }
-        }
-        setLastInputMethodWindowLw(null, null);
-    }
+	    @Override
+	    public void setCurrentUserLw(int newUserId) {
+		if (mKeyguardMediator != null) {
+		    mKeyguardMediator.setCurrentUser(newUserId);
+		}
+		if (mStatusBarService != null) {
+		    try {
+			mStatusBarService.setCurrentUser(newUserId);
+		    } catch (RemoteException e) {
+			// oh well
+		    }
+		}
+		setLastInputMethodWindowLw(null, null);
+	    }
 
-    @Override
-    public void showAssistant() {
-        mKeyguardMediator.showAssistant();
-    }
+	    @Override
+	    public void showAssistant() {
+		mKeyguardMediator.showAssistant();
+	    }
 
-    @Override
-    public boolean canMagnifyWindow(int windowType) {
-        switch (windowType) {
-            case WindowManager.LayoutParams.TYPE_INPUT_METHOD:
-            case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG:
-            case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR:
-            case WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY: {
-                return false;
-            }
-        }
-        return true;
-    }
+	    @Override
+	    public boolean canMagnifyWindow(int windowType) {
+		switch (windowType) {
+		    case WindowManager.LayoutParams.TYPE_INPUT_METHOD:
+		    case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG:
+		    case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR:
+		    case WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY: {
+			return false;
+		    }
+		}
+		return true;
+	    }
 
-    @Override
-    public boolean isTopLevelWindow(int windowType) {
-        if (windowType >= WindowManager.LayoutParams.FIRST_SUB_WINDOW
-                && windowType <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
-            return (windowType == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
-        }
-        return true;
-    }
+	    @Override
+	    public boolean isTopLevelWindow(int windowType) {
+		if (windowType >= WindowManager.LayoutParams.FIRST_SUB_WINDOW
+			&& windowType <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+		    return (windowType == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
+		}
+		return true;
+	    }
 
-    @Override
-    public void dump(String prefix, PrintWriter pw, String[] args) {
-        pw.print(prefix); pw.print("mSafeMode="); pw.print(mSafeMode);
-                pw.print(" mSystemReady="); pw.print(mSystemReady);
-                pw.print(" mSystemBooted="); pw.println(mSystemBooted);
-        pw.print(prefix); pw.print("mLidState="); pw.print(mLidState);
-                pw.print(" mLidOpenRotation="); pw.print(mLidOpenRotation);
-                pw.print(" mHdmiPlugged="); pw.println(mHdmiPlugged);
-        if (mLastSystemUiFlags != 0 || mResettingSystemUiFlags != 0
-                || mForceClearedSystemUiFlags != 0) {
-            pw.print(prefix); pw.print("mLastSystemUiFlags=0x");
-                    pw.print(Integer.toHexString(mLastSystemUiFlags));
-                    pw.print(" mResettingSystemUiFlags=0x");
-                    pw.print(Integer.toHexString(mResettingSystemUiFlags));
-                    pw.print(" mForceClearedSystemUiFlags=0x");
-                    pw.println(Integer.toHexString(mForceClearedSystemUiFlags));
-        }
-        if (mLastFocusNeedsMenu) {
-            pw.print(prefix); pw.print("mLastFocusNeedsMenu=");
-                    pw.println(mLastFocusNeedsMenu);
-        }
-        pw.print(prefix); pw.print("mUiMode="); pw.print(mUiMode);
-                pw.print(" mDockMode="); pw.print(mDockMode);
-                pw.print(" mCarDockRotation="); pw.print(mCarDockRotation);
-                pw.print(" mDeskDockRotation="); pw.println(mDeskDockRotation);
-        pw.print(prefix); pw.print("mUserRotationMode="); pw.print(mUserRotationMode);
-                pw.print(" mUserRotation="); pw.print(mUserRotation);
-                pw.print(" mAllowAllRotations="); pw.println(mAllowAllRotations);
-        pw.print(prefix); pw.print("mCurrentAppOrientation="); pw.println(mCurrentAppOrientation);
-        pw.print(prefix); pw.print("mCarDockEnablesAccelerometer=");
-                pw.print(mCarDockEnablesAccelerometer);
-                pw.print(" mDeskDockEnablesAccelerometer=");
-                pw.println(mDeskDockEnablesAccelerometer);
-        pw.print(prefix); pw.print("mLidKeyboardAccessibility=");
-                pw.print(mLidKeyboardAccessibility);
-                pw.print(" mLidNavigationAccessibility="); pw.print(mLidNavigationAccessibility);
-                pw.print(" mLidControlsSleep="); pw.println(mLidControlsSleep);
-        pw.print(prefix); pw.print("mLongPressOnPowerBehavior=");
-                pw.print(mLongPressOnPowerBehavior);
-                pw.print(" mHasSoftInput="); pw.println(mHasSoftInput);
-        pw.print(prefix); pw.print("mScreenOnEarly="); pw.print(mScreenOnEarly);
-                pw.print(" mScreenOnFully="); pw.print(mScreenOnFully);
-                pw.print(" mOrientationSensorEnabled="); pw.println(mOrientationSensorEnabled);
-        pw.print(prefix); pw.print("mOverscanScreen=("); pw.print(mOverscanScreenLeft);
-                pw.print(","); pw.print(mOverscanScreenTop);
-                pw.print(") "); pw.print(mOverscanScreenWidth);
-                pw.print("x"); pw.println(mOverscanScreenHeight);
-        if (mOverscanLeft != 0 || mOverscanTop != 0
-                || mOverscanRight != 0 || mOverscanBottom != 0) {
-            pw.print(prefix); pw.print("mOverscan left="); pw.print(mOverscanLeft);
-                    pw.print(" top="); pw.print(mOverscanTop);
-                    pw.print(" right="); pw.print(mOverscanRight);
-                    pw.print(" bottom="); pw.println(mOverscanBottom);
-        }
-        pw.print(prefix); pw.print("mRestrictedOverscanScreen=(");
-                pw.print(mRestrictedOverscanScreenLeft);
-                pw.print(","); pw.print(mRestrictedOverscanScreenTop);
-                pw.print(") "); pw.print(mRestrictedOverscanScreenWidth);
-                pw.print("x"); pw.println(mRestrictedOverscanScreenHeight);
-        pw.print(prefix); pw.print("mUnrestrictedScreen=("); pw.print(mUnrestrictedScreenLeft);
-                pw.print(","); pw.print(mUnrestrictedScreenTop);
-                pw.print(") "); pw.print(mUnrestrictedScreenWidth);
-                pw.print("x"); pw.println(mUnrestrictedScreenHeight);
-        pw.print(prefix); pw.print("mRestrictedScreen=("); pw.print(mRestrictedScreenLeft);
-                pw.print(","); pw.print(mRestrictedScreenTop);
-                pw.print(") "); pw.print(mRestrictedScreenWidth);
-                pw.print("x"); pw.println(mRestrictedScreenHeight);
-        pw.print(prefix); pw.print("mStableFullscreen=("); pw.print(mStableFullscreenLeft);
-                pw.print(","); pw.print(mStableFullscreenTop);
-                pw.print(")-("); pw.print(mStableFullscreenRight);
-                pw.print(","); pw.print(mStableFullscreenBottom); pw.println(")");
-        pw.print(prefix); pw.print("mStable=("); pw.print(mStableLeft);
-                pw.print(","); pw.print(mStableTop);
-                pw.print(")-("); pw.print(mStableRight);
-                pw.print(","); pw.print(mStableBottom); pw.println(")");
-        pw.print(prefix); pw.print("mSystem=("); pw.print(mSystemLeft);
-                pw.print(","); pw.print(mSystemTop);
-                pw.print(")-("); pw.print(mSystemRight);
-                pw.print(","); pw.print(mSystemBottom); pw.println(")");
-        pw.print(prefix); pw.print("mCur=("); pw.print(mCurLeft);
-                pw.print(","); pw.print(mCurTop);
-                pw.print(")-("); pw.print(mCurRight);
-                pw.print(","); pw.print(mCurBottom); pw.println(")");
-        pw.print(prefix); pw.print("mContent=("); pw.print(mContentLeft);
-                pw.print(","); pw.print(mContentTop);
-                pw.print(")-("); pw.print(mContentRight);
-                pw.print(","); pw.print(mContentBottom); pw.println(")");
-        pw.print(prefix); pw.print("mDock=("); pw.print(mDockLeft);
-                pw.print(","); pw.print(mDockTop);
-                pw.print(")-("); pw.print(mDockRight);
-                pw.print(","); pw.print(mDockBottom); pw.println(")");
-        pw.print(prefix); pw.print("mDockLayer="); pw.print(mDockLayer);
-                pw.print(" mStatusBarLayer="); pw.println(mStatusBarLayer);
-        pw.print(prefix); pw.print("mShowingLockscreen="); pw.print(mShowingLockscreen);
-                pw.print(" mShowingDream="); pw.print(mShowingDream);
-                pw.print(" mDreamingLockscreen="); pw.println(mDreamingLockscreen);
-        if (mLastInputMethodWindow != null) {
-            pw.print(prefix); pw.print("mLastInputMethodWindow=");
-                    pw.println(mLastInputMethodWindow);
-        }
-        if (mLastInputMethodTargetWindow != null) {
-            pw.print(prefix); pw.print("mLastInputMethodTargetWindow=");
-                    pw.println(mLastInputMethodTargetWindow);
-        }
-        if (mStatusBar != null) {
-            pw.print(prefix); pw.print("mStatusBar=");
-                    pw.println(mStatusBar);
-        }
-        if (mNavigationBar != null) {
-            pw.print(prefix); pw.print("mNavigationBar=");
-                    pw.println(mNavigationBar);
-        }
-        if (mKeyguard != null) {
-            pw.print(prefix); pw.print("mKeyguard=");
-                    pw.println(mKeyguard);
-        }
-        if (mFocusedWindow != null) {
-            pw.print(prefix); pw.print("mFocusedWindow=");
-                    pw.println(mFocusedWindow);
-        }
-        if (mFocusedApp != null) {
-            pw.print(prefix); pw.print("mFocusedApp=");
-                    pw.println(mFocusedApp);
-        }
-        if (mWinDismissingKeyguard != null) {
-            pw.print(prefix); pw.print("mWinDismissingKeyguard=");
-                    pw.println(mWinDismissingKeyguard);
-        }
-        if (mTopFullscreenOpaqueWindowState != null) {
-            pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
-                    pw.println(mTopFullscreenOpaqueWindowState);
-        }
-        if (mForcingShowNavBar) {
-            pw.print(prefix); pw.print("mForcingShowNavBar=");
-                    pw.println(mForcingShowNavBar); pw.print( "mForcingShowNavBarLayer=");
-                    pw.println(mForcingShowNavBarLayer);
-        }
-        pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
-                pw.print(" mHideLockScreen="); pw.println(mHideLockScreen);
-        pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
-                pw.print(" mForceStatusBarFromKeyguard=");
-                pw.println(mForceStatusBarFromKeyguard);
-        pw.print(prefix); pw.print("mDismissKeyguard="); pw.print(mDismissKeyguard);
-                pw.print(" mWinDismissingKeyguard="); pw.print(mWinDismissingKeyguard);
-                pw.print(" mHomePressed="); pw.println(mHomePressed);
-        pw.print(prefix); pw.print("mAllowLockscreenWhenOn="); pw.print(mAllowLockscreenWhenOn);
-                pw.print(" mLockScreenTimeout="); pw.print(mLockScreenTimeout);
-                pw.print(" mLockScreenTimerActive="); pw.println(mLockScreenTimerActive);
-        pw.print(prefix); pw.print("mEndcallBehavior="); pw.print(mEndcallBehavior);
-                pw.print(" mIncallPowerBehavior="); pw.print(mIncallPowerBehavior);
-                pw.print(" mLongPressOnHomeBehavior="); pw.println(mLongPressOnHomeBehavior);
-        pw.print(prefix); pw.print("mLandscapeRotation="); pw.print(mLandscapeRotation);
-                pw.print(" mSeascapeRotation="); pw.println(mSeascapeRotation);
-        pw.print(prefix); pw.print("mPortraitRotation="); pw.print(mPortraitRotation);
-                pw.print(" mUpsideDownRotation="); pw.println(mUpsideDownRotation);
-        pw.print(prefix); pw.print("mDemoHdmiRotation="); pw.print(mDemoHdmiRotation);
-                pw.print(" mDemoHdmiRotationLock="); pw.println(mDemoHdmiRotationLock);
-        pw.print(prefix); pw.print("mUndockedHdmiRotation="); pw.println(mUndockedHdmiRotation);
-    }
-}
+	    @Override
+	    public void dump(String prefix, PrintWriter pw, String[] args) {
+		pw.print(prefix); pw.print("mSafeMode="); pw.print(mSafeMode);
+			pw.print(" mSystemReady="); pw.print(mSystemReady);
+			pw.print(" mSystemBooted="); pw.println(mSystemBooted);
+		pw.print(prefix); pw.print("mLidState="); pw.print(mLidState);
+			pw.print(" mLidOpenRotation="); pw.print(mLidOpenRotation);
+			pw.print(" mHdmiPlugged="); pw.println(mHdmiPlugged);
+		if (mLastSystemUiFlags != 0 || mResettingSystemUiFlags != 0
+			|| mForceClearedSystemUiFlags != 0) {
+		    pw.print(prefix); pw.print("mLastSystemUiFlags=0x");
+			    pw.print(Integer.toHexString(mLastSystemUiFlags));
+			    pw.print(" mResettingSystemUiFlags=0x");
+			    pw.print(Integer.toHexString(mResettingSystemUiFlags));
+			    pw.print(" mForceClearedSystemUiFlags=0x");
+			    pw.println(Integer.toHexString(mForceClearedSystemUiFlags));
+		}
+		if (mLastFocusNeedsMenu) {
+		    pw.print(prefix); pw.print("mLastFocusNeedsMenu=");
+			    pw.println(mLastFocusNeedsMenu);
+		}
+		pw.print(prefix); pw.print("mUiMode="); pw.print(mUiMode);
+			pw.print(" mDockMode="); pw.print(mDockMode);
+			pw.print(" mCarDockRotation="); pw.print(mCarDockRotation);
+			pw.print(" mDeskDockRotation="); pw.println(mDeskDockRotation);
+		pw.print(prefix); pw.print("mUserRotationMode="); pw.print(mUserRotationMode);
+			pw.print(" mUserRotation="); pw.print(mUserRotation);
+			pw.print(" mAllowAllRotations="); pw.println(mAllowAllRotations);
+		pw.print(prefix); pw.print("mCurrentAppOrientation="); pw.println(mCurrentAppOrientation);
+		pw.print(prefix); pw.print("mCarDockEnablesAccelerometer=");
+			pw.print(mCarDockEnablesAccelerometer);
+			pw.print(" mDeskDockEnablesAccelerometer=");
+			pw.println(mDeskDockEnablesAccelerometer);
+		pw.print(prefix); pw.print("mLidKeyboardAccessibility=");
+			pw.print(mLidKeyboardAccessibility);
+			pw.print(" mLidNavigationAccessibility="); pw.print(mLidNavigationAccessibility);
+			pw.print(" mLidControlsSleep="); pw.println(mLidControlsSleep);
+		pw.print(prefix); pw.print("mLongPressOnPowerBehavior=");
+			pw.print(mLongPressOnPowerBehavior);
+			pw.print(" mHasSoftInput="); pw.println(mHasSoftInput);
+		pw.print(prefix); pw.print("mScreenOnEarly="); pw.print(mScreenOnEarly);
+			pw.print(" mScreenOnFully="); pw.print(mScreenOnFully);
+			pw.print(" mOrientationSensorEnabled="); pw.println(mOrientationSensorEnabled);
+		pw.print(prefix); pw.print("mOverscanScreen=("); pw.print(mOverscanScreenLeft);
+			pw.print(","); pw.print(mOverscanScreenTop);
+			pw.print(") "); pw.print(mOverscanScreenWidth);
+			pw.print("x"); pw.println(mOverscanScreenHeight);
+		if (mOverscanLeft != 0 || mOverscanTop != 0
+			|| mOverscanRight != 0 || mOverscanBottom != 0) {
+		    pw.print(prefix); pw.print("mOverscan left="); pw.print(mOverscanLeft);
+			    pw.print(" top="); pw.print(mOverscanTop);
+			    pw.print(" right="); pw.print(mOverscanRight);
+			    pw.print(" bottom="); pw.println(mOverscanBottom);
+		}
+		pw.print(prefix); pw.print("mRestrictedOverscanScreen=(");
+			pw.print(mRestrictedOverscanScreenLeft);
+			pw.print(","); pw.print(mRestrictedOverscanScreenTop);
+			pw.print(") "); pw.print(mRestrictedOverscanScreenWidth);
+			pw.print("x"); pw.println(mRestrictedOverscanScreenHeight);
+		pw.print(prefix); pw.print("mUnrestrictedScreen=("); pw.print(mUnrestrictedScreenLeft);
+			pw.print(","); pw.print(mUnrestrictedScreenTop);
+			pw.print(") "); pw.print(mUnrestrictedScreenWidth);
+			pw.print("x"); pw.println(mUnrestrictedScreenHeight);
+		pw.print(prefix); pw.print("mRestrictedScreen=("); pw.print(mRestrictedScreenLeft);
+			pw.print(","); pw.print(mRestrictedScreenTop);
+			pw.print(") "); pw.print(mRestrictedScreenWidth);
+			pw.print("x"); pw.println(mRestrictedScreenHeight);
+		pw.print(prefix); pw.print("mStableFullscreen=("); pw.print(mStableFullscreenLeft);
+			pw.print(","); pw.print(mStableFullscreenTop);
+			pw.print(")-("); pw.print(mStableFullscreenRight);
+			pw.print(","); pw.print(mStableFullscreenBottom); pw.println(")");
+		pw.print(prefix); pw.print("mStable=("); pw.print(mStableLeft);
+			pw.print(","); pw.print(mStableTop);
+			pw.print(")-("); pw.print(mStableRight);
+			pw.print(","); pw.print(mStableBottom); pw.println(")");
+		pw.print(prefix); pw.print("mSystem=("); pw.print(mSystemLeft);
+			pw.print(","); pw.print(mSystemTop);
+			pw.print(")-("); pw.print(mSystemRight);
+			pw.print(","); pw.print(mSystemBottom); pw.println(")");
+		pw.print(prefix); pw.print("mCur=("); pw.print(mCurLeft);
+			pw.print(","); pw.print(mCurTop);
+			pw.print(")-("); pw.print(mCurRight);
+			pw.print(","); pw.print(mCurBottom); pw.println(")");
+		pw.print(prefix); pw.print("mContent=("); pw.print(mContentLeft);
+			pw.print(","); pw.print(mContentTop);
+			pw.print(")-("); pw.print(mContentRight);
+			pw.print(","); pw.print(mContentBottom); pw.println(")");
+		pw.print(prefix); pw.print("mDock=("); pw.print(mDockLeft);
+			pw.print(","); pw.print(mDockTop);
+			pw.print(")-("); pw.print(mDockRight);
+			pw.print(","); pw.print(mDockBottom); pw.println(")");
+		pw.print(prefix); pw.print("mDockLayer="); pw.print(mDockLayer);
+			pw.print(" mStatusBarLayer="); pw.println(mStatusBarLayer);
+		pw.print(prefix); pw.print("mShowingLockscreen="); pw.print(mShowingLockscreen);
+			pw.print(" mShowingDream="); pw.print(mShowingDream);
+			pw.print(" mDreamingLockscreen="); pw.println(mDreamingLockscreen);
+		if (mLastInputMethodWindow != null) {
+		    pw.print(prefix); pw.print("mLastInputMethodWindow=");
+			    pw.println(mLastInputMethodWindow);
+		}
+		if (mLastInputMethodTargetWindow != null) {
+		    pw.print(prefix); pw.print("mLastInputMethodTargetWindow=");
+			    pw.println(mLastInputMethodTargetWindow);
+		}
+		if (mStatusBar != null) {
+		    pw.print(prefix); pw.print("mStatusBar=");
+			    pw.println(mStatusBar);
+		}
+		if (mNavigationBar != null) {
+		    pw.print(prefix); pw.print("mNavigationBar=");
+			    pw.println(mNavigationBar);
+		}
+		if (mKeyguard != null) {
+		    pw.print(prefix); pw.print("mKeyguard=");
+			    pw.println(mKeyguard);
+		}
+		if (mFocusedWindow != null) {
+		    pw.print(prefix); pw.print("mFocusedWindow=");
+			    pw.println(mFocusedWindow);
+		}
+		if (mFocusedApp != null) {
+		    pw.print(prefix); pw.print("mFocusedApp=");
+			    pw.println(mFocusedApp);
+		}
+		if (mWinDismissingKeyguard != null) {
+		    pw.print(prefix); pw.print("mWinDismissingKeyguard=");
+			    pw.println(mWinDismissingKeyguard);
+		}
+		if (mTopFullscreenOpaqueWindowState != null) {
+		    pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
+			    pw.println(mTopFullscreenOpaqueWindowState);
+		}
+		if (mForcingShowNavBar) {
+		    pw.print(prefix); pw.print("mForcingShowNavBar=");
+			    pw.println(mForcingShowNavBar); pw.print( "mForcingShowNavBarLayer=");
+			    pw.println(mForcingShowNavBarLayer);
+		}
+		pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
+			pw.print(" mHideLockScreen="); pw.println(mHideLockScreen);
+		pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
+			pw.print(" mForceStatusBarFromKeyguard=");
+			pw.println(mForceStatusBarFromKeyguard);
+		pw.print(prefix); pw.print("mDismissKeyguard="); pw.print(mDismissKeyguard);
+			pw.print(" mWinDismissingKeyguard="); pw.print(mWinDismissingKeyguard);
+			pw.print(" mHomePressed="); pw.println(mHomePressed);
+		pw.print(prefix); pw.print("mAllowLockscreenWhenOn="); pw.print(mAllowLockscreenWhenOn);
+			pw.print(" mLockScreenTimeout="); pw.print(mLockScreenTimeout);
+			pw.print(" mLockScreenTimerActive="); pw.println(mLockScreenTimerActive);
+		pw.print(prefix); pw.print("mEndcallBehavior="); pw.print(mEndcallBehavior);
+			pw.print(" mIncallPowerBehavior="); pw.print(mIncallPowerBehavior);
+			pw.print(" mLongPressOnHomeBehavior="); pw.println(mLongPressOnHomeBehavior);
+		pw.print(prefix); pw.print("mLandscapeRotation="); pw.print(mLandscapeRotation);
+			pw.print(" mSeascapeRotation="); pw.println(mSeascapeRotation);
+		pw.print(prefix); pw.print("mPortraitRotation="); pw.print(mPortraitRotation);
+			pw.print(" mUpsideDownRotation="); pw.println(mUpsideDownRotation);
+		pw.print(prefix); pw.print("mDemoHdmiRotation="); pw.print(mDemoHdmiRotation);
+			pw.print(" mDemoHdmiRotationLock="); pw.println(mDemoHdmiRotationLock);
+		pw.print(prefix); pw.print("mUndockedHdmiRotation="); pw.println(mUndockedHdmiRotation);
+	    }
+
+	    private void refreshNavigationBarSize() {
+		/*
+		 * get desired bar size 0 = normal 1 = low profile 2 = tiny
+		 */
+
+		int barHeight;
+		int barHeightLandscape;
+		int barWidth;
+
+		int barMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_BARSIZE, KKC.S.SYSTEMUI_BARSIZE_MODE_NORMAL);
+                    Log.d(TAG, "refreshNavigationBarSize: mode="+barMode);
+
+		switch (barMode) {
+		    case KKC.S.SYSTEMUI_BARSIZE_MODE_NORMAL:
+			barHeight = com.android.internal.R.dimen.navigation_bar_height;
+			barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape;
+			barWidth = com.android.internal.R.dimen.navigation_bar_width;
+			break;
+		    case KKC.S.SYSTEMUI_BARSIZE_MODE_SLIM:
+			barHeight = com.android.internal.R.dimen.navigation_bar_height_low_profile;
+			barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape_low_profile;
+			barWidth = com.android.internal.R.dimen.navigation_bar_width_low_profile;
+			break;
+		    case KKC.S.SYSTEMUI_BARSIZE_MODE_TINY:
+			barHeight = com.android.internal.R.dimen.navigation_bar_height_tiny_profile;
+			barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape_tiny_profile;
+			barWidth = com.android.internal.R.dimen.navigation_bar_width_tiny_profile;
+			break;
+		    default:
+			barHeight = com.android.internal.R.dimen.navigation_bar_height;
+			barHeightLandscape = com.android.internal.R.dimen.navigation_bar_height_landscape;
+			barWidth = com.android.internal.R.dimen.navigation_bar_width;
+			break;
+		}
+		synchronized (mLock) {
+		    mNavigationBarHeightForRotation[mPortraitRotation] = mNavigationBarHeightForRotation[mUpsideDownRotation] =
+			mContext.getResources() .getDimensionPixelSize(barHeight);
+		    mNavigationBarHeightForRotation[mLandscapeRotation] = mNavigationBarHeightForRotation[mSeascapeRotation] =
+			mContext.getResources().getDimensionPixelSize(barHeightLandscape);
+
+		    // Width of the navigation bar when presented vertically along
+		    // one side
+		    mNavigationBarWidthForRotation[mPortraitRotation] = mNavigationBarWidthForRotation[mUpsideDownRotation] =
+			mNavigationBarWidthForRotation[mLandscapeRotation] = mNavigationBarWidthForRotation[mSeascapeRotation] =
+			mContext.getResources().getDimensionPixelSize(barWidth);
+		}
+
+	    }
+	}

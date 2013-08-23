@@ -80,7 +80,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.teameos.jellybean.settings.EOSConstants;
+import org.meerkats.katkiss.KKC;
 
 public class RecentsPanelView extends FrameLayout implements OnItemClickListener, RecentsCallback,
         StatusBarPanel, Animator.AnimatorListener {
@@ -508,7 +508,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             }
         };
         mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.SYSTEMUI_RECENTS_KILLALL_BUTTON), false,
+                Settings.System.getUriFor(KKC.S.SYSTEMUI_RECENTS_KILLALL_BUTTON), false,
                 mRecentsKillAllButtonObserver);
 
         updateRecentsKillAllButton();
@@ -861,7 +861,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     private void updateRecentsKillAllButton() {
         boolean enableKillallButton = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_RECENTS_KILLALL_BUTTON, 1) == 1;
+                KKC.S.SYSTEMUI_RECENTS_KILLALL_BUTTON, 1) == 1;
 
         mRecentsKillAllButton = (Button) findViewById(R.id.recents_kill_all_button);
         if (mRecentsKillAllButton != null) {
@@ -899,7 +899,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     private boolean showMemDisplay(boolean show) {
         boolean enableMemDisplay = Settings.System.getInt(mContext.getContentResolver(),
-                EOSConstants.SYSTEMUI_RECENTS_MEM_DISPLAY, 0) == 1;
+                KKC.S.SYSTEMUI_RECENTS_MEM_DISPLAY, 0) == 1;
 
         final TextView memText = (TextView) findViewById(R.id.recents_memory_text);
         final ProgressBar memBar = (ProgressBar) findViewById(R.id.recents_memory_bar);

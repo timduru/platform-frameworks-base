@@ -134,9 +134,12 @@ public abstract class BaseStatusBar extends SystemUI implements
     private Locale mLocale;
 
 
+//KK
     protected BatteryController mBatteryController, mDockBatteryController;
     private boolean mHasDockBattery;
     protected ContentResolver mResolver;
+    protected int mCurrentBarSizeMode;
+
 
 
 
@@ -213,6 +216,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
         mDisplay = mWindowManager.getDefaultDisplay();
+
+        updateBarSizeMode();
 
         mProvisioningObserver.onChange(false); // set up
         mContext.getContentResolver().registerContentObserver(
@@ -1207,4 +1212,26 @@ public abstract class BaseStatusBar extends SystemUI implements
         int uiMode =  Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT);
         return (uiMode  == KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT || uiMode == KKC.S.SYSTEMUI_UI_MODE_SYSTEMBAR) ? R.layout.status_bar_search_panel_left : R.layout.status_bar_search_panel;
     }
+
+    public void updateBarSizeMode() {
+        mCurrentBarSizeMode = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_BARSIZE, KKC.S.SYSTEMUI_BARSIZE_MODE_NORMAL);
+    }
+
+    protected int getBarSizeMode() {
+        return mCurrentBarSizeMode;
+    }
+
+    public int getNavbarHeightResource() {
+        switch (mCurrentBarSizeMode) {
+            case KKC.S.SYSTEMUI_BARSIZE_MODE_NORMAL:
+                return com.android.internal.R.dimen.navigation_bar_height;
+            case KKC.S.SYSTEMUI_BARSIZE_MODE_SLIM:
+                return com.android.internal.R.dimen.navigation_bar_height_low_profile;
+            case KKC.S.SYSTEMUI_BARSIZE_MODE_TINY:
+                return com.android.internal.R.dimen.navigation_bar_height_tiny_profile;
+            default:
+                return com.android.internal.R.dimen.navigation_bar_height;
+        }
+    }
+
 }

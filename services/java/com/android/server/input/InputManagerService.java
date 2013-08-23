@@ -22,7 +22,7 @@ import com.android.server.Watchdog;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.display.DisplayViewport;
 
-import org.teameos.jellybean.settings.EOSConstants;
+import org.meerkats.katkiss.KKC;
 import org.xmlpull.v1.XmlPullParser;
 
 import android.Manifest;
@@ -1176,7 +1176,7 @@ public class InputManagerService extends IInputManager.Stub
 
     private void registerTouchpadModeSettingObserver() {
         mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.DEVICE_SETTINGS_TOUCHPAD_MODE), true,
+                Settings.System.getUriFor(KKC.S.DEVICE_SETTINGS_TOUCHPAD_MODE), true,
                 new ContentObserver(mHandler) {
                     @Override
                     public void onChange(boolean selfChange) {
@@ -1187,7 +1187,7 @@ public class InputManagerService extends IInputManager.Stub
 
     private void registerTouchpadStatusSettingObserver() {
         mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(EOSConstants.DEVICE_SETTINGS_TOUCHPAD_STATUS), true,
+                Settings.System.getUriFor(KKC.S.DEVICE_SETTINGS_TOUCHPAD_ENABLED), true,
                 new ContentObserver(mHandler) {
                     @Override
                     public void onChange(boolean selfChange) {
@@ -1209,8 +1209,7 @@ public class InputManagerService extends IInputManager.Stub
     private int getTouchpadModeSetting(int defaultValue) {
         int result = defaultValue;
         try {
-            result = Settings.System.getInt(mContext.getContentResolver(),
-                    EOSConstants.DEVICE_SETTINGS_TOUCHPAD_MODE);
+            result = Settings.System.getInt(mContext.getContentResolver(), KKC.S.DEVICE_SETTINGS_TOUCHPAD_MODE);
         } catch (SettingNotFoundException snfe) {
         }
         return result;
@@ -1247,11 +1246,8 @@ public class InputManagerService extends IInputManager.Stub
 
     private int getTouchpadStatusSetting(int defaultValue) {
         int result = defaultValue;
-        try {
-            result = Settings.System.getInt(mContext.getContentResolver(),
-                    EOSConstants.DEVICE_SETTINGS_TOUCHPAD_STATUS);
-        } catch (SettingNotFoundException snfe) {
-        }
+        try { result = Settings.System.getInt(mContext.getContentResolver(), KKC.S.DEVICE_SETTINGS_TOUCHPAD_ENABLED); } 
+        catch (SettingNotFoundException snfe) { }
         return result;
     }
 

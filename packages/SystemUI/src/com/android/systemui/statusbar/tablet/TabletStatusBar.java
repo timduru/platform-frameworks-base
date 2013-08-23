@@ -396,8 +396,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected void loadDimens() {
         final Resources res = mContext.getResources();
 
-        mNaturalBarHeight = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_height);
+        mNaturalBarHeight = getStatusBarHeight(); //res.getDimensionPixelSize( com.android.internal.R.dimen.navigation_bar_height);
 
         int newIconSize = res.getDimensionPixelSize(
             com.android.internal.R.dimen.system_bar_icon_size);
@@ -677,9 +676,10 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public int getStatusBarHeight() {
-        return mStatusBarView != null ? mStatusBarView.getHeight()
+        return  mContext.getResources().getDimensionPixelSize(getNavbarHeightResource());
+       /* return mStatusBarView != null ? mStatusBarView.getHeight()
                 : mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height);
+                        com.android.internal.R.dimen.navigation_bar_height);*/
     }
 
     protected int getStatusBarGravity() {

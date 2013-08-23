@@ -32,7 +32,7 @@ import android.view.View;
 
 import com.android.systemui.R;
 
-import org.teameos.jellybean.settings.EOSConstants;
+import org.meerkats.katkiss.KKC;
 import android.provider.Settings;
 
 
@@ -135,8 +135,8 @@ public class BatteryController extends BroadcastReceiver {
         for (int i = 0; i < N; i++) {
             TextView v = mLabelViews.get(i);
             String label = mContext.getString( R.string.status_bar_settings_battery_meter_format, mLastPercentage);
-            if (v.getTag() != null && v.getTag().equals( EOSConstants.SYSTEMUI_BATTERY_PERCENT_TAG)) {
-                if (Settings.System.getInt(mContext.getContentResolver(), EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE, EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE_DEF) == 0) {
+            if (v.getTag() != null && v.getTag().equals( KKC.S.SYSTEMUI_BATTERY_PERCENT_TAG)) {
+                if (Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_BATTERY_PERCENT_VISIBLE, 1) == 0) {
                     label = trimPercent(label);
                 }
             }
