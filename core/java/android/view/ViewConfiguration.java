@@ -221,7 +221,6 @@ public class ViewConfiguration {
     private final boolean mFadingMarqueeEnabled;
 
     private boolean sHasPermanentMenuKey;
-    private boolean sHasPermanentMenuKeySet;
 
     static final SparseArray<ViewConfiguration> sConfigurations =
             new SparseArray<ViewConfiguration>(2);
@@ -287,16 +286,6 @@ public class ViewConfiguration {
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
-
-        if (!sHasPermanentMenuKeySet) {
-            IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-            try {
-                sHasPermanentMenuKey = !wm.hasSystemNavBar() && !wm.hasNavigationBar();
-                sHasPermanentMenuKeySet = true;
-            } catch (RemoteException ex) {
-                sHasPermanentMenuKey = false;
-            }
-        }
 
         mFadingMarqueeEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_ui_enableFadingMarquee);
