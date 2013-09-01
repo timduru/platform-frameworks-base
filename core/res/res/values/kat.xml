@@ -25,5 +25,10 @@
     <!-- [CHAR LIMIT=40] Title of dialog that is shown when performing a system install. -->
     <string name="android_installing_title">Android is installing\u2026</string>
 
+    <!-- The list of components which should be automatically disabled. -->
+   <java-symbol type="array" name="config_disabledComponents" />
+    <string-array name="config_disabledComponents" translatable="false">
+    </string-array>
+
 </resources>
 
