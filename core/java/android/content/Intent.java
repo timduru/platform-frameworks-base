@@ -3870,6 +3870,13 @@ public class Intent implements Parcelable, Cloneable {
      * Activity.finishAndRemoveTask()}.
      */
     public static final int FLAG_ACTIVITY_RETAIN_IN_RECENTS = 0x00002000;
+    /**
+     * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
+     * this flag will cause a newly launching task to be resized according to the split
+     * view metrics, making it running alongside another app.
+     * @hide
+     */
+    public static final int FLAG_ACTIVITY_SPLIT_VIEW = 0x00000200;
 
     /**
      * If set, when sending a broadcast only registered receivers will be

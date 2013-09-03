@@ -469,6 +469,9 @@ public interface IActivityManager extends IInterface {
     public void notifyEnterAnimationComplete(IBinder token) throws RemoteException;
 
     public void systemBackupRestored() throws RemoteException;
+    /* SPLIT VIEW */
+    public void notifySplitViewLayoutChanged() throws RemoteException;
+    public IBinder getActivityForTask(int task, boolean onlyRoot) throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -755,8 +758,6 @@ public interface IActivityManager extends IInterface {
     int GET_HOME_ACTIVITY_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+183;
     int GET_ACTIVITY_DISPLAY_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+184;
     int DELETE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+185;
-
-
     // Start of L transactions
     int GET_TAG_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+210;
     int START_USER_IN_BACKGROUND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+211;
@@ -792,4 +793,8 @@ public interface IActivityManager extends IInterface {
     int CHECK_PERMISSION_WITH_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+241;
     int REGISTER_TASK_STACK_LISTENER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+242;
     int SYSTEM_BACKUP_RESTORED = IBinder.FIRST_CALL_TRANSACTION+243;
+
+    /* SPLIT VIEW */
+    int GET_ACTIVITY_FOR_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+200;
+    int NOTIFY_SPLIT_VIEW_LAYOUT_CHANGED = IBinder.FIRST_CALL_TRANSACTION+201;
 }

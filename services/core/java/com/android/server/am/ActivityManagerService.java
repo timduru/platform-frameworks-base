@@ -8918,6 +8918,24 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    public IBinder getActivityForTask(int task, boolean onlyRoot) {
+        final ActivityStack mainStack = mStackSupervisor.getFocusedStack();
+        synchronized(this) {
+            ArrayList<ActivityStack> stacks = mStackSupervisor.getStacks();
+            for (ActivityStack stack : stacks) {
+                TaskRecord r = stack.taskForIdLocked(task);
+
+                if (r != null && r.getTopActivity() != null) {
+                    return r.getTopActivity().appToken;
+                } else {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+
     // =========================================================
     // CONTENT PROVIDERS
     // =========================================================
@@ -16802,6 +16820,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         return kept;
     }
 
+private ArrayList<Integer> mIgnoreSplitViewUpdate = new ArrayList<Integer>();
+
     /**
      * Decide based on the configuration whether we should shouw the ANR,
      * crash, etc dialogs.  The idea is that if there is no affordnace to
@@ -18147,6 +18167,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private ArrayList<Integer> mIgnoreSplitViewUpdateResume = new ArrayList<Integer>();
+
     private final ActivityRecord resumedAppLocked() {
         ActivityRecord act = mStackSupervisor.resumedAppLocked();
         String pkg;
@@ -18172,6 +18194,34 @@ public final class ActivityManagerService extends ActivityManagerNative
                         mCurResumedPackage, mCurResumedUid);
             }
         }
+
+        // MW
+        if (mSplitResumeOrder != null && mSplitResumeOrder.size() > 0) {
+            final long origId = Binder.clearCallingIdentity();
+
+            int taskToResume = mSplitResumeOrder.get(0);
+            moveTaskToFront(taskToResume, 0, null);
+            mStackSupervisor.resumeTopActivitiesLocked();
+            mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+
+            mSplitResumeOrder.remove(0);
+
+            /*if (mSecondTaskToResume >= 0) {
+                moveTaskToFront(mSecondTaskToResume, 0, null);
+                mStackSupervisor.resumeTopActivitiesLocked();
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                mIgnoreSplitViewUpdateResume.add(mSecondTaskToResume);
+
+                if (mIgnoreSplitViewUpdateResume.contains((Integer) starting.task.taskId)) {
+                    mSecondTaskToResume = -1;
+                } else {
+                    mSecondTaskToResume = starting.task.taskId;
+                }
+            }*/
+
+            Binder.restoreCallingIdentity(origId);
+        }
+
         return act;
     }
 
@@ -19797,5 +19847,33 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
+    }
+
+    private List<Integer> mSplitResumeOrder;
+
+    public void notifySplitViewLayoutChanged() {
+        final long origId = Binder.clearCallingIdentity();
+
+        Log.e("XPLOD/AMS", "notifySplitViewLayoutChanged");
+
+        if (mWindowManager != null) {
+            // We go through all activities and resume all those splitted, so that they
+            // can relayout properly considering we changed the split view layout.
+            mSplitResumeOrder = new ArrayList<Integer>(mWindowManager.getSplitTaskRenderOrder());
+            mStackSupervisor.findTaskToMoveToFrontLocked(recentTaskForIdLocked(mSplitResumeOrder.get(0)), 0, null, "moveTaskToFront");
+//            getFocusedStack().findTaskToMoveToFrontLocked(mSplitResumeOrder.get(0), 0, null);
+            mStackSupervisor.resumeTopActivitiesLocked();
+            mSplitResumeOrder.remove(0);
+
+            // see resumedAppLocked - we wait on each app to resume the next one
+            // xplodwild: THIS IS A GODDAMN HACK! With light apps it will be ok,
+            // but heavier apps will take a fuckin' huge amount of resources to resume.
+            // Ideally, we'd hook in Policy or WindowManager to manually move the windows
+            // without telling Activity/ActivityManager, THEN only resume the activities
+            // when they are indeed moved to front (that's why getSplitViewRect layouts already
+            // with the proper final size)
+        }
+
+        Binder.restoreCallingIdentity(origId);
     }
 }

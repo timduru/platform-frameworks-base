@@ -102,6 +102,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
+import android.graphics.Rect;
+import android.view.Gravity;
+import android.view.IWindowManager;
+import android.widget.FrameLayout;
+
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
  * activities interact with the user, so the Activity class takes care of
@@ -663,7 +669,7 @@ public class Activity extends ContextThemeWrapper
         OnCreateContextMenuListener, ComponentCallbacks2,
         Window.OnWindowDismissedCallback {
     private static final String TAG = "Activity";
-    private static final boolean DEBUG_LIFECYCLE = false;
+    private static final boolean DEBUG_LIFECYCLE = true;
 
     /** Standard activity result: operation canceled. */
     public static final int RESULT_CANCELED    = 0;
@@ -2738,6 +2744,14 @@ public class Activity extends ContextThemeWrapper
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             onUserInteraction();
+        }
+        if (mIsSplitView && ev.getAction() == MotionEvent.ACTION_DOWN) {
+            IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+            try {
+                wm.notifyActivityTouched(mToken, false);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot notify activity touched", e);
+            }
         }
         if (getWindow().superDispatchTouchEvent(ev)) {
             return true;
@@ -5972,6 +5986,11 @@ public class Activity extends ContextThemeWrapper
         }
         mWindowManager = mWindow.getWindowManager();
         mCurrentConfig = config;
+
+        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_SPLIT_VIEW) != 0) {
+            final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+            updateSplitViewMetrics(true);
+        }
     }
 
     /** @hide */
@@ -6027,6 +6046,7 @@ public class Activity extends ContextThemeWrapper
 
     final void performRestart() {
         mFragments.noteStateNotSaved();
+        updateSplitViewMetrics(false);
 
         if (mStopped) {
             mStopped = false;
@@ -6263,4 +6283,97 @@ public class Activity extends ContextThemeWrapper
          */
         public void onTranslucentConversionComplete(boolean drawComplete);
     }
+
+
+// SPlitVIEW
+    private Rect mOriginalBounds;
+    private boolean mIsSplitView;
+
+    /** @hide */
+    public final void setSplitViewRect(int l, int t, int r, int b) {
+        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+        /*try {
+            wm.setSplitViewRect(l,t,r,b);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not update split view rect", e);
+        }*/
+        updateSplitViewMetrics(false);
+    }
+
+    /** @hide */
+    public final boolean isSplitView() {
+        return mIsSplitView;
+    }
+
+    /** @hide */
+    final void updateSplitViewMetrics(boolean shouldReset) {
+        if (mParent != null) {
+            // Also update the parent activities, don't let the windows hanging
+            mParent.updateSplitViewMetrics(shouldReset);
+        }
+
+        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+
+        try {
+            mIsSplitView = false;
+
+            if (shouldReset) {
+                wm.getSplitViewRect(getTaskId());
+            }
+
+            // Check for split view settings
+            if (wm.isTaskSplitView(getTaskId())) {
+                // This activity/task is tagged as being in split view
+                mIsSplitView = true;
+
+                wm.setTaskChildSplit(getTaskId(), mToken, true);
+
+                // Then, we apply it the position and size
+                mWindow.setGravity(Gravity.LEFT | Gravity.TOP);
+
+                WindowManager.LayoutParams params = mWindow.getAttributes();
+
+                // We save the original window size, in case we want to restore it later
+                if (mOriginalBounds == null) {
+                    mOriginalBounds = new Rect();
+                    mOriginalBounds.left = params.x;
+                    mOriginalBounds.top = params.y;
+                    mOriginalBounds.right = params.x + params.width;
+                    mOriginalBounds.bottom = params.y + params.height;
+                }
+
+                /*try {
+                    wm.setSplitViewRect(mOriginalBounds.left, mOriginalBounds.top, mOriginalBounds.right, mOriginalBounds.bottom);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not update split view rect", e);
+                }*/
+
+                Rect windowBounds = wm.getSplitViewRect(getTaskId());
+                mWindow.setLayout(windowBounds.right - windowBounds.left,
+                        windowBounds.bottom - windowBounds.top);
+
+                params.x = windowBounds.left;
+                params.y = windowBounds.top;
+                mWindow.setAttributes(params);
+
+                // Finally, we make the window non-modal to allow the second app to get input
+                mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+                mWindow.addFlags(WindowManager.LayoutParams.FLAG_SPLIT_TOUCH);
+            } else if (mOriginalBounds != null) {
+                // Restore normal window bounds
+                Log.d(TAG, "Restore original bounds from split (TaskId=" + getTaskId() + ")");
+                WindowManager.LayoutParams params = mWindow.getAttributes();
+                params.x = mOriginalBounds.left;
+                params.y = mOriginalBounds.top;
+
+                mWindow.setLayout(mOriginalBounds.right - mOriginalBounds.left,
+                        mOriginalBounds.bottom - mOriginalBounds.top);
+
+                wm.setTaskChildSplit(getTaskId(), mToken, false);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not perform split view actions on restart", e);
+        }
+    }
+
 }
