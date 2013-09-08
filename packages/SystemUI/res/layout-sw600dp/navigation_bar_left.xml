@@ -55,6 +55,7 @@
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_back"
+                systemui:keyConfigUri="kk_ui_back_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
                 android:layout_width="wrap_content" android:paddingStart="5dp" android:paddingEnd="5dp"
@@ -64,6 +65,7 @@
                 systemui:keyRepeat="true"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_home"
+                systemui:keyConfigUri="kk_ui_home_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
                 android:layout_width="wrap_content" android:paddingStart="5dp" android:paddingEnd="5dp"
@@ -71,6 +73,7 @@
                 android:src="@drawable/ic_sysbar_recent"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_recent"
+                systemui:keyConfigUri="kk_ui_recent_target_uri"
                 />
             <Space 
                 android:layout_width="match_parent"
@@ -90,6 +93,7 @@
                     systemui:keyCode="82"
                     android:visibility="invisible"
                     android:contentDescription="@string/accessibility_menu"
+                    systemui:keyConfigUri="kk_ui_menu_target_uri"
                     />
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/ime_switcher"
@@ -186,6 +190,7 @@
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_back"
+                systemui:keyConfigUri="kk_ui_back_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
                 android:layout_width="wrap_content" android:paddingStart="5dp" android:paddingEnd="5dp"
@@ -195,6 +200,7 @@
                 systemui:keyRepeat="true"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_home"
+                systemui:keyConfigUri="kk_ui_home_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
                 android:layout_width="wrap_content" android:paddingStart="5dp" android:paddingEnd="5dp"
@@ -202,6 +208,7 @@
                 android:src="@drawable/ic_sysbar_recent"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_recent"
+                systemui:keyConfigUri="kk_ui_recent_target_uri"
                 />
             <Space 
                 android:layout_width="match_parent"
@@ -220,7 +227,9 @@
                     android:src="@drawable/ic_sysbar_menu"
                     systemui:keyCode="82"
                     android:visibility="invisible"
-                    android:contentDescription="@string/accessibility_menu" />
+                    android:contentDescription="@string/accessibility_menu" 
+                    systemui:keyConfigUri="kk_ui_menu_target_uri"
+                />
                 <com.android.systemui.statusbar.policy.KeyButtonView
                     android:id="@+id/ime_switcher"
                     android:layout_width="@dimen/navigation_extra_key_width"

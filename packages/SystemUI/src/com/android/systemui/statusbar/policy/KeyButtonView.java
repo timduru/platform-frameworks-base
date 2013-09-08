@@ -31,6 +31,8 @@ import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -55,7 +57,17 @@ import com.android.systemui.R;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
-public class KeyButtonView extends ImageView {
+import android.util.Log;
+import org.meerkats.katkiss.KKC;
+import org.meerkats.katkiss.ActionHandler;
+import org.meerkats.katkiss.CustomObserver;
+import android.net.Uri;
+import java.util.ArrayList;
+
+
+import com.android.systemui.R;
+
+public class KeyButtonView extends ImageView implements CustomObserver.ChangeNotification{
     private static final String TAG = "StatusBar.KeyButtonView";
     private static final boolean DEBUG = false;
 
@@ -70,17 +82,22 @@ public class KeyButtonView extends ImageView {
     private boolean mSupportsLongpress = true;
     private AudioManager mAudioManager;
     private Animator mAnimateToQuiescent = new ObjectAnimator();
-
-    private final Runnable mCheckLongPress = new Runnable() {
+    boolean mCustomLongpressEnabled = false;
+    boolean mIsLongPressing = false;
+    String mConfigUri;
+    String mDefaultLongClickAction;
+    ActionHandler mClickActionHandler;
+    CustomObserver _observer;
+    CustomLongClick _customLongClick;
+    
+    Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
-                // Log.d("KeyButtonView", "longpressed: " + this);
-                if (isLongClickable()) {
-                    // Just an old-fashioned ImageView
-                    performLongClick();
-                } else {
-                    sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+                 //Log.d("KeyButtonView", "longpressed: mCustomLongpressEnabled=" +mCustomLongpressEnabled);
+                if (mCustomLongpressEnabled) { mIsLongPressing = true; performLongClick(); }
+                else if (mCode != 0 && !mCustomLongpressEnabled) {
+                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
+                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
                 }
             }
         }
@@ -102,19 +119,84 @@ public class KeyButtonView extends ImageView {
 
 
         setDrawingAlpha(mQuiescentAlpha);
+        setClickable(true);
+        setLongClickable(true);
 
+
+        mConfigUri = a.getString(R.styleable.KeyButtonView_keyConfigUri);
+        String clickAction = a.getString(R.styleable.KeyButtonView_keyClickAction);
+        if( clickAction != null) mClickActionHandler = new ActionHandler(context, clickAction);
+
+        if(mSupportsLongpress) 
+        {
+          _customLongClick = new CustomLongClick(mContext);
+          setOnLongClickListener(_customLongClick);
+
+         mDefaultLongClickAction = a.getString(R.styleable.KeyButtonView_longPressAction);
+
+         _observer = new CustomObserver(context, this);
+         updateCustomConfig();
+
+         mCustomLongpressEnabled = _customLongClick.getAction() != null;
+       }
+
+        
         a.recycle();
 
-        setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         setBackground(new KeyButtonRipple(context, this));
-    }
+        
+    }    
 
+    private class CustomLongClick extends ActionHandler implements View.OnLongClickListener {
+        String mAction;
+
+        public CustomLongClick(Context context) { super(context); }
+
+        public CustomLongClick(Context context, String action) {
+            super(context);
+            mAction = action;
+        }
+
+        public void setAction(String action) {mAction = action;}
+        public String getAction() { return mAction;}
+
+
+        @Override
+        public boolean onLongClick(View v) {
+            if(mAction == null || mAction.equals("none")) return false;
+
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            playSoundEffect(SoundEffectConstants.CLICK);
+            performTask(mAction);
+            return false;
+        }
+
+        @Override
+        public boolean handleAction(String action) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+    }
+    
+
+    private void updateCustomConfig() {
+        if(mConfigUri == null || _customLongClick == null) return;
+
+        String action = Settings.System.getString(mContext.getContentResolver(), mConfigUri);
+
+        if(action == null || action.equals("none"))
+                action = mDefaultLongClickAction;
+
+        _customLongClick.setAction(action);
+        mCustomLongpressEnabled = _customLongClick.getAction() != null;
+    }
+    
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        if (mCode != 0) {
+        if (mCode != 0 && !mCustomLongpressEnabled) {
             info.addAction(new AccessibilityNodeInfo.AccessibilityAction(ACTION_CLICK, null));
             if (mSupportsLongpress) {
                 info.addAction(
@@ -201,18 +283,19 @@ public class KeyButtonView extends ImageView {
                 break;
             case MotionEvent.ACTION_CANCEL:
                 setPressed(false);
-                if (mCode != 0) {
+                if (mCode != 0 && !mIsLongPressing) {
                     sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
                 }
                 if (mSupportsLongpress) {
                     removeCallbacks(mCheckLongPress);
+                    mIsLongPressing = false;
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 final boolean doIt = isPressed();
                 setPressed(false);
                 if (mCode != 0) {
-                    if (doIt) {
+                    if (doIt & !mIsLongPressing) {
                         sendEvent(KeyEvent.ACTION_UP, 0);
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                         playSoundEffect(SoundEffectConstants.CLICK);
@@ -221,13 +304,14 @@ public class KeyButtonView extends ImageView {
                     }
                 } else {
                     // no key code, just a regular ImageView
-                    if (doIt) {
+                    if (doIt & !mIsLongPressing) {
                         performClick();
                     }
                 }
                 if (mSupportsLongpress) {
                     removeCallbacks(mCheckLongPress);
-                }
+                    mIsLongPressing = false;
+               }
                 break;
         }
 
@@ -251,6 +335,38 @@ public class KeyButtonView extends ImageView {
         InputManager.getInstance().injectInputEvent(ev,
                 InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
+
+  
+// ChangeNotifications
+  @Override
+  public ArrayList<Uri> getObservedUris()
+  {
+    ArrayList<Uri> uris = new  ArrayList<Uri>();
+    uris.add(Settings.System.getUriFor(mConfigUri));
+    return uris;
+  }
+
+  @Override
+  public void onChangeNotification(Uri uri)
+  {
+    Log.d(TAG, "onChangeNotification:" + uri);
+    if(uri.equals(Settings.System.getUriFor(mConfigUri))) updateCustomConfig();
+  }
+
+  @Override
+  public boolean performClick()
+  {
+    if(mClickActionHandler != null) mClickActionHandler.executeAllActions();
+    return super.performClick();
+  }
+  @Override
+  public boolean performLongClick()
+  {
+    if( mCustomLongpressEnabled && _customLongClick != null) _customLongClick.onLongClick(this);
+    return super.performLongClick();
+  }
+
+
 }
 
 

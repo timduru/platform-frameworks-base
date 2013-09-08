@@ -20,6 +20,12 @@
         <attr name="keyCode" format="integer" />
         <!-- does this button generate longpress / repeat events? -->
         <attr name="keyRepeat" format="boolean" />
+        <!-- used for longpress action, click action, or other info -->
+        <attr name="keyConfigUri" format="string" />        
+        <!-- used for extra navbuttons that don't send a keycode-->
+        <attr name="keyClickAction" format="string" />
+        <!-- used for default longpress navbuttons action-->
+        <attr name="longPressAction" format="string" />
     </declare-styleable>
     <declare-styleable name="ToggleSlider">
         <attr name="text" format="string" />
