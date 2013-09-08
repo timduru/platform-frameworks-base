@@ -28,6 +28,10 @@ public final class KKC {
     public static final String SYSTEMUI_RECENTS_MEM_DISPLAY = "systemui_recents_mem_display";
 
 
+    public static final String SYSTEMUI_SOFTKEY_BACK = "systemui_softkey_back";
+    public static final String SYSTEMUI_SOFTKEY_HOME = "systemui_softkey_home";
+    public static final String SYSTEMUI_SOFTKEY_RECENT = "systemui_softkey_recent";
+    public static final String SYSTEMUI_SOFTKEY_MENU = "systemui_softkey_menu";    
   }
 
   // Intents
@@ -40,5 +44,14 @@ public final class KKC {
     public static final String CMD_BARTYPE_CHANGED = "bar_type_changed";
     public static final String CMD_BARSIZE_CHANGED = "bar_size_changed";
     public static final String EXTRA_RESTART_SYSTEMUI = "restart_systemui";
+  }
+  
+  //Actions
+  public final class A {
+	    public static final String SYSTEMUI_TASK_SCREENSHOT = "screenshot";
+	    public static final String SYSTEMUI_TASK_SCREENOFF = "screenoff";
+	    public static final String SYSTEMUI_TASK_KILL_PROCESS = "killcurrent";
+	    public static final String SYSTEMUI_TASK_ASSIST = "assist";
+//	    public static final String SYSTEMUI_TASK_POWER_MENU = "powermenu";
   }
 }

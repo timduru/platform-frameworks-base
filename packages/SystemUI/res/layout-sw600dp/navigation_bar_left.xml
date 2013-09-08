@@ -55,6 +55,7 @@
                 android:src="@drawable/ic_sysbar_back"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="4"
+                systemui:keyConfigUri="kk_ui_back_target_uri"
                 />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
@@ -66,7 +67,9 @@
                 android:src="@drawable/ic_sysbar_home"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="3"
-                systemui:keyRepeat="false" />
+                systemui:keyRepeat="false" 
+                systemui:keyConfigUri="kk_ui_home_target_uri"
+                />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
                 android:id="@+id/recent_apps"
@@ -76,6 +79,7 @@
                 android:contentDescription="@string/accessibility_recent"
                 android:src="@drawable/ic_sysbar_recent"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyConfigUri="kk_ui_recent_target_uri"
                 />
 
             <Space
@@ -94,6 +98,7 @@
                 android:visibility="invisible"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="82"
+                 systemui:keyConfigUri="kk_ui_menu_target_uri"
                 />
         </LinearLayout>
 
@@ -189,6 +194,7 @@
                 android:src="@drawable/ic_sysbar_back"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="4"
+                systemui:keyConfigUri="kk_ui_back_target_uri"
                 />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
@@ -200,7 +206,9 @@
                 android:src="@drawable/ic_sysbar_home"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="3"
-                systemui:keyRepeat="false" />
+                systemui:keyRepeat="false" 
+                systemui:keyConfigUri="kk_ui_home_target_uri"
+                />
 
             <com.android.systemui.statusbar.policy.KeyButtonView
                 android:id="@+id/recent_apps"
@@ -210,6 +218,7 @@
                 android:contentDescription="@string/accessibility_recent"
                 android:src="@drawable/ic_sysbar_recent"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyConfigUri="kk_ui_recent_target_uri"
                 />
 
             <Space
@@ -228,6 +237,7 @@
                 android:visibility="invisible"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyCode="82"
+                systemui:keyConfigUri="kk_ui_menu_target_uri"
                 />
         </LinearLayout>
 

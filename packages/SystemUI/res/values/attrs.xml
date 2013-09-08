@@ -22,6 +22,8 @@
         <attr name="keyRepeat" format="boolean" />
         <!-- drawable to use for a swelling, glowing background on press -->
         <attr name="glowBackground" format="reference" />
+        <!-- used for longpress action, click action, or other info -->
+        <attr name="keyConfigUri" format="string" />        
     </declare-styleable>
     <declare-styleable name="ToggleSlider">
         <attr name="text" format="string" />
