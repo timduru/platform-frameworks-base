@@ -121,12 +121,21 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         
-        _observer = new CustomObserver(context, this);
-        updateCustomConfig();        
+       if(mSupportsLongpress) {
+          _customLongClick = new CustomLongClick(mContext);
+          setOnLongClickListener(_customLongClick);
+
+          _observer = new CustomObserver(context, this);
+          updateCustomConfig();        
+       }
     }    
 
     private class CustomLongClick extends ActionHandler implements View.OnLongClickListener {
         String mAction;
+
+        public CustomLongClick(Context context) {
+            super(context);
+        }
 
         public CustomLongClick(Context context, String action) {
             super(context);
@@ -137,6 +146,8 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
 
         @Override
         public boolean onLongClick(View v) {
+            if(mAction == null || mAction.equals("none")) return false;
+
             performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             playSoundEffect(SoundEffectConstants.CLICK);
 Log.d("CustomLongClick", mAction + this);
@@ -152,27 +163,13 @@ Log.d("CustomLongClick", mAction + this);
     }
     
     private void updateCustomConfig() {
-        if(mConfigUri == null) return;
+        if(mConfigUri == null || _customLongClick == null) return;
+
         String action = Settings.System.getString(mContext.getContentResolver(), mConfigUri);
-        if (action == null) return;
-        if (mSupportsLongpress) {
-            if (action.equals("none")) {
-                setOnLongClickListener(null);
-                mCustomLongpressEnabled = false;
-            } else {
-        Log.d(TAG, "updateCustomConfig:" + this );
-		if(_customLongClick == null) {
-                  _customLongClick = new CustomLongClick(mContext, action);
-        Log.d(TAG, "updateCustomConfig:_customLongClick == null, new: "+ _customLongClick + "action="+action  );
-                  setOnLongClickListener(_customLongClick);
-                }
-		else{ 
-        Log.d(TAG, "updateCustomConfig:_customLongClick exists : "+ _customLongClick + "action="+action  );
-                  _customLongClick.setAction(action); 
-                }
-                mCustomLongpressEnabled = true;
-            }
-        }
+        
+        _customLongClick.setAction(action);
+        if (action == null || action.equals("none")) mCustomLongpressEnabled = false;
+	else mCustomLongpressEnabled = true;
     }
 
     
