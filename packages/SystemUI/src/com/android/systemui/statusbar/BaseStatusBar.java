@@ -139,7 +139,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private boolean mHasDockBattery;
     protected ContentResolver mResolver;
     protected int mCurrentBarSizeMode;
-
+    protected boolean mHardKeyboardInUse = false;
 
 
 
@@ -250,9 +250,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         disable(switches[0]);
         setSystemUiVisibility(switches[1], 0xffffffff);
         topAppWindowChanged(switches[2] != 0);
+        setHardKeyboardStatus(switches[5] != 0, switches[6] != 0);
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(binders.get(0), switches[3], switches[4]);
-        setHardKeyboardStatus(switches[5] != 0, switches[6] != 0);
 
         // Set up the initial icon state
         int N = iconList.size();

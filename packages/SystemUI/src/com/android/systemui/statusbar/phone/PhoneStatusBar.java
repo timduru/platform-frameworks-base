@@ -1948,8 +1948,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
-        boolean altBack = (backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS)
-            || ((vis & InputMethodService.IME_VISIBLE) != 0);
+        boolean altBack = (backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS) || ((vis & InputMethodService.IME_VISIBLE) != 0);
+        if(mHardKeyboardInUse) altBack = false;
 
         mCommandQueue.setNavigationIconHints(
                 altBack ? (mNavigationIconHints | StatusBarManager.NAVIGATION_HINT_BACK_ALT)
@@ -1958,7 +1958,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void setHardKeyboardStatus(boolean available, boolean enabled) {}
+    public void setHardKeyboardStatus(boolean available, boolean enabled) {        
+        mHardKeyboardInUse = available && enabled; 
+    }
 
     @Override
     protected void tick(IBinder key, StatusBarNotification n, boolean firstTime) {

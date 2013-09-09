@@ -1128,7 +1128,9 @@ public class TabletStatusBar extends BaseStatusBar {
         updateNotificationIcons();
 
         boolean altBack = (backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS) || ((vis & InputMethodService.IME_VISIBLE) != 0);
+        if(mHardKeyboardInUse) altBack = false;
         mAltBackButtonEnabledForIme = altBack;
+
 
         mCommandQueue.setNavigationIconHints(
                 altBack ? (mNavigationIconHints | StatusBarManager.NAVIGATION_HINT_BACK_ALT)
@@ -1146,6 +1148,8 @@ public class TabletStatusBar extends BaseStatusBar {
             Slog.d(TAG, "Set hard keyboard status: available=" + available
                     + ", enabled=" + enabled);
         }
+        mHardKeyboardInUse = available && enabled;
+
         updateNotificationIcons();
     }
 
