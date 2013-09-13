@@ -32,6 +32,8 @@ public final class KKC {
     public static final String SYSTEMUI_SOFTKEY_HOME = "systemui_softkey_home";
     public static final String SYSTEMUI_SOFTKEY_RECENT = "systemui_softkey_recent";
     public static final String SYSTEMUI_SOFTKEY_MENU = "systemui_softkey_menu";    
+
+    public static final String INPUTMETHOD_SHOWNOTIFICATION = "inputmethod_shownotification";
   }
 
   // Intents

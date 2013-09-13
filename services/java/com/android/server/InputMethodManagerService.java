@@ -121,11 +121,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 
+import org.meerkats.katkiss.KKC;
+import org.meerkats.katkiss.CustomObserver;
+import android.net.Uri;
+
+
 /**
  * This class provides a system service that manages input methods.
  */
 public class InputMethodManagerService extends IInputMethodManager.Stub
-        implements ServiceConnection, Handler.Callback {
+        implements ServiceConnection, Handler.Callback, CustomObserver.ChangeNotification {
     static final boolean DEBUG = false;
     static final String TAG = "InputMethodManagerService";
 
@@ -832,12 +837,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mStatusBar = statusBar;
                 statusBar.setIconVisibility("ime", false);
                 updateImeWindowStatusLocked();
-                mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
-                        com.android.internal.R.bool.show_ongoing_ime_switcher);
-                if (mShowOngoingImeSwitcherForPhones) {
-                    mWindowManagerService.setOnHardKeyboardStatusChangeListener(
-                            mHardKeyboardListener);
-                }
+
+                new CustomObserver(mContext, this);
+                mShowOngoingImeSwitcherForPhones = mRes.getBoolean( com.android.internal.R.bool.show_ongoing_ime_switcher)  
+                                                   && (Settings.System.getInt(mContext.getContentResolver(), KKC.S.INPUTMETHOD_SHOWNOTIFICATION,0) == 1);
+                if (mShowOngoingImeSwitcherForPhones) { mWindowManagerService.setOnHardKeyboardStatusChangeListener( mHardKeyboardListener); }
+
                 buildInputMethodListLocked(mMethodList, mMethodMap,
                         !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
                 if (!mImeSelectedOnBoot) {
@@ -3559,4 +3564,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("No input method service.");
         }
     }
+
+// ChangeNotifications
+  @Override
+  public ArrayList<Uri> getObservedUris()
+  {
+    ArrayList<Uri> uris = new  ArrayList<Uri>();
+    uris.add(Settings.System.getUriFor(KKC.S.INPUTMETHOD_SHOWNOTIFICATION));
+    return uris;
+  }
+
+  @Override
+  public void onChangeNotification(Uri uri)
+  {
+    if(uri.equals(Settings.System.getUriFor(KKC.S.INPUTMETHOD_SHOWNOTIFICATION))) 
+      updateCustomConfig();
+  }
+
+  private void updateCustomConfig() {
+    boolean inputmethod_shownotification = mShowOngoingImeSwitcherForPhones = Settings.System.getInt(mContext.getContentResolver(), KKC.S.INPUTMETHOD_SHOWNOTIFICATION,0) == 1;
+    Slog.d("KK", "inputmethod_shownotification="+inputmethod_shownotification);
+    if(inputmethod_shownotification) mWindowManagerService.setOnHardKeyboardStatusChangeListener( mHardKeyboardListener);
+    else mWindowManagerService.setOnHardKeyboardStatusChangeListener( null);
+  }
+
 }
