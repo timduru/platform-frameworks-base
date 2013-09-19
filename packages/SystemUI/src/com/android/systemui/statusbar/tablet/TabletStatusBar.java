@@ -1362,7 +1362,7 @@ public class TabletStatusBar extends BaseStatusBar {
         for (int i=0; toShow.size()< maxNotificationIconsCount; i++) {
             if (i >= N) break;
             Entry ent = mNotificationData.get(N-i-1);
-            if ((provisioned && ent.notification.getScore() >= HIDE_ICONS_BELOW_SCORE)
+            if (notificationIsForCurrentUser(ent.notification) && (provisioned && ent.notification.getScore() >= HIDE_ICONS_BELOW_SCORE)
                     || showNotificationEvenIfUnprovisioned(ent.notification)) {
                 toShow.add(ent.icon);
             }
@@ -1398,7 +1398,7 @@ public class TabletStatusBar extends BaseStatusBar {
         // If the device hasn't been through Setup, we only show system notifications
         for (int i=0; i<N; i++) {
             Entry ent = mNotificationData.get(N-i-1);
-            if (provisioned || showNotificationEvenIfUnprovisioned(ent.notification)) {
+            if (notificationIsForCurrentUser(ent.notification)  && (provisioned || showNotificationEvenIfUnprovisioned(ent.notification))) {
                 toShow.add(ent.row);
             }
         }
@@ -1492,6 +1492,15 @@ public class TabletStatusBar extends BaseStatusBar {
         return mNotificationPanel.getVisibility() == View.VISIBLE
                 || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
     }
+
+    @Override
+    public void userSwitched(int newUserId) {
+        animateCollapsePanels();
+        updateNotificationIcons();
+//        resetUserSetupObserver();
+    }
+
+
 }
 
 
