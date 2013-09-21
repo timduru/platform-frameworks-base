@@ -25,7 +25,7 @@ public class CustomObserver extends ContentObserver
   public CustomObserver(Context context, ChangeNotification callback) 
   { 
     //TODO use custom threaded handler
-    super(null);
+    super(new Handler());
     init(context); 
     setCallback(callback); 
     startObserving();
