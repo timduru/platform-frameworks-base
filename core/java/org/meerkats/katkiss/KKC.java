@@ -30,8 +30,8 @@ public final class KKC {
     public static final String SYSTEMUI_CLOCK_DATE = "kk_ui_clock_date";
     
     
-    public static final String SYSTEMUI_RECENTS_KILLALL_BUTTON = "systemui_recents_killall_button";
-    public static final String SYSTEMUI_RECENTS_MEM_DISPLAY = "systemui_recents_mem_display";
+    public static final String SYSTEMUI_RECENTS_KILLALL_BUTTON = "kk_ui_recents_killall_button";
+    public static final String SYSTEMUI_RECENTS_MEM_DISPLAY = "kk_ui_recents_mem_display";
 
 
     public static final String SYSTEMUI_SOFTKEY_BACK = "systemui_softkey_back";

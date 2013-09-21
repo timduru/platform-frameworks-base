@@ -81,9 +81,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.meerkats.katkiss.KKC;
+import org.meerkats.katkiss.CustomObserver;
+
 
 public class RecentsPanelView extends FrameLayout implements OnItemClickListener, RecentsCallback,
-        StatusBarPanel, Animator.AnimatorListener {
+        StatusBarPanel, Animator.AnimatorListener, CustomObserver.ChangeNotification {
     static final String TAG = "RecentsPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private PopupMenu mPopup;
@@ -110,7 +112,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private boolean mHighEndGfx;
 
     private Button mRecentsKillAllButton;
-    private ContentObserver mRecentsKillAllButtonObserver;
     private Timer updateMemDisplayTimer;
 
     public static interface OnRecentsPanelVisibilityChangedListener {
@@ -280,6 +281,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     public RecentsPanelView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+        new CustomObserver(context, this);
     }
 
     public RecentsPanelView(Context context, AttributeSet attrs, int defStyle) {
@@ -292,6 +294,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mRecentItemLayoutId = a.getResourceId(R.styleable.RecentsPanelView_recentItemLayout, 0);
         mRecentTasksLoader = RecentTasksLoader.getInstance(context);
         a.recycle();
+        new CustomObserver(context, this);
     }
 
     public int numItemsInOneScreenful() {
@@ -501,17 +504,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             }
         }
 
-        mRecentsKillAllButtonObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateRecentsKillAllButton();
-            }
-        };
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(KKC.S.SYSTEMUI_RECENTS_KILLALL_BUTTON), false,
-                mRecentsKillAllButtonObserver);
-
         updateRecentsKillAllButton();
+        
 
         mPreloadTasksRunnable = new Runnable() {
             public void run() {
@@ -862,7 +856,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private void updateRecentsKillAllButton() {
         boolean enableKillallButton = Settings.System.getInt(mContext.getContentResolver(),
                 KKC.S.SYSTEMUI_RECENTS_KILLALL_BUTTON, 1) == 1;
-
         mRecentsKillAllButton = (Button) findViewById(R.id.recents_kill_all_button);
         if (mRecentsKillAllButton != null) {
             if (enableKillallButton) {
@@ -961,4 +954,22 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
         return memory / 1048576;
     }
+    
+ // CustomObserver ChangeNotifications
+    @Override
+    public ArrayList<Uri> getObservedUris()
+    {
+      ArrayList<Uri> uris = new  ArrayList<Uri>();
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_RECENTS_KILLALL_BUTTON));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_RECENTS_MEM_DISPLAY));
+      return uris;
+    }
+
+    @Override
+    public void onChangeNotification(Uri uri)
+    {
+      Log.d(TAG, "onChangeNotification:" + uri);
+      updateRecentsKillAllButton();
+      showMemDisplay(true);
+    }    
 }
