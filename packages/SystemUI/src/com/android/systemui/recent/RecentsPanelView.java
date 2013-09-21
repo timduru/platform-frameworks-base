@@ -85,7 +85,7 @@ import org.meerkats.katkiss.CustomObserver;
 
 
 public class RecentsPanelView extends FrameLayout implements OnItemClickListener, RecentsCallback,
-        StatusBarPanel, Animator.AnimatorListener, CustomObserver.ChangeNotification {
+        StatusBarPanel, Animator.AnimatorListener/*, CustomObserver.ChangeNotification */{
     static final String TAG = "RecentsPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private PopupMenu mPopup;
@@ -281,12 +281,13 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     public RecentsPanelView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
-        new CustomObserver(context, this);
+//        new CustomObserver(context, this);
     }
 
     public RecentsPanelView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        updateValuesFromResources();
+//        Log.d(TAG, "RecentsPanelView++");
+       updateValuesFromResources();
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecentsPanelView,
                 defStyle, 0);
@@ -294,7 +295,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mRecentItemLayoutId = a.getResourceId(R.styleable.RecentsPanelView_recentItemLayout, 0);
         mRecentTasksLoader = RecentTasksLoader.getInstance(context);
         a.recycle();
-        new CustomObserver(context, this);
+        //new CustomObserver(context, this);
+//        Log.d(TAG, "RecentsPanelView--");
     }
 
     public int numItemsInOneScreenful() {
@@ -954,7 +956,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
         return memory / 1048576;
     }
-    
+/*
  // CustomObserver ChangeNotifications
     @Override
     public ArrayList<Uri> getObservedUris()
@@ -971,5 +973,5 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
       Log.d(TAG, "onChangeNotification:" + uri);
       updateRecentsKillAllButton();
       showMemDisplay(true);
-    }    
+    }  */  
 }
