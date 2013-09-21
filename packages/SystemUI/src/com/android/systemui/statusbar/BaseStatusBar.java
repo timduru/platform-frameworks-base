@@ -86,9 +86,10 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ExternalBatteryController;
 import android.content.ContentResolver;
 import org.meerkats.katkiss.KKC;
+import org.meerkats.katkiss.CustomObserver;
 
 public abstract class BaseStatusBar extends SystemUI implements
-        CommandQueue.Callbacks {
+        CommandQueue.Callbacks, CustomObserver.ChangeNotification {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -140,8 +141,10 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected ContentResolver mResolver;
     protected int mCurrentBarSizeMode;
     protected boolean mHardKeyboardInUse = false;
+    protected View mClockAreaRootView;
 
-
+    protected abstract View getClockAreaRootView() ;
+    public abstract void showClock(boolean show) ;
 
     // UI-specific methods
 
@@ -303,6 +306,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             }}, filter);
 
         mLocale = mContext.getResources().getConfiguration().locale;
+        
+        new CustomObserver(mContext, this);
+        refreshClockVisibility();
     }
 
     public void userSwitched(int newUserId) {
@@ -1233,5 +1239,37 @@ public abstract class BaseStatusBar extends SystemUI implements
                 return com.android.internal.R.dimen.navigation_bar_height;
         }
     }
+    
+    public void refreshClockVisibility() {
+     	  showClock( Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_CLOCK_TIME, 1) == 1 );
+    	  showClockDate( Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_CLOCK_DATE, 0) == 1 );
+    }
+
+    public void showClockDate(boolean show) {
+    	View rootView = getClockAreaRootView();    	
+        if (rootView == null) return;
+        
+        View v = rootView.findViewById(R.id.date);
+        if (v != null)  v.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    // CustomObserver ChangeNotifications
+    @Override
+    public ArrayList<Uri> getObservedUris()
+    {
+      ArrayList<Uri> uris = new  ArrayList<Uri>();
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_TIME));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_DATE));
+      return uris;
+    }
+
+    @Override
+    public void onChangeNotification(Uri uri)
+    {
+      Log.d(TAG, "onChangeNotification:" + uri);
+      if(uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_TIME)) || uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_DATE)) )
+    		  refreshClockVisibility();
+    }
+       
 
 }

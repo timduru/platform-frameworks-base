@@ -1202,6 +1202,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         updateCarrierLabelVisibility(false);
     }
 
+    protected View getClockAreaRootView() { return mStatusBarView; }
+
     public void showClock(boolean show) {
         if (mStatusBarView == null) return;
         View clock = mStatusBarView.findViewById(R.id.clock);

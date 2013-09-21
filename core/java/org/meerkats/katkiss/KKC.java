@@ -26,6 +26,10 @@ public final class KKC {
     public static final String SYSTEMUI_BATTERY_TEXT = "kk_ui_battery_text";
     public static final String SYSTEMUI_BATTERY_TEXT_PERCENT = "kk_ui_battery_text_percent";
 
+    public static final String SYSTEMUI_CLOCK_TIME = "kk_ui_clock_time";
+    public static final String SYSTEMUI_CLOCK_DATE = "kk_ui_clock_date";
+    
+    
     public static final String SYSTEMUI_RECENTS_KILLALL_BUTTON = "systemui_recents_killall_button";
     public static final String SYSTEMUI_RECENTS_MEM_DISPLAY = "systemui_recents_mem_display";
 

@@ -857,6 +857,8 @@ public class TabletStatusBar extends BaseStatusBar {
         setAreThereNotifications();
     }
 
+    protected View getClockAreaRootView() { return mBarContents; }
+
     public void showClock(boolean show) {
         View clock = mBarContents.findViewById(R.id.clock);
         View network_text = mBarContents.findViewById(R.id.network_text);

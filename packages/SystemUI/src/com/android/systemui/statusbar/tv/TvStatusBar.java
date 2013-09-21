@@ -150,4 +150,11 @@ public class TvStatusBar extends BaseStatusBar {
     protected void refreshLayout(int layoutDirection) {
     }
 
+    @Override
+    public void showClock(boolean show) {
+    }
+
+    @Override
+    protected View getClockAreaRootView() { return null; }
+
 }

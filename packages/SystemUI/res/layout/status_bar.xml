@@ -132,13 +132,22 @@
                     />
             </LinearLayout>
     
+            <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:paddingStart="6dip"
+            android:textAppearance="@style/TextAppearance.StatusBar.Date"
+            android:visibility="gone"
+            />
+            
             <com.android.systemui.statusbar.policy.Clock
                 android:id="@+id/clock"
                 android:textAppearance="@style/TextAppearance.StatusBar.Clock"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:singleLine="true"
-                android:paddingStart="6dip"
+                android:paddingStart="4dip"
                 android:gravity="center_vertical|start"
                 />
         </LinearLayout>
