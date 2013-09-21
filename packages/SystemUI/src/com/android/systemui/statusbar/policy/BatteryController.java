@@ -24,7 +24,9 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.BatteryManager;
+import android.util.Log;
 import android.util.Slog;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -34,10 +36,10 @@ import com.android.systemui.R;
 
 import org.meerkats.katkiss.KKC;
 import android.provider.Settings;
+import org.meerkats.katkiss.CustomObserver;
 
 
-
-public class BatteryController extends BroadcastReceiver {
+public class BatteryController extends BroadcastReceiver implements CustomObserver.ChangeNotification {
     private static final String TAG = "StatusBar.BatteryController";
 
     private Context mContext;
@@ -50,22 +52,12 @@ public class BatteryController extends BroadcastReceiver {
 
     private int mLastPercentage = 0;
     private boolean mCharging = false;
-    protected boolean mVisibilityOverride = false;
-    protected boolean mVisibility = true;
+    protected boolean mBatteryAvailable = true;
+
+    private boolean mShowIcon = true, mShowText = true, mShowTextPercent = true;
+
     private ContentObserver mPercentObserver;
-
-
-/*    private EosUiController.OnObserverStateChangedListener mListener = new EosUiController.OnObserverStateChangedListener() {        
-        @Override
-        public void observerStateChanged(boolean state) {
-            if(state == EosUiController.OBSERVERS_ON)
-                registerObservers();
-            else
-                unregisterObservers();
-        }
-    };
-
-*/
+ 
     public interface BatteryStateChangeCallback {
         public void onBatteryLevelChanged(int level, boolean pluggedIn);
     }
@@ -82,10 +74,11 @@ public class BatteryController extends BroadcastReceiver {
     }
 
     public void init(Context context) {
-        initResources();
-
         mContext = context;
-
+        initResources();
+        refreshConf();
+        new CustomObserver(context, this);
+        
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         context.registerReceiver(this, filter);
@@ -114,8 +107,8 @@ public class BatteryController extends BroadcastReceiver {
     }
 
     public void addLabelView(TextView v) {
-        updateLabelPercent();
         mLabelViews.add(v);
+        updateLabel();
     }
 
     protected void updateViews() {
@@ -123,25 +116,31 @@ public class BatteryController extends BroadcastReceiver {
         int N = mIconViews.size();
         for (int i = 0; i < N; i++) {
             ImageView v = mIconViews.get(i);
-            v.setImageResource(icon);
-            v.setImageLevel(mLastPercentage);
-            v.setContentDescription(mContext.getString(R.string.accessibility_battery_level, mLastPercentage));
-            if(mVisibilityOverride) v.setVisibility(mVisibility? View.VISIBLE : View.GONE);
+            boolean show =  mBatteryAvailable && mShowIcon;
+            v.setVisibility(show? View.VISIBLE : View.GONE);
+            
+            if(show) {
+              v.setImageResource(icon);
+              v.setImageLevel(mLastPercentage);
+              v.setContentDescription(mContext.getString(R.string.accessibility_battery_level, mLastPercentage));
+            }
         }
     }
 
-    protected void updateLabelPercent() {
+    public void updateLabel() {
         int N = mLabelViews.size();
         for (int i = 0; i < N; i++) {
             TextView v = mLabelViews.get(i);
-            String label = mContext.getString( R.string.status_bar_settings_battery_meter_format, mLastPercentage);
-            if (v.getTag() != null && v.getTag().equals( KKC.S.SYSTEMUI_BATTERY_PERCENT_TAG)) {
-                if (Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_BATTERY_PERCENT_VISIBLE, 1) == 0) {
-                    label = trimPercent(label);
-                }
+
+            boolean show =  mBatteryAvailable && mShowText;
+            v.setVisibility(show? View.VISIBLE : View.GONE);
+            
+            if(show) {              	
+              String label = mContext.getString( R.string.status_bar_settings_battery_meter_format, mLastPercentage);            
+              if (!mShowTextPercent) label = trimPercent(label);
+              v.setText(label);
             }
-            v.setText(label);
-            if(mVisibilityOverride) v.setVisibility(mVisibility? View.VISIBLE : View.GONE);
+            
         }
     }
 
@@ -171,11 +170,38 @@ public class BatteryController extends BroadcastReceiver {
             mCharging = isCharging(status);
 
             updateViews();
-            updateLabelPercent();
+            updateLabel();
 
             for (BatteryStateChangeCallback cb : mChangeCallbacks) {
                 cb.onBatteryLevelChanged(mLastPercentage, mCharging);
             }
         }
     }
+
+    private void refreshConf() {
+        mShowIcon = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_BATTERY_ICON, 1) == 1;
+        mShowText = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_BATTERY_TEXT, 1) == 1;
+        mShowTextPercent = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_BATTERY_TEXT_PERCENT, 1) == 1;
+    }
+    
+ // CustomObserver ChangeNotifications
+    @Override
+    public ArrayList<Uri> getObservedUris()
+    {
+      ArrayList<Uri> uris = new  ArrayList<Uri>();
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BATTERY_ICON));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BATTERY_TEXT));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BATTERY_TEXT_PERCENT));
+      return uris;
+    }
+
+    @Override
+    public void onChangeNotification(Uri uri)
+    {
+      Log.d(TAG, "onChangeNotification:" + uri);
+      refreshConf();
+      updateViews();
+      updateLabel();
+    }
+    
 }

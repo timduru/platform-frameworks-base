@@ -27,7 +27,6 @@ public class ExternalBatteryController extends BatteryController {
     public ExternalBatteryController(Context context) {
         super(context);
 
-        mVisibilityOverride = true;
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_DOCK_EVENT);
         context.registerReceiver(this, intentFilter);
     }
@@ -47,13 +46,13 @@ public class ExternalBatteryController extends BatteryController {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_DOCK_EVENT)) {
             final int status = intent.getIntExtra(Intent.EXTRA_DOCK_STATE, 0);
-            mVisibility = (status != Intent.EXTRA_DOCK_STATE_UNDOCKED);
+            mBatteryAvailable = (status != Intent.EXTRA_DOCK_STATE_UNDOCKED);
             updateViews();
-            updateLabelPercent();
+            updateLabel();
         }
         else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
             final int status = intent.getIntExtra(statusIntentParam, 0);
-            mVisibility = (status != BatteryManager.DOCK_STATE_UNDOCKED);
+            mBatteryAvailable = (status != BatteryManager.DOCK_STATE_UNDOCKED);
 
             super.onReceive(context, intent);
         }

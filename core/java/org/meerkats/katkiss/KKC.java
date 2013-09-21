@@ -21,8 +21,10 @@ public final class KKC {
     public static final String DEVICE_SETTINGS_TOUCHPAD_MODE = "device_settings_touchpad_mode"; // The touchpad gesture mode. (0 = spots, 1 = pointer)
     public static final String DEVICE_SETTINGS_TOUCHPAD_ENABLED = "device_settings_touchpad_enabled";
 
-    public static final String SYSTEMUI_BATTERY_PERCENT_TAG = "systemui_battery_percent_tag";
-    public static final String SYSTEMUI_BATTERY_PERCENT_VISIBLE = "systemui_battery_percent_visible";
+    public static final String SYSTEMUI_BATTERY_BASECONF = "kk_ui_battery_";
+    public static final String SYSTEMUI_BATTERY_ICON = "kk_ui_battery_icon";
+    public static final String SYSTEMUI_BATTERY_TEXT = "kk_ui_battery_text";
+    public static final String SYSTEMUI_BATTERY_TEXT_PERCENT = "kk_ui_battery_text_percent";
 
     public static final String SYSTEMUI_RECENTS_KILLALL_BUTTON = "systemui_recents_killall_button";
     public static final String SYSTEMUI_RECENTS_MEM_DISPLAY = "systemui_recents_mem_display";
