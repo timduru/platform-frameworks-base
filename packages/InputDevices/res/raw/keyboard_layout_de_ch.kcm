@@ -1,5 +1,9 @@
 type OVERLAY
 
+map key 21 Z
+map key 44 Y
+
+
 key GRAVE {
     label, number:                      '\u00a7'
     base:                               '\u00a7'

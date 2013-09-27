@@ -19,6 +19,9 @@
 type OVERLAY
 
 map key 86 PLUS
+map key 21 Z
+map key 44 Y
+
 
 ### ROW 1
 
