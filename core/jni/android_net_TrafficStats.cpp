@@ -31,6 +31,9 @@
 
 namespace android {
 
+//Deprecated
+static const char* IFACE_STAT_ALL = "/proc/net/xt_qtaguid/iface_stat_all";
+
 static const char* QTAGUID_IFACE_STATS = "/proc/net/xt_qtaguid/iface_stat_fmt";
 static const char* QTAGUID_UID_STATS = "/proc/net/xt_qtaguid/stats";
 
@@ -74,7 +77,49 @@ static uint64_t getStatsType(struct Stats* stats, StatsType type) {
     }
 }
 
-static int parseIfaceStats(const char* iface, struct Stats* stats) {
+
+//Deprecated OLD kernel proc struct
+static int parseIfaceStats(const char* iface, struct Stats* stat) {
+    FILE *fp = fopen(IFACE_STAT_ALL, "r");
+    if (!fp) return errno;
+
+    stat->tcpRxPackets = UNKNOWN;
+    stat->tcpTxPackets = UNKNOWN;
+
+    char buffer[256];
+    char cur_iface[32];
+    int active;
+    uint64_t rxBytes, rxPackets, txBytes, txPackets, devRxBytes, devRxPackets, devTxBytes, devTxPackets;
+
+    while (fgets(buffer, 256, fp) != NULL) {
+        if (sscanf(buffer, "%31s %d %llu %llu %llu %llu %llu %llu %llu %llu", cur_iface, &active,
+                   &rxBytes, &rxPackets, &txBytes, &txPackets, &devRxBytes, &devRxPackets,
+                   &devTxBytes, &devTxPackets) != 10) {
+            continue;
+        }
+
+        if (!iface || !strcmp(iface, cur_iface)) {
+            stat->rxBytes += rxBytes;
+            stat->rxPackets += rxPackets;
+            stat->txBytes += txBytes;
+            stat->txPackets += txPackets;
+
+            if (active) {
+                stat->rxBytes += devRxBytes;
+                stat->rxPackets += devRxPackets;
+                stat->txBytes += devTxBytes;
+                stat->txPackets += devTxPackets;
+            }
+        }
+    }
+
+    fclose(fp);
+
+    return 0;
+}
+
+
+static int parseIfaceStatsNew(const char* iface, struct Stats* stats) {
     FILE *fp = fopen(QTAGUID_IFACE_STATS, "r");
     if (fp == NULL) {
         return -1;
