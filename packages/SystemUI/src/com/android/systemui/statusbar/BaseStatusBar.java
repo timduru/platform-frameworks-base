@@ -136,7 +136,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
 
 //KK
-    protected BatteryController mBatteryController, mDockBatteryController;
+    public BatteryController mBatteryController, mDockBatteryController;
     private boolean mHasDockBattery;
     protected ContentResolver mResolver;
     protected int mCurrentBarSizeMode;

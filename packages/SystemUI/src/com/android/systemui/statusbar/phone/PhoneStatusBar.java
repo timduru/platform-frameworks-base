@@ -29,6 +29,7 @@ import android.app.StatusBarManager;
 import android.service.notification.StatusBarNotification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -102,8 +103,14 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import org.meerkats.katkiss.KKC;
+import org.meerkats.katkiss.CustomObserver;
+import android.net.Uri;
 
-public class PhoneStatusBar extends BaseStatusBar {
+
+
+public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.ChangeNotification {
+
+    private CustomObserver mConfChangedObserver;
 
     static final int LAYOUT_NAV_BAR_STOCK = com.android.systemui.R.layout.navigation_bar;
     static final int LAYOUT_NAV_BAR_LEFT = com.android.systemui.R.layout.navigation_bar_left;
@@ -199,12 +206,18 @@ public class PhoneStatusBar extends BaseStatusBar {
     TextView mNotificationPanelDebugText;
 
     // settings
-    QuickSettings mQS;
+    QuickSettingsController mQS;
     boolean mHasSettingsPanel, mHasFlipSettings;
     SettingsPanelView mSettingsPanel;
     View mFlipSettingsView;
     QuickSettingsContainerView mSettingsContainer;
     int mSettingsPanelGravity;
+
+    // Ribbon settings
+    private boolean mHasQuickAccessSettings;
+    private boolean mQuickAccessLayoutLinked = true;
+    private QuickSettingsHorizontalScrollView mRibbonView;
+    private QuickSettingsController mRibbonQS;
 
     // top bar
     View mNotificationPanelHeader;
@@ -327,6 +340,41 @@ public class PhoneStatusBar extends BaseStatusBar {
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
     }
+
+    private void cleanupRibbon() {
+        if (mRibbonView == null) {
+            return;
+        }
+        mRibbonView.setVisibility(View.GONE);
+        mRibbonQS.shutdown();
+        mRibbonQS = null;
+    }
+
+    private void inflateRibbon() {
+        if (mRibbonView == null) {
+            ViewStub ribbon_stub = (ViewStub) mStatusBarWindow.findViewById(R.id.ribbon_settings_stub);
+            if (ribbon_stub != null) {
+                mRibbonView = (QuickSettingsHorizontalScrollView) ((ViewStub)ribbon_stub).inflate();
+                mRibbonView.setVisibility(View.VISIBLE);
+            }
+        }
+        if (mRibbonQS == null) {
+            QuickSettingsContainerView mRibbonContainer = (QuickSettingsContainerView)
+                    mStatusBarWindow.findViewById(R.id.quick_settings_ribbon_container);
+            if (mRibbonContainer != null) {
+                mRibbonQS = new QuickSettingsController(mContext, mRibbonContainer, this,
+                        mQuickAccessLayoutLinked ? KKC.S.QUICK_SETTINGS_TILES
+                            : KKC.S.QUICK_SETTINGS_RIBBON_TILES);
+                mRibbonQS.hideLiveTiles(true);
+                mRibbonQS.hideLiveTileLabels(true);
+                mRibbonQS.setService(this);
+                mRibbonQS.setBar(mStatusBarView);
+                mRibbonQS.setupQuickSettings();
+            }
+        }
+    }
+
+
 
     // ================================================================================
     // Constructing the view
@@ -575,11 +623,17 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
             }
 
+            if (mQS != null) {
+                mQS.shutdown();
+                mQS = null;
+             }
+
             // wherever you find it, Quick Settings needs a container to survive
             mSettingsContainer = (QuickSettingsContainerView)
                     mStatusBarWindow.findViewById(R.id.quick_settings_container);
             if (mSettingsContainer != null) {
-                mQS = new QuickSettings(mContext, mSettingsContainer);
+                mQS = new QuickSettingsController(mContext, mSettingsContainer, this, KKC.S.QUICK_SETTINGS_TILES);
+
                 if (!mNotificationPanelIsFullScreenWidth) {
                     mSettingsContainer.setSystemUiVisibility(
                             View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
@@ -590,10 +644,26 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
                 mQS.setService(this);
                 mQS.setBar(mStatusBarView);
-                mQS.setup(mNetworkController, mBluetoothController, mBatteryController,
-                        mLocationController);
-            } else {
-                mQS = null; // fly away, be free
+                mQS.setupQuickSettings();
+
+                // Start observing for changes
+                if (mConfChangedObserver == null) {
+                    mConfChangedObserver = new CustomObserver(mContext, this);
+                }
+
+//TODO Start observing for changes
+            }
+
+            final ContentResolver resolver = mContext.getContentResolver();
+            mHasQuickAccessSettings = Settings.System.getIntForUser(resolver,
+                    KKC.S.QS_QUICK_ACCESS, 0, UserHandle.USER_CURRENT) == 1;
+            mQuickAccessLayoutLinked = Settings.System.getIntForUser(resolver,
+                    KKC.S.QS_QUICK_ACCESS_LINKED, 1, UserHandle.USER_CURRENT) == 1;
+            if (mHasQuickAccessSettings) {
+                cleanupRibbon();
+                mRibbonView = null;
+                inflateRibbon();
+
             }
         }
 
@@ -1650,6 +1720,11 @@ public class PhoneStatusBar extends BaseStatusBar {
 
             mScrollView.setScaleX(1f);
             mScrollView.setVisibility(View.VISIBLE);
+            if (mRibbonView != null && mHasQuickAccessSettings) {
+                mRibbonView.setScaleX(1f);
+                mRibbonView.setVisibility(View.VISIBLE);
+            }
+
             mSettingsButton.setAlpha(1f);
             mSettingsButton.setVisibility(View.VISIBLE);
             mNotificationPanel.setVisibility(View.GONE);
@@ -2362,6 +2437,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
         animateCollapsePanels();
         updateNotificationIcons();
+        refreshQuickSettings(null);
         resetUserSetupObserver();
     }
 
@@ -2552,5 +2628,58 @@ public class PhoneStatusBar extends BaseStatusBar {
         @Override
         public void setBounds(Rect bounds) {
         }
+    }
+
+ // CustomObserver ChangeNotifications
+    @Override
+    public ArrayList<Uri> getObservedUris()
+    {
+      ArrayList<Uri> uris = new  ArrayList<Uri>();
+      uris.add(Settings.System.getUriFor(KKC.S.QUICK_SETTINGS_TILES));
+      uris.add(Settings.System.getUriFor(KKC.S.QUICK_SETTINGS_RIBBON_TILES));
+      uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_ACCESS));
+      uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_ACCESS_LINKED));
+      uris.add(Settings.System.getUriFor(KKC.S.QS_DYNAMIC_WIFI));
+      uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_PULLDOWN));
+      uris.add(Settings.System.getUriFor(KKC.S.QS_COLLAPSE_PANEL));
+
+      return uris;
+    }
+
+    @Override
+    public void onChangeNotification(Uri uri)
+    {
+      Log.d(TAG, "onChangeNotification:" + uri);
+      refreshQuickSettings(uri);
+    }
+
+    public void refreshQuickSettings(Uri uri) {
+            if (uri != null && uri.equals(Settings.System.getUriFor( KKC.S.QS_QUICK_ACCESS))) {
+                final ContentResolver resolver = mContext.getContentResolver();
+                mHasQuickAccessSettings = Settings.System.getIntForUser(resolver, KKC.S.QS_QUICK_ACCESS, 0, UserHandle.USER_CURRENT) == 1;
+                if (mHasQuickAccessSettings) {
+                    inflateRibbon();
+                    mRibbonView.setVisibility(View.VISIBLE);
+                } else { cleanupRibbon(); }
+            } else if (uri != null && uri.equals(Settings.System.getUriFor( KKC.S.QS_QUICK_ACCESS_LINKED))) {
+                final ContentResolver resolver = mContext.getContentResolver();
+                boolean layoutLinked = Settings.System.getIntForUser(resolver, KKC.S.QS_QUICK_ACCESS_LINKED, 1, UserHandle.USER_CURRENT) == 1;
+                if (mQuickAccessLayoutLinked != layoutLinked) {
+                    // Reload the ribbon
+                    mQuickAccessLayoutLinked = layoutLinked;
+                    cleanupRibbon();
+                    inflateRibbon();
+                    mRibbonView.setVisibility(View.VISIBLE);
+                }
+            }  else if (uri != null && uri.equals(Settings.System.getUriFor( KKC.S.QUICK_SETTINGS_RIBBON_TILES))) {
+                    cleanupRibbon();
+                    inflateRibbon();
+                    mRibbonView.setVisibility(View.VISIBLE);
+            } else if (mSettingsContainer != null) {
+                mQS.setupQuickSettings();
+                if (mQuickAccessLayoutLinked && mRibbonQS != null) {
+                    mRibbonQS.setupQuickSettings();
+                }
+            }
     }
 }
