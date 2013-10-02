@@ -49,5 +49,10 @@
         <enum name="horizontal" value="0" />
         <enum name="vertical" value="1" />
     </attr>
+
+    <declare-styleable name="QuickSettingsContainer">
+        <attr name="singleRow" format="boolean" />
+    </declare-styleable>
+
 </resources>
 

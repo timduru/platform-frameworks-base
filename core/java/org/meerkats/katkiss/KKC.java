@@ -40,7 +40,21 @@ public final class KKC {
     public static final String SYSTEMUI_SOFTKEY_MENU = "systemui_softkey_menu";    
 
     public static final String INPUTMETHOD_SHOWNOTIFICATION = "inputmethod_shownotification";
+
+    public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
+    public static final String QUICK_SETTINGS_RIBBON_TILES = "quick_settings_ribbon_tiles";
+    public static final String QS_QUICK_ACCESS = "qs_quick_access";
+    public static final String QS_QUICK_ACCESS_LINKED = "qs_quick_access_linked";
+
+    public static final String QS_DYNAMIC_WIFI = "qs_dyanmic_wifi";
+    public static final String QS_QUICK_PULLDOWN = "qs_quick_pulldown";
+    public static final String QS_COLLAPSE_PANEL = "qs_collapse_panel";
+
+    public static final String EXPANDED_VIEW_WIDGET = "expanded_view_widget";
+
+    public static final String ADB_PORT = "adb_port";
   }
+
 
   // Intents
   public final class I {

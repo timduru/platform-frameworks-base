@@ -150,6 +150,11 @@ public class BatteryController extends BroadcastReceiver implements CustomObserv
         mChangeCallbacks.add(cb);
     }
 
+    public void removeStateChangedCallback(BatteryStateChangeCallback cb) {
+        mChangeCallbacks.remove(cb);
+    }
+
+
     private String trimPercent(String s) {
         if (s.contains("%"))
             return s.substring(0, s.indexOf("%"));
