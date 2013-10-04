@@ -225,4 +225,10 @@ public class EthernetManager implements NetworkStateTracker {
         // not supported on this network
     }
 
+    @Override
+    public void captivePortalCheckComplete() {
+    }
+
+
+
 }
