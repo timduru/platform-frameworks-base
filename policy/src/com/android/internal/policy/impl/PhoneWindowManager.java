@@ -117,6 +117,7 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 
 import org.meerkats.katkiss.KKC;
+import org.meerkats.katkiss.KatUtils;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -3606,6 +3607,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void initializeHdmiState() {
+        KatUtils.initializeHdmiMode(mContext);
         boolean plugged = false;
         // watch for HDMI plug messages if the hdmi switch exists
         if (new File("/sys/devices/virtual/switch/hdmi/state").exists()) {

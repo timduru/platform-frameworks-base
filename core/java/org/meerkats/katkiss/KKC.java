@@ -53,6 +53,8 @@ public final class KKC {
     public static final String EXPANDED_VIEW_WIDGET = "expanded_view_widget";
 
     public static final String ADB_PORT = "adb_port";
+    public static final String HDMI_MODE = "hdmi_mode";
+
   }
 
 
