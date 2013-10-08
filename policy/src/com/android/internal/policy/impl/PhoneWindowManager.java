@@ -118,6 +118,7 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 
 import org.meerkats.katkiss.KKC;
 import org.meerkats.katkiss.KatUtils;
+import org.meerkats.katkiss.KeyOverrideManager;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -299,6 +300,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // The last window we were told about in focusChanged.
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
+
+    KeyOverrideManager mKeyOverrideManager = null;
 
     private static final class PointerLocationInputEventReceiver extends InputEventReceiver {
         private final PointerLocationView mView;
@@ -944,6 +947,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void init(Context context, IWindowManager windowManager,
             WindowManagerFuncs windowManagerFuncs) {
         mContext = context;
+
+        mKeyOverrideManager = new KeyOverrideManager(context);
+
         mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
         mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
@@ -2025,7 +2031,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean canceled = event.isCanceled();
 
         if (DEBUG_INPUT) {
-            Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
+            Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + "metaState=" + metaState + " down=" + down + " repeatCount="
                     + repeatCount + " keyguardOn=" + keyguardOn + " mHomePressed=" + mHomePressed
                     + " canceled=" + canceled);
         }
@@ -2394,6 +2400,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean interceptFallback(WindowState win, KeyEvent fallbackEvent, int policyFlags) {
+        if(mKeyOverrideManager.executeOverrideIfNeeded(fallbackEvent)) return true;
+
         int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags, true);
         if ((actions & ACTION_PASS_TO_USER) != 0) {
             long delayMillis = interceptKeyBeforeDispatching(

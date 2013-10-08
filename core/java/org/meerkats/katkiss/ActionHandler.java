@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class ActionHandler {
+public class ActionHandler {
     protected ArrayList<String> mActions;
     protected Context mContext;
     static final String TAG = "ActionHandler";
@@ -83,6 +83,11 @@ public abstract class ActionHandler {
             performTask(action);
             return true;
         }
+    }
+
+    public void executeAllActions() {
+        for(String action : mActions)
+            performTask(action);
     }
 
     public void performTask(String action) {
@@ -314,5 +319,5 @@ public abstract class ActionHandler {
      * @param action
      * @return
      */
-    public abstract boolean handleAction(String action);
+    public boolean handleAction(String action){ return false;}
 }

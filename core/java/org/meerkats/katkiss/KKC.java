@@ -55,6 +55,8 @@ public final class KKC {
     public static final String ADB_PORT = "adb_port";
     public static final String HDMI_MODE = "hdmi_mode";
 
+    public static final String KEYS_OVERRIDE = "keys_override";
+    public static final String KEYS_OVERRIDE_PREFIX = "keys_override_";
   }
 
 
