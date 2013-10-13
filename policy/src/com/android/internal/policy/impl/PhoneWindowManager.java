@@ -132,7 +132,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
     static final boolean DEBUG_LAYOUT = false;
-    static final boolean DEBUG_INPUT = false;
+    static final boolean DEBUG_INPUT = true;
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
@@ -2400,7 +2400,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean interceptFallback(WindowState win, KeyEvent fallbackEvent, int policyFlags) {
-        if(mKeyOverrideManager.executeOverrideIfNeeded(fallbackEvent)) return true;
 
         int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags, true);
         if ((actions & ACTION_PASS_TO_USER) != 0) {
@@ -3792,6 +3791,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + " policyFlags=" + Integer.toHexString(policyFlags)
                     + " isWakeKey=" + isWakeKey);
         }
+
+        if(mKeyOverrideManager.executeOverrideIfNeeded(event)) return 0;
 
         if (down && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
                 && event.getRepeatCount() == 0) {

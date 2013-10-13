@@ -50,6 +50,13 @@ public class ActionHandler {
         mContext = context;
     }
 
+
+    public void addAction(String action) {
+      if (mActions == null)              
+          mActions = new ArrayList<String>();
+      mActions.add(action);
+    }
+    
     /**
      * Set the actions to perform.
      * 
@@ -63,6 +70,8 @@ public class ActionHandler {
             mActions.addAll(actions);
         }
     }
+
+    public List<String> getActions() { return mActions; }
 
     /**
      * Event handler. This method must be called when the event should be triggered.
@@ -88,6 +97,15 @@ public class ActionHandler {
     public void executeAllActions() {
         for(String action : mActions)
             performTask(action);
+    }
+
+    public String getActionsString() {
+        String res = "";
+        for(String action : mActions) {
+          if(!res.equals("")) res +="|";
+          res+= action;
+        }
+        return res;
     }
 
     public void performTask(String action) {

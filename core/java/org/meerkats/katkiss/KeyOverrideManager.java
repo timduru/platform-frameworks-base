@@ -56,25 +56,15 @@ public class KeyOverrideManager implements CustomObserver.ChangeNotification
 
   private void refreshKeysConf()
   {
-     String keysOverride = Settings.System.getString(_context.getContentResolver(), KKC.S.KEYS_OVERRIDE);
-     if(keysOverride == null || keysOverride.equals("")) { _keyOverrideMap = null; return; }
-
-    _keyOverrideMap = new HashMap<Integer,KeyActions>();
-    List<String> keys = Arrays.asList(keysOverride.split(Pattern.quote("|")));
-
-    for(String key : keys)
-    {
-      String keyConf = Settings.System.getString(_context.getContentResolver(), KKC.S.KEYS_OVERRIDE_PREFIX + key);
-      if(keyConf == null || keyConf.equals("")) return;
-
-     if(DEBUG) Log.d(TAG, "key="+key + " keyConf=" + keyConf);
-
-      _keyOverrideMap.put(Integer.parseInt(key), new KeyActions(_context, keyConf));
-    }
+    _keyOverrideMap = KatUtils.getKeyOverrideMap(_context);
+    Log.d(TAG, "_keyOverrideMap:" + _keyOverrideMap);
   }
 
   public boolean executeOverrideIfNeeded(KeyEvent keyEvent)
   {
+//    if(DEBUG) Log.d(TAG, "_keyOverrideMap:" + _keyOverrideMap);
+//   if(DEBUG) Log.d(TAG, "keyEvent=" + keyEvent.getKeyCode() +":" + keyEvent.getMetaState());
+
     if(_keyOverrideMap == null || keyEvent == null) return false;
 
     KeyActions action = _keyOverrideMap.get(keyEvent.getKeyCode());
