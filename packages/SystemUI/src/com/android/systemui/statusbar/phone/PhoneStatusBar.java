@@ -525,8 +525,8 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
         if (!mNotificationPanelIsFullScreenWidth) {
             mScrollView.setSystemUiVisibility(
                     View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER |
-                    View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
-                    View.STATUS_BAR_DISABLE_CLOCK);
+                    View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS /*|
+                    View.STATUS_BAR_DISABLE_CLOCK*/);
         }
 
         mTicker = new MyTicker(context, mStatusBarView);
