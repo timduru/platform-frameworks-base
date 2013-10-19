@@ -1355,7 +1355,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             }
             break;
         case WebViewInputDispatcher.EVENT_TYPE_DOUBLE_TAP:
-            mZoomManager.handleDoubleTap(event.getX(), event.getY());
+            hitTest = getHitTestResult();
+            if (isDoubleTapModeAction() && hitTest != null && hitTest.getType() != WebView.HitTestResult.UNKNOWN_TYPE) {   
+               hitTest.setAction("open");
+               mWebView.performLongClick();
+            }
+            else mZoomManager.handleDoubleTap(event.getX(), event.getY());
             break;
         case WebViewInputDispatcher.EVENT_TYPE_TOUCH:
             onHandleUiTouchEvent(event);
@@ -2782,6 +2787,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         WebSettingsClassic settings = getSettings();
         return (settings != null) ? settings.isPrivateBrowsingEnabled() : false;
     }
+
+    private boolean isDoubleTapModeAction() {
+        WebSettingsClassic settings = getSettings();
+        return (settings != null) ? settings.getDoubleTapMode() : true;
+    }
+
 
     private void startPrivateBrowsing() {
         getSettings().setPrivateBrowsingEnabled(true);

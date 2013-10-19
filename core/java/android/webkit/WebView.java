@@ -371,6 +371,7 @@ public class WebView extends AbsoluteLayout
 
         private int mType;
         private String mExtra;
+        private String mAction;
 
         /**
          * @hide Only for use by WebViewProvider implementations
@@ -393,6 +394,10 @@ public class WebView extends AbsoluteLayout
             mExtra = extra;
         }
 
+        public void setAction(String val) {
+            mAction = val;
+        }
+
         /**
          * Gets the type of the hit test result. See the XXX_TYPE constants
          * defined in this class.
@@ -413,6 +418,11 @@ public class WebView extends AbsoluteLayout
         public String getExtra() {
             return mExtra;
         }
+
+        public String getAction() {
+            return mAction;
+        }
+
     }
 
     /**

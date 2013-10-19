@@ -109,6 +109,7 @@ public class WebSettingsClassic extends WebSettings {
     private RenderPriority  mRenderPriority = RenderPriority.NORMAL;
     private int             mOverrideCacheMode = LOAD_DEFAULT;
     private int             mDoubleTapZoom = 100;
+    private boolean         mDoubleTapMode = true;
     private boolean         mSaveFormData = true;
     private boolean         mAutoFillEnabled = false;
     private boolean         mSavePassword = true;
@@ -678,6 +679,25 @@ public class WebSettingsClassic extends WebSettings {
     public int getDoubleTapZoom() {
         return mDoubleTapZoom;
     }
+
+    /**
+     * Set the double-tap mode
+     * @param mode false = zoom, true actions if doubletap on element
+     */
+    public void setDoubleTapMode(boolean doubleTapMode) {
+        if (mDoubleTapMode != doubleTapMode) {
+            mDoubleTapMode = doubleTapMode;
+        }
+    }
+
+    /**
+     * Get the double-tap mode
+     * @return mode false = zoom, true actions if doubletap on element
+     */
+    public boolean getDoubleTapMode() {
+        return mDoubleTapMode;
+    }
+
 
     /**
      * @see android.webkit.WebSettings#setDefaultZoom(android.webkit.WebSettingsClassic.ZoomDensity)
