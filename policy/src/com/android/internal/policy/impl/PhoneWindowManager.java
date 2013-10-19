@@ -132,7 +132,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
     static final boolean DEBUG_LAYOUT = false;
-    static final boolean DEBUG_INPUT = true;
+    static final boolean DEBUG_INPUT = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
