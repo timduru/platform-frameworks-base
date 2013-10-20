@@ -134,26 +134,47 @@ public class KatUtils {
     return (packageName.equals(getDefaultLauncherPackage(c)) || packageName.equals("com.android.systemui"));
   }
 
-  public static RunningTaskInfo getTaskBeforeTop(Context c) { return getTask(c, 1); }
-  public static RunningTaskInfo getTopTask(Context c) { return getTask(c, 0); }
+  public static RunningTaskInfo getTaskBeforeTop(Context c) { return getTask(c, 1, false); }
+  public static RunningTaskInfo getTopTask(Context c) { return getTask(c, 0, false); }
 
-  public static RunningTaskInfo getTask(Context c, int nTasksBeforeTop)
+  public static RunningTaskInfo getFirstSplitViewTaskBeforeTop(Context c) { return getTask(c, 1, true); }
+  public static RunningTaskInfo getTopSplitViewTask(Context c) { return getTask(c, 0, true); }
+  
+
+  public static RunningTaskInfo getTask(Context c, int nTasksBeforeTop, boolean splitViewTaskOnly)
   {
     if(c == null) return null; 
 
-    RunningTaskInfo topTaskPackage = null;;
+    RunningTaskInfo taskFound = null;;
     int current = nTasksBeforeTop;
     final ActivityManager am = (ActivityManager) c.getSystemService(Activity.ACTIVITY_SERVICE);
-    List <ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(5);
+    List <ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(10);
 
-    while ((topTaskPackage == null) && (current < tasks.size())) 
+    try
     {
-        String packageName = tasks.get(current).topActivity.getPackageName();
-        if (!isDefaultLauncherOrSystemUI(c, packageName))
-            topTaskPackage = tasks.get(current);
-        current++;
-    }
-    return topTaskPackage;
+	    final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+	
+	    while ((taskFound == null) && (current < tasks.size())) 
+	    {
+	    	boolean isSplitViewTask = false;
+	    	RunningTaskInfo currentTask = tasks.get(current);
+	    	if(wm != null) isSplitViewTask = wm.isTaskSplitView(currentTask.id);
+ 
+	        String packageName = currentTask.topActivity.getPackageName();
+	        if (!isDefaultLauncherOrSystemUI(c, packageName))
+	        {
+	        	if(splitViewTaskOnly)
+	        	{
+	        		if(isSplitViewTask) taskFound = currentTask;	        	
+	        	}
+	        	else
+	        		taskFound = tasks.get(current);
+	        }
+	        current++;
+	    }
+    }catch (Exception e) {}
+    
+    return taskFound;
   }
   
   public static void switchTaskToSplitView(Context c, int taskID, boolean reinit)
@@ -177,12 +198,21 @@ public class KatUtils {
       am.moveTaskToFront(task.id, ActivityManager.MOVE_TASK_WITH_HOME, null);
   }
   
-  public static void switchTopTaskToSplitView(Context c, boolean reinit)
+  public static void switchTopTaskToSplitView(Context c, boolean split)
   {
-          RunningTaskInfo topTask = getTopTask(c);
-          if(topTask == null) return;
+	  RunningTaskInfo task;
+/*      if(split)
+      {
+    	  // switch previous Split task if found too.
+    	  task = getTopSplitViewTask(c); 
+    	  if(task != null)
+    		  switchTaskToSplitView(c, task.id, split);
+      }
+*/
+      task = getTopTask(c);
+      if(task == null) return;
 
-          switchTaskToSplitView(c, topTask.id, reinit);
+      switchTaskToSplitView(c, task.id, split);
   }
   
   public static void showRecentAppsSystemUI() 
