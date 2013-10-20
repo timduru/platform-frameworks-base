@@ -140,6 +140,16 @@ public class RecentsVerticalScrollView extends ScrollView
 
             RecentsPanelView.ViewHolder holder = (RecentsPanelView.ViewHolder) view.getTag();
             final View thumbnailView = holder.thumbnailView;
+            final View splitIcon = holder.iconView;
+            OnClickListener addSplitListener = new OnClickListener() {
+                public void onClick(View v) {
+                    final View anchorView = view.findViewById(R.id.app_description);
+                    mCallback.addSplitView(view, anchorView, thumbnailView);
+                }
+            };
+            if(splitIcon != null)
+                splitIcon.setOnClickListener(addSplitListener);
+
             OnLongClickListener longClickListener = new OnLongClickListener() {
                 public boolean onLongClick(View v) {
                     final View anchorView = view.findViewById(R.id.app_description);
@@ -147,6 +157,7 @@ public class RecentsVerticalScrollView extends ScrollView
                     return true;
                 }
             };
+
             thumbnailView.setClickable(true);
             thumbnailView.setOnClickListener(launchAppListener);
             thumbnailView.setOnLongClickListener(longClickListener);
