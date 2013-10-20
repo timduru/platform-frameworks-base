@@ -27,5 +27,7 @@ public interface RecentsCallback {
     void handleOnClick(View selectedView);
     void handleSwipe(View selectedView);
     void handleLongPress(View selectedView, View anchorView, View thumbnailView);
+    void addSplitView( final View selectedView, final View anchorView, final View thumbnailView);
+
     void dismiss();
 }

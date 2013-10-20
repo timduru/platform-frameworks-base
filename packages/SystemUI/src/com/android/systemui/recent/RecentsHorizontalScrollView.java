@@ -142,6 +142,17 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                     return true;
                 }
             };
+
+            final View splitIcon = holder.iconView;
+            OnClickListener addSplitListener = new OnClickListener() {
+                public void onClick(View v) {
+                    final View anchorView = view.findViewById(R.id.app_description);
+                    mCallback.addSplitView(view, anchorView, thumbnailView);
+                }
+            };
+            if(splitIcon != null)
+                splitIcon.setOnClickListener(addSplitListener);
+
             thumbnailView.setClickable(true);
             thumbnailView.setOnClickListener(launchAppListener);
             thumbnailView.setOnLongClickListener(longClickListener);

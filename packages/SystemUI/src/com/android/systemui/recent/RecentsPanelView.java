@@ -841,27 +841,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
-    public void handleLongPress(
-            final View selectedView, final View anchorView, final View thumbnailView) {
-        thumbnailView.setSelected(true);
-        final PopupMenu popup =
-            new PopupMenu(mContext, anchorView == null ? selectedView : anchorView);
-        mPopup = popup;
-        popup.getMenuInflater().inflate(R.menu.recent_popup_menu, popup.getMenu());
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.recent_remove_item) {
-                    mRecentsContainer.removeViewInLayout(selectedView);
-                } else if (item.getItemId() == R.id.recent_inspect_item) {
-                    ViewHolder viewHolder = (ViewHolder) selectedView.getTag();
-                    if (viewHolder != null) {
-                        final TaskDescription ad = viewHolder.taskDescription;
-                        startApplicationDetailsActivity(ad.packageName);
-                        show(false);
-                    } else {
-                        throw new IllegalStateException("Oops, no tag on view " + selectedView);
-                    }
-                } else if (item.getItemId() == R.id.recent_add_split_view) {
+    public void addSplitView( final View selectedView, final View anchorView, final View thumbnailView) {
+
                     // Either start a new activity in split view, or move the current task
                     // to front, but resized
                     ViewHolder holder = (ViewHolder)selectedView.getTag();
@@ -935,10 +916,35 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                             }
                         }
 
-                        
+
                     } else {
                         throw new IllegalStateException("Oops, no tag on view " + selectedView);
                     }
+
+    }
+
+    public void handleLongPress(
+            final View selectedView, final View anchorView, final View thumbnailView) {
+        thumbnailView.setSelected(true);
+        final PopupMenu popup =
+            new PopupMenu(mContext, anchorView == null ? selectedView : anchorView);
+        mPopup = popup;
+        popup.getMenuInflater().inflate(R.menu.recent_popup_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.recent_remove_item) {
+                    mRecentsContainer.removeViewInLayout(selectedView);
+                } else if (item.getItemId() == R.id.recent_inspect_item) {
+                    ViewHolder viewHolder = (ViewHolder) selectedView.getTag();
+                    if (viewHolder != null) {
+                        final TaskDescription ad = viewHolder.taskDescription;
+                        startApplicationDetailsActivity(ad.packageName);
+                        show(false);
+                    } else {
+                        throw new IllegalStateException("Oops, no tag on view " + selectedView);
+                    }
+                } else if (item.getItemId() == R.id.recent_add_split_view) {
+                      addSplitView(selectedView, anchorView, thumbnailView);
                 } else {
                     return false;
                 }
