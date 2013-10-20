@@ -78,6 +78,9 @@ public final class KKC {
 	    public static final String SYSTEMUI_TASK_SCREENOFF = "screenoff";
 	    public static final String SYSTEMUI_TASK_KILL_PROCESS = "killcurrent";
 	    public static final String SYSTEMUI_TASK_ASSIST = "assist";
+	    public static final String SPLITVIEW_AUTO = "splitview_auto";
+	    public static final String SPLITVIEW_FULLSCREEN = "splitview_fullscreen";
+	    	    
 //	    public static final String SYSTEMUI_TASK_POWER_MENU = "powermenu";
   }
 }

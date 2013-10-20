@@ -8,16 +8,23 @@ import java.util.regex.Pattern;
 import java.util.Map.Entry;
 
 
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.util.Log;
 import android.os.SystemProperties;
+import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
 
 public class KatUtils {
     public static String[] HDMIModes = {"center", "crop", "scale"};
@@ -107,4 +114,60 @@ public class KatUtils {
 	  return info;
   }
   
+  public static String getDefaultLauncherPackage(Context c)
+  {
+        String defaultHomePackage = "com.android.launcher";
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+
+        final ResolveInfo res = c.getPackageManager().resolveActivity(intent, 0);
+        if (res.activityInfo != null && !res.activityInfo.packageName.equals("android")) {
+            defaultHomePackage = res.activityInfo.packageName;
+        }
+        return defaultHomePackage;
+  }
+
+  public static boolean isDefaultLauncherOrSystemUI(Context c, String packageName)
+  {
+    return (packageName.equals(getDefaultLauncherPackage(c)) || packageName.equals("com.android.systemui"));
+  }
+
+  public static RunningTaskInfo getTopTask(Context c)
+  {
+    if(c == null) return null; 
+
+    RunningTaskInfo topTaskPackage = null;;
+    int current = 0;
+    final ActivityManager am = (ActivityManager) c.getSystemService(Activity.ACTIVITY_SERVICE);
+    List <ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(5);
+
+    while ((topTaskPackage == null) && (current < tasks.size())) 
+    {
+        String packageName = tasks.get(current).topActivity.getPackageName();
+        if (!isDefaultLauncherOrSystemUI(c, packageName))
+            topTaskPackage = tasks.get(current);
+        current++;
+    }
+    return topTaskPackage;
+  }
+  
+  public static void switchTaskToSplitView(Context c, int taskID, boolean reinit)
+  {
+	  try
+	  {
+		  final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+	      final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+	      wm.setTaskSplitView(taskID, reinit);
+	      am.moveTaskToFront(taskID, ActivityManager.MOVE_TASK_WITH_HOME, null);
+	  }
+	  catch(Exception e) {}
+  }
+  
+  public static void switchTopTaskToSplitView(Context c, boolean reinit)
+  {
+	  RunningTaskInfo topTask = getTopTask(c);
+	  if(topTask == null) return;
+	  
+	  switchTaskToSplitView(c, topTask.id, reinit);
+  }
 }

@@ -112,11 +112,15 @@ public class ActionHandler {
         if (action.equals(KKC.A.SYSTEMUI_TASK_KILL_PROCESS))
         	killProcess();
         else if (action.equals(KKC.A.SYSTEMUI_TASK_SCREENSHOT))
-        	takeScreenshot();
+        	takeScreenshot();        
         else if (action.equals(KKC.A.SYSTEMUI_TASK_SCREENOFF))
         	screenOff();
         else if (action.equals(KKC.A.SYSTEMUI_TASK_ASSIST))
         	startAssistActivity();
+        else if(action.equals(KKC.A.SPLITVIEW_AUTO))
+        	KatUtils.switchTopTaskToSplitView(mContext, true);
+        else if(action.equals(KKC.A.SPLITVIEW_FULLSCREEN))
+        	KatUtils.switchTopTaskToSplitView(mContext, false);
 //        else if (action.equals(KKC.A.SYSTEMUI_TASK_POWER_MENU))
 //        	showPowerMenu();
         else if (action.startsWith("app:"))
