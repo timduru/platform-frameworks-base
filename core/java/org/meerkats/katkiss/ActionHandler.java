@@ -117,6 +117,10 @@ public class ActionHandler {
         	screenOff();
         else if (action.equals(KKC.A.SYSTEMUI_TASK_ASSIST))
         	startAssistActivity();
+        else if(action.equals(KKC.A.SYSTEMUI_RECENT))
+        	KatUtils.showRecentAppsSystemUI();
+        else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
+        	KatUtils.switchToPreviousTask(mContext);
         else if(action.equals(KKC.A.SPLITVIEW_AUTO))
         	KatUtils.switchTopTaskToSplitView(mContext, true);
         else if(action.equals(KKC.A.SPLITVIEW_FULLSCREEN))

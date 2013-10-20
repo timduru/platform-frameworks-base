@@ -22,9 +22,11 @@ import android.graphics.drawable.Drawable;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.util.Log;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
+import com.android.internal.statusbar.IStatusBarService;
 
 public class KatUtils {
     public static String[] HDMIModes = {"center", "crop", "scale"};
@@ -132,12 +134,15 @@ public class KatUtils {
     return (packageName.equals(getDefaultLauncherPackage(c)) || packageName.equals("com.android.systemui"));
   }
 
-  public static RunningTaskInfo getTopTask(Context c)
+  public static RunningTaskInfo getTaskBeforeTop(Context c) { return getTask(c, 1); }
+  public static RunningTaskInfo getTopTask(Context c) { return getTask(c, 0); }
+
+  public static RunningTaskInfo getTask(Context c, int nTasksBeforeTop)
   {
     if(c == null) return null; 
 
     RunningTaskInfo topTaskPackage = null;;
-    int current = 0;
+    int current = nTasksBeforeTop;
     final ActivityManager am = (ActivityManager) c.getSystemService(Activity.ACTIVITY_SERVICE);
     List <ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(5);
 
@@ -155,7 +160,7 @@ public class KatUtils {
   {
 	  try
 	  {
-		  final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+	  	final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
 	      final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
 	      wm.setTaskSplitView(taskID, reinit);
 	      am.moveTaskToFront(taskID, ActivityManager.MOVE_TASK_WITH_HOME, null);
@@ -163,11 +168,28 @@ public class KatUtils {
 	  catch(Exception e) {}
   }
   
+  public static void switchToPreviousTask(Context c)
+  {
+	  RunningTaskInfo task = getTaskBeforeTop(c);
+	  if(task == null) return;
+	  
+      final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+      am.moveTaskToFront(task.id, ActivityManager.MOVE_TASK_WITH_HOME, null);
+  }
+  
   public static void switchTopTaskToSplitView(Context c, boolean reinit)
   {
-	  RunningTaskInfo topTask = getTopTask(c);
-	  if(topTask == null) return;
-	  
-	  switchTaskToSplitView(c, topTask.id, reinit);
+          RunningTaskInfo topTask = getTopTask(c);
+          if(topTask == null) return;
+
+          switchTaskToSplitView(c, topTask.id, reinit);
   }
+  
+  public static void showRecentAppsSystemUI() 
+  {
+      try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).toggleRecentApps(); } 
+      catch (Exception e) { }
+  }
+
+
 }
