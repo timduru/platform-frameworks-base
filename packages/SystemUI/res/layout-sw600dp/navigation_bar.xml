@@ -83,6 +83,21 @@
                 android:contentDescription="@string/accessibility_recent"
                 systemui:keyConfigUri="kk_ui_recent_target_uri"
                 />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/switch_toprevious_task"
+                android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_switch_toprevious_task"
+                systemui:keyConfigUri="kk_ui_switch_toprevious_task_target_uri"
+                systemui:keyClickAction="switch_toprevious_task"
+                />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/splitview_auto"
+                android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_splitview_auto"
+                systemui:keyConfigUri="kk_ui_splitview_auto_target_uri"
+                systemui:keyClickAction="splitview_auto"
+                />
+
             <Space 
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -232,6 +247,21 @@
                 android:contentDescription="@string/accessibility_recent"
                 systemui:keyConfigUri="kk_ui_recent_target_uri"
                 />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/switch_toprevious_task"
+                android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_switch_toprevious_task"
+                systemui:keyConfigUri="kk_ui_switch_toprevious_task_target_uri"
+                systemui:keyClickAction="switch_toprevious_task"
+                />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/splitview_auto"
+                android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_splitview_auto"
+                systemui:keyConfigUri="kk_ui_splitview_auto_target_uri"
+                systemui:keyClickAction="splitview_auto"
+                />
+
             <Space 
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

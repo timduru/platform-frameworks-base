@@ -1194,6 +1194,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNavigationBarView.getBackButton().setOnLongClickListener(mLongPressBackRecentsListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeActionListener);
         updateSearchPanel();
+        refreshNewNavButtonVisibility();
     }
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
@@ -2061,6 +2062,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         | StatusBarManager.DISABLE_SEARCH)) != 0) {
             // the nav bar will take care of these
             if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state);
+            setExtraNavButtonsVisibility((state & StatusBarManager.DISABLE_RECENT) == 0);
 
             if ((state & StatusBarManager.DISABLE_RECENT) != 0) {
                 // close recents if it's visible
@@ -4365,4 +4367,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
     }
+
+    protected View getNavBarRootView() { return mNavigationBarView != null? mNavigationBarView.getCurrentView() : null; }
+
 }

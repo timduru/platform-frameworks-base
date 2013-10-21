@@ -182,4 +182,6 @@ public class TvStatusBar extends BaseStatusBar {
     @Override
     public void showScreenPinningRequest() {
     }
+    @Override
+    protected View getNavBarRootView() { return null; }
 }
