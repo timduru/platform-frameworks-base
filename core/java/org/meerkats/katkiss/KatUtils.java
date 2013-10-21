@@ -173,17 +173,27 @@ public class KatUtils {
 	        current++;
 	    }
     }catch (Exception e) {}
-Log.v("KatUtils", "getTask:"+taskFound);
+Log.v("KatUtils", "getTask:"+(taskFound!=null ? taskFound.baseActivity:null));
     
     return taskFound;
   }
-  
-  public static void switchTaskToSplitView(Context c, int taskID, int moveFlags)
+
+  public static boolean isTaskSplitView(Context c, int taskID)
   {
 	  try
 	  {
  	      final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
-              boolean split = !wm.isTaskSplitView(taskID);
+          return wm.isTaskSplitView(taskID);
+	  }
+	  catch(Exception e) {}
+	  return false;
+  }
+
+  public static void switchTaskToSplitView(Context c, int taskID, boolean split, int moveFlags)
+  {
+	  try
+	  {
+ 	      final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
 	      wm.setTaskSplitView(taskID, split);
 
 	      final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
@@ -204,7 +214,7 @@ Log.v("KatUtils", "getTask:"+taskFound);
   
   public static void switchTopTaskToSplitView(Context c)
   {
-	  RunningTaskInfo task;
+	  RunningTaskInfo topTask;
 	  RunningTaskInfo prevTask;
 /*      if(split)
       {
@@ -214,11 +224,16 @@ Log.v("KatUtils", "getTask:"+taskFound);
     		  switchTaskToSplitView(c, task.id, split);
       }
 */
-      task = getTopTask(c);
+      topTask = getTopTask(c);
+      if(topTask == null) return;
+
+      boolean isTopTaskSplitView = isTaskSplitView(c, topTask.id);
       prevTask = getTaskBeforeTop(c);
 
-      if(prevTask != null) switchTaskToSplitView(c, prevTask.id,  0);
-      if(task != null) switchTaskToSplitView(c, task.id, prevTask == null? ActivityManager.MOVE_TASK_WITH_HOME :0);
+      Log.v("KatUtils", "switchTopTaskToSplitView:topTask="+(topTask!=null ? topTask.baseActivity:null) + " prevTask="+ (prevTask!=null ? prevTask.baseActivity:null)+ " isTopTaskSplitView="+isTopTaskSplitView );
+
+      if(prevTask != null && !isTopTaskSplitView) switchTaskToSplitView(c, prevTask.id, !isTopTaskSplitView,  0);
+      if(topTask != null) switchTaskToSplitView(c, topTask.id, !isTopTaskSplitView,  (prevTask == null || isTopTaskSplitView)? ActivityManager.MOVE_TASK_WITH_HOME :0);
   }
   
   public static void showRecentAppsSystemUI() 
