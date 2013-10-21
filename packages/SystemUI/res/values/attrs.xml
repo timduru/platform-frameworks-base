@@ -24,6 +24,8 @@
         <attr name="glowBackground" format="reference" />
         <!-- used for longpress action, click action, or other info -->
         <attr name="keyConfigUri" format="string" />        
+        <!-- used for extra navbuttons that don't send a keycode-->
+        <attr name="keyClickAction" format="string" />        
     </declare-styleable>
     <declare-styleable name="ToggleSlider">
         <attr name="text" format="string" />

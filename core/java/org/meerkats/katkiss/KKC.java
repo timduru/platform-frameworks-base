@@ -81,7 +81,6 @@ public final class KKC {
 	    public static final String SYSTEMUI_RECENT = "recent";
 	    public static final String SYSTEMUI_SWITCH_TOPREVIOUS_TASK = "switch_toprevious_task";
 	    public static final String SPLITVIEW_AUTO = "splitview_auto";
-	    public static final String SPLITVIEW_FULLSCREEN = "splitview_fullscreen";
 	    	    
 //	    public static final String SYSTEMUI_TASK_POWER_MENU = "powermenu";
   }

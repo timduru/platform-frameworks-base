@@ -69,6 +69,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     boolean mCustomLongpressEnabled = false;
     boolean mIsLongPressing = false;
     String mConfigUri;
+    ActionHandler mClickActionHandler;
     CustomObserver _observer;
     CustomLongClick _customLongClick;
     
@@ -115,6 +116,8 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         }
 
         mConfigUri = a.getString(R.styleable.KeyButtonView_keyConfigUri);
+        String clickAction = a.getString(R.styleable.KeyButtonView_keyClickAction);
+        if( clickAction != null) mClickActionHandler = new ActionHandler(context, clickAction);
         
         a.recycle();
 
@@ -374,6 +377,13 @@ Log.d("CustomLongClick", mAction + this);
   {
     Log.d(TAG, "onChangeNotification:" + uri);
     if(uri.equals(Settings.System.getUriFor(mConfigUri))) updateCustomConfig();
+  }
+
+  @Override
+  public boolean performClick()
+  {
+    if(mClickActionHandler != null) mClickActionHandler.executeAllActions();
+    return super.performClick();
   }
 
 }
