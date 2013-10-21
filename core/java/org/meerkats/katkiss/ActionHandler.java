@@ -122,9 +122,7 @@ public class ActionHandler {
         else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
         	KatUtils.switchToPreviousTask(mContext);
         else if(action.equals(KKC.A.SPLITVIEW_AUTO))
-        	KatUtils.switchTopTaskToSplitView(mContext, true);
-        else if(action.equals(KKC.A.SPLITVIEW_FULLSCREEN))
-        	KatUtils.switchTopTaskToSplitView(mContext, false);
+        	KatUtils.switchTopTaskToSplitView(mContext);
 //        else if (action.equals(KKC.A.SYSTEMUI_TASK_POWER_MENU))
 //        	showPowerMenu();
         else if (action.startsWith("app:"))

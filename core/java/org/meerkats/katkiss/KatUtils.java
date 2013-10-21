@@ -173,18 +173,22 @@ public class KatUtils {
 	        current++;
 	    }
     }catch (Exception e) {}
+Log.v("KatUtils", "getTask:"+taskFound);
     
     return taskFound;
   }
   
-  public static void switchTaskToSplitView(Context c, int taskID, boolean reinit)
+  public static void switchTaskToSplitView(Context c, int taskID, int moveFlags)
   {
 	  try
 	  {
-	  	final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+ 	      final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+              boolean split = !wm.isTaskSplitView(taskID);
+	      wm.setTaskSplitView(taskID, split);
+
 	      final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
-	      wm.setTaskSplitView(taskID, reinit);
-	      am.moveTaskToFront(taskID, ActivityManager.MOVE_TASK_WITH_HOME, null);
+	      //am.moveTaskToFront(taskID, ActivityManager.MOVE_TASK_WITH_HOME, null);
+	      am.moveTaskToFront(taskID, moveFlags, null);
 	  }
 	  catch(Exception e) {}
   }
@@ -195,12 +199,13 @@ public class KatUtils {
 	  if(task == null) return;
 	  
       final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
-      am.moveTaskToFront(task.id, ActivityManager.MOVE_TASK_WITH_HOME, null);
+      am.moveTaskToFront(task.id, 0, null);
   }
   
-  public static void switchTopTaskToSplitView(Context c, boolean split)
+  public static void switchTopTaskToSplitView(Context c)
   {
 	  RunningTaskInfo task;
+	  RunningTaskInfo prevTask;
 /*      if(split)
       {
     	  // switch previous Split task if found too.
@@ -210,9 +215,10 @@ public class KatUtils {
       }
 */
       task = getTopTask(c);
-      if(task == null) return;
+      prevTask = getTaskBeforeTop(c);
 
-      switchTaskToSplitView(c, task.id, split);
+      if(prevTask != null) switchTaskToSplitView(c, prevTask.id,  0);
+      if(task != null) switchTaskToSplitView(c, task.id, prevTask == null? ActivityManager.MOVE_TASK_WITH_HOME :0);
   }
   
   public static void showRecentAppsSystemUI() 
