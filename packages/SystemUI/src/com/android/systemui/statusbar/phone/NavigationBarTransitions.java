@@ -53,7 +53,6 @@ public final class NavigationBarTransitions extends BarTransitions {
     }
 
     private void applyMode(int mode, boolean animate, boolean force) {
-
         // apply to lights out
         applyLightsOut(isLightsOut(mode), animate, force);
     }

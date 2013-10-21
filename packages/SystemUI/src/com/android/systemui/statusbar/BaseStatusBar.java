@@ -114,11 +114,14 @@ import java.util.Locale;
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import android.content.ContentResolver;
 import org.meerkats.katkiss.KKC;
+import android.net.Uri;
+import org.meerkats.katkiss.CustomObserver;
+
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
         RecentsComponent.Callbacks, ExpandableNotificationRow.ExpansionLogger,
-        NotificationData.Environment {
+        NotificationData.Environment , CustomObserver.ChangeNotification {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean MULTIUSER_DEBUG = false;
@@ -173,6 +176,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected NavigationBarView mNavigationBarView = null;
 
     protected Boolean mScreenOn;
+//KK
+    private boolean mShowBtnSwitchToPrevious, mShowBtnSplitViewAuto ;
 
     // The second field is a bit different from the first one because it only listens to screen on/
     // screen of events from Keyguard. We need this so we don't have a race condition with the
@@ -204,9 +209,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
     private NotificationColorUtil mNotificationColorUtil;
     protected ContentResolver mResolver;
-
-
     private UserManager mUserManager;
+    protected abstract View getNavBarRootView() ;
 
     // UI-specific methods
 
@@ -669,6 +673,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.registerReceiverAsUser(mAllUsersReceiver, UserHandle.ALL, allUsersFilter,
                 null, null);
         updateCurrentProfilesCache();
+
+        new CustomObserver(mContext, this);
+        refreshNewNavButtonVisibility();
     }
 
     protected void notifyUserAboutHiddenNotifications() {
@@ -789,6 +796,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             mLocale = locale;
             mLayoutDirection = ld;
             refreshLayout(ld);
+
+            refreshNewNavButtonVisibility();
         }
     }
 
@@ -2133,6 +2142,32 @@ public abstract class BaseStatusBar extends SystemUI implements
         return contextForUser.getPackageManager();
     }
 
+    public void refreshNewNavButtonVisibility() {
+        mShowBtnSwitchToPrevious = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS, 1) == 1;
+        mShowBtnSplitViewAuto = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO, 1) == 1;
+
+        setNavButtonVisibility(R.id.switch_toprevious_task, mShowBtnSwitchToPrevious);
+        setNavButtonVisibility(R.id.splitview_auto, mShowBtnSplitViewAuto);
+    }
+
+
+    public void setExtraNavButtonsVisibility(boolean visible) 
+    {
+        setNavButtonVisibility(R.id.switch_toprevious_task, mShowBtnSwitchToPrevious && visible);
+        setNavButtonVisibility(R.id.splitview_auto, mShowBtnSplitViewAuto && visible);
+    }
+
+    public void setNavButtonVisibility(int id, boolean visible)
+    {
+	    View navBarRootView = getNavBarRootView();
+        if(navBarRootView == null) return;
+
+        View buttonView = navBarRootView.findViewById(id);
+	    if(buttonView == null) return;
+
+        buttonView.setVisibility(visible? View.VISIBLE : View.GONE);
+    }
+
     @Override
     public void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
         try {
@@ -2179,5 +2214,24 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (mAssistManager != null) {
             mAssistManager.startAssist(args);
         }
+    }
+    // CustomObserver ChangeNotifications
+    @Override
+    public ArrayList<Uri> getObservedUris()
+    {
+      ArrayList<Uri> uris = new  ArrayList<Uri>();
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO));
+      return uris;
+    }
+
+    @Override
+    public void onChangeNotification(Uri uri)
+    {
+      Log.d(TAG, "onChangeNotification:" + uri);
+      if(uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS))
+        || uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO))
+        )
+        refreshNewNavButtonVisibility();
     }
 }
