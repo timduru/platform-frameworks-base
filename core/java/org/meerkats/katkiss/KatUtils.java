@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.Map.Entry;
+import android.os.AsyncTask;
+
 
 
 import android.app.Activity;
@@ -31,6 +33,8 @@ import com.android.internal.statusbar.IStatusBarService;
 public class KatUtils {
     public static String[] HDMIModes = {"center", "crop", "scale"};
     public static final boolean DEBUG = true;
+    public static float[] previousAnimationScales;
+
 
     static class AppInfo
     {
@@ -92,6 +96,24 @@ public class KatUtils {
         Settings.System.putString(c.getContentResolver(), KKC.S.KEYS_OVERRIDE, conf);
   }
 
+  public synchronized static float[] getAnimationScales()
+  {
+	final float[] anims = new float[3];
+	final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+	for(int i=0; i<anims.length; i++)
+		try {anims[i] = wm.getAnimationScale(i);} catch(Exception e) {}
+	return anims;
+  }
+
+  public synchronized static void setAnimationScales(final float[] anims)
+  {
+ 
+	final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+    for(int i=0; i<anims.length; i++)
+   		 	try {wm.setAnimationScale(i, anims[i]);} catch(Exception e) {Log.e("KatUtils", e.toString());}
+
+  }
+  
   public static AppInfo getAppInfoFromUri(Context c, String uri) 
   {
 	  final AppInfo info = new AppInfo();
@@ -189,7 +211,17 @@ Log.v("KatUtils", "getTask:"+(taskFound!=null ? taskFound.baseActivity:null));
 	  return false;
   }
 
-  public static void switchTaskToSplitView(Context c, int taskID, boolean split, int moveFlags)
+  public synchronized static void switchTaskToSplitView(final Context c, final int taskID, final boolean split, final int moveFlags,final int delayMS)
+  {
+        AsyncTask.execute(new Runnable() {
+                public void run()
+                {
+                        if(delayMS >0) try{Thread.sleep(delayMS);} catch(Exception e) {}
+                        switchTaskToSplitView(c,taskID, split, moveFlags);
+                } });
+  }
+
+  public synchronized static void switchTaskToSplitView(Context c, int taskID, boolean split, int moveFlags)
   {
 	  try
 	  {
@@ -203,44 +235,64 @@ Log.v("KatUtils", "getTask:"+(taskFound!=null ? taskFound.baseActivity:null));
 	  catch(Exception e) {}
   }
   
-  public static void switchToPreviousTask(Context c)
+  public synchronized static void switchToPreviousTask(final Context c, final int delayMS)
+  { 
+	AsyncTask.execute(new Runnable() {
+		public void run() 
+		{
+			if(delayMS >0) try{Thread.sleep(delayMS);} catch(Exception e) {}
+                        switchToPreviousTask(c);
+		} });
+  }
+
+  public synchronized static void switchToPreviousTask(Context c)
   {
-	  RunningTaskInfo task = getTaskBeforeTop(c);
-	  if(task == null) return;
+	RunningTaskInfo task = getTaskBeforeTop(c);
+	if(task == null) return;
 	  
-      final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
-      am.moveTaskToFront(task.id, 0, null);
+	final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+	am.moveTaskToFront(task.id, 0, null);
   }
   
-  public static void switchTopTaskToSplitView(Context c)
+  public synchronized static void switchTopTaskToSplitView(final Context c)
   {
-	  RunningTaskInfo topTask;
-	  RunningTaskInfo prevTask;
-/*      if(split)
-      {
-    	  // switch previous Split task if found too.
-    	  task = getTopSplitViewTask(c); 
-    	  if(task != null)
-    		  switchTaskToSplitView(c, task.id, split);
-      }
-*/
-      topTask = getTopTask(c);
-      if(topTask == null) return;
+    RunningTaskInfo topTask;
+    RunningTaskInfo prevTask;
+    if(previousAnimationScales == null) previousAnimationScales = getAnimationScales();
+    final float[] noAnims = {0,0,0};
+    Log.v("KatUtils", "previousAnimationScales="+previousAnimationScales);
+    setAnimationScales(noAnims);
 
-      boolean isTopTaskSplitView = isTaskSplitView(c, topTask.id);
-      prevTask = getTaskBeforeTop(c);
+    topTask = getTopTask(c);
+    if(topTask == null) return;
 
-      Log.v("KatUtils", "switchTopTaskToSplitView:topTask="+(topTask!=null ? topTask.baseActivity:null) + " prevTask="+ (prevTask!=null ? prevTask.baseActivity:null)+ " isTopTaskSplitView="+isTopTaskSplitView );
+    boolean isTopTaskSplitView = isTaskSplitView(c, topTask.id);
+    prevTask = getTaskBeforeTop(c);
 
-      if(prevTask != null && !isTopTaskSplitView) switchTaskToSplitView(c, prevTask.id, !isTopTaskSplitView,  0);
-      if(topTask != null) switchTaskToSplitView(c, topTask.id, !isTopTaskSplitView,  (prevTask == null || isTopTaskSplitView)? ActivityManager.MOVE_TASK_WITH_HOME :0);
+    Log.v("KatUtils", "switchTopTaskToSplitView:topTask="+(topTask!=null ? topTask.baseActivity:null) + " prevTask="+ (prevTask!=null ? prevTask.baseActivity:null)+ " isTopTaskSplitView="+isTopTaskSplitView );
+
+    if(prevTask != null && !isTopTaskSplitView) switchTaskToSplitView(c, prevTask.id, !isTopTaskSplitView,  0);
+    if(topTask != null) switchTaskToSplitView(c, topTask.id, !isTopTaskSplitView,  (prevTask == null || isTopTaskSplitView)? ActivityManager.MOVE_TASK_WITH_HOME :0);
+
+    // Workaround to force relayout of apps that don't layout cleanly after switching    
+    AsyncTask.execute(new Runnable() {
+        public void run()
+        {
+        	try{Thread.sleep(200);} catch(Exception e) {}
+            switchToPreviousTask(c);
+        	try{Thread.sleep(100);} catch(Exception e) {}
+        	switchToPreviousTask(c);
+        	try{Thread.sleep(1000);} catch(Exception e) {}
+            setAnimationScales(previousAnimationScales);
+        } });
   }
   
-  public static void showRecentAppsSystemUI() 
+  public synchronized static void showRecentAppsSystemUI() 
   {
       try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).toggleRecentApps(); } 
       catch (Exception e) { }
   }
+
 
 
 }
