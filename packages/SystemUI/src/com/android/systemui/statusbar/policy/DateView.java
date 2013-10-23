@@ -81,6 +81,7 @@ public class DateView extends TextView {
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
+        updateClock();
         //setUpdates();
     }
 
@@ -91,6 +92,7 @@ public class DateView extends TextView {
     }
 
     protected void updateClock() {
+        if(!isVisible()) return;
         final String dateFormat = getContext().getString(R.string.system_ui_date_pattern);
         final Locale l = Locale.getDefault();
         String fmt = ICU.getBestDateTimePattern(dateFormat, l.toString());
