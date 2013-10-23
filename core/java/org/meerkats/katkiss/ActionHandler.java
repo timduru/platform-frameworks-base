@@ -118,11 +118,11 @@ public class ActionHandler {
         else if (action.equals(KKC.A.SYSTEMUI_TASK_ASSIST))
         	startAssistActivity();
         else if(action.equals(KKC.A.SYSTEMUI_RECENT))
-        	KatUtils.showRecentAppsSystemUI();
+        	WMController.showRecentAppsSystemUI();
         else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
-        	KatUtils.switchToPreviousTask(mContext);
+        	new WMController(mContext).switchToPreviousTask();
         else if(action.equals(KKC.A.SPLITVIEW_AUTO))
-        	KatUtils.switchTopTaskToSplitView(mContext);
+        	new WMController(mContext).switchTopTaskToSplitView();
 //        else if (action.equals(KKC.A.SYSTEMUI_TASK_POWER_MENU))
 //        	showPowerMenu();
         else if (action.startsWith("app:"))
