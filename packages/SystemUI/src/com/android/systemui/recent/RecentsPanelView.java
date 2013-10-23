@@ -147,6 +147,9 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         ImageView thumbnailViewImage;
         Bitmap thumbnailViewImageBitmap;
         ImageView iconView;
+        ImageView splitIcon;
+        ImageView splitIcon1;
+        ImageView splitIcon2;
         TextView labelView;
         TextView descriptionView;
         View calloutLine;
@@ -187,6 +190,10 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             holder.labelView = (TextView) convertView.findViewById(R.id.app_label);
             holder.calloutLine = convertView.findViewById(R.id.recents_callout_line);
             holder.descriptionView = (TextView) convertView.findViewById(R.id.app_description);
+
+            holder.splitIcon = (ImageView) convertView.findViewById(R.id.add_splitview);
+            holder.splitIcon1 = (ImageView) convertView.findViewById(R.id.add_splitview1);
+            holder.splitIcon2 = (ImageView) convertView.findViewById(R.id.add_splitview2);
 
             convertView.setTag(holder);
             return convertView;
@@ -841,7 +848,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
-    public void addSplitView( final View selectedView, final View anchorView, final View thumbnailView) {
+    public void addSplitView( final View selectedView, final View anchorView, final View thumbnailView , int slot) {
 
                     // Either start a new activity in split view, or move the current task
                     // to front, but resized
@@ -880,6 +887,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                                 // This is not the home activity, so split it
                                 try {
                                     wm.setTaskSplitView(taskInfo.persistentId, true);
+                                    wm.setTaskLocation(taskInfo.persistentId, slot);
                                 } catch (RemoteException e) {
                                     Log.e(TAG, "Could not set previous task to split view", e);
                                 }
@@ -895,6 +903,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                             // set its state here.
                             try {
                                 wm.setTaskSplitView(ad.taskId, true);
+                                wm.setTaskLocation(ad.taskId, slot);
                             } catch (RemoteException e) {
                                 Log.e(TAG, "Could not setTaskSplitView", e);
                             }
@@ -944,7 +953,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                         throw new IllegalStateException("Oops, no tag on view " + selectedView);
                     }
                 } else if (item.getItemId() == R.id.recent_add_split_view) {
-                      addSplitView(selectedView, anchorView, thumbnailView);
+                      addSplitView(selectedView, anchorView, thumbnailView, -1);
                 } else {
                     return false;
                 }

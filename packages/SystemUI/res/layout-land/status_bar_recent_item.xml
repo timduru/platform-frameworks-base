@@ -51,6 +51,34 @@
             />
         </FrameLayout>
 
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/app_thumbnail"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingLeft="-30dp" >
+
+            <ImageView
+                android:id="@+id/add_splitview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_splitview_auto" />
+
+            <ImageView
+                android:id="@+id/add_splitview1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_splitview_1" />
+
+            <ImageView
+                android:id="@+id/add_splitview2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_splitview_2" />
+        </LinearLayout>
+
         <ImageView android:id="@+id/app_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

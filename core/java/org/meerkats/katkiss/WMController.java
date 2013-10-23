@@ -144,25 +144,23 @@ public class WMController
 		return false;
 	}
 
-	private synchronized void switchTaskToSplitView(final int taskID, final boolean split, final int moveFlags,final int delayMS)
-	{
-		AsyncTask.execute(new Runnable() {
-			public void run()
-			{
-				if(delayMS >0) try{Thread.sleep(delayMS);} catch(Exception e) {}
-				switchTaskToSplitView(taskID, split, moveFlags);
-			} });
-	}
-
 	private void setWMTaskFlagSplitView(int taskID, boolean split)
+	{ setWMTaskFlagSplitView(taskID, split, -1); }
+	
+	private void setWMTaskFlagSplitView(int taskID, boolean split, int slot)
 	{
-		try { 	_wm.setTaskSplitView(taskID, split); }
+		try 
+		{
+			_wm.setTaskSplitView(taskID, split); 
+			if(split) _wm.setTaskLocation(taskID, slot);
+		}
 		catch(Exception e) {}
 		
 	}
-	public synchronized void switchTaskToSplitView(int taskID, boolean split, int moveFlags)
+
+	public synchronized void switchTaskToSplitView(int taskID, boolean split, int slot, int moveFlags)
 	{
-			setWMTaskFlagSplitView(taskID, split);
+			setWMTaskFlagSplitView(taskID, split, slot);
 
 			final ActivityManager am = (ActivityManager) _c.getSystemService(Context.ACTIVITY_SERVICE);
 			//am.moveTaskToFront(taskID, ActivityManager.MOVE_TASK_WITH_HOME, null);
@@ -204,10 +202,18 @@ public class WMController
 			+ " isTopTaskSplitView="+_isTopTaskSplitView 
 			+ " isPrevTaskSplitView="+_isPrevTaskSplitView );
 	}
-	
-	public synchronized void switchTopTaskToSplitView()
+	// Auto mode
+	public synchronized void switchTopTaskToSplitView()	
+	{
+		switchTopTaskToSplitView(-1); 
+	}
+
+	public synchronized void switchTopTaskToSplitView(int slot)
 	{
 		Log.d(TAG, "switchTopTaskToSplitView++");
+		int prevSlot = -1;
+		if(slot != -1)
+			prevSlot = (slot == 0 ? 1:0);  
 
 		disableAnimationScales();
 		refreshTopAndPrevTasks();
@@ -215,10 +221,10 @@ public class WMController
 
 		if(_prevTask != null)
 		{	
-			if(_isTopTaskSplitView) setWMTaskFlagSplitView(_prevTask.id, false);
-			else switchTaskToSplitView(_prevTask.id, !_isTopTaskSplitView,  0);
+			if(_isTopTaskSplitView) setWMTaskFlagSplitView(_prevTask.id, false, prevSlot);
+			else switchTaskToSplitView(_prevTask.id, !_isTopTaskSplitView, prevSlot,  0);
 		}
-		if(_topTask != null) switchTaskToSplitView(_topTask.id, !_isTopTaskSplitView,  (_prevTask == null || _isTopTaskSplitView)? ActivityManager.MOVE_TASK_WITH_HOME :0);
+		if(_topTask != null) switchTaskToSplitView(_topTask.id, !_isTopTaskSplitView, slot,   (_prevTask == null || _isTopTaskSplitView)? ActivityManager.MOVE_TASK_WITH_HOME :0);
 
 		forceLayout2LastTasks();
 		Log.d(TAG, "switchTopTaskToSplitView--");

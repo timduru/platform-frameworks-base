@@ -10624,6 +10624,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+
+    public void setTaskLocation(int taskId, int slot ) {
+	if(slot >=0 && slot < mSplitViewTasks.length) {
+            mTaskLocation.put(taskId, slot);
+	    mNextSplitViewLocation = (slot==0 ? 1:0);
+        }
+    }
+
     /**
      * Sets whether or not a task should be in split view or not. The
      * update only occurs when activities performs a resume or restart

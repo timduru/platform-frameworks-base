@@ -64,6 +64,34 @@
                 android:layout_height="@dimen/status_bar_recents_thumbnail_height"
             />
         </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/app_thumbnail"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingLeft="-30dp" >
+
+            <ImageView
+                android:id="@+id/add_splitview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_splitview_auto" />
+
+            <ImageView
+                android:id="@+id/add_splitview1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_splitview_1" />
+
+            <ImageView
+                android:id="@+id/add_splitview2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_splitview_2" />
+        </LinearLayout>
+
         <View android:id="@+id/recents_callout_line"
             android:layout_width="@dimen/status_bar_recents_app_label_width"
             android:layout_height="1dip"

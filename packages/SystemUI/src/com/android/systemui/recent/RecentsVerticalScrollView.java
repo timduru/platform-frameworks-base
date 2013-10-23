@@ -140,15 +140,25 @@ public class RecentsVerticalScrollView extends ScrollView
 
             RecentsPanelView.ViewHolder holder = (RecentsPanelView.ViewHolder) view.getTag();
             final View thumbnailView = holder.thumbnailView;
-            final View splitIcon = holder.iconView;
+
             OnClickListener addSplitListener = new OnClickListener() {
                 public void onClick(View v) {
                     final View anchorView = view.findViewById(R.id.app_description);
-                    mCallback.addSplitView(view, anchorView, thumbnailView);
+                    int slot = -1; // auto
+                    if(v.getId() == R.id.add_splitview1) slot = 0;
+                    if(v.getId() == R.id.add_splitview2) slot = 1;
+
+                    mCallback.addSplitView(view, anchorView, thumbnailView, slot);
                 }
             };
-            if(splitIcon != null)
-                splitIcon.setOnClickListener(addSplitListener);
+            if(holder.iconView != null) // app icon
+                holder.iconView.setOnClickListener(addSplitListener);
+            if(holder.splitIcon != null) // app icon
+                holder.splitIcon.setOnClickListener(addSplitListener);
+            if(holder.splitIcon1 != null) // app icon
+                holder.splitIcon1.setOnClickListener(addSplitListener);
+            if(holder.splitIcon2 != null) // app icon
+                holder.splitIcon2.setOnClickListener(addSplitListener);
 
             OnLongClickListener longClickListener = new OnLongClickListener() {
                 public boolean onLongClick(View v) {

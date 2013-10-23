@@ -122,7 +122,11 @@ public class ActionHandler {
         else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
         	new WMController(mContext).switchToPreviousTask();
         else if(action.equals(KKC.A.SPLITVIEW_AUTO))
-        	new WMController(mContext).switchTopTaskToSplitView();
+        	new WMController(mContext).switchTopTaskToSplitView(-1);
+        else if(action.equals(KKC.A.SPLITVIEW_1))
+        	new WMController(mContext).switchTopTaskToSplitView(0);
+        else if(action.equals(KKC.A.SPLITVIEW_2))
+        	new WMController(mContext).switchTopTaskToSplitView(1);
 //        else if (action.equals(KKC.A.SYSTEMUI_TASK_POWER_MENU))
 //        	showPowerMenu();
         else if (action.startsWith("app:"))
