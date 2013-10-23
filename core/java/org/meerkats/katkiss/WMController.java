@@ -2,6 +2,7 @@ package org.meerkats.katkiss;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -32,6 +33,7 @@ public class WMController
 	public static final boolean DEBUG = true;
 	private static final String TAG = "WMController";
 	private static float[] _previousAnimationScales;
+	private static Date _previousAnimationScalesTime = new Date();
 	private IWindowManager _wm;
 	Context _c;
 	RunningTaskInfo _topTask;
@@ -60,7 +62,15 @@ public class WMController
 			try {_wm.setAnimationScale(i, anims[i]);} catch(Exception e) {Log.e(TAG, e.toString());}
 	}
 
-	public synchronized void saveAnimationScales()	{ if(_previousAnimationScales == null) _previousAnimationScales = getAnimationScales();	}
+	public synchronized void saveAnimationScales()	
+	{
+		// MAJ only if not asked for saving shortly before 
+		if(_previousAnimationScales == null || new Date().getTime() - _previousAnimationScalesTime.getTime() > 3000 )
+		{
+			_previousAnimationScales = getAnimationScales();
+		}
+		_previousAnimationScalesTime = new Date();
+	}
 	public synchronized void restoreAnimationScales()	{ setAnimationScales(_previousAnimationScales);	}
 	public synchronized void disableAnimationScales()	
 	{ 
@@ -171,11 +181,15 @@ public class WMController
 
 	public synchronized void switchToPreviousTask()
 	{
+//		disableAnimationScales();
+		
 		RunningTaskInfo task = getTaskBeforeTop();
 		if(task == null) return;
 
 		final ActivityManager am = (ActivityManager) _c.getSystemService(Context.ACTIVITY_SERVICE);
 		am.moveTaskToFront(task.id, 0, null);
+		
+//		restoreAnimationScales();		
 	}
 
 	public synchronized void refreshTopAndPrevTasks()
