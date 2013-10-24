@@ -10625,6 +10625,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
 
+    public void setNextLocation(int slot ) {
+        if(slot >=0 && slot < mSplitViewTasks.length) 
+            mNextSplitViewLocation = slot;
+    }
+
     public void setTaskLocation(int taskId, int slot ) {
 	if(slot >=0 && slot < mSplitViewTasks.length) {
             mTaskLocation.put(taskId, slot);

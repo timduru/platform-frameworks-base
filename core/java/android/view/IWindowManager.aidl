@@ -293,7 +293,8 @@ interface IWindowManager
     void setTaskChildSplit(IBinder token, boolean split);
     Rect getSplitViewRect(int taskId, boolean resetLocation);
     void notifyActivityTouched(IBinder token, boolean force);
-    void setTaskLocation(int taskId, int slot ); 
+    void setTaskLocation(int taskId, int slot); 
+    void setNextLocation(int slot); 
 
     /** SPLIT VIEW END **/
 }

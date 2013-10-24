@@ -911,6 +911,10 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                         } else {
                             // The app has been killed (we have no taskId for it), so we start
                             // a new one with the SPLIT_VIEW flag
+
+                            try { wm.setNextLocation(slot); } 
+                            catch (RemoteException e) { Log.e(TAG, "Could not setNextLocation", e); }
+
                             Intent intent = ad.intent;
                             intent.addFlags(Intent.FLAG_ACTIVITY_SPLIT_VIEW
                                 | Intent.FLAG_ACTIVITY_NEW_TASK);
