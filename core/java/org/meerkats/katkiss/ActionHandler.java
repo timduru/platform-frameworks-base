@@ -127,6 +127,10 @@ public class ActionHandler {
         	new WMController(mContext).switchTopTaskToSplitView(0);
         else if(action.equals(KKC.A.SPLITVIEW_2))
         	new WMController(mContext).switchTopTaskToSplitView(1);
+        else if(action.equals(KKC.A.EXPANDED_DESKTOP))
+        	KatUtils.expandedDesktopSwitch(mContext, 0);
+        else if(action.equals(KKC.A.EXPANDED_DESKTOP_KEEPSTATUSBAR))
+        	KatUtils.expandedDesktopSwitch(mContext, 1);
 //        else if (action.equals(KKC.A.SYSTEMUI_TASK_POWER_MENU))
 //        	showPowerMenu();
         else if (action.startsWith("app:"))

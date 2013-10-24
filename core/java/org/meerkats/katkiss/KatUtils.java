@@ -119,4 +119,13 @@ public class KatUtils {
 	  
 	  return info;
   }
+
+  public static void expandedDesktopSwitch(Context c, int style /* 0 both bars, 1: keep navbar*/)
+  {
+        boolean  currentlyExpanded = Settings.System.getInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE,  0) == 1;
+
+        Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, currentlyExpanded ? 0 : 1);
+        Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, style);
+  }
+
 }
