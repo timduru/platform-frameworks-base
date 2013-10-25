@@ -956,8 +956,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     } else {
                         throw new IllegalStateException("Oops, no tag on view " + selectedView);
                     }
-                } else if (item.getItemId() == R.id.recent_add_split_view) {
-                      addSplitView(selectedView, anchorView, thumbnailView, -1);
                 } else {
                     return false;
                 }
