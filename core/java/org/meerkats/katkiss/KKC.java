@@ -85,6 +85,8 @@ public final class KKC {
 	    public static final String SPLITVIEW_2 = "splitview_2";
 	    public static final String EXPANDED_DESKTOP = "expanded_desktop";
 	    public static final String EXPANDED_DESKTOP_KEEPSTATUSBAR = "expanded_desktop_keepstatusbar";
+	    public static final String SHOW_NOTIFICATIONS_PANEL = "show_notifications_panel";
+	    public static final String SHOW_SETTINGS_PANEL = "show_settings_panel";
 	    	    
 //	    public static final String SYSTEMUI_TASK_POWER_MENU = "powermenu";
   }

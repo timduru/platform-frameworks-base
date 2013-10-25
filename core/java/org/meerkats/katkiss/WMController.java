@@ -250,4 +250,16 @@ public class WMController
 		try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).toggleRecentApps(); } 
 		catch (Exception e) { }
 	}
+
+	public synchronized static void showNotificationsPanel() 
+	{
+		try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).expandNotificationsPanel(); } 
+		catch (Exception e) { }
+	}
+
+	public synchronized static void showSettingsPanel() 
+	{
+		try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).expandSettingsPanel(); } 
+		catch (Exception e) { }
+	}
 }
