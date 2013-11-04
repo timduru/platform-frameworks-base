@@ -94,7 +94,6 @@ public class BatteryController extends BroadcastReceiver implements CustomObserv
             Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE), false, mPercentObserver);
     }
 
-<<<<<<< HEAD
     private void unregisterObservers() {
         mContext.getContentResolver().unregisterContentObserver(mPercentObserver);
     }

@@ -1161,7 +1161,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     
     public void refreshClockVisibility() {
      	  showClock( Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_CLOCK_TIME, 1) == 1 );
-    	  showClockDate( Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_CLOCK_DATE, 0) == 1 );
+    	  //showClockDate( Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_CLOCK_DATE, 0) == 1 );
     }
 
     public void showClockDate(boolean show) {
