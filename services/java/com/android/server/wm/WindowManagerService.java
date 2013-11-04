@@ -9863,9 +9863,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Dispatch to this window if it is wants key events.
             if (win.canReceiveKeys()) {
-                if (thisApp != null) {
-                    if (mIsTokenSplitted.containsKey(thisApp.token) && mIsTokenSplitted.get(thisApp.token)) {
-                        if ((mTaskTouched != null && mTaskTouched.equals(thisApp.token)) || mTaskTouched == null) {
+                if (wtoken != null) {
+                    if (mIsTokenSplitted.containsKey(wtoken) && mIsTokenSplitted.get(wtoken)) {
+                        if ((mTaskTouched != null && mTaskTouched.equals(wtoken)) || mTaskTouched == null) {
                             if (DEBUG_FOCUS) Slog.v(
                                 TAG, "Found focus @ " + i + " = " + win);
                             return win;
@@ -10872,7 +10872,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-<<<<<<< HEAD
     /** SPLIT VIEW **/
 
     private int mSplitViewTasks[];
@@ -11055,10 +11054,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /** END SPLIT VIEW **/
-=======
     @Override
     public Object getWindowManagerLock() {
         return mWindowMap;
     }
->>>>>>> android-4.4_r1
 }

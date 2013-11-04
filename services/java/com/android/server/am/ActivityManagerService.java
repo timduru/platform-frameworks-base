@@ -7107,15 +7107,17 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public IBinder getActivityForTask(int task, boolean onlyRoot) {
         synchronized(this) {
-            return getActivityForTaskLocked(task, onlyRoot);
+            return null;/*getActivityForTaskLocked(task, onlyRoot);*/
         }
     }
-
+//FIXME Tim
+    /*
     IBinder getActivityForTaskLocked(int task, boolean onlyRoot) {
-        final int N = mMainStack.mHistory.size();
+    	ActivityStack mainStack  = mStackSupervisor.getStack(ActivityStackSupervisor.HOME_STACK_ID);
+        final int N = mainStack..mHistory.size();
         TaskRecord lastTask = null;
         for (int i=0; i<N; i++) {
-            ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
+            ActivityRecord r = (ActivityRecord)mainStack.mHistory.get(i);
             if (r.task.taskId == task) {
                 if (!onlyRoot || lastTask != r.task) {
                     return r.appToken;
@@ -7127,7 +7129,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         return null;
     }
-
+*/
     // =========================================================
     // THUMBNAILS
     // =========================================================
