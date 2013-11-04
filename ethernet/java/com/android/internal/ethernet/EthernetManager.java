@@ -39,6 +39,9 @@ import com.android.internal.ethernet.IEthernetManager;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.List;
 import java.net.InetAddress;
+import android.net.SamplingDataTracker;
+import android.net.BaseNetworkStateTracker;
+
 
 /**
  * EthernetManager provides access to ethernet to system apps (such as
@@ -48,7 +51,7 @@ import java.net.InetAddress;
  * addition, EthernetManager implements NetworkStateTracker, the generic
  * abstraction of a network type used by ConnectivityService.
  */
-public class EthernetManager implements NetworkStateTracker {
+public class EthernetManager extends BaseNetworkStateTracker {
     private IEthernetManager mService;
     private static final String TAG = "EthernetManager";
     private static final String PACKAGE = "com.android.internal.ethernet";
@@ -228,4 +231,10 @@ public class EthernetManager implements NetworkStateTracker {
     @Override
     public void captivePortalCheckCompleted(boolean isCaptivePortal) {
     }
+
+    @Override
+    public void startSampling(SamplingDataTracker.SamplingSnapshot s) { }
+    @Override
+    public void stopSampling(SamplingDataTracker.SamplingSnapshot s) { }
+
 }

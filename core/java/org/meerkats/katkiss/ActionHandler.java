@@ -115,8 +115,8 @@ public class ActionHandler {
         	takeScreenshot();        
         else if (action.equals(KKC.A.SYSTEMUI_TASK_SCREENOFF))
         	screenOff();
-        else if (action.equals(KKC.A.SYSTEMUI_TASK_ASSIST))
-        	startAssistActivity();
+/*        else if (action.equals(KKC.A.SYSTEMUI_TASK_ASSIST))
+        	startAssistActivity(); */
         else if(action.equals(KKC.A.SYSTEMUI_RECENT))
         	WMController.showRecentAppsSystemUI();
         else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
@@ -295,7 +295,7 @@ public class ActionHandler {
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         pm.goToSleep(SystemClock.uptimeMillis());
     }
-
+/*
     private void startAssistActivity() {
         IWindowManager mWm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
         boolean isKeyguardShowing = false;
@@ -330,7 +330,7 @@ public class ActionHandler {
             }
         }
     }
-
+*/
 /*    private void showPowerMenu() {
         new PowerMenu(mContext);
         postActionEventHandled(true);

@@ -16,22 +16,21 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.hardware.input.InputManager;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.view.accessibility.AccessibilityEvent;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
-import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -39,6 +38,7 @@ import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.util.Log;
 
@@ -55,9 +55,10 @@ import com.android.systemui.R;
 
 public class KeyButtonView extends ImageView implements CustomObserver.ChangeNotification{
     private static final String TAG = "StatusBar.KeyButtonView";
+    private static final boolean DEBUG = false;
 
     final float GLOW_MAX_SCALE_FACTOR = 1.8f;
-    final float BUTTON_QUIESCENT_ALPHA = 0.70f;
+    public static final float DEFAULT_QUIESCENT_ALPHA = 0.70f;
 
     long mDownTime;
     int mCode;
@@ -65,6 +66,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     Drawable mGlowBG;
     int mGlowWidth, mGlowHeight;
     float mGlowAlpha = 0f, mGlowScale = 1f, mDrawingAlpha = 1f;
+    float mQuiescentAlpha = DEFAULT_QUIESCENT_ALPHA;
     boolean mSupportsLongpress = true;
     boolean mCustomLongpressEnabled = false;
     boolean mIsLongPressing = false;
@@ -75,6 +77,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     
     RectF mRect = new RectF(0f,0f,0f,0f);
     AnimatorSet mPressedAnim;
+    Animator mAnimateToQuiescent = new ObjectAnimator();
 
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -105,12 +108,12 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
                 defStyle, 0);
 
         mCode = a.getInteger(R.styleable.KeyButtonView_keyCode, 0);
-        
+
         mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
 
         mGlowBG = a.getDrawable(R.styleable.KeyButtonView_glowBackground);
         if (mGlowBG != null) {
-            setDrawingAlpha(BUTTON_QUIESCENT_ALPHA);
+            setDrawingAlpha(mQuiescentAlpha);
             mGlowWidth = mGlowBG.getIntrinsicWidth();
             mGlowHeight = mGlowBG.getIntrinsicHeight();
         }
@@ -197,6 +200,26 @@ Log.d("CustomLongClick", mAction + this);
         super.onDraw(canvas);
     }
 
+    public void setQuiescentAlpha(float alpha, boolean animate) {
+        mAnimateToQuiescent.cancel();
+        alpha = Math.min(Math.max(alpha, 0), 1);
+        if (alpha == mQuiescentAlpha) return;
+        mQuiescentAlpha = alpha;
+        if (DEBUG) Log.d(TAG, "New quiescent alpha = " + mQuiescentAlpha);
+        if (mGlowBG != null) {
+            if (animate) {
+                mAnimateToQuiescent = animateToQuiescent();
+                mAnimateToQuiescent.start();
+            } else {
+                setDrawingAlpha(mQuiescentAlpha);
+            }
+        }
+    }
+
+    private ObjectAnimator animateToQuiescent() {
+        return ObjectAnimator.ofFloat(this, "drawingAlpha", mQuiescentAlpha);
+    }
+
     public float getDrawingAlpha() {
         if (mGlowBG == null) return 0;
         return mDrawingAlpha;
@@ -259,10 +282,10 @@ Log.d("CustomLongClick", mAction + this);
                 }
                 final AnimatorSet as = mPressedAnim = new AnimatorSet();
                 if (pressed) {
-                    if (mGlowScale < GLOW_MAX_SCALE_FACTOR) 
+                    if (mGlowScale < GLOW_MAX_SCALE_FACTOR)
                         mGlowScale = GLOW_MAX_SCALE_FACTOR;
-                    if (mGlowAlpha < BUTTON_QUIESCENT_ALPHA)
-                        mGlowAlpha = BUTTON_QUIESCENT_ALPHA;
+                    if (mGlowAlpha < mQuiescentAlpha)
+                        mGlowAlpha = mQuiescentAlpha;
                     setDrawingAlpha(1f);
                     as.playTogether(
                         ObjectAnimator.ofFloat(this, "glowAlpha", 1f),
@@ -270,10 +293,12 @@ Log.d("CustomLongClick", mAction + this);
                     );
                     as.setDuration(50);
                 } else {
+                    mAnimateToQuiescent.cancel();
+                    mAnimateToQuiescent = animateToQuiescent();
                     as.playTogether(
                         ObjectAnimator.ofFloat(this, "glowAlpha", 0f),
                         ObjectAnimator.ofFloat(this, "glowScale", 1f),
-                        ObjectAnimator.ofFloat(this, "drawingAlpha", BUTTON_QUIESCENT_ALPHA)
+                        mAnimateToQuiescent
                     );
                     as.setDuration(500);
                 }
@@ -289,7 +314,7 @@ Log.d("CustomLongClick", mAction + this);
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                //Slog.d("KeyButtonView", "press");
+                //Log.d("KeyButtonView", "press");
                 mDownTime = SystemClock.uptimeMillis();
                 setPressed(true);
                 if (mCode != 0) {

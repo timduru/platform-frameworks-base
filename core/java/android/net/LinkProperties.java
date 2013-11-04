@@ -23,6 +23,7 @@ import android.text.TextUtils;
 
 import java.net.InetAddress;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -66,6 +67,7 @@ public class LinkProperties implements Parcelable {
     private String mDomains;
     private Collection<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
     private ProxyProperties mHttpProxy;
+    private int mMtu;
 
     // Stores the properties of links that are "stacked" above this link.
     // Indexed by interface name to allow modification and to prevent duplicates being added.
@@ -104,6 +106,7 @@ public class LinkProperties implements Parcelable {
             for (LinkProperties l: source.mStackedLinks.values()) {
                 addStackedLink(l);
             }
+            setMtu(source.getMtu());
         }
     }
 
@@ -129,6 +132,9 @@ public class LinkProperties implements Parcelable {
         return interfaceNames;
     }
 
+    /**
+     * Returns all the addresses on this link.
+     */
     public Collection<InetAddress> getAddresses() {
         Collection<InetAddress> addresses = new ArrayList<InetAddress>();
         for (LinkAddress linkAddress : mLinkAddresses) {
@@ -137,8 +143,18 @@ public class LinkProperties implements Parcelable {
         return Collections.unmodifiableCollection(addresses);
     }
 
-    public void addLinkAddress(LinkAddress address) {
-        if (address != null) mLinkAddresses.add(address);
+    /**
+     * Returns all the addresses on this link and all the links stacked above it.
+     */
+    public Collection<InetAddress> getAllAddresses() {
+        Collection<InetAddress> addresses = new ArrayList<InetAddress>();
+        for (LinkAddress linkAddress : mLinkAddresses) {
+            addresses.add(linkAddress.getAddress());
+        }
+        for (LinkProperties stacked: mStackedLinks.values()) {
+            addresses.addAll(stacked.getAllAddresses());
+        }
+        return addresses;
     }
 
     public void setLinkAddress(LinkAddress address) {
@@ -148,8 +164,57 @@ public class LinkProperties implements Parcelable {
         }
     }
 
+    /**
+     * Adds a link address if it does not exist, or update it if it does.
+     * @param address The {@code LinkAddress} to add.
+     * @return true if the address was added, false if it already existed.
+     */
+    public boolean addLinkAddress(LinkAddress address) {
+        // TODO: when the LinkAddress has other attributes beyond the
+        // address and the prefix length, update them here.
+        if (address != null && !mLinkAddresses.contains(address)) {
+            mLinkAddresses.add(address);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Removes a link address.
+     * @param address The {@code LinkAddress} to remove.
+     * @return true if the address was removed, false if it did not exist.
+     */
+    public boolean removeLinkAddress(LinkAddress toRemove) {
+        return mLinkAddresses.remove(toRemove);
+    }
+
+    /**
+     * Returns all the addresses on this link.
+     */
     public Collection<LinkAddress> getLinkAddresses() {
         return Collections.unmodifiableCollection(mLinkAddresses);
+    }
+
+    /**
+     * Returns all the addresses on this link and all the links stacked above it.
+     */
+    public Collection<LinkAddress> getAllLinkAddresses() {
+        Collection<LinkAddress> addresses = new ArrayList<LinkAddress>();
+        addresses.addAll(mLinkAddresses);
+        for (LinkProperties stacked: mStackedLinks.values()) {
+            addresses.addAll(stacked.getAllLinkAddresses());
+        }
+        return addresses;
+    }
+
+    /**
+     * Replaces the LinkAddresses on this link with the given collection of addresses.
+     */
+    public void setLinkAddresses(Collection<LinkAddress> addresses) {
+        mLinkAddresses.clear();
+        for (LinkAddress address: addresses) {
+            addLinkAddress(address);
+        }
     }
 
     public void addDns(InetAddress dns) {
@@ -166,6 +231,14 @@ public class LinkProperties implements Parcelable {
 
     public void setDomains(String domains) {
         mDomains = domains;
+    }
+
+    public void setMtu(int mtu) {
+        mMtu = mtu;
+    }
+
+    public int getMtu() {
+        return mMtu;
     }
 
     private RouteInfo routeWithInterface(RouteInfo route) {
@@ -235,11 +308,14 @@ public class LinkProperties implements Parcelable {
      * of stacked links. If link is null, nothing changes.
      *
      * @param link The link to add.
+     * @return true if the link was stacked, false otherwise.
      */
-    public void addStackedLink(LinkProperties link) {
+    public boolean addStackedLink(LinkProperties link) {
         if (link != null && link.getInterfaceName() != null) {
             mStackedLinks.put(link.getInterfaceName(), link);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -248,12 +324,15 @@ public class LinkProperties implements Parcelable {
      * If there a stacked link with the same interfacename as link, it is
      * removed. Otherwise, nothing changes.
      *
-     * @param link The link to add.
+     * @param link The link to remove.
+     * @return true if the link was removed, false otherwise.
      */
-    public void removeStackedLink(LinkProperties link) {
+    public boolean removeStackedLink(LinkProperties link) {
         if (link != null && link.getInterfaceName() != null) {
-            mStackedLinks.remove(link.getInterfaceName());
+            LinkProperties removed = mStackedLinks.remove(link.getInterfaceName());
+            return removed != null;
         }
+        return false;
     }
 
     /**
@@ -275,6 +354,7 @@ public class LinkProperties implements Parcelable {
         mRoutes.clear();
         mHttpProxy = null;
         mStackedLinks.clear();
+        mMtu = 0;
     }
 
     /**
@@ -299,6 +379,8 @@ public class LinkProperties implements Parcelable {
 
         String domainName = "Domains: " + mDomains;
 
+        String mtu = "MTU: " + mMtu;
+
         String routes = " Routes: [";
         for (RouteInfo route : mRoutes) routes += route.toString() + ",";
         routes += "] ";
@@ -312,7 +394,8 @@ public class LinkProperties implements Parcelable {
             }
             stacked += "] ";
         }
-        return "{" + ifaceName + linkAddresses + routes + dns + domainName + proxy + stacked + "}";
+        return "{" + ifaceName + linkAddresses + routes + dns + domainName + mtu
+            + proxy + stacked + "}";
     }
 
     /**
@@ -323,6 +406,20 @@ public class LinkProperties implements Parcelable {
     public boolean hasIPv4Address() {
         for (LinkAddress address : mLinkAddresses) {
           if (address.getAddress() instanceof Inet4Address) {
+            return true;
+          }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this link has an IPv6 address.
+     *
+     * @return {@code true} if there is an IPv6 address, {@code false} otherwise.
+     */
+    public boolean hasIPv6Address() {
+        for (LinkAddress address : mLinkAddresses) {
+          if (address.getAddress() instanceof Inet6Address) {
             return true;
           }
         }
@@ -413,6 +510,16 @@ public class LinkProperties implements Parcelable {
         return true;
     }
 
+    /**
+     * Compares this {@code LinkProperties} MTU against the target
+     *
+     * @param target LinkProperties to compare.
+     * @return {@code true} if both are identical, {@code false} otherwise.
+     */
+    public boolean isIdenticalMtu(LinkProperties target) {
+        return getMtu() == target.getMtu();
+    }
+
     @Override
     /**
      * Compares this {@code LinkProperties} instance against the target
@@ -444,17 +551,16 @@ public class LinkProperties implements Parcelable {
                 isIdenticalDnses(target) &&
                 isIdenticalRoutes(target) &&
                 isIdenticalHttpProxy(target) &&
-                isIdenticalStackedLinks(target);
+                isIdenticalStackedLinks(target) &&
+                isIdenticalMtu(target);
     }
 
     /**
-     * Return two lists, a list of addresses that would be removed from
-     * mLinkAddresses and a list of addresses that would be added to
-     * mLinkAddress which would then result in target and mLinkAddresses
-     * being the same list.
+     * Compares the addresses in this LinkProperties with another
+     * LinkProperties, examining only addresses on the base link.
      *
-     * @param target is a LinkProperties with the new list of addresses
-     * @return the removed and added lists.
+     * @param target a LinkProperties with the new list of addresses
+     * @return the differences between the addresses.
      */
     public CompareResult<LinkAddress> compareAddresses(LinkProperties target) {
         /*
@@ -478,13 +584,11 @@ public class LinkProperties implements Parcelable {
     }
 
     /**
-     * Return two lists, a list of dns addresses that would be removed from
-     * mDnses and a list of addresses that would be added to
-     * mDnses which would then result in target and mDnses
-     * being the same list.
+     * Compares the DNS addresses in this LinkProperties with another
+     * LinkProperties, examining only DNS addresses on the base link.
      *
-     * @param target is a LinkProperties with the new list of dns addresses
-     * @return the removed and added lists.
+     * @param target a LinkProperties with the new list of dns addresses
+     * @return the differences between the DNS addresses.
      */
     public CompareResult<InetAddress> compareDnses(LinkProperties target) {
         /*
@@ -509,15 +613,13 @@ public class LinkProperties implements Parcelable {
     }
 
     /**
-     * Return two lists, a list of routes that would be removed from
-     * mRoutes and a list of routes that would be added to
-     * mRoutes which would then result in target and mRoutes
-     * being the same list.
+     * Compares all routes in this LinkProperties with another LinkProperties,
+     * examining both the the base link and all stacked links.
      *
-     * @param target is a LinkProperties with the new list of routes
-     * @return the removed and added lists.
+     * @param target a LinkProperties with the new list of routes
+     * @return the differences between the routes.
      */
-    public CompareResult<RouteInfo> compareRoutes(LinkProperties target) {
+    public CompareResult<RouteInfo> compareAllRoutes(LinkProperties target) {
         /*
          * Duplicate the RouteInfos into removed, we will be removing
          * routes which are common between mRoutes and target
@@ -552,7 +654,8 @@ public class LinkProperties implements Parcelable {
                 + ((null == mDomains) ? 0 : mDomains.hashCode())
                 + mRoutes.size() * 41
                 + ((null == mHttpProxy) ? 0 : mHttpProxy.hashCode())
-                + mStackedLinks.hashCode() * 47);
+                + mStackedLinks.hashCode() * 47)
+                + mMtu * 51;
     }
 
     /**
@@ -570,7 +673,7 @@ public class LinkProperties implements Parcelable {
             dest.writeByteArray(d.getAddress());
         }
         dest.writeString(mDomains);
-
+        dest.writeInt(mMtu);
         dest.writeInt(mRoutes.size());
         for(RouteInfo route : mRoutes) {
             dest.writeParcelable(route, flags);
@@ -609,6 +712,7 @@ public class LinkProperties implements Parcelable {
                     } catch (UnknownHostException e) { }
                 }
                 netProp.setDomains(in.readString());
+                netProp.setMtu(in.readInt());
                 addressCount = in.readInt();
                 for (int i=0; i<addressCount; i++) {
                     netProp.addRoute((RouteInfo)in.readParcelable(null));

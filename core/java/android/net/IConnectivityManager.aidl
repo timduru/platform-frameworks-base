@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.net.LinkQualityInfo;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkQuotaInfo;
@@ -37,6 +38,9 @@ import com.android.internal.net.VpnProfile;
 /** {@hide} */
 interface IConnectivityManager
 {
+    // Keep this in sync with framework/native/services/connectivitymanager/ConnectivityManager.h
+    void markSocketAsUser(in ParcelFileDescriptor socket, int uid);
+
     void setNetworkPreference(int pref);
 
     int getNetworkPreference();
@@ -89,12 +93,6 @@ interface IConnectivityManager
 
     String[] getTetheredIfaces();
 
-    /**
-     * Return list of interface pairs that are actively tethered.  Even indexes are
-     * remote interface, and odd indexes are corresponding local interfaces.
-     */
-    String[] getTetheredIfacePairs();
-
     String[] getTetheringErroredIfaces();
 
     String[] getTetherableUsbRegexs();
@@ -123,6 +121,8 @@ interface IConnectivityManager
 
     ParcelFileDescriptor establishVpn(in VpnConfig config);
 
+    VpnConfig getVpnConfig();
+
     void startLegacyVpn(in VpnProfile profile);
 
     LegacyVpnInfo getLegacyVpnInfo();
@@ -137,7 +137,6 @@ interface IConnectivityManager
 
     int findConnectionTypeForIface(in String iface);
 
-//    int checkMobileProvisioning(boolean sendNotification, int suggestedTimeOutMs, in ResultReceiver resultReceiver);
     int checkMobileProvisioning(int suggestedTimeOutMs);
 
     String getMobileProvisioningUrl();
@@ -145,4 +144,12 @@ interface IConnectivityManager
     String getMobileRedirectedProvisioningUrl();
 
     void setProvisioningNotificationVisible(boolean visible, int networkType, in String extraInfo, in String url);
+    LinkQualityInfo getLinkQualityInfo(int networkType);
+
+    LinkQualityInfo getActiveLinkQualityInfo();
+
+    LinkQualityInfo[] getAllLinkQualityInfo();
+
+
+    void setAirplaneMode(boolean enable);
 }

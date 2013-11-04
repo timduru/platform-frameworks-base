@@ -635,12 +635,16 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_EUROPE_2        = 228;
     public static final int KEYCODE_SLEEP           = 229;
 
-    private static final int LAST_KEYCODE           = KEYCODE_SLEEP;
+    /** Key code constant: Audio Track key
+     * Switches the audio tracks. */
+    public static final int KEYCODE_MEDIA_AUDIO_TRACK = 230;
+
+    private static final int LAST_KEYCODE           = KEYCODE_MEDIA_AUDIO_TRACK;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
-    //  native/include/android/keycodes.h
-    //  frameworks/base/include/ui/KeycodeLabels.h
+    //  frameworks/native/include/android/keycodes.h
+    //  frameworks/base/include/androidfw/KeycodeLabels.h
     //  external/webkit/WebKit/android/plugins/ANPKeyCodes.h
     //  frameworks/base/core/res/res/values/attrs.xml
     //  emulator?
@@ -887,6 +891,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         names.append(KEYCODE_EUROPE_1, "KEYCODE_EUROPE_1");
         names.append(KEYCODE_EUROPE_2, "KEYCODE_EUROPE_2");
         names.append(KEYCODE_SLEEP, "KEYCODE_SLEEP");
+        names.append(KEYCODE_MEDIA_AUDIO_TRACK, "KEYCODE_MEDIA_AUDIO_TRACK");
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.
@@ -1840,6 +1845,19 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_BUTTON_14:
             case KeyEvent.KEYCODE_BUTTON_15:
             case KeyEvent.KEYCODE_BUTTON_16:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /** Whether key will, by default, trigger a click on the focused view.
+     * @hide
+     */
+    public static final boolean isConfirmKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_ENTER:
                 return true;
             default:
                 return false;

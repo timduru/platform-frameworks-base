@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import java.util.ArrayList;
-
-import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -32,12 +29,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.View;
 
-import com.android.systemui.R;
+import java.util.ArrayList;
 
 import org.meerkats.katkiss.KKC;
 import android.provider.Settings;
 import org.meerkats.katkiss.CustomObserver;
-
+import com.android.systemui.R;
 
 public class BatteryController extends BroadcastReceiver implements CustomObserver.ChangeNotification {
     private static final String TAG = "StatusBar.BatteryController";
@@ -97,6 +94,7 @@ public class BatteryController extends BroadcastReceiver implements CustomObserv
             Settings.System.getUriFor(EOSConstants.SYSTEMUI_BATTERY_PERCENT_VISIBLE), false, mPercentObserver);
     }
 
+<<<<<<< HEAD
     private void unregisterObservers() {
         mContext.getContentResolver().unregisterContentObserver(mPercentObserver);
     }

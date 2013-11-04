@@ -59,7 +59,7 @@ import com.android.systemui.quicksettings.BluetoothTile;
 import com.android.systemui.quicksettings.BrightnessTile;
 import com.android.systemui.quicksettings.BugReportTile;
 import com.android.systemui.quicksettings.CameraTile;
-import com.android.systemui.quicksettings.GPSTile;
+//import com.android.systemui.quicksettings.GPSTile;
 import com.android.systemui.quicksettings.InputMethodTile;
 import com.android.systemui.quicksettings.NetworkAdbTile;
 import com.android.systemui.quicksettings.PreferencesTile;
@@ -73,6 +73,11 @@ import com.android.systemui.quicksettings.VolumeTile;
 import com.android.systemui.quicksettings.WiFiDisplayTile;
 import com.android.systemui.quicksettings.WiFiTile;
 import com.android.systemui.quicksettings.WifiAPTile;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.RotationLockController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -170,7 +175,7 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_WIFI)) {
                 qs = new WiFiTile(mContext, this, mStatusBarService.mNetworkController);
             } else if (tile.equals(TILE_GPS)) {
-                qs = new GPSTile(mContext, this);
+//                qs = new GPSTile(mContext, this);
             } else if (tile.equals(TILE_BLUETOOTH) && bluetoothSupported) {
                 qs = new BluetoothTile(mContext, this, mStatusBarService.mBluetoothController);
             } else if (tile.equals(TILE_BRIGHTNESS)) {
@@ -372,4 +377,13 @@ public class QuickSettingsController {
     public void hideLiveTiles(boolean hide) {
         mHideLiveTiles = hide;
     }
+
+	public void setup(NetworkController networkController,
+			BluetoothController bluetoothController,
+			BatteryController batteryController,
+			LocationController locationController,
+			RotationLockController rotationLockController) {
+		// TODO Auto-generated method stub
+		//FIXME Tim
+	}
 }

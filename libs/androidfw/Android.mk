@@ -14,39 +14,35 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-# libandroidfw is partially built for the host (used by build time keymap validation tool)
+# libandroidfw is partially built for the host (used by obbtool and others)
 # These files are common to host and target builds.
 
-# formerly in libutils
-commonUtilsSources:= \
+commonSources := \
     Asset.cpp \
     AssetDir.cpp \
     AssetManager.cpp \
+    misc.cpp \
     ObbFile.cpp \
     ResourceTypes.cpp \
-    StreamingZipInflater.cpp
+    StreamingZipInflater.cpp \
+    ZipFileRO.cpp \
+    ZipUtils.cpp
 
-# formerly in libui
-commonUiSources:= \
-    Input.cpp \
-    InputDevice.cpp \
-    Keyboard.cpp \
-    KeyCharacterMap.cpp \
-    KeyLayoutMap.cpp \
-    VelocityControl.cpp \
-    VelocityTracker.cpp \
-    VirtualKeyMap.cpp
+deviceSources := \
+    $(commonSources) \
+    BackupData.cpp \
+    BackupHelpers.cpp \
+    CursorWindow.cpp
 
-commonSources:= \
-	$(commonUtilsSources) \
-	$(commonUiSources)
+hostSources := \
+    $(commonSources)
 
 # For the host
 # =====================================================
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= $(commonSources)
+LOCAL_SRC_FILES:= $(hostSources)
 
 LOCAL_MODULE:= libandroidfw
 
@@ -56,6 +52,12 @@ LOCAL_CFLAGS += -Wno-error=strict-aliasing
 LOCAL_C_INCLUDES := \
 	external/zlib
 
+LOCAL_CFLAGS += -DSTATIC_ANDROIDFW_FOR_TOOLS
+
+LOCAL_C_INCLUDES := \
+	external/zlib
+
+LOCAL_STATIC_LIBRARIES := liblog
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
@@ -65,23 +67,16 @@ include $(BUILD_HOST_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= \
-	$(commonSources) \
-	BackupData.cpp \
-	BackupHelpers.cpp \
-    CursorWindow.cpp \
-	InputTransport.cpp
+LOCAL_SRC_FILES:= $(deviceSources)
 
 LOCAL_SHARED_LIBRARIES := \
+	libbinder \
 	liblog \
 	libcutils \
 	libutils \
-	libbinder \
-	libskia \
 	libz
 
 LOCAL_C_INCLUDES := \
-    external/skia/include/core \
     external/icu4c/common \
 	external/zlib
 

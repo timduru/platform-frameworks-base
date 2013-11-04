@@ -96,6 +96,7 @@ public class EthernetService extends IEthernetManager.Stub {
     private long mRxPkts;
     private int mDataActivity;
     private boolean mScreenOff;
+    
 
     private class AsyncServiceHandler extends Handler {
 
@@ -179,6 +180,10 @@ public class EthernetService extends IEthernetManager.Stub {
             if(DBG) Slog.d(TAG, "interfaceStatusChanged for " + iface + ", up = " + up);
             //addInterface(iface);
         }
+
+        public void addressRemoved(java.lang.String address, java.lang.String iface, int flags, int scope) throws android.os.RemoteException {}
+        public void addressUpdated(java.lang.String address, java.lang.String iface, int flags, int scope) throws android.os.RemoteException {}
+
     }
 
     private String getUtilityInterface() {
@@ -540,5 +545,6 @@ public class EthernetService extends IEthernetManager.Stub {
         }
         msg.sendToTarget();
     }
+
 }
 

@@ -69,22 +69,28 @@ public class AirplaneModeTile extends QuickSettingsTile implements NetworkSignal
         mDrawable = (enabled) ? R.drawable.ic_qs_airplane_on : R.drawable.ic_qs_airplane_off;
     }
 
-    @Override
-    public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId,
-            String wifitSignalContentDescriptionId, String description) {
-    }
-
-    @Override
-    public void onMobileDataSignalChanged(boolean enabled,
-            int mobileSignalIconId, String mobileSignalContentDescriptionId,
-            int dataTypeIconId, String dataTypeContentDescriptionId,
-            String description) {
-    }
 
     @Override
     public void onAirplaneModeChanged(boolean enabled) {
         this.enabled = enabled;
         updateResources();
     }
+
+	@Override
+	public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId,
+			boolean activityIn, boolean activityOut,
+			String wifiSignalContentDescriptionId, String description) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMobileDataSignalChanged(boolean enabled,
+			int mobileSignalIconId, String mobileSignalContentDescriptionId,
+			int dataTypeIconId, boolean activityIn, boolean activityOut,
+			String dataTypeContentDescriptionId, String description) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
