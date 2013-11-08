@@ -1359,6 +1359,7 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
                         | StatusBarManager.DISABLE_SEARCH)) != 0) {
             // the nav bar will take care of these
             if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state);
+            setExtraNavButtonsVisibility((state & StatusBarManager.DISABLE_RECENT) == 0);
 
             if ((state & StatusBarManager.DISABLE_RECENT) != 0) {
                 // close recents if it's visible

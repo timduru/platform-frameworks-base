@@ -917,6 +917,7 @@ public class TabletStatusBar extends BaseStatusBar {
                         | StatusBarManager.DISABLE_BACK
                         | StatusBarManager.DISABLE_HOME)) != 0) {
             setNavigationVisibility(state);
+            setExtraNavButtonsVisibility((state & StatusBarManager.DISABLE_RECENT) == 0);
 
             if ((state & StatusBarManager.DISABLE_RECENT) != 0) {
                 // close recents if it's visible

@@ -137,7 +137,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
 //KK
     public BatteryController mBatteryController, mDockBatteryController;
-    private boolean mHasDockBattery;
+    private boolean mHasDockBattery, mShowBtnSwitchToPrevious, mShowBtnSplitViewAuto ;
+
     protected ContentResolver mResolver;
     protected int mCurrentBarSizeMode;
     protected boolean mHardKeyboardInUse = false;
@@ -1248,8 +1249,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void refreshNewNavButtonVisibility() {
-          setSwitchToPreviousAppButtonVisibility( Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS, 1) == 1 );
-          setSplitViewAutoButtonVisibility( Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO, 1) == 1 );
+        mShowBtnSwitchToPrevious = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS, 1) == 1;
+        mShowBtnSplitViewAuto = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO, 1) == 1;
+
+        setSwitchToPreviousAppButtonVisibility(mShowBtnSwitchToPrevious);
+        setSplitViewAutoButtonVisibility(mShowBtnSplitViewAuto); 
     }
 
 
@@ -1265,6 +1269,13 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public void setSwitchToPreviousAppButtonVisibility(boolean visible) { setNavButtonVisibility(R.id.switch_toprevious_task, visible); }
     public void setSplitViewAutoButtonVisibility(boolean visible) { setNavButtonVisibility(R.id.splitview_auto, visible); }
+
+    public void setExtraNavButtonsVisibility(boolean visible) 
+    { 
+      
+        setSwitchToPreviousAppButtonVisibility(mShowBtnSwitchToPrevious && visible); 
+        setSplitViewAutoButtonVisibility(mShowBtnSplitViewAuto && visible); 
+    }
 
     public void setNavButtonVisibility(int id, boolean visible)
     {
@@ -1284,6 +1295,8 @@ public abstract class BaseStatusBar extends SystemUI implements
       ArrayList<Uri> uris = new  ArrayList<Uri>();
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_TIME));
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_DATE));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO));
       return uris;
     }
 
