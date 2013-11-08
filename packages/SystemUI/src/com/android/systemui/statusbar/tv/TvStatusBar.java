@@ -157,4 +157,8 @@ public class TvStatusBar extends BaseStatusBar {
     @Override
     protected View getClockAreaRootView() { return null; }
 
+    @Override
+    protected View getNavBarRootView() { return null; }
+
+
 }

@@ -65,6 +65,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.PopupMenu;
@@ -117,6 +118,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private int mRecentItemLayoutId;
     private boolean mHighEndGfx;
 
+    private boolean mMultiWindowEnabled = true;
+
     private Button mRecentsKillAllButton;
     private Timer updateMemDisplayTimer;
 
@@ -147,6 +150,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         ImageView thumbnailViewImage;
         Bitmap thumbnailViewImageBitmap;
         ImageView iconView;
+        LinearLayout multiWindowLayout;
         ImageView splitIcon;
         ImageView splitIcon1;
         ImageView splitIcon2;
@@ -191,6 +195,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             holder.calloutLine = convertView.findViewById(R.id.recents_callout_line);
             holder.descriptionView = (TextView) convertView.findViewById(R.id.app_description);
 
+            holder.multiWindowLayout = (LinearLayout) convertView.findViewById(R.id.multiwindow);
             holder.splitIcon = (ImageView) convertView.findViewById(R.id.add_splitview);
             holder.splitIcon1 = (ImageView) convertView.findViewById(R.id.add_splitview1);
             holder.splitIcon2 = (ImageView) convertView.findViewById(R.id.add_splitview2);
@@ -199,11 +204,16 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             return convertView;
         }
 
+        private void setMultiWindowVisibility(ViewHolder holder) {
+	    holder.multiWindowLayout.setVisibility(mMultiWindowEnabled? View.VISIBLE : View.INVISIBLE);
+        }
+
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = createView(parent);
             }
             final ViewHolder holder = (ViewHolder) convertView.getTag();
+            setMultiWindowVisibility(holder);
 
             // index is reverse since most recent appears at the bottom...
             final int index = mRecentTaskDescriptions.size() - position - 1;
@@ -524,6 +534,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
 
         updateRecentsKillAllButton();
+        mMultiWindowEnabled = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_RECENTS_MULTIWINDOW_ICONS, 1) == 1;
+
         
 
         mPreloadTasksRunnable = new Runnable() {

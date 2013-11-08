@@ -29,9 +29,13 @@ public final class KKC {
     public static final String SYSTEMUI_CLOCK_TIME = "kk_ui_clock_time";
     public static final String SYSTEMUI_CLOCK_DATE = "kk_ui_clock_date";
     
+    public static final String SYSTEMUI_BTN_SWITCH_TOPREVIOUS = "kk_ui_btn_switch_toprevious";
+    public static final String SYSTEMUI_BTN_SPLITVIEW_AUTO = "kk_ui_btn_splitview_auto";
+
     
     public static final String SYSTEMUI_RECENTS_KILLALL_BUTTON = "kk_ui_recents_killall_button";
     public static final String SYSTEMUI_RECENTS_MEM_DISPLAY = "kk_ui_recents_mem_display";
+    public static final String SYSTEMUI_RECENTS_MULTIWINDOW_ICONS = "kk_ui_recents_multiwindow_icons";
 
 
     public static final String SYSTEMUI_SOFTKEY_BACK = "systemui_softkey_back";

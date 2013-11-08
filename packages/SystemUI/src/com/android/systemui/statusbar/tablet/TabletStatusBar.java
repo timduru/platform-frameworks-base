@@ -858,6 +858,8 @@ public class TabletStatusBar extends BaseStatusBar {
     }
 
     protected View getClockAreaRootView() { return mBarContents; }
+    protected View getNavBarRootView() { return mStatusBarView; }
+
 
     public void showClock(boolean show) {
         View clock = mBarContents.findViewById(R.id.clock);
