@@ -162,7 +162,12 @@ public class KeyActions
 	        	
 	        	KatUtils.AppInfo appInfo = KatUtils.getAppInfoFromUri(_context, action);
 	        	if(appInfo != null && appInfo.appName != null)
-	                sActions += appInfo.appName;
+		                sActions += appInfo.appName;
+	        	else if(action.startsWith(KKC.A.SENDKEY_BASE))
+			{
+				Integer keyCode = Integer.parseInt(action.substring(KKC.A.SENDKEY_BASE.length()));
+				sActions += "Send Key: " + KeyEvent.keyCodeToString(keyCode).substring("KEYCODE_".length()); 
+			}
 	        	else 
 	        		sActions +=  action;
 	        }

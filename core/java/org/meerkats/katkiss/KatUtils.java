@@ -30,6 +30,12 @@ import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.statusbar.IStatusBarService;
 
+import android.hardware.input.InputManager;
+import android.view.InputDevice;
+import android.view.KeyEvent;
+import android.view.KeyCharacterMap;
+import android.os.SystemClock;
+
 public class KatUtils {
     public static String[] HDMIModes = {"center", "crop", "scale"};
     public static final boolean DEBUG = true;
@@ -126,6 +132,18 @@ public class KatUtils {
 
         Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, currentlyExpanded ? 0 : 1);
         Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, style);
+  }
+
+  public static void sendKeyDOWN(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_DOWN); }
+  public static void sendKeyUP(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_UP); }
+  public static void sendKey(final int keyCode, final int action) 
+  {
+	InputManager inputMgr = InputManager.getInstance();
+	if(inputMgr == null) return;
+	long currentTime = SystemClock.uptimeMillis();
+	inputMgr.injectInputEvent( 
+		new KeyEvent(currentTime, currentTime, action, keyCode, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_KEYBOARD), 
+		InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
   }
 
 }
