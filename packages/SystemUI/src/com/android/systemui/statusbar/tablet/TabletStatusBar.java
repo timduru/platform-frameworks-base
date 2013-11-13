@@ -770,6 +770,8 @@ public class TabletStatusBar extends BaseStatusBar {
                         mNotificationArea.setVisibility(View.INVISIBLE);
                         mTicker.halt();
                     }
+                    else
+                        mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PANEL);
                     break;
                 case MSG_CLOSE_NOTIFICATION_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing notifications panel");

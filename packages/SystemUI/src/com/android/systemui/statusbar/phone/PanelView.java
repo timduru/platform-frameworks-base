@@ -635,9 +635,8 @@ public class PanelView extends FrameLayout {
         if (isFullyCollapsed()) {
             mBar.startOpeningPanel(this);
             fling(mSelfExpandVelocityPx, /*always=*/ true);
-        } else if (DEBUG) {
-            if (DEBUG) LOG("skipping expansion: is expanded");
-        }
+        } else 
+            collapse();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
