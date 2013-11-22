@@ -126,12 +126,16 @@ public class KatUtils {
 	  return info;
   }
 
+  public static void expandedDesktop(Context c, boolean on, int style /* 0 both bars, 1: keep navbar*/)
+  {
+        Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, on ? 1 : 0);
+        Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, style);
+  }
+
   public static void expandedDesktopSwitch(Context c, int style /* 0 both bars, 1: keep navbar*/)
   {
         boolean  currentlyExpanded = Settings.System.getInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE,  0) == 1;
-
-        Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, currentlyExpanded ? 0 : 1);
-        Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, style);
+	expandedDesktop(c, !currentlyExpanded, style);
   }
 
   public static void sendKeyDOWN(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_DOWN); }

@@ -49,6 +49,9 @@ import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
 import com.android.server.TwilightService.TwilightState;
 
+import org.meerkats.katkiss.KatUtils;
+import org.meerkats.katkiss.KKC;
+
 final class UiModeManagerService extends IUiModeManager.Stub {
     private static final String TAG = UiModeManager.class.getSimpleName();
     private static final boolean LOG = false;
@@ -280,11 +283,18 @@ final class UiModeManagerService extends IUiModeManager.Stub {
             if (newState != mDockState) {
                 mDockState = newState;
                 setCarModeLocked(mDockState == Intent.EXTRA_DOCK_STATE_CAR);
+                updateExpandedDesktop();
                 if (mSystemReady) {
                     updateLocked(UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME, 0);
                 }
             }
         }
+    }
+
+    private void updateExpandedDesktop() {
+        boolean  autoExpand = Settings.System.getInt( mContext.getContentResolver(), KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK,  0) == 1;
+	if(autoExpand)
+            KatUtils.expandedDesktop(mContext, mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED, 0);
     }
 
     private static boolean isDeskDockState(int state) {
