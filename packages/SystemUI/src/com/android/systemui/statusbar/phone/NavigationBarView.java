@@ -60,6 +60,7 @@ public class NavigationBarView extends LinearLayout {
 
     final static boolean ANIMATE_HIDE_TRANSITION = false; // turned off because it introduces unsightly delay when videos goes to full screen
 
+    
     protected IStatusBarService mBarService;
     final Display mDisplay;
     View mCurrentView = null;
@@ -153,6 +154,10 @@ public class NavigationBarView extends LinearLayout {
     // for when home is disabled, but search isn't
     public View getSearchLight() {
         return mCurrentView.findViewById(R.id.search_light);
+    }
+
+    public View getCurrentView() {
+        return mCurrentView;
     }
 
     public NavigationBarView(Context context, AttributeSet attrs) {

@@ -138,7 +138,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 //KK
     public BatteryController mBatteryController, mDockBatteryController;
     private boolean mHasDockBattery, mShowBtnSwitchToPrevious, mShowBtnSplitViewAuto ;
-
+    private CustomObserver mCustomObserver;
     protected ContentResolver mResolver;
     protected int mCurrentBarSizeMode;
     protected boolean mHardKeyboardInUse = false;
@@ -147,7 +147,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract View getClockAreaRootView() ;
     protected abstract View getNavBarRootView() ;
     public abstract void showClock(boolean show) ;
-
+   
     // UI-specific methods
 
     /**
@@ -309,7 +309,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mLocale = mContext.getResources().getConfiguration().locale;
         
-        new CustomObserver(mContext, this);
+        mCustomObserver = new CustomObserver(mContext, this);
         refreshClockVisibility();
         refreshNewNavButtonVisibility();
     }
@@ -336,6 +336,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             mLocale = newLocale;
             mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
             refreshLayout(mLayoutDirection);
+
+        refreshNewNavButtonVisibility();
         }
     }
 
@@ -1285,7 +1287,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         View buttonView = navBarRootView.findViewById(id);
 	if(buttonView == null) return;
 
-        buttonView.setVisibility(visible? View.VISIBLE : View.INVISIBLE);
+        buttonView.setVisibility(visible? View.VISIBLE : View.GONE);
     }
 
     // CustomObserver ChangeNotifications

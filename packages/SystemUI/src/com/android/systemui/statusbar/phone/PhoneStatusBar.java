@@ -339,6 +339,9 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
+        
+        refreshNewNavButtonVisibility();
+        refreshClockVisibility();
     }
 
     private void cleanupRibbon() {
@@ -843,6 +846,7 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
         mNavigationBarView.getSearchLight().setOnTouchListener(mHomeSearchActionListener);
         updateSearchPanel();
+        refreshNewNavButtonVisibility();
     }
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
@@ -1273,7 +1277,7 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
     }
 
     protected View getClockAreaRootView() { return mStatusBarView; }
-    protected View getNavBarRootView() { return mNavigationBarView; }
+    protected View getNavBarRootView() { return mNavigationBarView.getCurrentView(); }
 
     public void showClock(boolean show) {
         if (mStatusBarView == null) return;
@@ -2637,6 +2641,8 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
     public ArrayList<Uri> getObservedUris()
     {
       ArrayList<Uri> uris = new  ArrayList<Uri>();
+      uris.addAll(super.getObservedUris());
+
       uris.add(Settings.System.getUriFor(KKC.S.QUICK_SETTINGS_TILES));
       uris.add(Settings.System.getUriFor(KKC.S.QUICK_SETTINGS_RIBBON_TILES));
       uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_ACCESS));
@@ -2644,8 +2650,8 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
       uris.add(Settings.System.getUriFor(KKC.S.QS_DYNAMIC_WIFI));
       uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_PULLDOWN));
       uris.add(Settings.System.getUriFor(KKC.S.QS_COLLAPSE_PANEL));
-
-      return uris;
+      
+      return uris; 
     }
 
     @Override
@@ -2653,6 +2659,7 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
     {
       Log.d(TAG, "onChangeNotification:" + uri);
       refreshQuickSettings(uri);
+      super.onChangeNotification(uri);
     }
 
     public void refreshQuickSettings(Uri uri) {
