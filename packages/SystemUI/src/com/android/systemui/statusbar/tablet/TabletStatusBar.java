@@ -40,6 +40,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
@@ -69,6 +70,7 @@ import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CompatModeButton;
+import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
@@ -130,6 +132,8 @@ public class TabletStatusBar extends BaseStatusBar {
     View mHomeButton;
     View mMenuButton;
     View mRecentButton;
+    KeyButtonView mSplitViewAutoButton;
+    
     private boolean mAltBackButtonEnabledForIme;
 
     ViewGroup mFeedbackIconArea; // notification icons, IME icon, compat icon
@@ -378,6 +382,7 @@ public class TabletStatusBar extends BaseStatusBar {
 
     protected void loadDimens() {
         final Resources res = mContext.getResources();
+        Log.d(TAG, "loadDimens: orientation=" + res.getConfiguration().orientation);
 
         mNaturalBarHeight = getStatusBarHeight(); //res.getDimensionPixelSize( com.android.internal.R.dimen.navigation_bar_height);
 
@@ -388,6 +393,9 @@ public class TabletStatusBar extends BaseStatusBar {
         int newNavIconWidth = res.getDimensionPixelSize(R.dimen.navigation_key_width);
         int newMenuNavIconWidth = res.getDimensionPixelSize(R.dimen.navigation_menu_key_width);
 
+        if(mSplitViewAutoButton != null)
+        	mSplitViewAutoButton.setImageDrawable(res.getDrawable(R.drawable.ic_sysbar_splitview_auto));
+        
         if (mNavigationArea != null && newNavIconWidth != mNavIconWidth) {
             mNavIconWidth = newNavIconWidth;
 
@@ -489,7 +497,8 @@ public class TabletStatusBar extends BaseStatusBar {
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
         mRecentButton.setOnClickListener(mOnClickListener);
-
+        mSplitViewAutoButton = (KeyButtonView) mNavigationArea.findViewById(R.id.splitview_auto);
+        
         LayoutTransition lt = new LayoutTransition();
         lt.setDuration(250);
         // don't wait for these transitions; we just want icons to fade in/out, not move around
