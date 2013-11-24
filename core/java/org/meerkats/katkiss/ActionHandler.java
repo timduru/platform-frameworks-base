@@ -140,6 +140,7 @@ public class ActionHandler {
         else if (action.startsWith(KKC.A.SENDKEY_BASE)) {
 		int keyCode = Integer.parseInt(action.substring(KKC.A.SENDKEY_BASE.length()));
 		KatUtils.sendKeyDOWN(keyCode);
+		KatUtils.sendKeyUP(keyCode);
         }
         else if (action.startsWith("app:"))
         	launchActivity(action);
