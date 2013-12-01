@@ -2666,14 +2666,21 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
       uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_PULLDOWN));
       uris.add(Settings.System.getUriFor(KKC.S.QS_COLLAPSE_PANEL));
       
+      uris.add(Settings.System.getUriFor(KKC.S.ENABLE_PANELS_DROPSHADOW));
       return uris; 
     }
 
     @Override
     public void onChangeNotification(Uri uri)
     {
-      Log.d(TAG, "onChangeNotification:" + uri);
-      refreshQuickSettings(uri);
+        Log.d(TAG, "onChangeNotification:" + uri);
+    	if(uri.equals(Settings.System.getUriFor(KKC.S.ENABLE_PANELS_DROPSHADOW)))
+    	{
+    		if(mStatusBarView != null) 
+    			mStatusBarView.refreshEnablePanelsDropShadow();
+    	}
+    	else
+    		refreshQuickSettings(uri);
       super.onChangeNotification(uri);
     }
 
