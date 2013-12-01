@@ -1275,7 +1275,7 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
     }
 
     protected View getClockAreaRootView() { return mStatusBarView; }
-    protected View getNavBarRootView() { return mNavigationBarView.getCurrentView(); }
+    protected View getNavBarRootView() { return mNavigationBarView != null? mNavigationBarView.getCurrentView() : null; }
 
     public void showClock(boolean show) {
         if (mStatusBarView == null) return;
