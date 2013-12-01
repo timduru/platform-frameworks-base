@@ -21,6 +21,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.util.Log;
@@ -150,4 +151,9 @@ public class KatUtils {
 		InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
   }
 
+  public static Configuration invertOrientation(Configuration conf)
+  {
+	  conf.orientation = (conf.orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) ?  ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+	  return conf;
+  }
 }
