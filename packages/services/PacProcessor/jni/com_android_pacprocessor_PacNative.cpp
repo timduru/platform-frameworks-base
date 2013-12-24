@@ -48,7 +48,7 @@ bool pacSet = false;
 
 String16 jstringToString16(JNIEnv* env, jstring jstr) {
     const jchar* str = env->GetStringCritical(jstr, 0);
-    String16 str16(str, env->GetStringLength(jstr));
+    String16 str16((const char16_t*)str, env->GetStringLength(jstr));
     env->ReleaseStringCritical(jstr, str);
     return str16;
 }
@@ -57,7 +57,7 @@ jstring string16ToJstring(JNIEnv* env, String16 string) {
     const char16_t* str = string.string();
     size_t len = string.size();
 
-    return env->NewString(str, len);
+    return env->NewString((const jchar*)str, len);
 }
 
 static jboolean com_android_pacprocessor_PacNative_createV8ParserNativeLocked(JNIEnv* env, 

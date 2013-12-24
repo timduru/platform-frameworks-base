@@ -33,7 +33,7 @@ struct Vertex {
      * Program::set()), and used to make geometry damage rect calculation conservative (see
      * Rect::snapGeometryToPixelBoundaries())
      */
-    static const float gGeometryFudgeFactor = 0.0656f;
+    static constexpr float gGeometryFudgeFactor = 0.0656f;
 
     float position[2];
 

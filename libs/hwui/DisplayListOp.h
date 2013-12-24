@@ -77,7 +77,7 @@ public:
     virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
             bool useQuickReject) = 0;
 
-    virtual void output(int level, uint32_t logFlags = 0) const = 0;
+    virtual void output(int level, uint32_t logFlags = 0) = 0;
 
     // NOTE: it would be nice to declare constants and overriding the implementation in each op to
     // point at the constants, but that seems to require a .cpp file
@@ -274,7 +274,7 @@ public:
         renderer.save(mFlags);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Save flags %x", mFlags);
     }
 
@@ -308,7 +308,7 @@ public:
         renderer.restoreToCount(saveCount + mCount);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Restore to count %d", mCount);
     }
 
@@ -347,7 +347,7 @@ public:
         renderer.saveLayer(mArea.left, mArea.top, mArea.right, mArea.bottom, mAlpha, mMode, mFlags);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("SaveLayer%s of area " RECT_STRING,
                 (isSaveLayerAlpha() ? "Alpha" : ""),RECT_ARGS(mArea));
     }
@@ -384,7 +384,7 @@ public:
         renderer.translate(mDx, mDy);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Translate by %f %f", mDx, mDy);
     }
 
@@ -404,7 +404,7 @@ public:
         renderer.rotate(mDegrees);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Rotate by %f degrees", mDegrees);
     }
 
@@ -423,7 +423,7 @@ public:
         renderer.scale(mSx, mSy);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Scale by %f %f", mSx, mSy);
     }
 
@@ -443,7 +443,7 @@ public:
         renderer.skew(mSx, mSy);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Skew by %f %f", mSx, mSy);
     }
 
@@ -463,7 +463,7 @@ public:
         renderer.setMatrix(mMatrix);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         if (mMatrix) {
             OP_LOG("SetMatrix " MATRIX_STRING, MATRIX_ARGS(mMatrix));
         } else {
@@ -486,7 +486,7 @@ public:
         renderer.concatMatrix(mMatrix);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("ConcatMatrix " MATRIX_STRING, MATRIX_ARGS(mMatrix));
     }
 
@@ -530,7 +530,7 @@ public:
         renderer.clipRect(mArea.left, mArea.top, mArea.right, mArea.bottom, mOp);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("ClipRect " RECT_STRING, RECT_ARGS(mArea));
     }
 
@@ -559,7 +559,7 @@ public:
         renderer.clipPath(mPath, mOp);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         SkRect bounds = mPath->getBounds();
         OP_LOG("ClipPath bounds " RECT_STRING,
                 bounds.left(), bounds.top(), bounds.right(), bounds.bottom());
@@ -580,7 +580,7 @@ public:
         renderer.clipRegion(mRegion, mOp);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         SkIRect bounds = mRegion->getBounds();
         OP_LOG("ClipRegion bounds %d %d %d %d",
                 bounds.left(), bounds.top(), bounds.right(), bounds.bottom());
@@ -598,7 +598,7 @@ public:
         renderer.resetShader();
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOGS("ResetShader");
     }
 
@@ -613,7 +613,7 @@ public:
         renderer.setupShader(mShader);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("SetupShader, shader %p", mShader);
     }
 
@@ -629,7 +629,7 @@ public:
         renderer.resetColorFilter();
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOGS("ResetColorFilter");
     }
 
@@ -645,7 +645,7 @@ public:
         renderer.setupColorFilter(mColorFilter);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("SetupColorFilter, filter %p", mColorFilter);
     }
 
@@ -661,7 +661,7 @@ public:
         renderer.resetShadow();
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOGS("ResetShadow");
     }
 
@@ -677,7 +677,7 @@ public:
         renderer.setupShadow(mRadius, mDx, mDy, mColor);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("SetupShadow, radius %f, %f, %f, color %#x", mRadius, mDx, mDy, mColor);
     }
 
@@ -696,7 +696,7 @@ public:
         renderer.resetPaintFilter();
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOGS("ResetPaintFilter");
     }
 
@@ -712,7 +712,7 @@ public:
         renderer.setupPaintFilter(mClearBits, mSetBits);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("SetupPaintFilter, clear %#x, set %#x", mClearBits, mSetBits);
     }
 
@@ -804,7 +804,7 @@ public:
                 pureTranslate, bounds, mPaint);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw bitmap %p at %f %f", mBitmap, mLocalBounds.left, mLocalBounds.top);
     }
 
@@ -848,7 +848,7 @@ public:
         return renderer.drawBitmap(mBitmap, mMatrix, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw bitmap %p matrix " MATRIX_STRING, mBitmap, MATRIX_ARGS(mMatrix));
     }
 
@@ -877,8 +877,8 @@ public:
                 getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw bitmap %p src="RECT_STRING", dst="RECT_STRING,
+    virtual void output(int level, uint32_t logFlags) {
+        OP_LOG("Draw bitmap %p src=" RECT_STRING ", dst=" RECT_STRING,
                 mBitmap, RECT_ARGS(mSrc), RECT_ARGS(mLocalBounds));
     }
 
@@ -904,7 +904,7 @@ public:
                 mLocalBounds.top, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw bitmap %p", mBitmap);
     }
 
@@ -929,7 +929,7 @@ public:
                 mVertices, mColors, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw bitmap %p mesh %d x %d", mBitmap, mMeshWidth, mMeshHeight);
     }
 
@@ -1067,8 +1067,8 @@ public:
                 getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw patch "RECT_STRING, RECT_ARGS(mLocalBounds));
+    virtual void output(int level, uint32_t logFlags) {
+        OP_LOG("Draw patch " RECT_STRING, RECT_ARGS(mLocalBounds));
     }
 
     virtual const char* name() { return "DrawPatch"; }
@@ -1103,7 +1103,7 @@ public:
         return renderer.drawColor(mColor, mMode);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw color %#x, mode %d", mColor, mMode);
     }
 
@@ -1149,8 +1149,8 @@ public:
                 mLocalBounds.right, mLocalBounds.bottom, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw Rect "RECT_STRING, RECT_ARGS(mLocalBounds));
+    virtual void output(int level, uint32_t logFlags) {
+        OP_LOG("Draw Rect " RECT_STRING, RECT_ARGS(mLocalBounds));
     }
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
@@ -1173,7 +1173,7 @@ public:
         return renderer.drawRects(mRects, mCount, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Rects count %d", mCount);
     }
 
@@ -1200,8 +1200,8 @@ public:
                 mLocalBounds.right, mLocalBounds.bottom, mRx, mRy, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw RoundRect "RECT_STRING", rx %f, ry %f", RECT_ARGS(mLocalBounds), mRx, mRy);
+    virtual void output(int level, uint32_t logFlags) {
+        OP_LOG("Draw RoundRect " RECT_STRING ", rx %f, ry %f", RECT_ARGS(mLocalBounds), mRx, mRy);
     }
 
     virtual const char* name() { return "DrawRoundRect"; }
@@ -1221,7 +1221,7 @@ public:
         return renderer.drawCircle(mX, mY, mRadius, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Circle x %f, y %f, r %f", mX, mY, mRadius);
     }
 
@@ -1243,8 +1243,8 @@ public:
                 mLocalBounds.right, mLocalBounds.bottom, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw Oval "RECT_STRING, RECT_ARGS(mLocalBounds));
+    virtual void output(int level, uint32_t logFlags) {
+        OP_LOG("Draw Oval " RECT_STRING, RECT_ARGS(mLocalBounds));
     }
 
     virtual const char* name() { return "DrawOval"; }
@@ -1263,8 +1263,8 @@ public:
                 mStartAngle, mSweepAngle, mUseCenter, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw Arc "RECT_STRING", start %f, sweep %f, useCenter %d",
+    virtual void output(int level, uint32_t logFlags) {
+        OP_LOG("Draw Arc " RECT_STRING ", start %f, sweep %f, useCenter %d",
                 RECT_ARGS(mLocalBounds), mStartAngle, mSweepAngle, mUseCenter);
     }
 
@@ -1300,8 +1300,8 @@ public:
         deferInfo.batchId = DeferredDisplayList::kOpBatch_AlphaMaskTexture;
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw Path %p in "RECT_STRING, mPath, RECT_ARGS(mLocalBounds));
+    virtual void output(int level, uint32_t logFlags) {
+        OP_LOG("Draw Path %p in " RECT_STRING, mPath, RECT_ARGS(mLocalBounds));
     }
 
     virtual const char* name() { return "DrawPath"; }
@@ -1322,7 +1322,7 @@ public:
         return renderer.drawLines(mPoints, mCount, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Lines count %d", mCount);
     }
 
@@ -1349,7 +1349,7 @@ public:
         return renderer.drawPoints(mPoints, mCount, getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Points count %d", mCount);
     }
 
@@ -1361,7 +1361,7 @@ public:
     DrawSomeTextOp(const char* text, int bytesCount, int count, SkPaint* paint)
             : DrawOp(paint), mText(text), mBytesCount(bytesCount), mCount(count) {};
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw some text, %d bytes", mBytesCount);
     }
 
@@ -1478,7 +1478,7 @@ public:
         return status;
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Text of count %d, bytes %d", mCount, mBytesCount);
     }
 
@@ -1511,7 +1511,7 @@ public:
         return ret;
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Functor %p", mFunctor);
     }
 
@@ -1545,7 +1545,7 @@ public:
         return DrawGlInfo::kStatusDone;
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Display List %p, flags %#x", mDisplayList, mFlags);
         if (mDisplayList && (logFlags & kOpLogFlag_Recurse)) {
             mDisplayList->output(level + 1);
@@ -1568,7 +1568,7 @@ public:
         return renderer.drawLayer(mLayer, mX, mY);
     }
 
-    virtual void output(int level, uint32_t logFlags) const {
+    virtual void output(int level, uint32_t logFlags) {
         OP_LOG("Draw Layer %p at %f %f", mLayer, mX, mY);
     }
 
