@@ -1351,8 +1351,8 @@ public abstract class HardwareRenderer {
             }
 
             if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
-                throw new IllegalStateException("eglMakeCurrent failed " +
-                        GLUtils.getEGLErrorString(sEgl.eglGetError()));
+Log.e(LOG_TAG, "eglMakeCurrent failed " +  GLUtils.getEGLErrorString(sEgl.eglGetError()) );
+//                throw new IllegalStateException("eglMakeCurrent failed " + GLUtils.getEGLErrorString(sEgl.eglGetError()));
             }
 
             enableDirtyRegions();
