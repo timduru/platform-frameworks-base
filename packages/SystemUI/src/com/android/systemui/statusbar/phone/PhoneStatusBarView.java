@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.phone;
 
+import org.meerkats.katkiss.KKC;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -51,7 +55,9 @@ public class PhoneStatusBarView extends PanelBar {
         super(context, attrs);
 
         Resources res = getContext().getResources();
-        mScrimColor = res.getColor(R.color.notification_panel_scrim_color);
+        boolean enablePanelsDropShadow = Settings.System.getIntForUser(getContext().getContentResolver(), KKC.S.ENABLE_PANELS_DROPSHADOW, 0, UserHandle.USER_CURRENT) == 1;
+        
+        refreshEnablePanelsDropShadow();
         mSettingsPanelDragzoneMin = res.getDimension(R.dimen.settings_panel_dragzone_min);
         try {
             mSettingsPanelDragzoneFrac = res.getFraction(R.dimen.settings_panel_dragzone_fraction, 1, 1);
@@ -70,6 +76,12 @@ public class PhoneStatusBarView extends PanelBar {
         mBar = bar;
     }
 
+    public void refreshEnablePanelsDropShadow()
+    {
+        boolean enablePanelsDropShadow = Settings.System.getIntForUser(getContext().getContentResolver(), KKC.S.ENABLE_PANELS_DROPSHADOW, 0, UserHandle.USER_CURRENT) == 1;
+        mScrimColor = enablePanelsDropShadow? getContext().getResources().getColor(R.color.notification_panel_scrim_color) : 0;
+    }
+    
     public boolean hasFullWidthNotifications() {
         return mFullWidthNotifications;
     }

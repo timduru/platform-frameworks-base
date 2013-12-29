@@ -32,13 +32,16 @@ import com.android.systemui.R;
  */
 public class QuickSettingsContainerView extends FrameLayout {
 
-    // The number of columns in the QuickSettings grid
+
+	// The number of columns in the QuickSettings grid
     private int mNumColumns;
 
     // The gap between tiles in the QuickSettings grid
     private float mCellGap;
 
     private boolean mSingleRow;
+
+	private int mTileIconSize = 32;
 
     public QuickSettingsContainerView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -60,6 +63,8 @@ public class QuickSettingsContainerView extends FrameLayout {
         Resources r = getContext().getResources();
         mCellGap = r.getDimension(R.dimen.quick_settings_cell_gap);
         mNumColumns = r.getInteger(R.integer.quick_settings_num_columns);
+        //mTileIconSize = r.getInteger(R.dimen.qs_tile_icon_size);
+        
         requestLayout();
     }
 
@@ -75,7 +80,7 @@ public class QuickSettingsContainerView extends FrameLayout {
         float cellGap = mCellGap;
 
         if (mSingleRow) {
-            cellWidth = MeasureSpec.getSize(heightMeasureSpec);
+            cellWidth = mTileIconSize +1; //MeasureSpec.getSize(heightMeasureSpec);
             cellHeight = (int) cellWidth;
             cellGap /= 2;
         } else {

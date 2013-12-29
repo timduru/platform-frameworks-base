@@ -142,15 +142,17 @@ public abstract class BaseStatusBar extends SystemUI implements
 
 //KK
     public BatteryController mBatteryController, mDockBatteryController;
-    private boolean mHasDockBattery;
+    private boolean mHasDockBattery, mShowBtnSwitchToPrevious, mShowBtnSplitViewAuto ;
+    private CustomObserver mCustomObserver;
     protected ContentResolver mResolver;
     protected int mCurrentBarSizeMode;
     protected boolean mHardKeyboardInUse = false;
     protected View mClockAreaRootView;
 
     protected abstract View getClockAreaRootView() ;
+    protected abstract View getNavBarRootView() ;
     public abstract void showClock(boolean show) ;
-
+   
     // UI-specific methods
 
     /**
@@ -321,9 +323,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         mLocale = mContext.getResources().getConfiguration().locale;
         
-        new CustomObserver(mContext, this);
+        mCustomObserver = new CustomObserver(mContext, this);
         refreshClockVisibility();
         mContext.registerReceiver(mBroadcastReceiver, filter);
+        refreshNewNavButtonVisibility();
     }
 
     public void userSwitched(int newUserId) {
@@ -354,6 +357,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             mLocale = locale;
             mLayoutDirection = ld;
             refreshLayout(ld);
+        refreshNewNavButtonVisibility();
         }
     }
 
@@ -1164,12 +1168,44 @@ public abstract class BaseStatusBar extends SystemUI implements
     	  //showClockDate( Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_CLOCK_DATE, 0) == 1 );
     }
 
+    public void refreshNewNavButtonVisibility() {
+        mShowBtnSwitchToPrevious = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS, 1) == 1;
+        mShowBtnSplitViewAuto = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO, 1) == 1;
+
+        setSwitchToPreviousAppButtonVisibility(mShowBtnSwitchToPrevious);
+        setSplitViewAutoButtonVisibility(mShowBtnSplitViewAuto); 
+    }
+
+
     public void showClockDate(boolean show) {
     	View rootView = getClockAreaRootView();    	
         if (rootView == null) return;
         
         View v = rootView.findViewById(R.id.date);
         if (v != null)  v.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+
+
+    public void setSwitchToPreviousAppButtonVisibility(boolean visible) { setNavButtonVisibility(R.id.switch_toprevious_task, visible); }
+    public void setSplitViewAutoButtonVisibility(boolean visible) { setNavButtonVisibility(R.id.splitview_auto, visible); }
+
+    public void setExtraNavButtonsVisibility(boolean visible) 
+    { 
+      
+        setSwitchToPreviousAppButtonVisibility(mShowBtnSwitchToPrevious && visible); 
+        setSplitViewAutoButtonVisibility(mShowBtnSplitViewAuto && visible); 
+    }
+
+    public void setNavButtonVisibility(int id, boolean visible)
+    {
+	View navBarRootView = getNavBarRootView();
+        if(navBarRootView == null) return;
+
+        View buttonView = navBarRootView.findViewById(id);
+	if(buttonView == null) return;
+
+        buttonView.setVisibility(visible? View.VISIBLE : View.GONE);
     }
 
     // CustomObserver ChangeNotifications
@@ -1179,6 +1215,8 @@ public abstract class BaseStatusBar extends SystemUI implements
       ArrayList<Uri> uris = new  ArrayList<Uri>();
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_TIME));
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_DATE));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO));
       return uris;
     }
 
@@ -1187,7 +1225,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     {
       Log.d(TAG, "onChangeNotification:" + uri);
       if(uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_TIME)) || uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_DATE)) )
-    		  refreshClockVisibility();
+        refreshClockVisibility();
+      if(uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS)) || uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO)) )
+        refreshNewNavButtonVisibility();
     }
        
 

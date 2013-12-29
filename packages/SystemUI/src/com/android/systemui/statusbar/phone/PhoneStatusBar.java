@@ -63,6 +63,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -93,8 +94,6 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.ExternalBatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
@@ -377,6 +376,9 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
                     Settings.Global.getUriFor(SETTING_HEADS_UP), true,
                     mHeadsUpObserver);
         }
+        
+        refreshNewNavButtonVisibility();
+        refreshClockVisibility();
     }
 
     private void cleanupRibbon() {
@@ -488,7 +490,6 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
                     == KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT ? LAYOUT_NAV_BAR_LEFT : LAYOUT_NAV_BAR_STOCK;
 
                 mNavigationBarView = (NavigationBarView) View.inflate(context, navBarLayout, null);
-
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
                 mNavigationBarView.setOnTouchListener(new View.OnTouchListener() {
@@ -872,6 +873,7 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
         mNavigationBarView.getSearchLight().setOnTouchListener(mHomeSearchActionListener);
         updateSearchPanel();
+        refreshNewNavButtonVisibility();
     }
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
@@ -1291,6 +1293,7 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
     }
 
     protected View getClockAreaRootView() { return mStatusBarView; }
+    protected View getNavBarRootView() { return mNavigationBarView != null? mNavigationBarView.getCurrentView() : null; }
 
     public void showClock(boolean show) {
         if (mStatusBarView == null) return;
@@ -1375,6 +1378,7 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
                         | StatusBarManager.DISABLE_SEARCH)) != 0) {
             // the nav bar will take care of these
             if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state);
+            setExtraNavButtonsVisibility((state & StatusBarManager.DISABLE_RECENT) == 0);
 
             if ((state & StatusBarManager.DISABLE_RECENT) != 0) {
                 // close recents if it's visible
@@ -1478,6 +1482,21 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
         }
     };
 
+    private int getUseableScreenHeight()
+    {
+        //int rotation = mDisplay.getRotation();
+        DisplayInfo disp = new DisplayInfo() ;
+        mDisplay.getDisplayInfo(disp);
+        return disp.appHeight ;
+
+        /*
+                if(rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270)
+                return mDisplayMetrics.widthPixels;
+        else
+                return mDisplayMetrics.heightPixels;
+                */
+    }
+
     boolean panelsEnabled() {
         return (mDisabled & StatusBarManager.DISABLE_EXPAND) == 0;
     }
@@ -1492,7 +1511,7 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
         mPile.setLayoutTransitionsEnabled(true);
         if (mNavigationBarView != null)
             mNavigationBarView.setSlippery(true);
-
+        
         updateCarrierLabelVisibility(true);
 
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
@@ -1502,7 +1521,9 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarWindow.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        lp.height = getUseableScreenHeight() ;
+//        lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        
         mWindowManager.updateViewLayout(mStatusBarWindow, lp);
 
         visibilityChanged(true);
@@ -2803,6 +2824,8 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
     public ArrayList<Uri> getObservedUris()
     {
       ArrayList<Uri> uris = new  ArrayList<Uri>();
+      uris.addAll(super.getObservedUris());
+
       uris.add(Settings.System.getUriFor(KKC.S.QUICK_SETTINGS_TILES));
       uris.add(Settings.System.getUriFor(KKC.S.QUICK_SETTINGS_RIBBON_TILES));
       uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_ACCESS));
@@ -2810,15 +2833,23 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
       uris.add(Settings.System.getUriFor(KKC.S.QS_DYNAMIC_WIFI));
       uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_PULLDOWN));
       uris.add(Settings.System.getUriFor(KKC.S.QS_COLLAPSE_PANEL));
-
-      return uris;
+      
+      uris.add(Settings.System.getUriFor(KKC.S.ENABLE_PANELS_DROPSHADOW));
+      return uris; 
     }
 
     @Override
     public void onChangeNotification(Uri uri)
     {
-      Log.d(TAG, "onChangeNotification:" + uri);
-      refreshQuickSettings(uri);
+        Log.d(TAG, "onChangeNotification:" + uri);
+    	if(uri.equals(Settings.System.getUriFor(KKC.S.ENABLE_PANELS_DROPSHADOW)))
+    	{
+    		if(mStatusBarView != null) 
+    			mStatusBarView.refreshEnablePanelsDropShadow();
+    	}
+    	else
+    		refreshQuickSettings(uri);
+      super.onChangeNotification(uri);
     }
 
     public void refreshQuickSettings(Uri uri) {

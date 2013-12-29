@@ -21,6 +21,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.util.Log;
@@ -29,6 +30,12 @@ import android.os.SystemProperties;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.statusbar.IStatusBarService;
+
+import android.hardware.input.InputManager;
+import android.view.InputDevice;
+import android.view.KeyEvent;
+import android.view.KeyCharacterMap;
+import android.os.SystemClock;
 
 public class KatUtils {
     public static String[] HDMIModes = {"center", "crop", "scale"};
@@ -120,12 +127,33 @@ public class KatUtils {
 	  return info;
   }
 
-  public static void expandedDesktopSwitch(Context c, int style /* 0 both bars, 1: keep navbar*/)
+  public static void expandedDesktop(Context c, boolean on, int style /* 0 both bars, 1: keep navbar*/)
   {
-        boolean  currentlyExpanded = Settings.System.getInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE,  0) == 1;
-
-        Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, currentlyExpanded ? 0 : 1);
+        Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, on ? 1 : 0);
         Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, style);
   }
 
+  public static void expandedDesktopSwitch(Context c, int style /* 0 both bars, 1: keep navbar*/)
+  {
+        boolean  currentlyExpanded = Settings.System.getInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE,  0) == 1;
+	expandedDesktop(c, !currentlyExpanded, style);
+  }
+
+  public static void sendKeyDOWN(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_DOWN); }
+  public static void sendKeyUP(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_UP); }
+  public static void sendKey(final int keyCode, final int action) 
+  {
+	InputManager inputMgr = InputManager.getInstance();
+	if(inputMgr == null) return;
+	long currentTime = SystemClock.uptimeMillis();
+	inputMgr.injectInputEvent( 
+		new KeyEvent(currentTime, currentTime, action, keyCode, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_KEYBOARD), 
+		InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+  }
+
+  public static Configuration invertOrientation(Configuration conf)
+  {
+	  conf.orientation = (conf.orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) ?  ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+	  return conf;
+  }
 }

@@ -29,9 +29,13 @@ public final class KKC {
     public static final String SYSTEMUI_CLOCK_TIME = "kk_ui_clock_time";
     public static final String SYSTEMUI_CLOCK_DATE = "kk_ui_clock_date";
     
+    public static final String SYSTEMUI_BTN_SWITCH_TOPREVIOUS = "kk_ui_btn_switch_toprevious";
+    public static final String SYSTEMUI_BTN_SPLITVIEW_AUTO = "kk_ui_btn_splitview_auto";
+
     
     public static final String SYSTEMUI_RECENTS_KILLALL_BUTTON = "kk_ui_recents_killall_button";
     public static final String SYSTEMUI_RECENTS_MEM_DISPLAY = "kk_ui_recents_mem_display";
+    public static final String SYSTEMUI_RECENTS_MULTIWINDOW_ICONS = "kk_ui_recents_multiwindow_icons";
 
 
     public static final String SYSTEMUI_SOFTKEY_BACK = "systemui_softkey_back";
@@ -52,11 +56,16 @@ public final class KKC {
 
     public static final String EXPANDED_VIEW_WIDGET = "expanded_view_widget";
 
+    public static final String ENABLE_PANELS_DROPSHADOW = "enable_panels_dropshadow";
+    
+    
     public static final String ADB_PORT = "adb_port";
     public static final String HDMI_MODE = "hdmi_mode";
 
     public static final String KEYS_OVERRIDE = "keys_override";
     public static final String KEYS_OVERRIDE_PREFIX = "keys_override_";
+
+    public static final String AUTO_EXPANDED_DESKTOP_ONDOCK = "auto_expanded_desktop_ondock";
   }
 
 
@@ -87,6 +96,7 @@ public final class KKC {
 	    public static final String EXPANDED_DESKTOP_KEEPSTATUSBAR = "expanded_desktop_keepstatusbar";
 	    public static final String SHOW_NOTIFICATIONS_PANEL = "show_notifications_panel";
 	    public static final String SHOW_SETTINGS_PANEL = "show_settings_panel";
+	    public static final String SENDKEY_BASE = "sendkey_";
 	    	    
 //	    public static final String SYSTEMUI_TASK_POWER_MENU = "powermenu";
   }
