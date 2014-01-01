@@ -749,7 +749,15 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Help key. */
     public static final int KEYCODE_HELP = 259;
 
-    private static final int LAST_KEYCODE = KEYCODE_HELP;
+    public static final int KEYCODE_WIRELESS = 260;
+    public static final int KEYCODE_BLUETOOTH = 261;
+    public static final int KEYCODE_TOUCHPAD = 262;
+    public static final int KEYCODE_BRIGHTNESS_AUTO = 263;
+    public static final int KEYCODE_CAPTURE = 264;
+    public static final int KEYCODE_EUROPE_1 = 265;
+    public static final int KEYCODE_EUROPE_2 = 266;
+
+    private static final int LAST_KEYCODE = KEYCODE_EUROPE_2;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()

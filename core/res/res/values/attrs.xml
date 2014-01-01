@@ -1772,6 +1772,13 @@
         <enum name="KEYCODE_TV_MEDIA_CONTEXT_MENU" value="257" />
         <enum name="KEYCODE_TV_TIMER_PROGRAMMING" value="258" />
         <enum name="KEYCODE_HELP" value="259" />
+        <enum name="KEYCODE_WIRELESS" value="260" />
+        <enum name="KEYCODE_BLUETOOTH" value="261" />
+        <enum name="KEYCODE_TOUCHPAD" value="262" />
+        <enum name="KEYCODE_BRIGHTNESS_AUTO" value="263" />
+        <enum name="KEYCODE_CAPTURE" value="264" />
+        <enum name="KEYCODE_EUROPE_1" value="265" />
+        <enum name="KEYCODE_EUROPE_2" value="266" />
     </attr>
 
     <!-- ***************************************************************** -->

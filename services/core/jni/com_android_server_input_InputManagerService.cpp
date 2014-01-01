@@ -24,6 +24,11 @@
 // Log debug messages about InputDispatcherPolicy
 #define DEBUG_INPUT_DISPATCHER_POLICY 0
 
+#define ASUSDEC_DEV "/dev/asusdec"
+
+// copied from drivers/input/asusec/asusdec.h
+#define ASUSDEC_IOC_MAGIC   0xf4
+#define ASUSDEC_TP_CONTROL      _IOR(ASUSDEC_IOC_MAGIC, 5,  int)
 
 #include "JNIHelp.h"
 #include "jni.h"
@@ -51,6 +56,10 @@
 #include <ScopedLocalRef.h>
 #include <ScopedPrimitiveArray.h>
 #include <ScopedUtfChars.h>
+
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
 
 #include "com_android_server_power_PowerManagerService.h"
 #include "com_android_server_input_InputApplicationHandle.h"
@@ -191,6 +200,9 @@ public:
     void setShowTouches(bool enabled);
     void setInteractive(bool interactive);
     void reloadCalibration();
+    void setTouchpadMode(int32_t mode);
+    void setTouchpadStatus(int32_t status);
+
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -255,6 +267,12 @@ private:
         // Show touches feature enable/disable.
         bool showTouches;
 
+        // The touchpad gesture mode.
+        int32_t touchpadMode;
+
+        // Touchpad status.
+        int32_t touchpadStatus;
+
         // Sprite controller singleton, created on first use.
         sp<SpriteController> spriteController;
 
@@ -291,6 +309,9 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLocked.pointerSpeed = 0;
         mLocked.pointerGesturesEnabled = true;
         mLocked.showTouches = false;
+        mLocked.touchpadMode = 0;
+        mLocked.touchpadStatus = 1;
+
     }
 
     sp<EventHub> eventHub = new EventHub();
@@ -425,6 +446,9 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
 
         outConfig->setDisplayInfo(false /*external*/, mLocked.internalViewport);
         outConfig->setDisplayInfo(true /*external*/, mLocked.externalViewport);
+        outConfig->touchpadMode = mLocked.touchpadMode;
+
+
     } // release lock
 }
 
@@ -1003,6 +1027,35 @@ void NativeInputManager::loadPointerResources(PointerResources* outResources) {
             &outResources->spotAnchor);
 }
 
+void NativeInputManager::setTouchpadMode(int32_t mode) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+        if (mLocked.touchpadMode == mode) return;
+
+        ALOGI("Setting touchpad mode to %d.", mode);
+        mLocked.touchpadMode = mode;
+    } // release lock
+
+    mInputManager->getReader()->requestRefreshConfiguration(InputReaderConfiguration::CHANGE_TOUCHPAD_MODE);
+}
+
+void NativeInputManager::setTouchpadStatus(int32_t status) {
+    ALOGI("Setting touchpad status to %d.", status);
+
+    int fd = open(ASUSDEC_DEV, O_RDONLY | O_NONBLOCK);
+    if (fd < 0) { ALOGE("Could not open device %s\n", ASUSDEC_DEV); return ; }
+
+    int res = ioctl(fd, ASUSDEC_TP_CONTROL, status);
+
+    if (res != 0) ALOGE("Error calling ioctl, %d\n", res);
+
+    close(fd);
+    ALOGD("Touchpad ioctl %d is %d\n", ASUSDEC_TP_CONTROL,status);
+
+    //mInputManager->getReader()->requestRefreshConfiguration(InputReaderConfiguration::CHANGE_TOUCHPAD_STATUS);
+}
+
+
 
 // ----------------------------------------------------------------------------
 
@@ -1341,6 +1394,20 @@ static void nativeMonitor(JNIEnv* env, jclass clazz, jlong ptr) {
     im->getInputManager()->getDispatcher()->monitor();
 }
 
+static void nativeSetTouchpadMode(JNIEnv* env,
+        jclass clazz, jlong ptr, jint mode) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->setTouchpadMode(mode);
+}
+
+static void android_server_InputManager_nativeSetTouchpadStatus(JNIEnv* env,
+        jclass clazz, jlong ptr, jint status) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->setTouchpadStatus(status);
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gInputManagerMethods[] = {
@@ -1399,6 +1466,11 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeDump },
     { "nativeMonitor", "(J)V",
             (void*) nativeMonitor },
+    { "nativeSetTouchpadMode", "(JI)V",
+            (void*) nativeSetTouchpadMode },
+    { "nativeSetTouchpadStatus", "(JI)V",
+            (void*) android_server_InputManager_nativeSetTouchpadStatus },
+
 };
 
 #define FIND_CLASS(var, className) \
