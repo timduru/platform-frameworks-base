@@ -7105,31 +7105,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public IBinder getActivityForTask(int task, boolean onlyRoot) {
+   public IBinder getActivityForTask(int task, boolean onlyRoot) {
+        final ActivityStack mainStack = mStackSupervisor.getFocusedStack();
         synchronized(this) {
-            return null;/*getActivityForTaskLocked(task, onlyRoot);*/
-        }
-    }
-//FIXME Tim
-    /*
-    IBinder getActivityForTaskLocked(int task, boolean onlyRoot) {
-    	ActivityStack mainStack  = mStackSupervisor.getStack(ActivityStackSupervisor.HOME_STACK_ID);
-        final int N = mainStack..mHistory.size();
-        TaskRecord lastTask = null;
-        for (int i=0; i<N; i++) {
-            ActivityRecord r = (ActivityRecord)mainStack.mHistory.get(i);
-            if (r.task.taskId == task) {
-                if (!onlyRoot || lastTask != r.task) {
-                    return r.appToken;
-                }
-                return null;
-            }
-            lastTask = r.task;
-        }
+            ArrayList<ActivityStack> stacks = mStackSupervisor.getStacks();
+            for (ActivityStack stack : stacks) {
+                TaskRecord r = stack.taskForIdLocked(task);
 
+                if (r != null && r.getTopActivity() != null) {
+                    return r.getTopActivity().appToken;
+                } else {
+                    return null;
+                }
+            }
+        }
         return null;
     }
-*/
+
     // =========================================================
     // THUMBNAILS
     // =========================================================
