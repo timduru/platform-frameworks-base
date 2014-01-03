@@ -52,7 +52,7 @@ public class ExternalBatteryController extends BatteryController {
         }
         else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
             final int status = intent.getIntExtra(statusIntentParam, 0);
-            mBatteryAvailable = (status != BatteryManager.DOCK_STATE_UNDOCKED);
+            //FIXME Tim mBatteryAvailable = (status != BatteryManager.DOCK_STATE_UNDOCKED);
 
             super.onReceive(context, intent);
         }
