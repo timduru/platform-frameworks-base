@@ -1140,7 +1140,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void updateBarSizeMode() {
-        mCurrentBarSizeMode = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_BARSIZE, KKC.S.SYSTEMUI_BARSIZE_MODE_NORMAL);
+        mCurrentBarSizeMode = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_BARSIZE, KKC.S.SYSTEMUI_BARSIZE_MODE_SLIM);
     }
 
     protected int getBarSizeMode() {

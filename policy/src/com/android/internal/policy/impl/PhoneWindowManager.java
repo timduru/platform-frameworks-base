@@ -918,7 +918,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void refreshBarType() {
-        final int barType = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_SYSTEMBAR);
+        final int barType = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT);
         synchronized (mLock) {
         boolean expandedDesktop = false;
         int expandedStyle = KKC.S.SYSTEMUI_UI_MODE_PHABLETUI;
@@ -5369,7 +5369,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 		int barHeightLandscape;
 		int barWidth;
 
-		int barMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_BARSIZE, KKC.S.SYSTEMUI_BARSIZE_MODE_NORMAL);
+		int barMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_BARSIZE, KKC.S.SYSTEMUI_BARSIZE_MODE_SLIM);
                     Log.d(TAG, "refreshNavigationBarSize: mode="+barMode);
 
 		switch (barMode) {
