@@ -48,7 +48,7 @@
     <style name="TextAppearance.StatusBar.BatteryText" parent="@*android:style/TextAppearance.StatusBar">
         <item name="android:textSize">16dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
+        <item name="android:textColor">@color/status_bar_clock_color</item>
     </style>
 
     <style name="TextAppearance.StatusBar.TextButton"
