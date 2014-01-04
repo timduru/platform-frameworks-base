@@ -100,6 +100,7 @@
                     android:layout_height="18dp"
                     android:layout_width="wrap_content"
                     android:paddingLeft="4dip"
+                    android:visibility="gone"
                     />
 
                 <TextView
@@ -111,6 +112,7 @@
                     android:paddingLeft="1dp"
                     android:paddingRight="1dp"
                     android:gravity="center_vertical|left"
+                    android:visibility="gone"
                     />
 
                 <!-- battery must be padded below to match assets -->
