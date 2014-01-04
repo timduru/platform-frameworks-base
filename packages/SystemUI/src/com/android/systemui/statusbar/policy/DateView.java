@@ -74,23 +74,19 @@ public class DateView extends TextView {
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
         mContext.registerReceiver(mIntentReceiver, filter, null, null);
-    }
-    
-    @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
+
         updateClock();
-        //setUpdates();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+
+        mDateFormat = null; // reload the locale next time
+        mContext.unregisterReceiver(mIntentReceiver);
     }
 
     protected void updateClock() {
-        if(!isVisibleToUser()) return;
-
         if (mDateFormat == null) {
             final String dateFormat = getContext().getString(R.string.system_ui_date_pattern);
             final Locale l = Locale.getDefault();
