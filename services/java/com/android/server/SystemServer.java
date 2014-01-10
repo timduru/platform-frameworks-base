@@ -76,6 +76,11 @@ import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.meerkats.katkiss.KKC;
+import android.provider.Settings;
+
+
+
 class ServerThread {
     private static final String TAG = "SystemServer";
     private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
@@ -652,8 +657,9 @@ class ServerThread {
                 reportWtf("starting DropBoxManagerService", e);
             }
 
-            if (!disableNonCoreServices && context.getResources().getBoolean(
-                        R.bool.config_enableWallpaperService)) {
+            if (!disableNonCoreServices && context.getResources().getBoolean( R.bool.config_enableWallpaperService) 
+                 && Settings.System.getInt(context.getContentResolver(), KKC.S.SYSTEMUI_WALLPAPER_MODE, KKC.S.WALLPAPER_MODE_DISABLE_SYSTEM) != KKC.S.WALLPAPER_MODE_DISABLE_ALL 
+                 ) {
                 try {
                     Slog.i(TAG, "Wallpaper Service");
                     if (!headless) {

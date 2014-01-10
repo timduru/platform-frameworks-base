@@ -24,6 +24,7 @@ import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.provider.Settings;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -48,6 +49,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
+
+import org.meerkats.katkiss.KKC;
 
 /**
  * Default built-in wallpaper that simply shows a static image.
@@ -388,9 +391,11 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void updateWallpaperLocked() {
+
             Throwable exception = null;
             try {
                 mBackground = null;
+                if(mWallpaperMode != KKC.S.WALLPAPER_MODE_NORMAL) return;
                 mBackground = mWallpaperManager.getBitmap();
             } catch (RuntimeException e) {
                 exception = e;

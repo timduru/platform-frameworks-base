@@ -307,7 +307,7 @@ public class WallpaperManager {
                         }
                     }
                 }
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 // Ignore
             }
             return null;
@@ -335,7 +335,7 @@ public class WallpaperManager {
                         }
                     }
                 }
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 // Ignore
             }
             return null;

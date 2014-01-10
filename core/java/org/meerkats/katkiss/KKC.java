@@ -17,6 +17,11 @@ public final class KKC {
     public static final int SYSTEMUI_BARSIZE_MODE_SLIM = 1;
     public static final int SYSTEMUI_BARSIZE_MODE_TINY = 2;
 
+    public static final String SYSTEMUI_WALLPAPER_MODE = "kk_ui_wallpaper_mode";
+    public static final int WALLPAPER_MODE_NORMAL = 0;
+    public static final int WALLPAPER_MODE_DISABLE_SYSTEM = 1;
+    public static final int WALLPAPER_MODE_DISABLE_ALL = 2;
+
 
     public static final String DEVICE_SETTINGS_TOUCHPAD_MODE = "device_settings_touchpad_mode"; // The touchpad gesture mode. (0 = spots, 1 = pointer)
     public static final String DEVICE_SETTINGS_TOUCHPAD_ENABLED = "device_settings_touchpad_enabled";
@@ -78,6 +83,7 @@ public final class KKC {
 
     public static final String CMD_BARTYPE_CHANGED = "bar_type_changed";
     public static final String CMD_BARSIZE_CHANGED = "bar_size_changed";
+    public static final String CMD_REBOOT = "reboot";
     public static final String EXTRA_RESTART_SYSTEMUI = "restart_systemui";
   }
   

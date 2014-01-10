@@ -526,13 +526,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             String action = intent.getAction();
             if (action.equals(KKC.I.UI_CHANGED)) {
                 String cmd = intent.getStringExtra(KKC.I.CMD);
-                if (cmd == null)
-                    return;
 
-                if (cmd.equals(KKC.I.CMD_BARTYPE_CHANGED))
+                if (KKC.I.CMD_BARTYPE_CHANGED.equals(cmd))
                     refreshBarType();
-                else if(cmd.equals(KKC.I.CMD_BARSIZE_CHANGED))
+                else if(KKC.I.CMD_BARSIZE_CHANGED.equals(cmd))
                     refreshNavigationBarSize();
+                else if(KKC.I.CMD_REBOOT.equals(cmd))
+                    mWindowManagerFuncs.reboot(null, true);
 
                 if (intent.getBooleanExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, false)) {
                     closeApplication("com.android.settings");
