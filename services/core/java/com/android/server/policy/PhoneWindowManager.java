@@ -671,9 +671,10 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
                     refreshBarType();
                 else if(KKC.I.CMD_BARSIZE_CHANGED.equals(cmd))
                     refreshNavigationBarSize();
-                else if(KKC.I.CMD_REBOOT.equals(cmd))
-                    mWindowManagerFuncs.reboot(null, true);
+                else 
 */
+                if(KKC.I.CMD_REBOOT.equals(cmd))
+                    mWindowManagerFuncs.reboot(null, true);
 
                 if (intent.getBooleanExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, false)) {
                     closeApplication("com.android.settings");

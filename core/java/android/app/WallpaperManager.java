@@ -316,7 +316,7 @@ public class WallpaperManager {
                         }
                     }
                 }
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 // Ignore
             }
             return null;
@@ -330,6 +330,7 @@ public class WallpaperManager {
                     return BitmapFactory.decodeStream(is, null, options);
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "Can't decode stream", e);
+                } catch (Exception  e) {
                 } finally {
                     try {
                         is.close();

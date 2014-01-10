@@ -31,8 +31,10 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
 import android.app.WallpaperManager;
 import android.content.Context;
+import android.provider.Settings;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -61,6 +63,10 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import android.net.Uri;
+import org.meerkats.katkiss.KKC;
+import org.meerkats.katkiss.CustomObserver;
+
 /**
  * A wallpaper service is responsible for showing a live wallpaper behind
  * applications that would like to sit on top of it.  This service object
@@ -70,7 +76,7 @@ import java.util.ArrayList;
  * and implementing {@link #onCreateEngine()} to return a new instance of
  * your engine.
  */
-public abstract class WallpaperService extends Service {
+public abstract class WallpaperService extends Service implements CustomObserver.ChangeNotification {
     /**
      * The {@link Intent} that must be declared as handled by the service.
      * To be supported, the service must also require the
@@ -117,6 +123,9 @@ public abstract class WallpaperService extends Service {
         boolean sync;
     }
     
+    private CustomObserver mCustomObserver;
+    protected int mWallpaperMode = 0;
+
     /**
      * The actual implementation of a wallpaper.  A wallpaper service may
      * have multiple instances running (for example as a real wallpaper
@@ -583,6 +592,8 @@ public abstract class WallpaperService extends Service {
         }
 
         void updateSurface(boolean forceRelayout, boolean forceReport, boolean redrawNeeded) {
+            if( mWallpaperMode == KKC.S.WALLPAPER_MODE_DISABLE_ALL) return;
+
             if (mDestroyed) {
                 Log.w(TAG, "Ignoring updateSurface: destroyed");
             }
@@ -1246,6 +1257,8 @@ public abstract class WallpaperService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mCustomObserver = new CustomObserver(this, this);
+        refreshCustomConf();
     }
 
     @Override
@@ -1282,5 +1295,26 @@ public abstract class WallpaperService extends Service {
             out.print("  Engine "); out.print(engine); out.println(":");
             engine.dump("    ", fd, out, args);
         }
+    }
+
+    // CustomObserver ChangeNotifications
+    @Override
+    public ArrayList<Uri> getObservedUris()
+    {
+      ArrayList<Uri> uris = new  ArrayList<Uri>();
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_WALLPAPER_MODE));
+      return uris;
+    }
+
+    @Override
+    public void onChangeNotification(Uri uri)
+    {
+      Log.d(TAG, "onChangeNotification:" + uri);
+      if(uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_WALLPAPER_MODE)))
+        refreshCustomConf();
+    }
+
+    private void refreshCustomConf() {
+       mWallpaperMode = Settings.System.getInt(getContentResolver(), KKC.S.SYSTEMUI_WALLPAPER_MODE, Resources.getSystem().getInteger(com.android.internal.R.integer.wallpaper_mode_default));
     }
 }

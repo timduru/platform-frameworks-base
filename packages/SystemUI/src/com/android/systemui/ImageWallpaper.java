@@ -22,6 +22,9 @@ import static javax.microedition.khronos.egl.EGL10.*;
 import android.app.ActivityManager;
 import android.app.WallpaperManager;
 import android.content.ComponentCallbacks2;
+import android.content.Context;
+import android.provider.Settings;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -50,6 +53,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
+
+import org.meerkats.katkiss.KKC;
 
 /**
  * Default built-in wallpaper that simply shows a static image.
@@ -305,6 +310,8 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         void drawFrame() {
+            if(mWallpaperMode != KKC.S.WALLPAPER_MODE_NORMAL) return;
+
             try {
                 DisplayInfo displayInfo = getDefaultDisplayInfo();
                 int newRotation = displayInfo.rotation;
@@ -420,11 +427,13 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void updateWallpaperLocked() {
+
             Throwable exception = null;
             try {
                 mBackground = null;
                 mBackgroundWidth = -1;
                 mBackgroundHeight = -1;
+                if(mWallpaperMode != KKC.S.WALLPAPER_MODE_NORMAL) return;
                 mBackground = mWallpaperManager.getBitmap();
                 mBackgroundWidth = mBackground.getWidth();
                 mBackgroundHeight = mBackground.getHeight();
