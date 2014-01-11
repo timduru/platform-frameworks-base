@@ -994,9 +994,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private void onExpandDesktopModeChanged() {
         boolean expandDesktopModeOn = Settings.System.getInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
-        boolean expandDesktopStyleKeepNavBar = Settings.System.getInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, 0) == 1 /* KKC.S.SYSTEMUI_UI_MODE_PHABLETUI*/;
-        mExpandDesktopModeOn.updateState(expandDesktopModeOn && !expandDesktopStyleKeepNavBar ? ToggleAction.State.On : ToggleAction.State.Off);
-        mExpandDesktopModeNoNavBar.updateState(expandDesktopModeOn && expandDesktopStyleKeepNavBar ? ToggleAction.State.On : ToggleAction.State.Off);
+        boolean expandDesktopStyleKeepStatusBar = Settings.System.getInt( mContext.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, 0) == 1 /* KKC.S.SYSTEMUI_UI_MODE_PHABLETUI*/;
+        mExpandDesktopModeOn.updateState(expandDesktopModeOn && !expandDesktopStyleKeepStatusBar ? ToggleAction.State.On : ToggleAction.State.Off);
+        mExpandDesktopModeNoNavBar.updateState(expandDesktopModeOn && expandDesktopStyleKeepStatusBar ? ToggleAction.State.On : ToggleAction.State.Off);
     }
 
     /**

@@ -25,6 +25,7 @@ import static org.meerkats.katkiss.QSConstants.TILE_BRIGHTNESS;
 import static org.meerkats.katkiss.QSConstants.TILE_CAMERA;
 import static org.meerkats.katkiss.QSConstants.TILE_DELIMITER;
 import static org.meerkats.katkiss.QSConstants.TILE_GPS;
+import static org.meerkats.katkiss.QSConstants.TILE_EXPANDEDDESKTOP;
 import static org.meerkats.katkiss.QSConstants.TILE_LOCKSCREEN;
 import static org.meerkats.katkiss.QSConstants.TILE_NETWORKADB;
 import static org.meerkats.katkiss.QSConstants.TILE_SETTINGS;
@@ -59,7 +60,8 @@ import com.android.systemui.quicksettings.BluetoothTile;
 import com.android.systemui.quicksettings.BrightnessTile;
 import com.android.systemui.quicksettings.BugReportTile;
 import com.android.systemui.quicksettings.CameraTile;
-//import com.android.systemui.quicksettings.GPSTile;
+import com.android.systemui.quicksettings.GPSTile;
+import com.android.systemui.quicksettings.ExpandedDesktopTile;
 import com.android.systemui.quicksettings.InputMethodTile;
 import com.android.systemui.quicksettings.NetworkAdbTile;
 import com.android.systemui.quicksettings.PreferencesTile;
@@ -175,7 +177,9 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_WIFI)) {
                 qs = new WiFiTile(mContext, this, mStatusBarService.mNetworkController);
             } else if (tile.equals(TILE_GPS)) {
-//                qs = new GPSTile(mContext, this);
+                qs = new GPSTile(mContext, this);
+            } else if (tile.equals(TILE_EXPANDEDDESKTOP)) {
+                qs = new ExpandedDesktopTile(mContext, this, mHandler);
             } else if (tile.equals(TILE_BLUETOOTH) && bluetoothSupported) {
                 qs = new BluetoothTile(mContext, this, mStatusBarService.mBluetoothController);
             } else if (tile.equals(TILE_BRIGHTNESS)) {
