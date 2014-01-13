@@ -281,6 +281,11 @@
             <file lang="ja">MTLmr3m.ttf</file>
         </fileset>
     </family>
+    <family>
+        <fileset>
+            <file>DroidSansThai.ttf</file>
+        </fileset>
+    </family>
     <!-- Note: complex scripts (i.e. those requiring shaping in Harfbuzz) have
          a cumulative limit of 64k glyphs. Thus, if they are placed after the
          large fonts such as DroidSansFallback, they are likely to render

@@ -150,7 +150,8 @@ font_src_files += \
     RobotoCondensed-Italic.ttf \
     RobotoCondensed-BoldItalic.ttf \
     RobotoCondensed-Light.ttf \
-    RobotoCondensed-LightItalic.ttf
+    DroidSansThai.ttf \
+    RobotoCondensed-LightItalic.ttf 
 
 endif # !MINIMAL_FONT
 
