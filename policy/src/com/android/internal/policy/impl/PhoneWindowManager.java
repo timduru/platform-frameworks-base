@@ -2882,7 +2882,7 @@ Log.d("TTTim", "mExpandedDesktopStyle=" + mExpandedDesktopStyle);
                     if (!expandedDesktopHidesNavigationBar()) {
                         mStableFullscreenBottom = mTmpNavigationFrame.top;
                     }
-Log.v("TTTim", "transientNavBarShowing="+transientNavBarShowing+" navVisible="+navVisible);
+//Log.v("TTTim", "transientNavBarShowing="+transientNavBarShowing+" navVisible="+navVisible);
                     if (transientNavBarShowing
                             || (navVisible && expandedDesktopHidesNavigationBar())) {
                         mNavigationBarController.setBarShowingLw(true);
