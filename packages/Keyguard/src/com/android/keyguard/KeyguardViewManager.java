@@ -52,6 +52,13 @@ import android.view.ViewManager;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import android.app.WallpaperManager;
+import android.provider.Settings;
+import org.meerkats.katkiss.KKC;
+
+
+
+
 /**
  * Manages creating, showing, hiding and resetting the keyguard.  Calls back
  * via {@link KeyguardViewMediator.ViewMediatorCallback} to poke
@@ -137,6 +144,7 @@ public class KeyguardViewManager {
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
         mKeyguardHost.setVisibility(View.VISIBLE);
         mKeyguardView.show();
+
         mKeyguardView.requestFocus();
     }
 
@@ -315,7 +323,30 @@ public class KeyguardViewManager {
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
 
         mKeyguardHost.restoreHierarchyState(mStateContainer);
+
+        addInternalWallpaperIfNeeded();
     }
+
+    private void addInternalWallpaperIfNeeded() {
+        if(Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_WALLPAPER_MODE, KKC.S.WALLPAPER_MODE_DISABLE_SYSTEM) != KKC.S.WALLPAPER_MODE_DISABLE_SYSTEM) return;
+
+        WallpaperManager wallpaperManager = WallpaperManager.getInstance(mContext);
+        if(wallpaperManager == null) return;
+
+        Bitmap bmp = null;
+        if (wallpaperManager.getWallpaperInfo() == null) {
+            Drawable wallpaper = wallpaperManager.getDrawable();
+            if (wallpaper instanceof BitmapDrawable)
+                bmp = ((BitmapDrawable) wallpaper).getBitmap();
+        }
+
+        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+        if(monitor != null && bmp != null) {
+            Log.d("TTTim", "Keyguard set bmp");
+            monitor.dispatchSetBackground(bmp);
+        }
+    }
+
 
     private void inflateKeyguardView(Bundle options) {
         View v = mKeyguardHost.findViewById(R.id.keyguard_host_view);
@@ -475,6 +506,7 @@ public class KeyguardViewManager {
                 Slog.w(TAG, "Exception calling onShown():", e);
             }
         }
+
     }
 
     public synchronized void verifyUnlock() {
