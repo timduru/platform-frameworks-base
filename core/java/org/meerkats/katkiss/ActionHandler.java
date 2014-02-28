@@ -131,6 +131,8 @@ public class ActionHandler {
         	KatUtils.expandedDesktopSwitch(mContext, 2);
         else if(action.equals(KKC.A.EXPANDED_DESKTOP_KEEPSTATUSBAR))
         	KatUtils.expandedDesktopSwitch(mContext, 1);
+        else if(action.equals(KKC.A.AUTOROTATION_TOGGLE))
+        	KatUtils.rotationToggle(mContext);
         else if(action.equals(KKC.A.SHOW_NOTIFICATIONS_PANEL))
         	new WMController(mContext).showNotificationsPanel();
         else if(action.equals(KKC.A.SHOW_SETTINGS_PANEL))

@@ -71,6 +71,7 @@ public final class KKC {
     public static final String KEYS_OVERRIDE_PREFIX = "keys_override_";
 
     public static final String AUTO_EXPANDED_DESKTOP_ONDOCK = "auto_expanded_desktop_ondock";
+
   }
 
 
@@ -103,6 +104,7 @@ public final class KKC {
 	    public static final String SHOW_NOTIFICATIONS_PANEL = "show_notifications_panel";
 	    public static final String SHOW_SETTINGS_PANEL = "show_settings_panel";
 	    public static final String SENDKEY_BASE = "sendkey_";
+	    public static final String AUTOROTATION_TOGGLE = "autorotation";
 	    	    
 //	    public static final String SYSTEMUI_TASK_POWER_MENU = "powermenu";
   }
