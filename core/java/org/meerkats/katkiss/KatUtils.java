@@ -156,4 +156,10 @@ public class KatUtils {
 	  conf.orientation = (conf.orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) ?  ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 	  return conf;
   }
+
+  public static void rotationToggle(Context c, boolean on) 
+  {
+        Settings.System.putInt( c.getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, on ? 1 : 0);
+  }
+
 }

@@ -14,6 +14,7 @@ import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
+import org.meerkats.katkiss.KatUtils;
 
 public class AutoRotateTile extends QuickSettingsTile {
 
@@ -23,7 +24,8 @@ public class AutoRotateTile extends QuickSettingsTile {
         mOnClick = new OnClickListener() {
             @Override
             public void onClick(View v) {
-                RotationPolicy.setRotationLock(mContext, getAutoRotation());
+                  KatUtils.rotationToggle(mContext, !getAutoRotation());
+//                RotationPolicy.setRotationLock(mContext, getAutoRotation());
             }
         };
 
