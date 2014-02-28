@@ -29,90 +29,90 @@ map key 86 PLUS
 key GRAVE {
     label:                              '\u00b8'
     base:                               '\u0327'
-    shift:                              '\u0308'
+    shift, capslock:                    '\u0308'
 }
 
 key 1 {
     label:                              '1'
     base:                               '1'
-    shift:                              '!'
+    shift, capslock:                    '!'
     ralt:                               '\u0303'
 }
 
 key 2 {
     label:                              '2'
     base:                               '2'
-    shift:                              '"'
+    shift, capslock:                    '"'
     ralt:                               '\u030c'
 }
 
 key 3 {
     label:                              '3'
     base:                               '3'
-    shift:                              '#'
+    shift, capslock:                    '#'
     ralt:                               '\u0302'
 }
 
 key 4 {
     label:                              '4'
     base:                               '4'
-    shift:                              '$'
+    shift, capslock:                    '$'
     ralt:                               '\u0306'
 }
 
 key 5 {
     label:                              '5'
     base:                               '5'
-    shift:                              '%'
+    shift, capslock:                    '%'
     ralt:                               '\u030a'
 }
 
 key 6 {
     label:                              '6'
     base:                               '6'
-    shift:                              '&'
+    shift, capslock:                    '&'
     ralt:                               '\u0328'
 }
 
 key 7 {
     label:                              '7'
     base:                               '7'
-    shift:                              '/'
+    shift, capslock:                    '/'
     ralt:                               '\u0300'
 }
 
 key 8 {
     label:                              '8'
     base:                               '8'
-    shift:                              '('
+    shift, capslock:                    '('
     ralt:                               '\u0307'
 }
 
 key 9 {
     label:                              '9'
     base:                               '9'
-    shift:                              ')'
+    shift, capslock:                    ')'
     ralt:                               '\u0301'
 }
 
 key 0 {
     label:                              '0'
     base:                               '0'
-    shift:                              '='
+    shift, capslock:                    '='
     ralt:                               '\u030b'
 }
 
 key SLASH {
     label:                              '\''
     base:                               '\''
-    shift:                              '?'
+    shift, capslock:                    '?'
     ralt:                               '\u0308'
 }
 
 key EQUALS {
     label:                              '+'
     base:                               '+'
-    shift:                              '*'
+    shift, capslock:                    '*'
     ralt:                               '\u0327'
 }
 
@@ -282,7 +282,7 @@ key BACKSLASH {
 key PLUS {
     label:                              '<'
     base:                               '<'
-    shift:                              '>'
+    shift, capslock:                    '>'
 }
 
 key Y {
@@ -334,19 +334,19 @@ key M {
 key COMMA {
     label:                              ','
     base:                               ','
-    shift:                              ';'
+    shift, capslock:                    ';'
     ralt:                               '<'
 }
 
 key PERIOD {
     label:                              '.'
     base:                               '.'
-    shift:                              ':'
+    shift, capslock:                    ':'
     ralt:                               '>'
 }
 
 key MINUS {
     label:                              '-'
     base:                               '-'
-    shift:                              '_'
+    shift, capslock:                    '_'
 }

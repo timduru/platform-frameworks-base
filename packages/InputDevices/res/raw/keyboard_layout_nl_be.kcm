@@ -3,7 +3,7 @@ type OVERLAY
 key GRAVE {
     label, number:                      '\u00b2'
     base:                               '\u00b2'
-    shift:                              '\u00b3'
+    shift, capslock:                    '\u00b3'
     alt, ctrl, meta:                    none
 }
 
@@ -380,7 +380,7 @@ key ENTER {
 key EUROPE_2 {
     label, number:                      '<'
     base:                               '<'
-    shift:                              '>'
+    shift, capslock:                    '>'
     alt:                                '\\'
     alt+shift:                          none
     ctrl, meta:                         none

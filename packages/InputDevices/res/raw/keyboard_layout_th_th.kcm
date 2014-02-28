@@ -398,6 +398,6 @@ key SPACE {
 key EUROPE_2 {
     label, number:                      '\\'
     base:                               '\\'
-    shift:                              '|'
+    shift, capslock:                    '|'
     alt, ctrl, meta:                    none
 }

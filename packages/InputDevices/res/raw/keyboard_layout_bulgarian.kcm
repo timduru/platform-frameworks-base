@@ -35,84 +35,84 @@ key GRAVE {
 key 1 {
     label:                              '1'
     base:                               '1'
-    shift:                              '!'
+    shift, capslock:                    '!'
     ralt:                               '!'
 }
 
 key 2 {
     label:                              '2'
     base:                               '2'
-    shift:                              '?'
+    shift, capslock:                    '?'
     ralt:                               '@'
 }
 
 key 3 {
     label:                              '3'
     base:                               '3'
-    shift:                              '+'
+    shift, capslock:                    '+'
     ralt:                               '#'
 }
 
 key 4 {
     label:                              '4'
     base:                               '4'
-    shift:                              '"'
+    shift, capslock:                    '"'
     ralt:                               '$'
 }
 
 key 5 {
     label:                              '5'
     base:                               '5'
-    shift:                              '%'
+    shift, capslock:                    '%'
     ralt:                               '%'
 }
 
 key 6 {
     label:                              '6'
     base:                               '6'
-    shift:                              '='
+    shift, capslock:                    '='
     ralt:                               '^'
 }
 
 key 7 {
     label:                              '7'
     base:                               '7'
-    shift:                              ':'
+    shift, capslock:                    ':'
     ralt:                               '&'
 }
 
 key 8 {
     label:                              '8'
     base:                               '8'
-    shift:                              '/'
+    shift, capslock:                    '/'
     ralt:                               '*'
 }
 
 key 9 {
     label:                              '9'
     base:                               '9'
-    shift:                              '_'
+    shift, capslock:                    '_'
     ralt:                               '('
 }
 
 key 0 {
     label:                              '0'
     base:                               '0'
-    shift:                              '\u2116'
+    shift, capslock:                    '\u2116'
     ralt:                               ')'
 }
 
 key MINUS {
     label:                              '-'
     base:                               '-'
-    shift:                              'I'
+    shift, capslock:                    'I'
     ralt:                               '_'
 }
 
 key EQUALS {
     label:                              '.'
     base:                               '.'
-    shift:                              'V'
+    shift, capslock:                    'V'
     ralt:                               '='
     ralt+shift:                         '+'
 }
@@ -122,7 +122,7 @@ key EQUALS {
 key Q {
     label:                              ','
     base:                               ','
-    shift:                              '\u044b'
+    shift, capslock:                    '\u044b'
     capslock:                           '\u042b'
     ralt:                               'q'
     ralt+shift, ralt+capslock:          'Q'
@@ -211,7 +211,7 @@ key LEFT_BRACKET {
 key RIGHT_BRACKET {
     label:                              ';'
     base:                               ';'
-    shift:                              '\u00a7'
+    shift, capslock:                    '\u00a7'
     ralt:                               ']'
     ralt+shift:                         '}'
 }
@@ -309,7 +309,7 @@ key APOSTROPHE {
 key BACKSLASH {
     label:                              '('
     base:                               '('
-    shift:                              ')'
+    shift, capslock:                    ')'
     ralt:                               '\\'
     ralt+shift:                         '|'
 }
@@ -319,7 +319,7 @@ key BACKSLASH {
 key PLUS {
     label:                              '\\'
     base:                               '\\'
-    shift:                              '|'
+    shift, capslock:                    '|'
     ralt:                               '\\'
     ralt+shift:                         '|'
 }

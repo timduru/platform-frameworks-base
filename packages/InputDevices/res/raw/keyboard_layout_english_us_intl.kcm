@@ -25,13 +25,13 @@ map key 86 PLUS
 key GRAVE {
     label:                              '\u0300'
     base:                               '\u0300'
-    shift:                              '\u0303'
+    shift, capslock:                    '\u0303'
 }
 
 key 1 {
     label:                              '1'
     base:                               '1'
-    shift:                              '!'
+    shift, capslock:                    '!'
     ralt:                               '\u00a1'
     ralt+shift:                         '\u00b9'
 }
@@ -39,21 +39,21 @@ key 1 {
 key 2 {
     label:                              '2'
     base:                               '2'
-    shift:                              '@'
+    shift, capslock:                    '@'
     ralt:                               '\u00b2'
 }
 
 key 3 {
     label:                              '3'
     base:                               '3'
-    shift:                              '#'
+    shift, capslock:                    '#'
     ralt:                               '\u00b3'
 }
 
 key 4 {
     label:                              '4'
     base:                               '4'
-    shift:                              '$'
+    shift, capslock:                    '$'
     ralt:                               '\u00a4'
     ralt+shift:                         '\u00a3'
 }
@@ -61,56 +61,56 @@ key 4 {
 key 5 {
     label:                              '5'
     base:                               '5'
-    shift:                              '%'
+    shift, capslock:                    '%'
     ralt:                               '\u20ac'
 }
 
 key 6 {
     label:                              '6'
     base:                               '6'
-    shift:                              '\u0302'
+    shift, capslock:                    '\u0302'
     ralt:                               '\u00bc'
 }
 
 key 7 {
     label:                              '7'
     base:                               '7'
-    shift:                              '&'
+    shift, capslock:                    '&'
     ralt:                               '\u00bd'
 }
 
 key 8 {
     label:                              '8'
     base:                               '8'
-    shift:                              '*'
+    shift, capslock:                    '*'
     ralt:                               '\u00be'
 }
 
 key 9 {
     label:                              '9'
     base:                               '9'
-    shift:                              '('
+    shift, capslock:                    '('
     ralt:                               '\u2018'
 }
 
 key 0 {
     label:                              '0'
     base:                               '0'
-    shift:                              ')'
+    shift, capslock:                    ')'
     ralt:                               '\u2019'
 }
 
 key MINUS {
     label:                              '-'
     base:                               '-'
-    shift:                              '_'
+    shift, capslock:                    '_'
     ralt:                               '\u00a5'
 }
 
 key EQUALS {
     label:                              '='
     base:                               '='
-    shift:                              '+'
+    shift, capslock:                    '+'
     ralt:                               '\u00d7'
     shift+ralt:                         '\u00f7'
 }
@@ -199,21 +199,21 @@ key P {
 key LEFT_BRACKET {
     label:                              '['
     base:                               '['
-    shift:                              '{'
+    shift, capslock:                    '{'
     ralt:                               '\u00ab'
 }
 
 key RIGHT_BRACKET {
     label:                              ']'
     base:                               ']'
-    shift:                              '}'
+    shift, capslock:                    '}'
     ralt:                               '\u00bb'
 }
 
 key BACKSLASH {
     label:                              '\\'
     base:                               '\\'
-    shift:                              '|'
+    shift, capslock:                    '|'
     ralt:                               '\u00ac'
     shift+ralt:                         '\u00a6'
 }
@@ -285,7 +285,7 @@ key L {
 key SEMICOLON {
     label:                              ';'
     base:                               ';'
-    shift:                              ':'
+    shift, capslock:                    ':'
     ralt:                               '\u00b6'
     shift+ralt:                         '\u00b0'
 }
@@ -293,7 +293,7 @@ key SEMICOLON {
 key APOSTROPHE {
     label:                              '\''
     base:                               '\''
-    shift:                              '"'
+    shift, capslock:                    '"'
     ralt:                               '\u0301'
     shift+ralt:                         '\u0308'
 }
@@ -303,7 +303,7 @@ key APOSTROPHE {
 key PLUS {
     label:                              '\\'
     base:                               '\\'
-    shift:                              '|'
+    shift, capslock:                    '|'
     ralt:                               '\u00ac'
     shift+ralt:                         '\u00a6'
 }
@@ -360,7 +360,7 @@ key M {
 key COMMA {
     label:                              ','
     base:                               ','
-    shift:                              '<'
+    shift, capslock:                    '<'
     ralt:                               '\u00e7'
     shift+ralt:                         '\u00c7'
 }
@@ -368,12 +368,12 @@ key COMMA {
 key PERIOD {
     label:                              '.'
     base:                               '.'
-    shift:                              '>'
+    shift, capslock:                    '>'
 }
 
 key SLASH {
     label:                              '/'
     base:                               '/'
-    shift:                              '?'
+    shift, capslock:                    '?'
     ralt:                               '\u00bf'
 }
