@@ -81,11 +81,13 @@ public final class KKC {
     public static final String CMD = "cmd";
 
     public static final String UI_CHANGED = "intent_ui_changed";
+    public static final String GLOBAL_ACTIONS = "intent_global_actions";
 
     public static final String CMD_BARTYPE_CHANGED = "bar_type_changed";
     public static final String CMD_BARSIZE_CHANGED = "bar_size_changed";
     public static final String CMD_REBOOT = "reboot";
     public static final String EXTRA_RESTART_SYSTEMUI = "restart_systemui";
+
   }
   
   //Actions
@@ -105,6 +107,12 @@ public final class KKC {
 	    public static final String SHOW_SETTINGS_PANEL = "show_settings_panel";
 	    public static final String SENDKEY_BASE = "sendkey_";
 	    public static final String AUTOROTATION_TOGGLE = "autorotation";
+            public static final String SHOW_POWERMENU = "show_powermenu";
+
+            public static final String WIFI_TOGGLE = "wifi_toggle";
+            public static final String BLUETOOTH_TOGGLE = "bluetooth_toggle";
+            public static final String TOUCHPAD_TOGGLE = "touchpad_toggle";
+            public static final String LAUNCH_SETTINGS = "launch_settings";
 	    	    
 //	    public static final String SYSTEMUI_TASK_POWER_MENU = "powermenu";
   }

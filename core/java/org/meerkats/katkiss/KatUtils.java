@@ -36,6 +36,8 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.KeyCharacterMap;
 import android.os.SystemClock;
+import android.os.UserHandle;
+
 
 public class KatUtils {
     public static String[] HDMIModes = {"center", "crop", "scale"};
@@ -166,5 +168,14 @@ public class KatUtils {
   {
         Settings.System.putInt( c.getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, on ? 1 : 0);
   }
+
+  public static void sendIntentToWindowManager(Context c, String action, String cmd, boolean shouldRestartUI) 
+  {
+        Intent intent = new Intent()
+                .setAction(action)
+                .putExtra(KKC.I.CMD,  cmd)
+                .putExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, shouldRestartUI);
+        c.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_ALL));
+    }
 
 }

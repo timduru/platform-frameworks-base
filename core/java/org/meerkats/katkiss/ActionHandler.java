@@ -133,6 +133,8 @@ public class ActionHandler {
         	KatUtils.expandedDesktopSwitch(mContext, 1);
         else if(action.equals(KKC.A.AUTOROTATION_TOGGLE))
         	KatUtils.rotationToggle(mContext);
+        else if(action.equals(KKC.A.SHOW_POWERMENU) || action.equals(KKC.A.WIFI_TOGGLE) || action.equals(KKC.A.BLUETOOTH_TOGGLE) || action.equals(KKC.A.TOUCHPAD_TOGGLE) || action.equals(KKC.A.LAUNCH_SETTINGS))
+        	KatUtils.sendIntentToWindowManager(mContext, KKC.I.GLOBAL_ACTIONS, action, false);
         else if(action.equals(KKC.A.SHOW_NOTIFICATIONS_PANEL))
         	new WMController(mContext).showNotificationsPanel();
         else if(action.equals(KKC.A.SHOW_SETTINGS_PANEL))

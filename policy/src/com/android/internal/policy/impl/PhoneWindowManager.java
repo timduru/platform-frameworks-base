@@ -548,6 +548,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }, 250);
                 }
             }
+            else if(action.equals(KKC.I.GLOBAL_ACTIONS)) {
+                String cmd = intent.getStringExtra(KKC.I.CMD);
+                if (KKC.A.SHOW_POWERMENU.equals(cmd))
+                    showGlobalActionsDialog();
+                else if (KKC.A.WIFI_TOGGLE.equals(cmd))
+                    wifiToggle();
+                else if (KKC.A.BLUETOOTH_TOGGLE.equals(cmd))
+                    bluetoothToggle();
+                else if (KKC.A.TOUCHPAD_TOGGLE.equals(cmd))
+                    touchpadToggle();
+                else if (KKC.A.LAUNCH_SETTINGS.equals(cmd))
+                    launchSettings();
+            }
+
         }
     }
 
@@ -1027,6 +1041,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         filter = new IntentFilter();
         filter.addAction(KKC.I.UI_CHANGED);
+        filter.addAction(KKC.I.GLOBAL_ACTIONS);
         context.registerReceiver(mGlobalIntentReceiver, filter);
         // monitor for system gestures
         mSystemGestures = new SystemGesturesPointerEventListener(context,
