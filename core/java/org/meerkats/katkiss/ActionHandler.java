@@ -133,7 +133,11 @@ public class ActionHandler {
         	KatUtils.expandedDesktopSwitch(mContext, 1);
         else if(action.equals(KKC.A.AUTOROTATION_TOGGLE))
         	KatUtils.rotationToggle(mContext);
-        else if(action.equals(KKC.A.SHOW_POWERMENU) || action.equals(KKC.A.WIFI_TOGGLE) || action.equals(KKC.A.BLUETOOTH_TOGGLE) || action.equals(KKC.A.TOUCHPAD_TOGGLE) || action.equals(KKC.A.LAUNCH_SETTINGS))
+        else if(action.equals(KKC.A.SHOW_POWERMENU) || action.equals(KKC.A.WIFI_TOGGLE) || action.equals(KKC.A.BLUETOOTH_TOGGLE) || action.equals(KKC.A.TOUCHPAD_TOGGLE) || action.equals(KKC.A.LAUNCH_SETTINGS)
+                || action.equals(KKC.A.BRIGHTNESS_DOWN) || action.equals(KKC.A.BRIGHTNESS_UP) || action.equals(KKC.A.BRIGHTNESS_AUTO)
+                || action.equals(KKC.A.MEDIA_PREVIOUS) || action.equals(KKC.A.MEDIA_NEXT) || action.equals(KKC.A.MEDIA_PLAYPAUSE)
+                || action.equals(KKC.A.AUDIO_DOWN) || action.equals(KKC.A.AUDIO_UP) || action.equals(KKC.A.AUDIO_MUTE)
+               )
         	KatUtils.sendIntentToWindowManager(mContext, KKC.I.GLOBAL_ACTIONS, action, false);
         else if(action.equals(KKC.A.SHOW_NOTIFICATIONS_PANEL))
         	new WMController(mContext).showNotificationsPanel();

@@ -147,10 +147,13 @@ public class KatUtils {
   {
 	InputManager inputMgr = InputManager.getInstance();
 	if(inputMgr == null) return;
-	long currentTime = SystemClock.uptimeMillis();
-	inputMgr.injectInputEvent( 
-		new KeyEvent(currentTime, currentTime, action, keyCode, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_KEYBOARD), 
-		InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+	inputMgr.injectInputEvent( newKeyEvent(keyCode, action), InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+  }
+
+  public static KeyEvent newKeyEvent(final int keyCode, final int action) 
+  { 
+       long currentTime = SystemClock.uptimeMillis();
+       return new KeyEvent(currentTime, currentTime, action, keyCode, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_KEYBOARD);
   }
 
   public static Configuration invertOrientation(Configuration conf)

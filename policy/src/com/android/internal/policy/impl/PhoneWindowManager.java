@@ -560,6 +560,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     touchpadToggle();
                 else if (KKC.A.LAUNCH_SETTINGS.equals(cmd))
                     launchSettings();
+                else if (KKC.A.BRIGHTNESS_DOWN.equals(cmd))
+                    brightnessControl(KeyEvent.KEYCODE_BRIGHTNESS_DOWN);
+                else if (KKC.A.BRIGHTNESS_UP.equals(cmd))
+                    brightnessControl(KeyEvent.KEYCODE_BRIGHTNESS_UP);
+                else if (KKC.A.BRIGHTNESS_AUTO.equals(cmd))
+                    brightnessControl(KeyEvent.KEYCODE_BRIGHTNESS_AUTO);
+                else if (KKC.A.MEDIA_PREVIOUS.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.ACTION_DOWN)); 
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.ACTION_UP)); 
+                }
+                else if (KKC.A.MEDIA_NEXT.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.ACTION_DOWN)); 
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.ACTION_UP));
+                }
+                else if (KKC.A.MEDIA_PLAYPAUSE.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.ACTION_DOWN)); 
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.ACTION_UP)); 
+                }
+/*                else if (KKC.A.AUDIO_DOWN.equals(cmd))
+                    handleVolumeKey(isMusicActive()?AudioManager.STREAM_MUSIC:AudioManager.STREAM_SYSTEM, KeyEvent.KEYCODE_VOLUME_DOWN);
+                else if (KKC.A.AUDIO_UP.equals(cmd)) {
+                    handleVolumeKey(isMusicActive()?AudioManager.STREAM_MUSIC:AudioManager.STREAM_SYSTEM, KeyEvent.KEYCODE_VOLUME_UP);
+                }*/
+                else if (KKC.A.AUDIO_MUTE.equals(cmd)) {
+                    muteVolume(false);
+                }
             }
 
         }
@@ -4817,7 +4843,7 @@ Log.d("TTTim", "mExpandedDesktopStyle=" + mExpandedDesktopStyle);
                 sensorRotation = lastRotation;
             }
 
-            Log.v(TAG, "mLidState=" + mLidState+ " mLidOpenRotation=" + mLidOpenRotation+ " mDockMode="+ mDockMode+ " mAllowAllRotations=" +mAllowAllRotations);
+	    Log.v(TAG, "mLidState=" + mLidState+ " mLidOpenRotation=" + mLidOpenRotation+ " mDockMode="+ mDockMode+ " mAllowAllRotations=" +mAllowAllRotations);
 
             final int preferredRotation;
             if (mDockMode != Intent.EXTRA_DOCK_STATE_UNDOCKED && mLidState == LID_OPEN && mLidOpenRotation >= 0) {

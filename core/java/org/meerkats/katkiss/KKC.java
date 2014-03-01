@@ -113,6 +113,15 @@ public final class KKC {
             public static final String BLUETOOTH_TOGGLE = "bluetooth_toggle";
             public static final String TOUCHPAD_TOGGLE = "touchpad_toggle";
             public static final String LAUNCH_SETTINGS = "launch_settings";
+            public static final String BRIGHTNESS_DOWN = "brightness_down";
+            public static final String BRIGHTNESS_UP = "brightness_up";
+            public static final String BRIGHTNESS_AUTO = "brightness_auto";
+            public static final String MEDIA_PREVIOUS = "media_previous";
+            public static final String MEDIA_NEXT = "media_next";
+            public static final String MEDIA_PLAYPAUSE = "media_playpause";
+            public static final String AUDIO_DOWN = "audio_down";
+            public static final String AUDIO_UP = "audio_up";
+            public static final String AUDIO_MUTE = "audio_mute";
 	    	    
 //	    public static final String SYSTEMUI_TASK_POWER_MENU = "powermenu";
   }
