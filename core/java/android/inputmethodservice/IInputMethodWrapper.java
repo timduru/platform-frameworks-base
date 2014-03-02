@@ -276,6 +276,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @Override
     public void setSessionEnabled(IInputMethodSession session, boolean enabled) {
+        if(session == null) return;
         try {
             InputMethodSession ls = ((IInputMethodSessionWrapper)
                     session).getInternalInputMethodSession();
@@ -292,6 +293,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @Override
     public void revokeSession(IInputMethodSession session) {
+        if(session == null) return;
         try {
             InputMethodSession ls = ((IInputMethodSessionWrapper)
                     session).getInternalInputMethodSession();
