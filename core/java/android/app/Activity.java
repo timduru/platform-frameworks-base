@@ -5247,7 +5247,28 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */
+    public final void setSplitViewRect(int l, int t, int r, int b) {
+        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+        /*try {
+            wm.setSplitViewRect(l,t,r,b);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not update split view rect", e);
+        }*/
+        updateSplitViewMetrics(false);
+    }
+
+    /** @hide */
+    public final boolean isSplitView() {
+        return mIsSplitView;
+    }
+
+    /** @hide */
     final void updateSplitViewMetrics(boolean shouldReset) {
+        if (mParent != null) {
+            // Also update the parent activities, don't let the windows hanging
+            mParent.updateSplitViewMetrics(shouldReset);
+        }
+
         final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
 
         try {
@@ -5277,6 +5298,12 @@ public class Activity extends ContextThemeWrapper
                     mOriginalBounds.right = params.x + params.width;
                     mOriginalBounds.bottom = params.y + params.height;
                 }
+
+                /*try {
+                    wm.setSplitViewRect(mOriginalBounds.left, mOriginalBounds.top, mOriginalBounds.right, mOriginalBounds.bottom);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not update split view rect", e);
+                }*/
 
                 Rect windowBounds = wm.getSplitViewRect(getTaskId(), false);
                 mWindow.setLayout(windowBounds.right - windowBounds.left,

@@ -9885,9 +9885,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Dispatch to this window if it is wants key events.
             if (win.canReceiveKeys()) {
-                if (wtoken != null) {
-                    if (mIsTokenSplitted.containsKey(wtoken) && mIsTokenSplitted.get(wtoken)) {
-                        if ((mTaskTouched != null && mTaskTouched.equals(wtoken)) || mTaskTouched == null) {
+                if (mFocusedApp != null) {
+                    if (mIsTokenSplitted.containsKey(mFocusedApp.token) && mIsTokenSplitted.get(mFocusedApp.token)) {
+                        if ((mTaskTouched != null && mTaskTouched.equals(mFocusedApp.token)) || mTaskTouched == null) {
                             if (DEBUG_FOCUS) Slog.v(
                                 TAG, "Found focus @ " + i + " = " + win);
                             return win;
