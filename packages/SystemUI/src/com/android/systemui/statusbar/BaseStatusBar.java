@@ -1167,7 +1167,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public void refreshNewNavButtonVisibility() {
         mShowBtnSwitchToPrevious = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS, 1) == 1;
-        mShowBtnSplitViewAuto = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO, 0) == 1;
+        mShowBtnSplitViewAuto = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO, 1) == 1;
 
         setSwitchToPreviousAppButtonVisibility(mShowBtnSwitchToPrevious);
         setSplitViewAutoButtonVisibility(mShowBtnSplitViewAuto); 

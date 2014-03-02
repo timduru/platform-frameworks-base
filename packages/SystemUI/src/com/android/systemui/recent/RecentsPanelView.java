@@ -516,7 +516,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
 
         updateRecentsKillAllButton();
-        mMultiWindowEnabled = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_RECENTS_MULTIWINDOW_ICONS, 0) == 1;
+        mMultiWindowEnabled = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_RECENTS_MULTIWINDOW_ICONS, 1) == 1;
 
         
 
