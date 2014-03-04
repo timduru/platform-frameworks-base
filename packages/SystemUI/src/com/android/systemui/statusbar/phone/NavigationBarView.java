@@ -281,6 +281,14 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.home);
     }
 
+    public View getSplitViewAutoButton() {
+        return mCurrentView.findViewById(R.id.splitview_auto);
+    }
+
+    public View getSwitchToPreviousTaskButton() {
+        return mCurrentView.findViewById(R.id.switch_toprevious_task);
+    }
+
     // for when home is disabled, but search isn't
     public View getSearchLight() {
         return mCurrentView.findViewById(R.id.search_light);

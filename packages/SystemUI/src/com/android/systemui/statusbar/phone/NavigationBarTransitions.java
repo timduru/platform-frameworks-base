@@ -81,6 +81,9 @@ public final class NavigationBarTransitions extends BarTransitions {
         setKeyButtonViewQuiescentAlpha(mView.getRecentsButton(), alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getMenuButton(), alpha, animate);
 
+        setKeyButtonViewQuiescentAlpha(mView.getSplitViewAutoButton(), alpha, animate);
+        setKeyButtonViewQuiescentAlpha(mView.getSwitchToPreviousTaskButton(), alpha, animate);
+
         setKeyButtonViewQuiescentAlpha(mView.getSearchLight(), KEYGUARD_QUIESCENT_ALPHA, animate);
         setKeyButtonViewQuiescentAlpha(mView.getCameraButton(), KEYGUARD_QUIESCENT_ALPHA, animate);
 
