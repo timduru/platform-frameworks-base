@@ -271,6 +271,15 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.ime_switcher);
     }
 
+    public View getSplitViewAutoButton() {
+        return mCurrentView.findViewById(R.id.splitview_auto);
+    }
+
+    public View getSwitchToPreviousTaskButton() {
+        return mCurrentView.findViewById(R.id.switch_toprevious_task);
+    }
+
+
     private void getIcons(Resources res) {
         mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
