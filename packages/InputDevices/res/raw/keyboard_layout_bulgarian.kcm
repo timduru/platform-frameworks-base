@@ -122,7 +122,7 @@ key EQUALS {
 key Q {
     label:                              ','
     base:                               ','
-    shift, capslock:                    '\u044b'
+    shift:                              '\u044b'
     capslock:                           '\u042b'
     ralt:                               'q'
     ralt+shift, ralt+capslock:          'Q'

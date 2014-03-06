@@ -311,7 +311,7 @@ key L {
 key SEMICOLON {
     label, number:                      '\u05e3'
     base:                               '\u05e3'
-    shift, capslock:                    ':'
+    shift:                              ':'
     capslock:                           ';'
     capslock+shift:                     '\u05e3'
     alt, ctrl, meta:                    none
@@ -320,7 +320,7 @@ key SEMICOLON {
 key APOSTROPHE {
     label, number:                      ','
     base:                               ','
-    shift, capslock:                    '"'
+    shift:                              '"'
     capslock:                           '\''
     capslock+shift:                     ','
     alt, ctrl, meta:                    none
@@ -391,7 +391,7 @@ key M {
 key COMMA {
     label, number:                      '\u05ea'
     base:                               '\u05ea'
-    shift, capslock:                    '<'
+    shift:                              '<'
     capslock:                           ','
     capslock+shift:                     '\u05ea'
     alt, ctrl, meta:                    none
@@ -400,7 +400,7 @@ key COMMA {
 key PERIOD {
     label, number:                      '\u05e5'
     base:                               '\u05e5'
-    shift, capslock:                    '>'
+    shift:                              '>'
     capslock:                           '.'
     capslock+shift:                     '\u05e5'
     alt, ctrl, meta:                    none
@@ -409,7 +409,7 @@ key PERIOD {
 key SLASH {
     label, number:                      '.'
     base:                               '.'
-    shift, capslock:                    '?'
+    shift:                              '?'
     capslock:                           '/'
     capslock+shift:                     '.'
     alt, ctrl, meta:                    none

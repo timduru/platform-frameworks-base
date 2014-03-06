@@ -218,7 +218,7 @@ key P {
 key LEFT_BRACKET {
     label, number:                      '\u00fc'
     base:                               '\u00fc'
-    shift, capslock:                    '\u00e8'
+    shift:                              '\u00e8'
     capslock:                           '\u00dc'
     alt:                                '['
     alt+shift:                          none
@@ -321,7 +321,7 @@ key L {
 key SEMICOLON {
     label, number:                      '\u00f6'
     base:                               '\u00f6'
-    shift, capslock:                    '\u00e9'
+    shift:                              '\u00e9'
     capslock:                           '\u00d6'
     capslock+shift:                     '\u00c9'
     alt, ctrl, meta:                    none
@@ -330,7 +330,7 @@ key SEMICOLON {
 key APOSTROPHE {
     label, number:                      '\u00e4'
     base:                               '\u00e4'
-    shift, capslock:                    '\u00e0'
+    shift:                              '\u00e0'
     capslock:                           '\u00c4'
     alt:                                '{'
     alt+shift:                          none
