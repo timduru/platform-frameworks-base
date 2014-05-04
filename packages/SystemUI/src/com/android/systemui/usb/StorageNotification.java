@@ -198,7 +198,8 @@ public class StorageNotification extends SystemUI {
              * and enable UMS notification if connected.
              */
             Intent intent = new Intent();
-            intent.setClass(mContext, com.android.internal.app.ExternalMediaFormatActivity.class);
+            intent.setAction(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
+
             PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
 
             setMediaStorageNotification(
