@@ -122,6 +122,8 @@ public final class KKC {
             public static final String AUDIO_DOWN = "audio_down";
             public static final String AUDIO_UP = "audio_up";
             public static final String AUDIO_MUTE = "audio_mute";
+
+            public static final String RELAUNCH_FLOATING = "relaunch_floating";
 	    	    
 //	    public static final String SYSTEMUI_TASK_POWER_MENU = "powermenu";
   }

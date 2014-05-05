@@ -262,4 +262,27 @@ public class WMController
 		try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).expandSettingsPanel(); } 
 		catch (Exception e) { }
 	}
+
+
+	public synchronized void relaunchTopAsFloating()
+	{
+		RunningTaskInfo top =  getTopTask();
+		if(top == null) return;
+
+       		String packageName = top.baseActivity.getPackageName();
+
+		//killApp(killApp);
+		PackageManager pm = _c.getPackageManager();
+		Intent intent = pm.getLaunchIntentForPackage(packageName);
+                intent.addFlags(Intent.FLAG_FLOATING_WINDOW | Intent.FLAG_ACTIVITY_NEW_TASK);
+   		_c.startActivity(intent);
+	}
+
+	public synchronized static void killApp(Context c, String packageName)
+	{
+		if(packageName == null) return;
+		final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+		am.forceStopPackage(packageName);
+        }
+
 }
