@@ -285,6 +285,10 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.splitview_auto);
     }
 
+    public View getRelaunchFloatingButton() {
+        return mCurrentView.findViewById(R.id.relaunch_floating);
+    }
+
     public View getSwitchToPreviousTaskButton() {
         return mCurrentView.findViewById(R.id.switch_toprevious_task);
     }

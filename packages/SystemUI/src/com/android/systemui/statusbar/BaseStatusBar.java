@@ -141,7 +141,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
 //KK
     public BatteryController mBatteryController, mDockBatteryController;
-    private boolean mHasDockBattery, mShowBtnSwitchToPrevious, mShowBtnSplitViewAuto ;
+    private boolean mHasDockBattery, mShowBtnSwitchToPrevious, mShowBtnSplitViewAuto, mShowBtnRelaunchFloating ;
     private CustomObserver mCustomObserver;
     protected ContentResolver mResolver;
     protected int mCurrentBarSizeMode;
@@ -1168,9 +1168,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     public void refreshNewNavButtonVisibility() {
         mShowBtnSwitchToPrevious = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS, 1) == 1;
         mShowBtnSplitViewAuto = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO, 1) == 1;
+        mShowBtnRelaunchFloating = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_RELAUNCH_FLOATING, 1) == 1;
 
-        setSwitchToPreviousAppButtonVisibility(mShowBtnSwitchToPrevious);
-        setSplitViewAutoButtonVisibility(mShowBtnSplitViewAuto); 
+        setNavButtonVisibility(R.id.switch_toprevious_task, mShowBtnSwitchToPrevious);
+        setNavButtonVisibility(R.id.splitview_auto, mShowBtnSplitViewAuto); 
+        setNavButtonVisibility(R.id.relaunch_floating, mShowBtnRelaunchFloating); 
     }
 
 
@@ -1182,16 +1184,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (v != null)  v.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-
-
-    public void setSwitchToPreviousAppButtonVisibility(boolean visible) { setNavButtonVisibility(R.id.switch_toprevious_task, visible); }
-    public void setSplitViewAutoButtonVisibility(boolean visible) { setNavButtonVisibility(R.id.splitview_auto, visible); }
-
     public void setExtraNavButtonsVisibility(boolean visible) 
     { 
-      
-        setSwitchToPreviousAppButtonVisibility(mShowBtnSwitchToPrevious && visible); 
-        setSplitViewAutoButtonVisibility(mShowBtnSplitViewAuto && visible); 
+        setNavButtonVisibility(R.id.switch_toprevious_task, mShowBtnSwitchToPrevious && visible);
+        setNavButtonVisibility(R.id.splitview_auto, mShowBtnSplitViewAuto && visible);
+        setNavButtonVisibility(R.id.relaunch_floating, mShowBtnRelaunchFloating && visible);
     }
 
     public void setNavButtonVisibility(int id, boolean visible)
@@ -1214,6 +1211,7 @@ public abstract class BaseStatusBar extends SystemUI implements
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_DATE));
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS));
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_RELAUNCH_FLOATING));
       return uris;
     }
 
@@ -1223,7 +1221,10 @@ public abstract class BaseStatusBar extends SystemUI implements
       Log.d(TAG, "onChangeNotification:" + uri);
       if(uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_TIME)) || uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_CLOCK_DATE)) )
         refreshClockVisibility();
-      if(uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS)) || uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO)) )
+      if(uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS)) 
+	|| uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO)) 
+	|| uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_RELAUNCH_FLOATING)) 
+	)
         refreshNewNavButtonVisibility();
     }
        

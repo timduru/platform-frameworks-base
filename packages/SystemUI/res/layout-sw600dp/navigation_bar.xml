@@ -99,6 +99,14 @@
                 systemui:keyConfigUri="kk_ui_splitview_auto_target_uri"
                 systemui:keyClickAction="splitview_auto"
                 />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/relaunch_floating"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_navbar_relaunch_floating"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyConfigUri="kk_ui_relaunch_floating_target_uri"
+                systemui:keyClickAction="relaunch_floating"
+                />
 
             <Space 
                 android:layout_width="match_parent"
@@ -262,6 +270,15 @@
                 systemui:keyConfigUri="kk_ui_splitview_auto_target_uri"
                 systemui:keyClickAction="splitview_auto"
                 />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/relaunch_floating"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_navbar_relaunch_floating"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                systemui:keyConfigUri="kk_ui_relaunch_floating_target_uri"
+                systemui:keyClickAction="relaunch_floating"
+                />
+
 
             <Space 
                 android:layout_width="match_parent"

@@ -267,13 +267,17 @@ public class WMController
 	public synchronized void relaunchTopAsFloating()
 	{
 		RunningTaskInfo top =  getTopTask();
-		if(top == null) return;
+		if(top == null) { Log.w(TAG, "relaunchTopAsFloating: no TopTask"); return; }
 
        		String packageName = top.baseActivity.getPackageName();
+		if(packageName == null) { Log.w(TAG, "relaunchTopAsFloating: no packageName"); return; }
+ 		Log.d(TAG, "relaunchTopAsFloating: packageName=" + packageName );
 
 		//killApp(killApp);
 		PackageManager pm = _c.getPackageManager();
 		Intent intent = pm.getLaunchIntentForPackage(packageName);
+		if(intent == null) { Log.w(TAG, "relaunchTopAsFloating: no intent for packageName:" + packageName); return; }
+
                 intent.addFlags(Intent.FLAG_FLOATING_WINDOW | Intent.FLAG_ACTIVITY_NEW_TASK);
    		_c.startActivity(intent);
 	}

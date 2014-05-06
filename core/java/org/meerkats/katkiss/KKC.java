@@ -36,6 +36,7 @@ public final class KKC {
     
     public static final String SYSTEMUI_BTN_SWITCH_TOPREVIOUS = "kk_ui_btn_switch_toprevious";
     public static final String SYSTEMUI_BTN_SPLITVIEW_AUTO = "kk_ui_btn_splitview_auto";
+    public static final String SYSTEMUI_BTN_RELAUNCH_FLOATING = "kk_ui_btn_relaunch_floating";
 
     
     public static final String SYSTEMUI_RECENTS_KILLALL_BUTTON = "kk_ui_recents_killall_button";
