@@ -478,7 +478,7 @@ final class ActivityRecord {
             }
 
             if ((intent != null && (aInfo.flags & ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS) != 0)
-                || floatingWindow) {
+                /*|| floatingWindow*/) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
             }
 
