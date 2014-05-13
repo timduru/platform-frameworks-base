@@ -79,7 +79,7 @@ public class RecentsActivity extends Activity {
             if (action == MotionEvent.ACTION_OUTSIDE
                     || (action == MotionEvent.ACTION_DOWN
                     && !mPanel.isInContentArea((int) ev.getX(), (int) ev.getY()))) {
-                dismissAndGoHome();
+                dismissAndDoNothing();
                 return true;
             }
             return false;
