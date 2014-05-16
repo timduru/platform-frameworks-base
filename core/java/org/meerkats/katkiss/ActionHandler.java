@@ -128,7 +128,9 @@ public class ActionHandler {
         else if(action.equals(KKC.A.SPLITVIEW_2))
         	new WMController(mContext).switchTopTaskToSplitView(1);
         else if(action.equals(KKC.A.RELAUNCH_FLOATING))
-        	new WMController(mContext).relaunchTopAsFloating();
+        	new WMController(mContext).switchTopAsFloating();
+        else if(action.equals(KKC.A.SHOW_HIDE_ALL_FLOATING))
+        	new WMController(mContext).switchAllFloating();
 
         else if(action.equals(KKC.A.EXPANDED_DESKTOP))
         	KatUtils.expandedDesktopSwitch(mContext, 2);
