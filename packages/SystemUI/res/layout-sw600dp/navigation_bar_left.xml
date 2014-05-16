@@ -104,6 +104,7 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyConfigUri="kk_ui_relaunch_floating_target_uri"
                 systemui:keyClickAction="relaunch_floating"
+                systemui:longPressAction="show_hide_all_floating"
                 />
 
             <Space
@@ -267,6 +268,7 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 systemui:keyConfigUri="kk_ui_relaunch_floating_target_uri"
                 systemui:keyClickAction="relaunch_floating"
+                systemui:longPressAction="show_hide_all_floating"
                 />
 
 

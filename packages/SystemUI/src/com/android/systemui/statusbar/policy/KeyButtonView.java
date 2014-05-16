@@ -126,7 +126,6 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         String clickAction = a.getString(R.styleable.KeyButtonView_keyClickAction);
         if( clickAction != null) mClickActionHandler = new ActionHandler(context, clickAction);
         
-        a.recycle();
 
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
@@ -135,9 +134,18 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
           _customLongClick = new CustomLongClick(mContext);
           setOnLongClickListener(_customLongClick);
 
-          _observer = new CustomObserver(context, this);
-          updateCustomConfig();        
+         String defaultLongClickAction = a.getString(R.styleable.KeyButtonView_longPressAction);
+	Log.v("TTTim", "defaultLongClickAction"+ defaultLongClickAction);
+         if(defaultLongClickAction != null) _customLongClick.setAction(defaultLongClickAction);
+
+         _observer = new CustomObserver(context, this);
+	Log.v("TTTim", "before"+ _customLongClick.getAction());
+         updateCustomConfig();        
+        Log.v("TTTim", "after"+ _customLongClick.getAction());
+
+        mCustomLongpressEnabled = _customLongClick.getAction() != null;
        }
+       a.recycle();
     }    
 
     private class CustomLongClick extends ActionHandler implements View.OnLongClickListener {
@@ -153,6 +161,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         }
 
         public void setAction(String action) {mAction = action;}
+        public String getAction() { return mAction;}
 
         @Override
         public boolean onLongClick(View v) {
@@ -176,10 +185,9 @@ Log.d("CustomLongClick", mAction + this);
         if(mConfigUri == null || _customLongClick == null) return;
 
         String action = Settings.System.getString(mContext.getContentResolver(), mConfigUri);
-        
-        _customLongClick.setAction(action);
-        if (action == null || action.equals("none")) mCustomLongpressEnabled = false;
-	else mCustomLongpressEnabled = true;
+	if(action != null && !action.equals("none"))
+        	_customLongClick.setAction(action);
+	mCustomLongpressEnabled = _customLongClick.getAction() != null;
     }
 
     
