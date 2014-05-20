@@ -75,6 +75,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     boolean mCustomLongpressEnabled = false;
     boolean mIsLongPressing = false;
     String mConfigUri;
+    String mDefaultLongClickAction;
     ActionHandler mClickActionHandler;
     CustomObserver _observer;
     CustomLongClick _customLongClick;
@@ -134,14 +135,10 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
           _customLongClick = new CustomLongClick(mContext);
           setOnLongClickListener(_customLongClick);
 
-         String defaultLongClickAction = a.getString(R.styleable.KeyButtonView_longPressAction);
-	Log.v("TTTim", "defaultLongClickAction"+ defaultLongClickAction);
-         if(defaultLongClickAction != null) _customLongClick.setAction(defaultLongClickAction);
+         mDefaultLongClickAction = a.getString(R.styleable.KeyButtonView_longPressAction);
 
          _observer = new CustomObserver(context, this);
-	Log.v("TTTim", "before"+ _customLongClick.getAction());
          updateCustomConfig();        
-        Log.v("TTTim", "after"+ _customLongClick.getAction());
 
         mCustomLongpressEnabled = _customLongClick.getAction() != null;
        }
@@ -185,8 +182,10 @@ Log.d("CustomLongClick", mAction + this);
         if(mConfigUri == null || _customLongClick == null) return;
 
         String action = Settings.System.getString(mContext.getContentResolver(), mConfigUri);
-	if(action != null && !action.equals("none"))
-        	_customLongClick.setAction(action);
+	if(action == null || action.equals("none"))
+		action = mDefaultLongClickAction;
+
+      	_customLongClick.setAction(action);
 	mCustomLongpressEnabled = _customLongClick.getAction() != null;
     }
 
