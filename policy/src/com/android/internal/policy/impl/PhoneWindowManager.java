@@ -4828,7 +4828,7 @@ Log.d("TTTim", "mExpandedDesktopStyle=" + mExpandedDesktopStyle);
 
     @Override
     public int rotationForOrientationLw(int orientation, int lastRotation) {
-        if (false) {
+        if (true) {
             Slog.v(TAG, "rotationForOrientationLw(orient="
                         + orientation + ", last=" + lastRotation
                         + "); user=" + mUserRotation + " "
@@ -4916,7 +4916,7 @@ Log.d("TTTim", "mExpandedDesktopStyle=" + mExpandedDesktopStyle);
                 // The idea is that the user rotation expresses a weak preference for the direction
                 // of gravity and as NOSENSOR is never affected by gravity, then neither should
                 // NOSENSOR be affected by rotation lock (although it will be affected by docks).
-                preferredRotation = mUserRotation;
+                preferredRotation = mUserRotation != 0 ? mUserRotation:lastRotation;
             } else {
                 // No overriding preference.
                 // We will do exactly what the application asked us to do.
