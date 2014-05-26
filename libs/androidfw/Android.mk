@@ -48,7 +48,6 @@ LOCAL_MODULE:= libandroidfw
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_CFLAGS += -Wno-error=strict-aliasing
 LOCAL_C_INCLUDES := \
 	external/zlib
 
@@ -83,7 +82,6 @@ LOCAL_C_INCLUDES := \
 LOCAL_MODULE:= libandroidfw
 
 LOCAL_MODULE_TAGS := optional
-LOCAL_CFLAGS += -Wno-error=strict-aliasing
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -98,7 +96,6 @@ LOCAL_C_INCLUDES += \
 LOCAL_LDLIBS := -lrt -ldl -lpthread
 LOCAL_MODULE := libandroidfw
 LOCAL_SRC_FILES := $(commonUtilsSources) BackupData.cpp BackupHelpers.cpp
-LOCAL_CFLAGS += -Wno-error=strict-aliasing
 include $(BUILD_STATIC_LIBRARY)
 endif
 
