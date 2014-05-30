@@ -116,6 +116,7 @@ public class FloatingWindowView extends RelativeLayout {
         final String menu_item3 = mResource.getString(R.string.floating_window_snap_left);
         final String menu_item4 = mResource.getString(R.string.floating_window_snap_right);
         final String menu_item5 = mResource.getString(R.string.floating_window_minimize);
+        final String menu_item6 = mResource.getString(R.string.floating_window_autosnap);
 
         final PopupMenu popupMenu = new PopupMenu(mTitleBarMore.getContext(), mTitleBarMore);
         Menu menu = popupMenu.getMenu();
@@ -124,6 +125,9 @@ public class FloatingWindowView extends RelativeLayout {
         menu.add(menu_item3);
         menu.add(menu_item4);
         menu.add(menu_item5);
+        final MenuItem autosnapItem = menu.add(menu_item6);
+        autosnapItem.setCheckable(true);
+        autosnapItem.setChecked(true);
 
         mTitleBarMore.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -140,6 +144,9 @@ public class FloatingWindowView extends RelativeLayout {
                               activity.forceSnap(SNAP_RIGHT);
                           } else if (item.getTitle().equals(menu_item5)) {
                               activity.sendAppLaunchBroadcast();
+                          } else if (item.getTitle().equals(menu_item6)) {
+                              boolean currentAutoSnap = activity.toggleAutoSnap();
+                              autosnapItem.setChecked(currentAutoSnap);
                           }
                           return false;
                       }

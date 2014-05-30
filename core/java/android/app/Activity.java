@@ -797,6 +797,7 @@ public class Activity extends ContextThemeWrapper
     private int[] mSnapParam = new int[3]; // w,h,g
     private int[] mOldParam = new int[2]; // w,h
     private boolean mSnapped;
+    private boolean mAutoSnap = true;
     private int[] mOldLayout;
     private int[] mLastLayout;
     private boolean mTimeoutRunning;
@@ -2691,14 +2692,17 @@ public class Activity extends ContextThemeWrapper
                            if (mRestorePosition && moveRangeAboveLimit(ev)) {
                                restoreOldPosition();
                            }
-                           showSnap((int) ev.getRawX(), (int) ev.getRawY());
+                           if(mAutoSnap)
+                               showSnap((int) ev.getRawX(), (int) ev.getRawY());
                        }
                        break;
                   case MotionEvent.ACTION_UP:
                        if (viewY < actionBarHeight) {
                            mChangedFlags = false;
-                           finishSnap(isValidSnap() && mTimeoutDone);
-                           discardTimeout();
+                           if(mAutoSnap) {
+                               finishSnap(isValidSnap() && mTimeoutDone);
+                               discardTimeout();
+                            }
                            mChangedPreviousRange = false;
                        }
                        break;
@@ -2986,6 +2990,14 @@ public class Activity extends ContextThemeWrapper
         } catch (RemoteException e) {
             Log.e(TAG, "Could not perform get app fullscreen view layout", e);
         }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean toggleAutoSnap() {
+        mAutoSnap = !mAutoSnap;
+        return mAutoSnap;
     }
 
     /**
