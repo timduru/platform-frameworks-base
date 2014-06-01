@@ -30,6 +30,7 @@ import android.os.SystemProperties;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.ethernet.EthernetManager;
 
 import android.hardware.input.InputManager;
 import android.view.InputDevice;
@@ -37,6 +38,7 @@ import android.view.KeyEvent;
 import android.view.KeyCharacterMap;
 import android.os.SystemClock;
 import android.os.UserHandle;
+
 
 
 public class KatUtils {
@@ -180,5 +182,14 @@ public class KatUtils {
                 .putExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, shouldRestartUI);
         c.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_ALL));
     }
+
+  public static void ethernetToggle(Context c)
+  {
+        EthernetManager ethernetManager = (EthernetManager) c.getSystemService(Context.ETHERNET_SERVICE);
+	if(ethernetManager == null) return;
+
+	if(ethernetManager.isEnabled()) 	ethernetManager.teardown();
+	else 					ethernetManager.reconnect();
+  }
 
 }

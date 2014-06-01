@@ -110,6 +110,7 @@ public final class KKC {
 	    public static final String AUTOROTATION_TOGGLE = "autorotation";
             public static final String SHOW_POWERMENU = "show_powermenu";
 
+            public static final String ETHERNET_TOGGLE = "ethernet_toggle";
             public static final String WIFI_TOGGLE = "wifi_toggle";
             public static final String BLUETOOTH_TOGGLE = "bluetooth_toggle";
             public static final String TOUCHPAD_TOGGLE = "touchpad_toggle";
