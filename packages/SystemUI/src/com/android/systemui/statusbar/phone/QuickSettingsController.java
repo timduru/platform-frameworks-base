@@ -33,6 +33,7 @@ import static org.meerkats.katkiss.QSConstants.TILE_SYNC;
 import static org.meerkats.katkiss.QSConstants.TILE_USER;
 import static org.meerkats.katkiss.QSConstants.TILE_VOLUME;
 import static org.meerkats.katkiss.QSConstants.TILE_WIFI;
+import static org.meerkats.katkiss.QSConstants.TILE_ETHERNET;
 import static org.meerkats.katkiss.QSConstants.TILE_WIFIAP;
 import static org.meerkats.katkiss.QSConstants.TILE_WIMAX;
 
@@ -60,6 +61,7 @@ import com.android.systemui.quicksettings.BluetoothTile;
 import com.android.systemui.quicksettings.BrightnessTile;
 import com.android.systemui.quicksettings.BugReportTile;
 import com.android.systemui.quicksettings.CameraTile;
+import com.android.systemui.quicksettings.EthernetTile;
 import com.android.systemui.quicksettings.GPSTile;
 import com.android.systemui.quicksettings.ExpandedDesktopTile;
 import com.android.systemui.quicksettings.InputMethodTile;
@@ -184,6 +186,8 @@ public class QuickSettingsController {
                 qs = new BluetoothTile(mContext, this, mStatusBarService.mBluetoothController);
             } else if (tile.equals(TILE_BRIGHTNESS)) {
                 qs = new BrightnessTile(mContext, this);
+            } else if (tile.equals(TILE_ETHERNET)) {
+                qs = new EthernetTile(mContext, this);
             } else if (tile.equals(TILE_CAMERA) && cameraSupported) {
                 qs = new CameraTile(mContext, this, mHandler);
             } else if (tile.equals(TILE_SYNC)) {

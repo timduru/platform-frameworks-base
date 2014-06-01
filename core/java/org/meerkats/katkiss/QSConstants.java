@@ -7,6 +7,7 @@ public class QSConstants {
         public static final String TILE_BATTERY = "toggleBattery";
         public static final String TILE_SETTINGS = "toggleSettings";
         public static final String TILE_WIFI = "toggleWifi";
+        public static final String TILE_ETHERNET = "toggleEthernet";
         public static final String TILE_GPS = "toggleGPS";
         public static final String TILE_BLUETOOTH = "toggleBluetooth";
         public static final String TILE_BRIGHTNESS = "toggleBrightness";
