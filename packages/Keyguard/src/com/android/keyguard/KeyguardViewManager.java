@@ -328,7 +328,7 @@ public class KeyguardViewManager {
     }
 
     private void addInternalWallpaperIfNeeded() {
-        if(Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_WALLPAPER_MODE, KKC.S.WALLPAPER_MODE_DISABLE_SYSTEM) != KKC.S.WALLPAPER_MODE_DISABLE_SYSTEM) return;
+        if(Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_WALLPAPER_MODE, Resources.getSystem().getInteger(com.android.internal.R.integer.wallpaper_mode_default)) != KKC.S.WALLPAPER_MODE_DISABLE_SYSTEM) return;
 
         WallpaperManager wallpaperManager = WallpaperManager.getInstance(mContext);
         if(wallpaperManager == null) return;

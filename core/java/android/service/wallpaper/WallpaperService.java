@@ -30,6 +30,7 @@ import android.provider.Settings;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -1178,6 +1179,6 @@ public abstract class WallpaperService extends Service implements CustomObserver
     }
 
     private void refreshCustomConf() {
-       mWallpaperMode = Settings.System.getInt(getContentResolver(), KKC.S.SYSTEMUI_WALLPAPER_MODE, KKC.S.WALLPAPER_MODE_DISABLE_SYSTEM);
+       mWallpaperMode = Settings.System.getInt(getContentResolver(), KKC.S.SYSTEMUI_WALLPAPER_MODE, Resources.getSystem().getInteger(com.android.internal.R.integer.wallpaper_mode_default));
     }
 }

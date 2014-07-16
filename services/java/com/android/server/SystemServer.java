@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.media.AudioService;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.Environment;
@@ -658,7 +659,7 @@ class ServerThread {
             }
 
             if (!disableNonCoreServices && context.getResources().getBoolean( R.bool.config_enableWallpaperService) 
-                 && Settings.System.getInt(context.getContentResolver(), KKC.S.SYSTEMUI_WALLPAPER_MODE, KKC.S.WALLPAPER_MODE_DISABLE_SYSTEM) != KKC.S.WALLPAPER_MODE_DISABLE_ALL 
+                 && Settings.System.getInt(context.getContentResolver(), KKC.S.SYSTEMUI_WALLPAPER_MODE,  Resources.getSystem().getInteger(com.android.internal.R.integer.wallpaper_mode_default)) != KKC.S.WALLPAPER_MODE_DISABLE_ALL 
                  ) {
                 try {
                     Slog.i(TAG, "Wallpaper Service");
