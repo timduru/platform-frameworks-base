@@ -25,6 +25,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.statusbar.IStatusBarService;
@@ -333,7 +334,7 @@ public class WMController
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		if(isTopFloating()) killApp(_c, packageName);
 		else intent.addFlags(Intent.FLAG_FLOATING_WINDOW);
-		_c.startActivity(intent);
+		_c.startActivityAsUser(intent, UserHandle.CURRENT);
 	}
 
 	public synchronized boolean isTopFloating()
