@@ -56,7 +56,8 @@ public final class KKC {
     public static final String QS_QUICK_ACCESS = "qs_quick_access";
     public static final String QS_QUICK_ACCESS_LINKED = "qs_quick_access_linked";
 
-    public static final String QS_DYNAMIC_WIFI = "qs_dyanmic_wifi";
+    public static final String QS_DYNAMIC_WIFI = "qs_dynamic_wifi";
+    public static final String QS_DYNAMIC_ALARM = "qs_dynamic_alarm";
     public static final String QS_QUICK_PULLDOWN = "qs_quick_pulldown";
     public static final String QS_COLLAPSE_PANEL = "qs_collapse_panel";
 

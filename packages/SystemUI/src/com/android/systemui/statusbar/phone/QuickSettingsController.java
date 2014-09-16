@@ -36,6 +36,7 @@ import static org.meerkats.katkiss.QSConstants.TILE_WIFI;
 import static org.meerkats.katkiss.QSConstants.TILE_ETHERNET;
 import static org.meerkats.katkiss.QSConstants.TILE_WIFIAP;
 import static org.meerkats.katkiss.QSConstants.TILE_WIMAX;
+import org.meerkats.katkiss.KKC;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -224,13 +225,13 @@ public class QuickSettingsController {
         // Load the dynamic tiles
         // These toggles must be the last ones added to the view, as they will show
         // only when they are needed
-/*        if (Settings.System.getIntForUser(resolver,
-                    Settings.System.QS_DYNAMIC_ALARM, 1, UserHandle.USER_CURRENT) == 1) {
+        if (Settings.System.getIntForUser(resolver,
+                    KKC.S.QS_DYNAMIC_ALARM, 1, UserHandle.USER_CURRENT) == 1) {
             QuickSettingsTile qs = new AlarmTile(mContext, this, mHandler);
             qs.setupQuickSettingsTile(inflater, mContainerView);
             mQuickSettingsTiles.add(qs);
         }
-        if (Settings.System.getIntForUser(resolver,
+/*        if (Settings.System.getIntForUser(resolver,
                     Settings.System.QS_DYNAMIC_BUGREPORT, 1, UserHandle.USER_CURRENT) == 1) {
             QuickSettingsTile qs = new BugReportTile(mContext, this, mHandler);
             qs.setupQuickSettingsTile(inflater, mContainerView);
@@ -239,12 +240,14 @@ public class QuickSettingsController {
         if (!dockBatteryLoaded) {
             loadDockBatteryTile(resolver, inflater);
         }
+
         if (Settings.System.getIntForUser(resolver,
-                    Settings.System.QS_DYNAMIC_WIFI, 1, UserHandle.USER_CURRENT) == 1) {
+                    KKC.S.QS_DYNAMIC_WIFI, 1, UserHandle.USER_CURRENT) == 1) {
             QuickSettingsTile qs = new WiFiDisplayTile(mContext, this);
             qs.setupQuickSettingsTile(inflater, mContainerView);
             mQuickSettingsTiles.add(qs);
         }
+
         if (QSUtils.deviceSupportsUsbTether(mContext) && Settings.System.getIntForUser(resolver,
                     Settings.System.QS_DYNAMIC_USBTETHER, 1, UserHandle.USER_CURRENT) == 1) {
             QuickSettingsTile qs = new UsbTetherTile(mContext, this);

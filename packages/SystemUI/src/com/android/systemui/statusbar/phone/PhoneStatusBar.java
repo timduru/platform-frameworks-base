@@ -2869,6 +2869,7 @@ public class PhoneStatusBar extends BaseStatusBar implements CustomObserver.Chan
       uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_ACCESS));
       uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_ACCESS_LINKED));
       uris.add(Settings.System.getUriFor(KKC.S.QS_DYNAMIC_WIFI));
+      uris.add(Settings.System.getUriFor(KKC.S.QS_DYNAMIC_ALARM));
       uris.add(Settings.System.getUriFor(KKC.S.QS_QUICK_PULLDOWN));
       uris.add(Settings.System.getUriFor(KKC.S.QS_COLLAPSE_PANEL));
       
