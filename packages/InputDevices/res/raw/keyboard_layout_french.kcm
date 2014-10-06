@@ -43,8 +43,9 @@ key 1 {
 key 2 {
     label:                              '2'
     base:                               '\u00e9'
-    shift, capslock:                    '2'
     ralt:                               '~'
+    shift, capslock:                    '2'
+    shift+capslock:         '\u00c9'
 }
 
 key 3 {
@@ -79,6 +80,7 @@ key 7 {
     label:                              '7'
     base:                               '\u00e8'
     shift, capslock:                    '7'
+    shift+capslock:         '\u00c8'
     ralt:                               '`'
 }
 
@@ -93,14 +95,16 @@ key 9 {
     label:                              '9'
     base:                               '\u00e7'
     shift, capslock:                    '9'
+    shift+capslock:         '\u00c7'
     ralt:                               '^'
 }
 
 key 0 {
     label:                              '0'
     base:                               '\u00e0'
-    shift, capslock:                    '0'
     ralt:                               '@'
+    shift, capslock:                    '0'
+    shift+capslock:         '\u00c0'
 }
 
 key MINUS {
@@ -123,6 +127,8 @@ key A {
     label:                              'A'
     base:                               'a'
     shift, capslock:                    'A'
+    ralt+shift:                         '\u00e2'
+    ralt+ctrl:                          '\u00e4'
 }
 
 key Z {
@@ -136,6 +142,8 @@ key E {
     base:                               'e'
     shift, capslock:                    'E'
     ralt:                               '\u20ac'
+    ralt+shift:                         '\u00ea'
+    ralt+ctrl:                          '\u00eb'
 }
 
 key R {
@@ -160,18 +168,24 @@ key U {
     label:                              'U'
     base:                               'u'
     shift, capslock:                    'U'
+    ralt+shift:                         '\u00fb'
+    ralt+ctrl:                          '\u00fc'
 }
 
 key I {
     label:                              'I'
     base:                               'i'
     shift, capslock:                    'I'
+    ralt+shift:                         '\u00ee'
+    ralt+ctrl:                          '\u00ef'
 }
 
 key O {
     label:                              'O'
     base:                               'o'
     shift, capslock:                    'O'
+    ralt+shift:                         '\u00f4'
+    ralt+ctrl:                          '\u00f6'
 }
 
 key P {
@@ -259,6 +273,7 @@ key APOSTROPHE {
     label:                              '\u00f9'
     base:                               '\u00f9'
     shift, capslock:                    '%'
+    shift+capslock:         '\u00d9'
 }
 
 key BACKSLASH {
