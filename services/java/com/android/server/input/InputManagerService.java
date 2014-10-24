@@ -1154,7 +1154,7 @@ public class InputManagerService extends IInputManager.Stub
 
     public void updateTouchpadModeFromSettings()
     {
-        int mode = getTouchpadModeSetting(0);
+        int mode = getTouchpadModeSetting(1);
         nativeSetTouchpadMode(mPtr, mode);
     }
 
