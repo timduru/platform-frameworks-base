@@ -2749,6 +2749,7 @@ package android.app {
     method public void finishActivity(int);
     method public void finishActivityFromChild(android.app.Activity, int);
     method public void finishAffinity();
+    method public void finishFloating();
     method public void finishFromChild(android.app.Activity);
     method public android.app.ActionBar getActionBar();
     method public final android.app.Application getApplication();
@@ -3489,6 +3490,7 @@ package android.app {
     method public deprecated android.app.DownloadManager.Request setShowRunningNotification(boolean);
     method public android.app.DownloadManager.Request setTitle(java.lang.CharSequence);
     method public android.app.DownloadManager.Request setVisibleInDownloadsUi(boolean);
+    field public static final int NETWORK_ETHERNET = 8; // 0x8
     field public static final int NETWORK_MOBILE = 1; // 0x1
     field public static final int NETWORK_WIFI = 2; // 0x2
     field public static final int VISIBILITY_HIDDEN = 2; // 0x2
@@ -4283,6 +4285,7 @@ package android.app {
     method public android.content.Intent[] getIntents();
     method public android.app.PendingIntent getPendingIntent(int, int);
     method public android.app.PendingIntent getPendingIntent(int, int, android.os.Bundle);
+    method public void setTaskOnHome(boolean);
     method public void startActivities();
     method public void startActivities(android.os.Bundle);
   }
@@ -17369,11 +17372,6 @@ package android.os {
     field public static final int BATTERY_STATUS_FULL = 5; // 0x5
     field public static final int BATTERY_STATUS_NOT_CHARGING = 4; // 0x4
     field public static final int BATTERY_STATUS_UNKNOWN = 1; // 0x1
-    field public static final int DOCK_STATE_CHARGING = 2; // 0x2
-    field public static final int DOCK_STATE_DISCHARGING = 4; // 0x4
-    field public static final int DOCK_STATE_DOCKED = 3; // 0x3
-    field public static final int DOCK_STATE_UNDOCKED = 1; // 0x1
-    field public static final int DOCK_STATE_UNKNOWN = 0; // 0x0
     field public static final java.lang.String EXTRA_HEALTH = "health";
     field public static final java.lang.String EXTRA_ICON_SMALL = "icon-small";
     field public static final java.lang.String EXTRA_LEVEL = "level";
@@ -21248,6 +21246,7 @@ package android.provider {
     field public static final deprecated java.lang.String DIM_SCREEN = "dim_screen";
     field public static final java.lang.String DTMF_TONE_WHEN_DIALING = "dtmf_tone";
     field public static final java.lang.String END_BUTTON_BEHAVIOR = "end_button_behavior";
+    field public static final java.lang.String EXPANDED_DESKTOP_STYLE = "expanded_desktop_style";
     field public static final java.lang.String FONT_SCALE = "font_scale";
     field public static final java.lang.String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
     field public static final deprecated java.lang.String HTTP_PROXY = "http_proxy";
@@ -21266,6 +21265,7 @@ package android.provider {
     field public static final deprecated java.lang.String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";
     field public static final deprecated java.lang.String PARENTAL_CONTROL_LAST_UPDATE = "parental_control_last_update";
     field public static final deprecated java.lang.String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
+    field public static final java.lang.String POWER_MENU_EXPANDED_DESKTOP_ENABLED = "power_menu_expanded_desktop_enabled";
     field public static final deprecated java.lang.String RADIO_BLUETOOTH = "bluetooth";
     field public static final deprecated java.lang.String RADIO_CELL = "cell";
     field public static final deprecated java.lang.String RADIO_NFC = "nfc";
@@ -21795,7 +21795,7 @@ package android.renderscript {
   }
 
   public class BaseObj {
-    method public synchronized void destroy();
+    method public void destroy();
     method public java.lang.String getName();
     method public void setName(java.lang.String);
   }
@@ -22769,10 +22769,13 @@ package android.service.wallpaper {
 
   public abstract class WallpaperService extends android.app.Service {
     ctor public WallpaperService();
+    method public java.util.ArrayList<android.net.Uri> getObservedUris();
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onChangeNotification(android.net.Uri);
     method public abstract android.service.wallpaper.WallpaperService.Engine onCreateEngine();
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.wallpaper.WallpaperService";
     field public static final java.lang.String SERVICE_META_DATA = "android.service.wallpaper";
+    field protected int mWallpaperMode;
   }
 
   public class WallpaperService.Engine {
@@ -26829,7 +26832,7 @@ package android.view {
     field public static final int KEYCODE_LEFT_BRACKET = 71; // 0x47
     field public static final int KEYCODE_M = 41; // 0x29
     field public static final int KEYCODE_MANNER_MODE = 205; // 0xcd
-    field public static final int KEYCODE_MEDIA_AUDIO_TRACK = 222; // 0xde
+    field public static final int KEYCODE_MEDIA_AUDIO_TRACK = 230; // 0xe6
     field public static final int KEYCODE_MEDIA_CLOSE = 128; // 0x80
     field public static final int KEYCODE_MEDIA_EJECT = 129; // 0x81
     field public static final int KEYCODE_MEDIA_FAST_FORWARD = 90; // 0x5a
@@ -28661,6 +28664,7 @@ package android.view {
     field public static final int PROGRESS_START = 0; // 0x0
     field public static final int PROGRESS_VISIBILITY_OFF = -2; // 0xfffffffe
     field public static final int PROGRESS_VISIBILITY_ON = -1; // 0xffffffff
+    field public boolean mIsFloatingWindow;
   }
 
   public static abstract interface Window.Callback {
@@ -30340,8 +30344,10 @@ package android.webkit {
   }
 
   public static class WebView.HitTestResult {
+    method public java.lang.String getAction();
     method public java.lang.String getExtra();
     method public int getType();
+    method public void setAction(java.lang.String);
     field public static final deprecated int ANCHOR_TYPE = 1; // 0x1
     field public static final int EDIT_TEXT_TYPE = 9; // 0x9
     field public static final int EMAIL_TYPE = 4; // 0x4
