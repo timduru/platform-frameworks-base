@@ -70,7 +70,7 @@ static void signalExceptionForPriorityError(JNIEnv* env, int err)
             jniThrowException(env, "java/lang/SecurityException", "No permission to modify given thread");
             break;
         case EACCES:
-            jniThrowException(env, "java/lang/SecurityException", "No permission to set to given priority");
+//            jniThrowException(env, "java/lang/SecurityException", "No permission to set to given priority");
             break;
         default:
             jniThrowException(env, "java/lang/RuntimeException", "Unknown error");
