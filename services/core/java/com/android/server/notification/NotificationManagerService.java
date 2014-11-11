@@ -535,7 +535,7 @@ public class NotificationManagerService extends SystemService {
                 StatusBarNotification sbn = r.sbn;
                 cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
                         sbn.getId(), Notification.FLAG_AUTO_CANCEL,
-                        Notification.FLAG_FOREGROUND_SERVICE, false, r.getUserId(),
+                        0, false, r.getUserId(),
                         REASON_DELEGATE_CLICK, null);
             }
         }
@@ -544,7 +544,7 @@ public class NotificationManagerService extends SystemService {
         public void onNotificationClear(int callingUid, int callingPid,
                 String pkg, String tag, int id, int userId) {
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
-                    Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE,
+                    Notification.FLAG_ONGOING_EVENT ,
                     true, userId, REASON_DELEGATE_CANCEL, null);
         }
 
@@ -1110,7 +1110,7 @@ public class NotificationManagerService extends SystemService {
             // Calling from user space, don't allow the canceling of actively
             // running foreground services.
             cancelAllNotificationsInt(Binder.getCallingUid(), Binder.getCallingPid(),
-                    pkg, 0, Notification.FLAG_FOREGROUND_SERVICE, true, userId,
+                    pkg, 0, 0, true, userId,
                     REASON_NOMAN_CANCEL_ALL, null);
         }
 
@@ -1799,11 +1799,11 @@ public class NotificationManagerService extends SystemService {
 
                     // Ensure if this is a foreground service that the proper additional
                     // flags are set.
-                    if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+/*                    if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
                         notification.flags |= Notification.FLAG_ONGOING_EVENT
                                 | Notification.FLAG_NO_CLEAR;
                     }
-
+*/
                     applyZenModeLocked(r);
                     mRankingHelper.sort(mNotificationList);
 
