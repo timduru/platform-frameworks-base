@@ -39,13 +39,26 @@ import android.view.KeyCharacterMap;
 import android.os.SystemClock;
 import android.os.UserHandle;
 
+import android.widget.Toast;
+import android.provider.Settings.SettingNotFoundException;
+import android.bluetooth.BluetoothAdapter;
+import android.net.wifi.WifiManager;
+import android.os.BatteryManager;
+import android.os.PowerManager;
+import android.os.Vibrator;
+import android.media.AudioManager;
+
+
+
 
 
 public class KatUtils {
     public static String[] HDMIModes = {"center", "crop", "scale"};
+    public static String TAG = "KatUtils";
     public static final boolean DEBUG = true;
     public static float[] previousAnimationScales;
 
+    private Context mContext = null;
 
     static class AppInfo
     {
@@ -53,6 +66,8 @@ public class KatUtils {
     	public String appName;
     }
     
+    public KatUtils(Context c) {mContext = c;}
+
     public static void initializeHdmiMode(Context c) {
         int currentMode = Settings.System.getInt(c.getContentResolver(), KKC.S.HDMI_MODE, 2);
         SystemProperties.set("nvidia.hwc.rotation", "ICS");
@@ -192,5 +207,146 @@ public class KatUtils {
 	else 					ethernetManager.reconnect();
   }
 */
+
+    public void muteVolume(boolean keyguardActive) {
+        AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        int ringerMode = audioManager.getRingerMode();
+        if (ringerMode == AudioManager.RINGER_MODE_NORMAL) 
+	{
+            if (!keyguardActive)
+                audioManager.adjustVolume(AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
+            int vibrateMode = AudioManager.RINGER_MODE_VIBRATE;
+            // Check if vibrate in silent mode (default) should be overridden.
+            if (android.provider.Settings.System.getInt( mContext.getContentResolver(), Settings.System.VIBRATE_IN_SILENT, vibrateMode) == AudioManager.RINGER_MODE_VIBRATE) 
+	    {
+                vibrateMode = AudioManager.RINGER_MODE_VIBRATE;
+                Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+                vibrator.vibrate(300);
+            } else
+                vibrateMode = AudioManager.RINGER_MODE_SILENT;
+            audioManager.setRingerMode(vibrateMode);
+        } else {
+            audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            if (!keyguardActive)
+                audioManager.adjustVolume(AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
+        }
+    }
+    public void wifiToggle() {
+        WifiManager wifiManager = (WifiManager) mContext
+                .getSystemService("wifi");
+        boolean wifiState = wifiManager.isWifiEnabled();
+        if (wifiState) {
+            wifiManager.setWifiEnabled(false);
+            Toast.makeText(mContext, "Wifi Disabled", Toast.LENGTH_SHORT).show();
+        } else {
+            wifiManager.setWifiEnabled(true);
+            Toast.makeText(mContext, "Wifi Enabled", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void bluetoothToggle() {
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        boolean btState = btAdapter.isEnabled();
+        if (btState) {
+            btAdapter.disable();
+            Toast.makeText(mContext, "Bluetooth Disabled", Toast.LENGTH_SHORT).show();
+        } else {
+            btAdapter.enable();
+            Toast.makeText(mContext, "Bluetooth Enabled", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    public void brightnessControl(int keyCode)
+    {
+	if(keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP) brightnessControl(KKC.A.BRIGHTNESS_UP);
+	else if(keyCode == KeyEvent.KEYCODE_BRIGHTNESS_DOWN) brightnessControl(KKC.A.BRIGHTNESS_DOWN);
+	else if(keyCode == KeyEvent.KEYCODE_BRIGHTNESS_AUTO) brightnessControl(KKC.A.BRIGHTNESS_AUTO);
+    }
+
+    public void brightnessControl(String action) 
+    {
+        int level = 255;
+        int incrementBacklight = 15;
+        if (KKC.A.BRIGHTNESS_UP.equals(action))
+	{
+            setBrightnessMode(Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+         // Prevent the new brightness value from exceeding 255
+            if ((getBrightness() + (2 * incrementBacklight)) <= level) 	
+		level = getBrightness() + incrementBacklight;
+            setBrightness(level);
+        } else if (KKC.A.BRIGHTNESS_DOWN.equals(action))
+	{
+            setBrightnessMode(Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+            level = 4;
+            // Prevent the new brightness value from falling below 4
+            if (getBrightness() - 2 * incrementBacklight >= level) 
+                level = getBrightness() - incrementBacklight;
+            setBrightness(level);
+        } else if(KKC.A.BRIGHTNESS_AUTO.equals(action))
+	    setBrightnessMode( getBrightnessMode() == Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL ? Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC: Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+
+        Intent intent = new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG);
+        mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT_OR_SELF);
+    }
+
+    public int getBrightness() {
+        try {
+            int level = android.provider.Settings.System.getInt(
+                    mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS);
+            return level;
+        } catch (SettingNotFoundException e) {
+            Log.e(TAG, "Couldn't get brightness setting. ", e);
+            return 255;
+        }
+    }
+
+
+    public int getBrightnessMode() {
+        try {
+            int mode = android.provider.Settings.System.getInt(
+                    mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_MODE);
+            return mode;
+        } catch (SettingNotFoundException e) {
+            Log.e(TAG, "Couldn't get brightness mode. ", e);
+            return 0;
+        }
+
+    }
+
+    public void setBrightness(int level)
+    {
+        android.provider.Settings.System.putInt(mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, level);
+        PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+
+        if(powerManager != null) powerManager.setBacklightBrightness(level);
+        return;
+    }
+
+    public void setBrightnessMode(int mode)
+    {
+        if(getBrightnessMode() != mode)
+            android.provider.Settings.System.putInt(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_MODE, mode);
+    }
+
+    public void launchSettings() {
+        Intent intent = new Intent("android.settings.SETTINGS");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mContext.startActivity(intent);
+    }
+
+    public void touchpadToggle() {
+        int touchpadEnabled = android.provider.Settings.System.getInt( mContext.getContentResolver(), KKC.S.DEVICE_SETTINGS_TOUCHPAD_ENABLED, 1);
+        touchpadEnabled = (touchpadEnabled == 1 ? 0:1);
+        android.provider.Settings.System.putInt(mContext.getContentResolver(), KKC.S.DEVICE_SETTINGS_TOUCHPAD_ENABLED, touchpadEnabled);
+
+        Toast.makeText(mContext, "Touchpad " + (touchpadEnabled ==1 ? "Enabled" : "Disabled"), Toast.LENGTH_SHORT).show();
+
+     }
+
+
 
 }

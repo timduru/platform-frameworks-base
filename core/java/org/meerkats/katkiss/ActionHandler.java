@@ -141,10 +141,34 @@ public class ActionHandler {
         	KatUtils.rotationToggle(mContext);
 //        else if(action.equals(KKC.A.ETHERNET_TOGGLE))
 //        	KatUtils.ethernetToggle(mContext);
-        else if(action.equals(KKC.A.SHOW_POWERMENU) || action.equals(KKC.A.WIFI_TOGGLE) || action.equals(KKC.A.BLUETOOTH_TOGGLE) || action.equals(KKC.A.TOUCHPAD_TOGGLE) || action.equals(KKC.A.LAUNCH_SETTINGS)
-                || action.equals(KKC.A.BRIGHTNESS_DOWN) || action.equals(KKC.A.BRIGHTNESS_UP) || action.equals(KKC.A.BRIGHTNESS_AUTO)
+        else if (KKC.A.WIFI_TOGGLE.equals(action))
+                new KatUtils(mContext).wifiToggle();
+        else if (KKC.A.BLUETOOTH_TOGGLE.equals(action))
+                new KatUtils(mContext).bluetoothToggle();
+        else if (KKC.A.TOUCHPAD_TOGGLE.equals(action))
+                new KatUtils(mContext).touchpadToggle();
+        else if (KKC.A.LAUNCH_SETTINGS.equals(action))
+                new KatUtils(mContext).launchSettings();
+        else if (KKC.A.BRIGHTNESS_DOWN.equals(action) || KKC.A.BRIGHTNESS_UP.equals(action) || KKC.A.BRIGHTNESS_AUTO.equals(action))
+                new KatUtils(mContext).brightnessControl(action);
+        else if (KKC.A.AUDIO_MUTE.equals(action))
+                new KatUtils(mContext).muteVolume(false);
+/*                else if (KKC.A.MEDIA_PREVIOUS.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.ACTION_DOWN));
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.ACTION_UP));
+                }
+                else if (KKC.A.MEDIA_NEXT.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.ACTION_DOWN));
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.ACTION_UP));
+                }
+                else if (KKC.A.MEDIA_PLAYPAUSE.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.ACTION_DOWN));
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.ACTION_UP));
+                }
+*/
+        else if(action.equals(KKC.A.SHOW_POWERMENU) 
                 || action.equals(KKC.A.MEDIA_PREVIOUS) || action.equals(KKC.A.MEDIA_NEXT) || action.equals(KKC.A.MEDIA_PLAYPAUSE)
-                || action.equals(KKC.A.AUDIO_DOWN) || action.equals(KKC.A.AUDIO_UP) || action.equals(KKC.A.AUDIO_MUTE)
+                || action.equals(KKC.A.AUDIO_DOWN) || action.equals(KKC.A.AUDIO_UP)
                )
         	KatUtils.sendIntentToWindowManager(mContext, KKC.I.GLOBAL_ACTIONS, action, false);
         else if(action.equals(KKC.A.SHOW_NOTIFICATIONS_PANEL))
