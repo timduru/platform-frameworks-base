@@ -94,11 +94,13 @@ public class WMController
 		return defaultHomePackage;
 	}
 
+
+	public void killTopApp() { killApp(_c, getPackageName(getTopTask())); }
+
 	private boolean isDefaultLauncherOrSystemUI(String packageName)
 	{
 		return (packageName.equals(getDefaultLauncherPackage()) || packageName.equals("com.android.systemui"));
 	}
-/*
 	private RunningTaskInfo getTaskBeforeTop() { return getTask(1, false); }
 	private RunningTaskInfo getTopTask() { return getTask(0, false); }
 
@@ -119,7 +121,7 @@ public class WMController
 			while ((taskFound == null) && (current < tasks.size())) 
 			{
 				RunningTaskInfo currentTask = tasks.get(current);
-				boolean isSplitViewTask = isTaskSplitView(currentTask.id);
+				boolean isSplitViewTask = false; //FIXME isTaskSplitView(currentTask.id);
 
 				String packageName = currentTask.topActivity.getPackageName();
 				if (!isDefaultLauncherOrSystemUI(packageName))
@@ -138,6 +140,7 @@ public class WMController
 
 		return taskFound;
 	}
+/*
 
 	public boolean isFloating(ActivityManager.RecentTaskInfo taskInfo)
 	{
@@ -182,7 +185,7 @@ public class WMController
 				//am.moveTaskToFront(taskID, ActivityManager.MOVE_TASK_WITH_HOME, null);
 				am.moveTaskToFront(taskID, moveFlags, null);
 		}
-
+*/
 		private synchronized  void switchToPreviousTask(final int delayMS)
 		{ 
 			AsyncTask.execute(new Runnable() {
@@ -205,6 +208,7 @@ public class WMController
 	//		restoreAnimationScales();		
 		}
 
+/*
 		public synchronized void refreshTopAndPrevTasks()
 		{
 			_topTask = getTopTask();
@@ -372,5 +376,12 @@ public class WMController
                         final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
                         am.forceStopPackage(packageName);
                 }
+
+                public synchronized static String getPackageName(RunningTaskInfo task)
+		{
+	                if(task == null) return null;
+
+       	         	return task.baseActivity.getPackageName();
+		}
 
 }

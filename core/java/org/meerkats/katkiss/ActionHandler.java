@@ -109,9 +109,9 @@ public class ActionHandler {
     }
 
     public void performTask(String action) {
-/*        if (action.equals(KKC.A.SYSTEMUI_TASK_KILL_PROCESS))
-        	killProcess();
-        else*/ if (action.equals(KKC.A.SYSTEMUI_TASK_SCREENSHOT))
+        if (action.equals(KKC.A.SYSTEMUI_TASK_KILL_PROCESS))
+        	new WMController(mContext).killTopApp();
+        else if (action.equals(KKC.A.SYSTEMUI_TASK_SCREENSHOT))
         	takeScreenshot();        
         else if (action.equals(KKC.A.SYSTEMUI_TASK_SCREENOFF))
         	screenOff();
@@ -119,9 +119,9 @@ public class ActionHandler {
         	startAssistActivity(); */
         else if(action.equals(KKC.A.SYSTEMUI_RECENT))
         	WMController.showRecentAppsSystemUI();
-/*        else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
+        else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
         	new WMController(mContext).switchToPreviousTask();
-        else if(action.equals(KKC.A.SPLITVIEW_AUTO))
+/*        else if(action.equals(KKC.A.SPLITVIEW_AUTO))
         	new WMController(mContext).switchTopTaskToSplitView(-1);
         else if(action.equals(KKC.A.SPLITVIEW_1))
         	new WMController(mContext).switchTopTaskToSplitView(0);
