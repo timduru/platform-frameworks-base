@@ -30,7 +30,7 @@ import android.os.SystemProperties;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.ethernet.EthernetManager;
+//import com.android.internal.ethernet.EthernetManager;
 
 import android.hardware.input.InputManager;
 import android.view.InputDevice;
@@ -130,19 +130,19 @@ public class KatUtils {
 	  
 	  return info;
   }
-
-  public static void expandedDesktop(Context c, boolean on, int style /* 2 both bars, 1: keep statusbar*/)
+/*
+  public static void expandedDesktop(Context c, boolean on, int style) //2 both bars, 1: keep statusbar
   {
         Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, on ? 1 : 0);
         Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, style);
   }
 
-  public static void expandedDesktopSwitch(Context c, int style /* 2 both bars, 1: keep statusbar*/)
+  public static void expandedDesktopSwitch(Context c, int style) // 2 both bars, 1: keep statusbar
   {
         boolean  currentlyExpanded = Settings.System.getInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE,  0) == 1;
 	expandedDesktop(c, !currentlyExpanded, style);
   }
-
+*/
   public static void sendKeyDOWN(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_DOWN); }
   public static void sendKeyUP(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_UP); }
   public static void sendKey(final int keyCode, final int action) 
@@ -182,7 +182,7 @@ public class KatUtils {
                 .putExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, shouldRestartUI);
         c.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_ALL));
     }
-
+/*
   public static void ethernetToggle(Context c)
   {
         EthernetManager ethernetManager = (EthernetManager) c.getSystemService(Context.ETHERNET_SERVICE);
@@ -191,5 +191,6 @@ public class KatUtils {
 	if(ethernetManager.isEnabled()) 	ethernetManager.teardown();
 	else 					ethernetManager.reconnect();
   }
+*/
 
 }

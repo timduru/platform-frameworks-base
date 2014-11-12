@@ -98,7 +98,7 @@ public class WMController
 	{
 		return (packageName.equals(getDefaultLauncherPackage()) || packageName.equals("com.android.systemui"));
 	}
-
+/*
 	private RunningTaskInfo getTaskBeforeTop() { return getTask(1, false); }
 	private RunningTaskInfo getTopTask() { return getTask(0, false); }
 
@@ -260,31 +260,6 @@ public class WMController
 				} });
 		}
 		
-		public synchronized static void showRecentAppsSystemUI() 
-		{
-			try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).toggleRecentApps(); } 
-			catch (Exception e) { }
-		}
-
-		public synchronized static void showNotificationsPanel() 
-		{
-			try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).expandNotificationsPanel(); } 
-			catch (Exception e) { }
-		}
-
-		public synchronized static void showSettingsPanel() 
-		{
-			try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).expandSettingsPanel(); } 
-			catch (Exception e) { }
-		}
-
-		public synchronized static void killApp(Context c, String packageName)
-		{
-			if(packageName == null) return;
-			final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
-			am.forceStopPackage(packageName);
-		}
-
         private ArrayList<ActivityManager.RecentTaskInfo> getRecentTaskList(int max, boolean getRegular, boolean getSplit, boolean getFloating)
         {
                 if(_c == null) return null;
@@ -370,4 +345,32 @@ public class WMController
                                       //  try{Thread.sleep(100);} catch(Exception e) {}
                                 } });
 	}
+
+*/
+// ================================================== static
+                public synchronized static void showRecentAppsSystemUI()
+                {
+                        try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).toggleRecentApps(); }
+                        catch (Exception e) { }
+                }
+
+                public synchronized static void showNotificationsPanel()
+                {
+                        try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).expandNotificationsPanel(); }
+                        catch (Exception e) { }
+                }
+
+                public synchronized static void showSettingsPanel()
+                {
+                        try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).expandSettingsPanel(); }
+                        catch (Exception e) { }
+                }
+
+                public synchronized static void killApp(Context c, String packageName)
+                {
+                        if(packageName == null) return;
+                        final ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+                        am.forceStopPackage(packageName);
+                }
+
 }

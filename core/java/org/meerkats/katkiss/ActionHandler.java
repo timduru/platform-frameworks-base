@@ -109,9 +109,9 @@ public class ActionHandler {
     }
 
     public void performTask(String action) {
-        if (action.equals(KKC.A.SYSTEMUI_TASK_KILL_PROCESS))
+/*        if (action.equals(KKC.A.SYSTEMUI_TASK_KILL_PROCESS))
         	killProcess();
-        else if (action.equals(KKC.A.SYSTEMUI_TASK_SCREENSHOT))
+        else*/ if (action.equals(KKC.A.SYSTEMUI_TASK_SCREENSHOT))
         	takeScreenshot();        
         else if (action.equals(KKC.A.SYSTEMUI_TASK_SCREENOFF))
         	screenOff();
@@ -119,7 +119,7 @@ public class ActionHandler {
         	startAssistActivity(); */
         else if(action.equals(KKC.A.SYSTEMUI_RECENT))
         	WMController.showRecentAppsSystemUI();
-        else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
+/*        else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
         	new WMController(mContext).switchToPreviousTask();
         else if(action.equals(KKC.A.SPLITVIEW_AUTO))
         	new WMController(mContext).switchTopTaskToSplitView(-1);
@@ -136,10 +136,11 @@ public class ActionHandler {
         	KatUtils.expandedDesktopSwitch(mContext, 2);
         else if(action.equals(KKC.A.EXPANDED_DESKTOP_KEEPSTATUSBAR))
         	KatUtils.expandedDesktopSwitch(mContext, 1);
+*/
         else if(action.equals(KKC.A.AUTOROTATION_TOGGLE))
         	KatUtils.rotationToggle(mContext);
-        else if(action.equals(KKC.A.ETHERNET_TOGGLE))
-        	KatUtils.ethernetToggle(mContext);
+//        else if(action.equals(KKC.A.ETHERNET_TOGGLE))
+//        	KatUtils.ethernetToggle(mContext);
         else if(action.equals(KKC.A.SHOW_POWERMENU) || action.equals(KKC.A.WIFI_TOGGLE) || action.equals(KKC.A.BLUETOOTH_TOGGLE) || action.equals(KKC.A.TOUCHPAD_TOGGLE) || action.equals(KKC.A.LAUNCH_SETTINGS)
                 || action.equals(KKC.A.BRIGHTNESS_DOWN) || action.equals(KKC.A.BRIGHTNESS_UP) || action.equals(KKC.A.BRIGHTNESS_AUTO)
                 || action.equals(KKC.A.MEDIA_PREVIOUS) || action.equals(KKC.A.MEDIA_NEXT) || action.equals(KKC.A.MEDIA_PLAYPAUSE)
@@ -147,9 +148,9 @@ public class ActionHandler {
                )
         	KatUtils.sendIntentToWindowManager(mContext, KKC.I.GLOBAL_ACTIONS, action, false);
         else if(action.equals(KKC.A.SHOW_NOTIFICATIONS_PANEL))
-        	new WMController(mContext).showNotificationsPanel();
+        	WMController.showNotificationsPanel();
         else if(action.equals(KKC.A.SHOW_SETTINGS_PANEL))
-        	new WMController(mContext).showSettingsPanel();
+        	WMController.showSettingsPanel();
 //        else if (action.equals(KKC.A.SYSTEMUI_TASK_POWER_MENU))
 //        	showPowerMenu();
         else if (action.startsWith(KKC.A.SENDKEY_BASE)) {
@@ -286,7 +287,7 @@ public class ActionHandler {
         }
     }
 
-    private void killProcess() {
+/*    private void killProcess() {
         if (mContext
                 .checkCallingOrSelfPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) == PackageManager.PERMISSION_GRANTED) {
             ActivityManager am = (ActivityManager) mContext
@@ -294,7 +295,7 @@ public class ActionHandler {
             List<ActivityManager.RunningTaskInfo> task = am.getRunningTasks(1, 0, null);
             String packageName = task.get(0).baseActivity.getPackageName();
 
-            /* Check that we're not killing the launcher */
+            //Check that we're not killing the launcher 
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.addCategory(Intent.CATEGORY_HOME);
             ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(intent,
@@ -311,6 +312,7 @@ public class ActionHandler {
             postActionEventHandled(false);
         }
     }
+*/
 
     private void screenOff() {
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
