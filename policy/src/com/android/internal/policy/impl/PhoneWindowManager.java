@@ -132,6 +132,9 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 
 import org.meerkats.katkiss.KKC;
+import org.meerkats.katkiss.KatUtils;
+import org.meerkats.katkiss.KeyOverrideManager;
+
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -371,6 +374,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // The last window we were told about in focusChanged.
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
+
+    KeyOverrideManager mKeyOverrideManager = null;
 
     PointerLocationView mPointerLocationView;
 
@@ -974,6 +979,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void init(Context context, IWindowManager windowManager,
             WindowManagerFuncs windowManagerFuncs) {
         mContext = context;
+        mKeyOverrideManager = new KeyOverrideManager(context);
         mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
@@ -4213,6 +4219,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + " interactive=" + interactive + " keyguardActive=" + keyguardActive
                     + " policyFlags=" + Integer.toHexString(policyFlags));
         }
+
+        if(mKeyOverrideManager.executeOverrideIfNeeded(event)) return 0;
 
         // Basic policy based on interactive state.
         int result;
