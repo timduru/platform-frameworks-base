@@ -604,8 +604,8 @@ public class WindowManagerService extends IWindowManager.Stub
     PowerManager mPowerManager;
     PowerManagerInternal mPowerManagerInternal;
 
-    float mWindowAnimationScaleSetting = 0.5f;
-    float mTransitionAnimationScaleSetting = 0.5f;
+    float mWindowAnimationScaleSetting = 0.0f;
+    float mTransitionAnimationScaleSetting = 0.0f;
     float mAnimatorDurationScaleSetting = 0.5f;
     boolean mAnimationsDisabled = false;
 
