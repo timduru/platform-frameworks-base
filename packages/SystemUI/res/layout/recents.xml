@@ -29,7 +29,7 @@
     <!-- Recents View -->
     <com.android.systemui.recents.views.RecentsView
         android:id="@+id/recents_view"
-        android:layout_width="match_parent" 
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:focusable="true" />
 
@@ -44,6 +44,18 @@
            android:layout="@layout/recents_debug_overlay"
            android:layout_width="match_parent"
            android:layout_height="match_parent" />
+
+    <!-- Clear Recents View -->
+    <ImageView
+        android:id="@+id/clear_recents"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|left"
+        android:src="@drawable/ic_dismiss_all"
+        android:scaleType="fitCenter"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="48dp"
+        android:background="@drawable/recents_button_bg" />
 
     <!-- Nav Bar Scrim View -->
     <ImageView
