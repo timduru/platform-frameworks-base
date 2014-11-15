@@ -70,7 +70,9 @@
     <string name="keyboard_layout_croatian">Croatian</string>
 
     <!-- Czech keyboard layout label. [CHAR LIMIT=35] -->
-    <string name="keyboard_layout_czech">Czech</string>
+    <string name="keyboard_layout_czech">Czech (qwertz)</string>
+    <!-- Czech keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_czech_qwerty">Czech (qwerty)</string>
 
     <!-- Estonian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_estonian">Estonian</string>
@@ -99,21 +101,20 @@
     <!-- Ukrainian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_ukrainian">Ukrainian</string>
 
-    <!-- Arabic keyboard layout label. [CHAR LIMIT=35] -->
-    <string name="keyboard_layout_arabic">Arabic</string>
-
-    <!-- Greek keyboard layout label. [CHAR LIMIT=35] -->
-    <string name="keyboard_layout_greek">Greek</string>
-
-    <!-- Hebrew keyboard layout label. [CHAR LIMIT=35] -->
-    <string name="keyboard_layout_hebrew">Hebrew</string>
-
-    <!-- Lithuanian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_ar_EG">Arabic</string>
+    <string name="keyboard_layout_nl_BE">Dutch (Belgium)</string>
+    <string name="keyboard_layout_en_CA">English (Canada)</string>
+    <string name="keyboard_layout_en_GB">English (UK)</string>
+    <string name="keyboard_layout_de_CH">German (Switzerland)</string>
+    <string name="keyboard_layout_el_GR">Greek</string>
+    <string name="keyboard_layout_iw_IL">Hebrew</string>
+    <string name="keyboard_layout_it_CH">Italian (Switzerland)</string>
+    <string name="keyboard_layout_ko_KR">Korean</string>
+    <string name="keyboard_layout_pt_BR">Portuguese (Brazilian)</string>
+    <string name="keyboard_layout_es_LA">Spanish (Laos)</string>
+    <string name="keyboard_layout_es_US">Spanish (US)</string>
+    <string name="keyboard_layout_th_TH">Thai</string>
+    <string name="keyboard_layout_pl_PL">Polish</string>
     <string name="keyboard_layout_lithuanian">Lithuanian</string>
-
-    <!-- Spanish (Latin) keyboard layout label. [CHAR LIMIT=35] -->
-    <string name="keyboard_layout_spanish_latin">Spanish (Latin)</string>
-
-    <!-- Latvian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_latvian">Latvian</string>
 </resources>
