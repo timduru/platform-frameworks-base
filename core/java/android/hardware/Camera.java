@@ -1324,7 +1324,9 @@ public class Camera {
      */
     public void setAutoFocusMoveCallback(AutoFocusMoveCallback cb) {
         mAutoFocusMoveCallback = cb;
-        enableFocusMoveCallback((mAutoFocusMoveCallback != null) ? 1 : 0);
+        // not supported with old camera blobs => ignore and continue
+        try { enableFocusMoveCallback((mAutoFocusMoveCallback != null) ? 1 : 0); } 
+        catch(Exception e) {} 
     }
 
     private native void enableFocusMoveCallback(int enable);
