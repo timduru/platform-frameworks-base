@@ -1027,12 +1027,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_deskDockEnablesAccelerometer);
-        mLidKeyboardAccessibility = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_lidKeyboardAccessibility);
+        mLidKeyboardAccessibility = mContext.getResources().getInteger( com.android.internal.R.integer.config_lidKeyboardAccessibility);
+        int overrideAccessibility = SystemProperties.getInt("ro.lid.keyboard_accessibility", -1);
+        if(overrideAccessibility != -1) mLidKeyboardAccessibility = overrideAccessibility;
         mLidNavigationAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidNavigationAccessibility);
-        mLidControlsSleep = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_lidControlsSleep);
+        mLidControlsSleep = mContext.getResources().getBoolean( com.android.internal.R.bool.config_lidControlsSleep) &&  "1".equals(SystemProperties.get("ro.lid.controls_sleep", "1"));
         mTranslucentDecorEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableTranslucentDecor);
         readConfigurationDependentBehaviors();
