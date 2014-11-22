@@ -137,14 +137,10 @@ public final class ShutdownThread extends Thread {
                 sConfirmDialog.dismiss();
             }
             sConfirmDialog = new AlertDialog.Builder(context)
-                    .setTitle(mRebootSafeMode
-                            ? com.android.internal.R.string.reboot_safemode_title
-                            : com.android.internal.R.string.power_off)
+                    .setTitle(mRebootSafeMode ? com.android.internal.R.string.reboot_safemode_title : com.android.internal.R.string.power_off)
                     .setMessage(resourceId)
                     .setPositiveButton(com.android.internal.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            beginShutdownSequence(context);
-                        }
+                        public void onClick(DialogInterface dialog, int which) { beginShutdownSequence(context); }
                     })
                     .setNegativeButton(com.android.internal.R.string.no, null)
                     .create();
@@ -220,8 +216,11 @@ public final class ShutdownThread extends Thread {
         // throw up an indeterminate system dialog to indicate radio is
         // shutting down.
         ProgressDialog pd = new ProgressDialog(context);
-        pd.setTitle(context.getText(com.android.internal.R.string.power_off));
-        pd.setMessage(context.getText(com.android.internal.R.string.shutdown_progress));
+        pd.setTitle(context.getText( (mReboot || mRebootSafeMode) ? com.android.internal.R.string.reboot : com.android.internal.R.string.power_off));
+        if(mReboot)
+            pd.setMessage(context.getText( (mRebootReason != null && mRebootReason.equals("recovery")) ? com.android.internal.R.string.reboot_recovery : com.android.internal.R.string.reboot));
+        else
+            pd.setMessage(context.getText(com.android.internal.R.string.shutdown_progress));
         pd.setIndeterminate(true);
         pd.setCancelable(false);
         pd.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);

@@ -94,6 +94,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     /* Valid settings for global actions keys.
      * see config.xml config_globalActionList */
     private static final String GLOBAL_ACTION_KEY_POWER = "power";
+    private static final String GLOBAL_ACTION_KEY_REBOOT = "reboot";
     private static final String GLOBAL_ACTION_KEY_AIRPLANE = "airplane";
     private static final String GLOBAL_ACTION_KEY_BUGREPORT = "bugreport";
     private static final String GLOBAL_ACTION_KEY_SILENT = "silent";
@@ -270,9 +271,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 // If we already have added this, don't add it again.
                 continue;
             }
-            if (GLOBAL_ACTION_KEY_POWER.equals(actionKey)) {
-                mItems.add(new PowerAction());
-            } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
+            if (GLOBAL_ACTION_KEY_POWER.equals(actionKey)) mItems.add(new PowerAction());
+            else if (GLOBAL_ACTION_KEY_REBOOT.equals(actionKey)) mItems.add(new RebootAction());
+            else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
                 mItems.add(mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
                 if (Settings.Global.getInt(mContext.getContentResolver(),
@@ -329,7 +330,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         return dialog;
     }
 
-    private final class PowerAction extends SinglePressAction implements LongPressAction {
+    private class PowerAction extends SinglePressAction implements LongPressAction {
         private PowerAction() {
             super(com.android.internal.R.drawable.ic_lock_power_off,
                 R.string.global_action_power_off);
@@ -356,6 +357,25 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             // shutdown by making sure radio and power are handled accordingly.
             mWindowManagerFuncs.shutdown(false /* confirm */);
         }
+    }
+
+    private final class RebootAction  extends SinglePressAction implements LongPressAction {
+        private RebootAction() {
+            super(com.android.internal.R.drawable.ic_lock_power_off, R.string.global_action_reboot);
+        }
+
+        @Override
+        public boolean onLongPress() { mWindowManagerFuncs.reboot("recovery", false); return true; }
+
+        @Override
+        public void onPress() { mWindowManagerFuncs.reboot(null, false); }
+
+        @Override
+        public boolean showDuringKeyguard() { return true; }
+
+        @Override
+        public boolean showBeforeProvisioning() { return true; }
+
     }
 
     private Action getBugReportAction() {
