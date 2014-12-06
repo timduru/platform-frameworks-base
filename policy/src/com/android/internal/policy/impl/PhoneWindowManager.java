@@ -135,6 +135,8 @@ import org.meerkats.katkiss.KKC;
 import org.meerkats.katkiss.KatUtils;
 import org.meerkats.katkiss.KeyOverrideManager;
 import org.meerkats.katkiss.WMController;
+import android.app.AppGlobals;
+
 
 
 /**
@@ -578,8 +580,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 */
 
                 if (intent.getBooleanExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, false)) {
-                    WMController.killApp(mContext, "com.android.settings");
-                    WMController.killApp(mContext, "com.android.systemui");
+                    closeApplication("com.android.settings");
+                    closeApplication("com.android.systemui");
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -6147,4 +6149,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mOrientationListener.dump(pw, prefix);
         }
     }
+
+    private void closeApplication(String packageName) {
+        try {
+            ActivityManagerNative.getDefault().killApplicationProcess(
+                    packageName, AppGlobals.getPackageManager().getPackageUid(
+                    packageName, UserHandle.myUserId()));
+        } catch (RemoteException e) { }
+    }
+
 }
