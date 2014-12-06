@@ -612,10 +612,11 @@ public abstract class WindowOrientationListener {
                                 // atan2 returns [-180, 180]; normalize to [0, 360]
                                 orientationAngle += 360;
                             }
+                            if(orientationAngle > 360) orientationAngle = 0; // protection for sensor sending bad values
 
                             // Find the nearest rotation.
                             int nearestRotation = (orientationAngle + 45) / 90;
-                            if (nearestRotation == 4) {
+                            if (nearestRotation >= 4) {
                                 nearestRotation = 0;
                             }
 
