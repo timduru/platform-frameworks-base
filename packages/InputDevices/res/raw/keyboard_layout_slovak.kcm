@@ -289,7 +289,6 @@ key BACKSLASH {
 key PLUS {
     label:                              '&'
     base:                               '&'
-    shift:                              '*'
     shift, capslock:                    '*'
     ralt:                               '<'
 }
