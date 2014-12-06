@@ -131,8 +131,10 @@ import android.bluetooth.BluetoothAdapter;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 
+import org.meerkats.katkiss.KKC;
 import org.meerkats.katkiss.KatUtils;
 import org.meerkats.katkiss.KeyOverrideManager;
+import org.meerkats.katkiss.WMController;
 
 
 /**
@@ -559,6 +561,55 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_DISPATCH_SHOW_GLOBAL_ACTIONS = 10;
     private static final int MSG_HIDE_BOOT_MESSAGE = 11;
     private static final int MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK = 12;
+
+    class GlobalIntentReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(KKC.I.UI_CHANGED)) {
+                String cmd = intent.getStringExtra(KKC.I.CMD);
+
+/*                if (KKC.I.CMD_BARTYPE_CHANGED.equals(cmd))
+                    refreshBarType();
+                else if(KKC.I.CMD_BARSIZE_CHANGED.equals(cmd))
+                    refreshNavigationBarSize();
+                else if(KKC.I.CMD_REBOOT.equals(cmd))
+                    mWindowManagerFuncs.reboot(null, true);
+*/
+
+                if (intent.getBooleanExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, false)) {
+                    WMController.killApp(mContext, "com.android.settings");
+                    WMController.killApp(mContext, "com.android.systemui");
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mContext.startServiceAsUser(new Intent().setComponent(ComponentName
+                                    .unflattenFromString("com.android.systemui/.SystemUIService")),
+                                    new UserHandle(
+                                            UserHandle.myUserId()));
+                        }
+                    }, 250);
+                }
+            }
+            else if(action.equals(KKC.I.GLOBAL_ACTIONS)) {
+                String cmd = intent.getStringExtra(KKC.I.CMD);
+                if (KKC.A.SHOW_POWERMENU.equals(cmd))
+                    showGlobalActionsInternal();
+                else if (KKC.A.MEDIA_PREVIOUS.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.ACTION_DOWN));
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.ACTION_UP));
+                }
+                else if (KKC.A.MEDIA_NEXT.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.ACTION_DOWN));
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.ACTION_UP));
+                }
+                else if (KKC.A.MEDIA_PLAYPAUSE.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.ACTION_DOWN));
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.ACTION_UP));
+                }
+            }
+        }
+    }
 
     private class PolicyHandler extends Handler {
         @Override
@@ -1009,6 +1060,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDeskDockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
+        GlobalIntentReceiver mGlobalIntentReceiver = new GlobalIntentReceiver();
+
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mBroadcastWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");
@@ -1063,6 +1116,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // register for multiuser-relevant broadcasts
         filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
         context.registerReceiver(mMultiuserReceiver, filter);
+
+        filter = new IntentFilter();
+        filter.addAction(KKC.I.UI_CHANGED);
+        filter.addAction(KKC.I.GLOBAL_ACTIONS);
+        context.registerReceiver(mGlobalIntentReceiver, filter);
 
         // monitor for system gestures
         mSystemGestures = new SystemGesturesPointerEventListener(context,
