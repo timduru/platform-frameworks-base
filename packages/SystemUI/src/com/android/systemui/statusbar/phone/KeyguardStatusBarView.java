@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -125,7 +126,9 @@ public class KeyguardStatusBarView extends RelativeLayout{
 
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
-        BatteryMeterView statusBarBatteryView = ((BatteryMeterView) findViewById(R.id.battery));
+        BaseStatusBar.updateBatteryView(this, R.id.battery, R.id.battery_level, mBatteryController);
+        BaseStatusBar.updateBatteryView(this, R.id.dock_battery, R.id.dock_battery_level, mBatteryController);
+         BatteryMeterView statusBarBatteryView = ((BatteryMeterView) findViewById(R.id.battery));
         TextView statusBarBatteryLevel = ((TextView) findViewById(R.id.battery_level));
 
         if(statusBarBatteryView != null)

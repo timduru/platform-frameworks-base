@@ -85,6 +85,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
@@ -93,7 +94,9 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.phone.NavigationBarView;
+import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -2099,4 +2102,17 @@ public abstract class BaseStatusBar extends SystemUI implements
         int uiMode =  Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT);
         return (uiMode  == KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT || uiMode == KKC.S.SYSTEMUI_UI_MODE_SYSTEMBAR) ? R.layout.status_bar_search_panel_left : R.layout.status_bar_search_panel;
     }
+
+	public static void updateBatteryView(View v, int batteryViewID, int batteryLevelViewID, BatteryController ctrl) 
+	{
+		if(v == null) return;
+        BatteryMeterView batteryView = ((BatteryMeterView) v.findViewById(batteryViewID));
+        if(batteryView == null) return;      
+    	batteryView.setBatteryController(ctrl);
+
+        TextView batteryLevel = ((TextView) v.findViewById(batteryLevelViewID));
+        if(batteryLevel == null) return;        
+        batteryView.addLabelView(batteryLevel);
+		
+	}
 }

@@ -84,8 +84,9 @@ public class BatteryMeterView extends View implements DemoMode,
 
     private boolean mShowIcon = true, mShowText = false, mShowTextPercent = false;
     private boolean mCustomConf;
+    private boolean mDockMode = false;
     private ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
-    protected boolean mBatteryAvailable = true;
+    protected boolean mBatteryAvailable = false;
 
     private class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -105,7 +106,7 @@ public class BatteryMeterView extends View implements DemoMode,
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+            if (action.equals(Intent.ACTION_BATTERY_CHANGED) || action.equals(Intent.ACTION_DOCK_BATTERY_CHANGED) ) {
                 if (testmode && ! intent.getBooleanExtra("testmode", false)) return;
 
                 level = (int)(100f
@@ -121,11 +122,13 @@ public class BatteryMeterView extends View implements DemoMode,
                 technology = intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY);
                 voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0);
                 temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0);
-
+                mBatteryAvailable = level != BatteryTracker.UNKNOWN_LEVEL;
+                
                 setContentDescription(
                         context.getString(R.string.accessibility_battery_level, level));
                 postInvalidate();
                 updateLabel();
+                updateIconState();
 
             } else if (action.equals(ACTION_LEVEL_TEST)) {
                 testmode = true;
@@ -169,14 +172,14 @@ public class BatteryMeterView extends View implements DemoMode,
         super.onAttachedToWindow();
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(mDockMode  ? Intent.ACTION_DOCK_BATTERY_CHANGED : Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(ACTION_LEVEL_TEST);
         final Intent sticky = getContext().registerReceiver(mTracker, filter);
         if (sticky != null) {
             // preload the battery level
             mTracker.onReceive(getContext(), sticky);
         }
-        mBatteryController.addStateChangedCallback(this);
+        if(mBatteryController != null) mBatteryController.addStateChangedCallback(this);
         updateLabel();
         updateIconState();
     }
@@ -186,7 +189,7 @@ public class BatteryMeterView extends View implements DemoMode,
         super.onDetachedFromWindow();
 
         getContext().unregisterReceiver(mTracker);
-        mBatteryController.removeStateChangedCallback(this);
+        if(mBatteryController != null) mBatteryController.removeStateChangedCallback(this);
     }
 
     public BatteryMeterView(Context context) {
@@ -211,6 +214,8 @@ public class BatteryMeterView extends View implements DemoMode,
         	refreshConf();
         	new CustomObserver(context, this);
         }
+
+        mDockMode = atts.getBoolean(R.styleable.BatteryMeterView_dockMode, false);
 
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
                 res.getColor(R.color.batterymeter_frame_color));

@@ -24,7 +24,10 @@ import android.os.BatteryManager;
 import android.os.PowerManager;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.FileDescriptor;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -40,8 +43,80 @@ public class BatteryController extends BroadcastReceiver {
     private boolean mCharging;
     private boolean mCharged;
     private boolean mPowerSave;
+    private Context mContext;
+    
+    private class RefreshDockStatus extends Thread
+    {
+    	private final static String DOCK_STATUS_PATH = "/sys/class/power_supply/dock_battery/status";
+    	private final static String DOCK_CAPACITY_PATH = "/sys/class/power_supply/dock_battery/capacity";
+    	private final static int REFRESH = 15*1000;
+
+    	private String _status = "";
+    	private int _capacity = 0 ;
+    	private String _prevStatus = "";
+    	private int _prevCapacity = 0 ;
+    	private boolean _present = false ;
+    	
+    	private int readSysIntVal(String sysPath) throws IOException
+    	{
+			String val = readSysStringVal(sysPath);
+			if(val == null) return -1;
+			else return Integer.parseInt(val);
+    	}
+
+    	private String readSysStringVal(String sysPath) throws IOException
+    	{
+			BufferedReader reader = new BufferedReader(new FileReader(sysPath));
+			String val = reader.readLine();
+			reader.close();
+			return val;
+    	}
+    	
+    	private void refresh()
+    	{
+    		try 
+    		{
+    			_capacity = readSysIntVal(DOCK_CAPACITY_PATH);
+    			_status = readSysStringVal(DOCK_STATUS_PATH);
+    			_present = true;
+    		}
+    		catch(Exception e )
+    		{_present = false;}
+    		if(!_present) _capacity = -1;
+    	}
+
+    	private void postUpdateIfNeeded()
+    	{
+    		
+    		if(_prevStatus == _status && _prevCapacity == _capacity  || mContext == null) return;
+    		
+    		Intent batteryChangedIntent = new Intent(Intent.ACTION_DOCK_BATTERY_CHANGED);
+    		batteryChangedIntent.putExtra(BatteryManager.EXTRA_LEVEL, _capacity);
+    		batteryChangedIntent.putExtra(BatteryManager.EXTRA_PLUGGED, _status.equals("Charging")?1:0);
+    		batteryChangedIntent.putExtra(BatteryManager.EXTRA_PRESENT, _present);
+    		mContext.sendBroadcast(batteryChangedIntent);
+    		
+    		_prevStatus = _status; 
+    		_prevCapacity = _capacity;
+    	}
+
+    	
+    	@Override
+    	public void run() {
+    		while(true)
+    		{
+    			refresh();
+    			postUpdateIfNeeded();
+
+	    		try { Thread.sleep(REFRESH);} 
+	    		catch (InterruptedException e) {}
+    		}
+    	}
+    }
+    
 
     public BatteryController(Context context) {
+    	mContext = context;
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 
         IntentFilter filter = new IntentFilter();
@@ -49,8 +124,8 @@ public class BatteryController extends BroadcastReceiver {
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
         context.registerReceiver(this, filter);
-
         updatePowerSave();
+    	new RefreshDockStatus().start();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -107,7 +182,7 @@ public class BatteryController extends BroadcastReceiver {
         firePowerSaveChanged();
     }
 
-    private void fireBatteryLevelChanged() {
+    private void fireBatteryLevelChanged() {    	    	
         final int N = mChangeCallbacks.size();
         for (int i = 0; i < N; i++) {
             mChangeCallbacks.get(i).onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
