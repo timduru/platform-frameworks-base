@@ -39,8 +39,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 /**
  * The header group on Keyguard.
  */
-public class KeyguardStatusBarView extends RelativeLayout
-        implements BatteryController.BatteryStateChangeCallback {
+public class KeyguardStatusBarView extends RelativeLayout{
 
     private boolean mBatteryCharging;
     private boolean mKeyguardUserSwitcherShowing;
@@ -102,7 +101,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         } else if (mMultiUserSwitch.getParent() == this && mKeyguardUserSwitcherShowing) {
             removeView(mMultiUserSwitch);
         }
-        mBatteryLevel.setVisibility(mBatteryCharging ? View.VISIBLE : View.GONE);
+        //mBatteryLevel.setVisibility(mBatteryCharging ? View.VISIBLE : View.GONE);
     }
 
     private void updateSystemIconsLayoutParams() {
@@ -115,17 +114,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         }
     }
 
-    public void setListening(boolean listening) {
-        if (listening == mBatteryListening) {
-            return;
-        }
-        mBatteryListening = listening;
-        if (mBatteryListening) {
-            mBatteryController.addStateChangedCallback(this);
-        } else {
-            mBatteryController.removeStateChangedCallback(this);
-        }
-    }
+
 
     private void updateUserSwitcher() {
         boolean keyguardSwitcherAvailable = mKeyguardUserSwitcher != null;
@@ -136,7 +125,14 @@ public class KeyguardStatusBarView extends RelativeLayout
 
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
-        ((BatteryMeterView) findViewById(R.id.battery)).setBatteryController(batteryController);
+        BatteryMeterView statusBarBatteryView = ((BatteryMeterView) findViewById(R.id.battery));
+        TextView statusBarBatteryLevel = ((TextView) findViewById(R.id.battery_level));
+
+        if(statusBarBatteryView != null)
+        {
+        	statusBarBatteryView.setBatteryController(mBatteryController);
+        	statusBarBatteryView.addLabelView(statusBarBatteryLevel);
+        }
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
@@ -148,20 +144,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         });
     }
 
-    @Override
-    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-        mBatteryLevel.setText(getResources().getString(R.string.battery_level_template, level));
-        boolean changed = mBatteryCharging != charging;
-        mBatteryCharging = charging;
-        if (changed) {
-            updateVisibilities();
-        }
-    }
 
-    @Override
-    public void onPowerSaveChanged() {
-        // could not care less
-    }
 
     public void setKeyguardUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
         mKeyguardUserSwitcher = keyguardUserSwitcher;

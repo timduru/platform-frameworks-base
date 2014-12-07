@@ -29,8 +29,9 @@ public final class KKC {
     public static final String SYSTEMUI_BATTERY_BASECONF = "kk_ui_battery_";
     public static final String SYSTEMUI_BATTERY_ICON = "kk_ui_battery_icon";
     public static final String SYSTEMUI_BATTERY_TEXT = "kk_ui_battery_text";
+    public static final String NATIVE_BATTERY_TEXT_ON_ICON = "status_bar_show_battery_percent";
     public static final String SYSTEMUI_BATTERY_TEXT_PERCENT = "kk_ui_battery_text_percent";
-
+    
     public static final String SYSTEMUI_CLOCK_TIME = "kk_ui_clock_time";
     public static final String SYSTEMUI_CLOCK_DATE = "kk_ui_clock_date";
     

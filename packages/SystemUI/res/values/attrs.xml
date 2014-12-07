@@ -48,7 +48,8 @@
     </declare-styleable>
     <declare-styleable name="BatteryMeterView">
         <attr name="frameColor" format="color" />
-    </declare-styleable>
+        <attr name="customConf" format="boolean" />
+        </declare-styleable>
     <declare-styleable name="Clock">
         <attr name="amPmStyle" format="enum">
             <enum name="normal" value="0" />
