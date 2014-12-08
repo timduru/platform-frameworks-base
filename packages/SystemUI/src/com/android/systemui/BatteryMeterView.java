@@ -114,11 +114,11 @@ public class BatteryMeterView extends View implements DemoMode,
                         / intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
 
                 plugType = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
-                plugged = plugType != 0;
                 health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH,
                         BatteryManager.BATTERY_HEALTH_UNKNOWN);
                 status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
                         BatteryManager.BATTERY_STATUS_UNKNOWN);
+                plugged = plugType != 0 || status == BatteryManager.BATTERY_STATUS_CHARGING;
                 technology = intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY);
                 voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0);
                 temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0);
