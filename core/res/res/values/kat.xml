@@ -9,5 +9,8 @@
     <string name="reboot_recovery">Reboot to recovery</string>
     <java-symbol type="string" name="reboot_recovery" />
 
+    <string name="reboot_recovery_desc">(Long press to reboot to recovery)</string>
+    <java-symbol type="string" name="reboot_recovery_desc" />
+    
 </resources>
 

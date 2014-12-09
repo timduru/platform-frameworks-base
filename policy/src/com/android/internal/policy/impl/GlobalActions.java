@@ -357,6 +357,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             // shutdown by making sure radio and power are handled accordingly.
             mWindowManagerFuncs.shutdown(false /* confirm */);
         }
+        
     }
 
     private final class RebootAction  extends SinglePressAction implements LongPressAction {
@@ -376,6 +377,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         @Override
         public boolean showBeforeProvisioning() { return true; }
 
+        @Override
+        public String getStatus() { return mContext.getString(R.string.reboot_recovery_desc) ; }
     }
 
     private Action getBugReportAction() {
