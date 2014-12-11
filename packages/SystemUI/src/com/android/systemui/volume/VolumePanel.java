@@ -71,6 +71,9 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import org.meerkats.katkiss.KKC;
+import android.provider.Settings;
+
 /**
  * Handles the user interface for the volume keys.
  *
@@ -1112,6 +1115,8 @@ public class VolumePanel extends Handler {
 
     protected void onPlaySound(int streamType, int flags) {
 
+    	if(Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_AUDIOADJUST_SOUND, 0) == 0) return;
+    	
         if (hasMessages(MSG_STOP_SOUNDS)) {
             removeMessages(MSG_STOP_SOUNDS);
             // Force stop right now
