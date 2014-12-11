@@ -51,6 +51,10 @@ import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 
+import org.meerkats.katkiss.KatUtils;
+import org.meerkats.katkiss.KKC;
+
+
 final class UiModeManagerService extends SystemService {
     private static final String TAG = UiModeManager.class.getSimpleName();
     private static final boolean LOG = false;
@@ -324,6 +328,7 @@ final class UiModeManagerService extends SystemService {
         synchronized (mLock) {
             if (newState != mDockState) {
                 mDockState = newState;
+                updateExpandedDesktop();
                 setCarModeLocked(mDockState == Intent.EXTRA_DOCK_STATE_CAR, 0);
                 if (mSystemReady) {
                     updateLocked(UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME, 0);
@@ -331,6 +336,12 @@ final class UiModeManagerService extends SystemService {
             }
         }
     }
+
+     private void updateExpandedDesktop() {
+	         boolean  autoExpand = Settings.System.getInt( mContext.getContentResolver(), KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK,  0) == 1;
+	       if(autoExpand)
+	            KatUtils.expandedDesktop(mContext, mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED);
+    }	
 
     private static boolean isDeskDockState(int state) {
         switch (state) {

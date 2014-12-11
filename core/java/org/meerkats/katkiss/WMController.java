@@ -107,7 +107,10 @@ public class WMController
 	private RunningTaskInfo getFirstSplitViewTaskBeforeTop() { return getTask(1, true); }
 	private RunningTaskInfo getTopSplitViewTask() { return getTask(0, true); }
 
-	private RunningTaskInfo getTask(int nTasksBeforeTop, boolean splitViewTaskOnly)
+	public RunningTaskInfo getTask(int nTasksBeforeTop, boolean splitViewTaskOnly)
+	{ return getTask(nTasksBeforeTop, splitViewTaskOnly, false); }
+	
+	public RunningTaskInfo getTask(int nTasksBeforeTop, boolean splitViewTaskOnly, boolean returnLauncherToo)
 	{
 		if(_c == null) return null; 
 
@@ -124,7 +127,7 @@ public class WMController
 				boolean isSplitViewTask = false; //FIXME isTaskSplitView(currentTask.id);
 
 				String packageName = currentTask.topActivity.getPackageName();
-				if (!isDefaultLauncherOrSystemUI(packageName))
+				if (returnLauncherToo || !isDefaultLauncherOrSystemUI(packageName))
 				{
 					if(splitViewTaskOnly)
 					{
@@ -140,7 +143,40 @@ public class WMController
 
 		return taskFound;
 	}
-/*
+
+	public synchronized void forceLayout2LastTasks()
+	{
+		// Workaround to force relayout of apps that don't layout cleanly after switching    
+		AsyncTask.execute(new Runnable() {
+			public void run()
+			{
+				try{Thread.sleep(200);} catch(Exception e) {}
+				switchToPreviousTask();
+				try{Thread.sleep(100);} catch(Exception e) {}
+				switchToPreviousTask();
+			} });
+	}
+
+
+	public synchronized void forceRefreshTop()
+	{
+		AsyncTask.execute(new Runnable() {
+			public void run()
+			{
+				final ActivityManager am = (ActivityManager) _c.getSystemService(Context.ACTIVITY_SERVICE);
+				try{Thread.sleep(300);} catch(Exception e) {}
+				RunningTaskInfo task = getTask(1, false, true);
+				if(task == null) return;
+				am.moveTaskToFront(task.id, 0, null);
+				
+				try{Thread.sleep(200);} catch(Exception e) {}
+				task = getTask(1, false, true);
+				if(task == null) return;
+				am.moveTaskToFront(task.id, 0, null);
+			} });
+	}
+
+	/*
 
 	public boolean isFloating(ActivityManager.RecentTaskInfo taskInfo)
 	{
@@ -249,20 +285,6 @@ public class WMController
 			Log.d(TAG, "switchTopTaskToSplitView--");
 		}
 
-		private synchronized void forceLayout2LastTasks()
-		{
-			// Workaround to force relayout of apps that don't layout cleanly after switching    
-			AsyncTask.execute(new Runnable() {
-				public void run()
-				{
-					try{Thread.sleep(200);} catch(Exception e) {}
-					switchToPreviousTask();
-					try{Thread.sleep(100);} catch(Exception e) {}
-					switchToPreviousTask();
-					try{Thread.sleep(1000);} catch(Exception e) {}
-					restoreAnimationScales();
-				} });
-		}
 		
         private ArrayList<ActivityManager.RecentTaskInfo> getRecentTaskList(int max, boolean getRegular, boolean getSplit, boolean getFloating)
         {
@@ -378,10 +400,10 @@ public class WMController
                 }
 
                 public synchronized static String getPackageName(RunningTaskInfo task)
-		{
-	                if(task == null) return null;
-
-       	         	return task.baseActivity.getPackageName();
-		}
+				{
+			                if(task == null) return null;
+		
+		       	         	return task.baseActivity.getPackageName();
+				}
 
 }

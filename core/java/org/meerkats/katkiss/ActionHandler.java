@@ -131,12 +131,10 @@ public class ActionHandler {
         	new WMController(mContext).switchTopAsFloating();
         else if(action.equals(KKC.A.SHOW_HIDE_ALL_FLOATING))
         	new WMController(mContext).switchAllFloating();
+*/
 
         else if(action.equals(KKC.A.EXPANDED_DESKTOP))
-        	KatUtils.expandedDesktopSwitch(mContext, 2);
-        else if(action.equals(KKC.A.EXPANDED_DESKTOP_KEEPSTATUSBAR))
-        	KatUtils.expandedDesktopSwitch(mContext, 1);
-*/
+        	KatUtils.expandedDesktopSwitch(mContext);
         else if(action.equals(KKC.A.AUTOROTATION_TOGGLE))
         	KatUtils.rotationToggle(mContext);
 //        else if(action.equals(KKC.A.ETHERNET_TOGGLE))

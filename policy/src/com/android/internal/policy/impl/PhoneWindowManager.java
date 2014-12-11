@@ -115,6 +115,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import static android.view.WindowManager.LayoutParams.*;
@@ -128,9 +129,11 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_CO
 import android.widget.Toast;
 import android.provider.Settings.SettingNotFoundException;
 import android.bluetooth.BluetoothAdapter;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 
+import org.meerkats.katkiss.CustomObserver;
 import org.meerkats.katkiss.KKC;
 import org.meerkats.katkiss.KatUtils;
 import org.meerkats.katkiss.KeyOverrideManager;
@@ -146,7 +149,10 @@ import android.app.AppGlobals;
  * can be acquired with either the Lw and Li lock held, so has the restrictions
  * of both of those when held.
  */
-public class PhoneWindowManager implements WindowManagerPolicy {
+public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.ChangeNotification {
+	
+	private boolean _autoExpandedOnDock = false;
+
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
@@ -1181,6 +1187,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mPowerManager.isInteractive()) {
             goingToSleep(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
         }
+        
+       	refreshConf();
+    	new CustomObserver(context, this);
     }
 
     /**
@@ -6157,5 +6166,44 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     packageName, UserHandle.myUserId()));
         } catch (RemoteException e) { }
     }
+
+ // CustomObserver ChangeNotifications
+    @Override
+    public ArrayList<Uri> getObservedUris()
+    {
+      ArrayList<Uri> uris = new  ArrayList<Uri>();
+//      uris.add(Settings.System.getUriFor(KKC.S.USER_IMMERSIVE_MODE));
+      uris.add(Settings.System.getUriFor(KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_UI_BARSIZE));
+      return uris;
+    }
+
+    @Override
+    public void onChangeNotification(Uri uri)
+    {
+      Log.d(TAG, "onChangeNotification:" + uri);
+      if(uri.equals(Settings.System.getUriFor(KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK)))
+      {
+          boolean newAutoExpandedOnDock  = Settings.System.getInt(mContext.getContentResolver(), KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK, 0) == 1;
+          if(newAutoExpandedOnDock != _autoExpandedOnDock)
+          {
+        	  boolean docked = mDockMode != Intent.EXTRA_DOCK_STATE_UNDOCKED;
+        	  KatUtils.expandedDesktop(mContext, docked && newAutoExpandedOnDock);
+          }
+          _autoExpandedOnDock = newAutoExpandedOnDock;
+      }
+    }
+
+
+	private void refreshConf() 
+	{
+		_autoExpandedOnDock = Settings.System.getInt(mContext.getContentResolver(), KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK, 0) == 1;;
+        //mUserImmersiveMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE, 0) == 1;
+        //mBarSize = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_BARSIZE, KKC.S.SYSTEMUI_BARSIZE_MODE_SLIM);
+
+/*        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+        try { wm.setUserImmersiveMode(mUserImmersiveMode); }
+        catch(Exception e) {} */
+	}
 
 }

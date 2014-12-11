@@ -145,19 +145,24 @@ public class KatUtils {
 	  
 	  return info;
   }
-/*
-  public static void expandedDesktop(Context c, boolean on, int style) //2 both bars, 1: keep statusbar
+
+
+  public static void expandedDesktop(Context c, boolean on)
   {
-        Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, on ? 1 : 0);
-        Settings.System.putInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STYLE, style);
+        Settings.System.putInt( c.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE, on ? 1 : 0);
+        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+        try { wm.setUserImmersiveMode(on); }
+        catch(Exception e) {}
+
+        new WMController(c).forceRefreshTop();
   }
 
-  public static void expandedDesktopSwitch(Context c, int style) // 2 both bars, 1: keep statusbar
+  public static void expandedDesktopSwitch(Context c)
   {
-        boolean  currentlyExpanded = Settings.System.getInt( c.getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE,  0) == 1;
-	expandedDesktop(c, !currentlyExpanded, style);
+        boolean  currentlyExpanded = Settings.System.getInt( c.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE,  0) == 1;
+        expandedDesktop(c, !currentlyExpanded);
   }
-*/
+
   public static void sendKeyDOWN(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_DOWN); }
   public static void sendKeyUP(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_UP); }
   public static void sendKey(final int keyCode, final int action) 
@@ -346,7 +351,6 @@ public class KatUtils {
         Toast.makeText(mContext, "Touchpad " + (touchpadEnabled ==1 ? "Enabled" : "Disabled"), Toast.LENGTH_SHORT).show();
 
      }
-
 
 
 }
