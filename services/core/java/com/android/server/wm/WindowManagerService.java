@@ -11619,9 +11619,4 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     }
-
-    private boolean mUserImmersiveMode = false;
-
-    public boolean isUserImmersiveMode() { return mUserImmersiveMode; }
-    public void setUserImmersiveMode(boolean val) { mUserImmersiveMode = val; }
 }

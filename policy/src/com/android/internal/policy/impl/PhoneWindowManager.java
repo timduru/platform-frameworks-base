@@ -6172,7 +6172,7 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
     public ArrayList<Uri> getObservedUris()
     {
       ArrayList<Uri> uris = new  ArrayList<Uri>();
-//      uris.add(Settings.System.getUriFor(KKC.S.USER_IMMERSIVE_MODE));
+      uris.add(Settings.System.getUriFor(KKC.S.USER_IMMERSIVE_MODE));
       uris.add(Settings.System.getUriFor(KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK));
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_UI_BARSIZE));
       return uris;
@@ -6182,23 +6182,27 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
     public void onChangeNotification(Uri uri)
     {
       Log.d(TAG, "onChangeNotification:" + uri);
-      if(uri.equals(Settings.System.getUriFor(KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK)))
-      {
-          boolean newAutoExpandedOnDock  = Settings.System.getInt(mContext.getContentResolver(), KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK, 0) == 1;
-          if(newAutoExpandedOnDock != _autoExpandedOnDock)
-          {
-        	  boolean docked = mDockMode != Intent.EXTRA_DOCK_STATE_UNDOCKED;
-        	  KatUtils.expandedDesktop(mContext, docked && newAutoExpandedOnDock);
-          }
-          _autoExpandedOnDock = newAutoExpandedOnDock;
-      }
+      refreshConf();
     }
 
 
 	private void refreshConf() 
 	{
-		_autoExpandedOnDock = Settings.System.getInt(mContext.getContentResolver(), KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK, 0) == 1;;
-        //mUserImmersiveMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE, 0) == 1;
+        boolean newAutoExpandedOnDock  = Settings.System.getInt(mContext.getContentResolver(), KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK, 0) == 1;
+        if(newAutoExpandedOnDock != _autoExpandedOnDock)
+        {
+      	  boolean docked = mDockMode != Intent.EXTRA_DOCK_STATE_UNDOCKED;
+      	  KatUtils.expandedDesktop(mContext, docked && newAutoExpandedOnDock);
+          _autoExpandedOnDock = newAutoExpandedOnDock;
+        }
+        
+        boolean userImmersiveMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE, 0) == 1;
+        Log.d(TAG, "_autoExpandedOnDock:" + _autoExpandedOnDock + " userImmersiveMode:"+userImmersiveMode);
+
+        Settings.Global.putString(mContext.getContentResolver(),Settings.Global.POLICY_CONTROL, userImmersiveMode?"immersive.full=*:immersive.preconfirms=*":"");
+        PolicyControl.reloadFromSetting(mContext);
+
+		//mUserImmersiveMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE, 0) == 1;
         //mBarSize = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_BARSIZE, KKC.S.SYSTEMUI_BARSIZE_MODE_SLIM);
 
 /*        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();

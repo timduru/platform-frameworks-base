@@ -140,7 +140,7 @@ public class PolicyControl {
         }
     }
 
-    private static void setFilters(String value) {
+    public static void setFilters(String value) {
         if (DEBUG) Slog.d(TAG, "setFilters: " + value);
         sImmersiveStatusFilter = null;
         sImmersiveNavigationFilter = null;

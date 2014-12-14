@@ -262,8 +262,4 @@ interface IWindowManager
      * @return The frame statistics or null if the window does not exist.
      */
     WindowContentFrameStats getWindowContentFrameStats(IBinder token);
-    
-    boolean isUserImmersiveMode();
-    void setUserImmersiveMode(boolean val);
-    
 }

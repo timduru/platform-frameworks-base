@@ -6,32 +6,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.Map.Entry;
-import android.os.AsyncTask;
-
-
-
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.provider.Settings;
 import android.util.Log;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
-import com.android.internal.statusbar.IStatusBarService;
-//import com.android.internal.ethernet.EthernetManager;
-
 import android.hardware.input.InputManager;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -43,7 +28,6 @@ import android.widget.Toast;
 import android.provider.Settings.SettingNotFoundException;
 import android.bluetooth.BluetoothAdapter;
 import android.net.wifi.WifiManager;
-import android.os.BatteryManager;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.media.AudioManager;
@@ -150,11 +134,7 @@ public class KatUtils {
   public static void expandedDesktop(Context c, boolean on)
   {
         Settings.System.putInt( c.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE, on ? 1 : 0);
-        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
-        try { wm.setUserImmersiveMode(on); }
-        catch(Exception e) {}
-
-        new WMController(c).forceRefreshTop();
+//        new WMController(c).forceRefreshTop();
   }
 
   public static void expandedDesktopSwitch(Context c)

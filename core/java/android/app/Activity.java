@@ -78,7 +78,6 @@ import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -786,9 +785,6 @@ public class Activity extends ContextThemeWrapper
     private SpannableStringBuilder mDefaultKeySsb = null;
 
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
-	private static final int IMMERSIVE_FLAGS = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-	private static final int NON_IMMERSIVE_FLAGS = View.SYSTEM_UI_FLAG_VISIBLE;
-
 
     @SuppressWarnings("unused")
     private final Object mInstanceTracker = StrictMode.trackActivity(this);
@@ -799,7 +795,6 @@ public class Activity extends ContextThemeWrapper
     ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
     SharedElementCallback mEnterTransitionListener = SharedElementCallback.NULL_CALLBACK;
     SharedElementCallback mExitTransitionListener = SharedElementCallback.NULL_CALLBACK;
-	private boolean _prevUserImmersiveMode;
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -1224,30 +1219,8 @@ public class Activity extends ContextThemeWrapper
         getApplication().dispatchActivityResumed(this);
         mActivityTransitionState.onResume();
         mCalled = true;
-
-        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
-
-        try
-        {
-        	boolean currentUserImmersiveMode = wm.isUserImmersiveMode();
-        	
-	        if(_prevUserImmersiveMode != currentUserImmersiveMode || currentUserImmersiveMode)
-	        {	        	
-	        	if(currentUserImmersiveMode)
-	        	{
-	        		mWindow.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-					mWindow.getDecorView().setSystemUiVisibility(IMMERSIVE_FLAGS);
-	        	}
-	        	else
-	        	{
-	        		mWindow.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-					mWindow.getDecorView().setSystemUiVisibility(NON_IMMERSIVE_FLAGS);
-	        	}
-	        }
-			_prevUserImmersiveMode = currentUserImmersiveMode;
-        }
-        catch(Exception e) {}
     }
+
     /**
      * Called when activity resume is complete (after {@link #onResume} has
      * been called). Applications will generally not implement this method;
