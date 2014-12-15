@@ -201,6 +201,7 @@ public:
     void setInteractive(bool interactive);
     void reloadCalibration();
     void setTouchpadMode(int32_t mode);
+    void setRightClickMode(int32_t mode);
     void setTouchpadStatus(int32_t status);
 
 
@@ -269,6 +270,7 @@ private:
 
         // The touchpad gesture mode.
         int32_t touchpadMode;
+        int32_t rightclickMode;
 
         // Touchpad status.
         int32_t touchpadStatus;
@@ -311,6 +313,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLocked.showTouches = false;
         mLocked.touchpadMode = 0;
         mLocked.touchpadStatus = 1;
+        mLocked.rightclickMode = 0;
 
     }
 
@@ -447,6 +450,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->setDisplayInfo(false /*external*/, mLocked.internalViewport);
         outConfig->setDisplayInfo(true /*external*/, mLocked.externalViewport);
         outConfig->touchpadMode = mLocked.touchpadMode;
+        outConfig->rightclickMode = mLocked.rightclickMode;
 
 
     } // release lock
@@ -1039,6 +1043,20 @@ void NativeInputManager::setTouchpadMode(int32_t mode) {
     mInputManager->getReader()->requestRefreshConfiguration(InputReaderConfiguration::CHANGE_TOUCHPAD_MODE);
 }
 
+void NativeInputManager::setRightClickMode(int32_t mode) {
+
+
+    { // acquire lock
+        AutoMutex _l(mLock);
+        if (mLocked.rightclickMode == mode) return;
+
+        ALOGI("Setting rightclick mode to %d.", mode);
+        mLocked.rightclickMode = mode;
+    } // release lock
+
+    mInputManager->getReader()->requestRefreshConfiguration( InputReaderConfiguration::CHANGE_RIGHTCLICK_MODE);
+}
+
 void NativeInputManager::setTouchpadStatus(int32_t status) {
     ALOGI("Setting touchpad status to %d.", status);
 
@@ -1401,6 +1419,12 @@ static void nativeSetTouchpadMode(JNIEnv* env,
     im->setTouchpadMode(mode);
 }
 
+static void nativeSetRightClickMode(JNIEnv* env, jclass clazz, jlong ptr, jint mode) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->setRightClickMode(mode);
+}
+
 static void android_server_InputManager_nativeSetTouchpadStatus(JNIEnv* env,
         jclass clazz, jlong ptr, jint status) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1468,6 +1492,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeMonitor },
     { "nativeSetTouchpadMode", "(JI)V",
             (void*) nativeSetTouchpadMode },
+    { "nativeSetRightClickMode", "(JI)V",
+            (void*) nativeSetRightClickMode },
     { "nativeSetTouchpadStatus", "(JI)V",
             (void*) android_server_InputManager_nativeSetTouchpadStatus },
 

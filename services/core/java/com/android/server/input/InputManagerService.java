@@ -200,6 +200,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native String nativeDump(long ptr);
     private static native void nativeMonitor(long ptr);
     private static native void nativeSetTouchpadMode(long ptr, int mode);
+    private static native void nativeSetRightClickMode(long ptr, int mode);
     private static native void nativeSetTouchpadStatus(long ptr, int status);
 
 
@@ -296,6 +297,7 @@ public class InputManagerService extends IInputManager.Stub
 
         registerPointerSpeedSettingObserver();
         registerShowTouchesSettingObserver();
+        registerRightClickModeSettingObserver();
         if (mHasTouchpad) {
             registerTouchpadModeSettingObserver();
             registerTouchpadStatusSettingObserver();
@@ -317,6 +319,7 @@ public class InputManagerService extends IInputManager.Stub
 
         updatePointerSpeedFromSettings();
         updateShowTouchesFromSettings();
+        updateRightClickModeFromSettings();
         if (mHasTouchpad) {
             updateTouchpadModeFromSettings();
             updateTouchpadStatusFromSettings();
@@ -1294,6 +1297,16 @@ Log.d("TTT", "updateTouchpadStatusFromSettings:" + status);
         nativeSetTouchpadStatus(mPtr, status);
     }
 
+    public void updateRightClickModeFromSettings()
+    {
+        int val = 0;
+        try { val = Settings.System.getInt(mContext.getContentResolver(), KKC.S.DEVICE_SETTINGS_RIGHTCLICK_MODE);
+        } catch (SettingNotFoundException snfe) { }
+
+Log.d("TTT", "updateRightClickModeFromSettings:" + val);
+        nativeSetRightClickMode(mPtr, val);
+    }
+
     private void registerShowTouchesSettingObserver() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.SHOW_TOUCHES), true,
@@ -1326,6 +1339,16 @@ Log.d("TTT", "updateTouchpadStatusFromSettings:" + status);
                     }
                 });
     }
+
+    private void registerRightClickModeSettingObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(KKC.S.DEVICE_SETTINGS_RIGHTCLICK_MODE), true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) { updateRightClickModeFromSettings(); }
+                });
+    }
+
 
     private int getShowTouchesSetting(int defaultValue) {
         int result = defaultValue;
@@ -1378,11 +1401,8 @@ Log.d("TTT", "updateTouchpadStatusFromSettings:" + status);
 
     private int getTouchpadStatusSetting(int defaultValue) {
         int result = defaultValue;
-        try {
-            result = Settings.System.getInt(mContext.getContentResolver(),
-                    KKC.S.DEVICE_SETTINGS_TOUCHPAD_ENABLED);
-        } catch (SettingNotFoundException snfe) {
-        }
+        try { result = Settings.System.getInt(mContext.getContentResolver(), KKC.S.DEVICE_SETTINGS_TOUCHPAD_ENABLED);
+        } catch (SettingNotFoundException snfe) { }
         return result;
     }
 
