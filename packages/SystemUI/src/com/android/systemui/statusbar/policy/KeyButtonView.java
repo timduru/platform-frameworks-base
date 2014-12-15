@@ -63,6 +63,9 @@ import org.meerkats.katkiss.ActionHandler;
 import org.meerkats.katkiss.CustomObserver;
 import android.net.Uri;
 import java.util.ArrayList;
+import android.app.IActivityManager;
+import android.app.ActivityManagerNative;
+
 
 
 import com.android.systemui.R;
@@ -94,7 +97,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         public void run() {
             if (isPressed()) {
                  //Log.d("KeyButtonView", "longpressed: mCustomLongpressEnabled=" +mCustomLongpressEnabled);
-                if (mCustomLongpressEnabled) { mIsLongPressing = true; performLongClick(); }
+                if (isLongClickable() || mCustomLongpressEnabled) { mIsLongPressing = true; performLongClick(); }
                 else if (mCode != 0 && !mCustomLongpressEnabled) {
                      sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                      sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
@@ -362,7 +365,15 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
   @Override
   public boolean performLongClick()
   {
-    if( mCustomLongpressEnabled && _customLongClick != null) _customLongClick.onLongClick(this);
+    try
+    {
+      IActivityManager activityManager = ActivityManagerNative.getDefault();
+      Log.v(TAG, "activityManager.isInLockTaskMode():" + activityManager.isInLockTaskMode());
+      if(activityManager.isInLockTaskMode()) activityManager.stopLockTaskModeOnCurrent();
+      else if( mCustomLongpressEnabled && _customLongClick != null) _customLongClick.onLongClick(this);
+    }
+    catch (Exception e) {}
+
     return super.performLongClick();
   }
 
