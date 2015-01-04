@@ -304,18 +304,24 @@ public class InputManagerService extends IInputManager.Stub
 
         }
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DOCK_EVENT);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+
                 updatePointerSpeedFromSettings();
                 updateShowTouchesFromSettings();
                 if (mHasTouchpad) {
                     updateTouchpadModeFromSettings();
-                    updateTouchpadStatusFromSettings();
+                    if(action.equals(Intent.ACTION_DOCK_EVENT) && intent.getIntExtra(Intent.EXTRA_DOCK_STATE, -1) != Intent.EXTRA_DOCK_STATE_UNDOCKED)
+                        updateTouchpadStatusFromSettings();
                 }
-
             }
-        }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
+        }, filter, null, mHandler);
 
         updatePointerSpeedFromSettings();
         updateShowTouchesFromSettings();
