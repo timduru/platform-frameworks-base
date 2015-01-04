@@ -44,6 +44,7 @@ public class BatteryController extends BroadcastReceiver {
     private boolean mCharged;
     private boolean mPowerSave;
     private Context mContext;
+    private RefreshDockStatus mRefreshDockThread; 
     
     private class RefreshDockStatus extends Thread
     {
@@ -120,12 +121,14 @@ public class BatteryController extends BroadcastReceiver {
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 
         IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DOCK_EVENT);
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
         context.registerReceiver(this, filter);
         updatePowerSave();
-    	new RefreshDockStatus().start();
+    	mRefreshDockThread = new RefreshDockStatus();
+        mRefreshDockThread.start();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -164,6 +167,8 @@ public class BatteryController extends BroadcastReceiver {
             updatePowerSave();
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)) {
             setPowerSave(intent.getBooleanExtra(PowerManager.EXTRA_POWER_SAVE_MODE, false));
+        } else if (action.equals(Intent.ACTION_DOCK_EVENT)) {
+           mRefreshDockThread.interrupt(); 
         }
     }
 
