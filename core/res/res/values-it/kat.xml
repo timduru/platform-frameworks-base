@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="global_action_reboot">Riavvio</string>
+    <java-symbol type="string" name="global_action_reboot" />
+
+    <string name="reboot">Riavvio</string>
+    <java-symbol type="string" name="reboot" />
+    <string name="reboot_recovery">Riavvio in recovery</string>
+    <java-symbol type="string" name="reboot_recovery" />
+
+    <string name="reboot_recovery_desc">(Tieni premuto per riavviare in recovery)</string>
+    <java-symbol type="string" name="reboot_recovery_desc" />
+    
+</resources>
