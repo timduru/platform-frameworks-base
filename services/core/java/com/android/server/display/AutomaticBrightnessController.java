@@ -173,6 +173,8 @@ class AutomaticBrightnessController {
     // The last screen auto-brightness gamma.  (For printing in dump() only.)
     private float mLastScreenAutoBrightnessGamma = 1.0f;
 
+	private long m_prevUpdate;
+
     public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
             SensorManager sensorManager, Spline autoBrightnessSpline,
             int lightSensorWarmUpTime, int brightnessMin, int brightnessMax) {
@@ -258,7 +260,8 @@ class AutomaticBrightnessController {
 
     private void handleLightSensorEvent(long time, float lux) {
         mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
-
+        if(time - m_prevUpdate < LIGHT_SENSOR_RATE_MILLIS ) return;
+        m_prevUpdate = time;
         applyLightSensorMeasurement(time, lux);
         updateAmbientLux(time);
     }
