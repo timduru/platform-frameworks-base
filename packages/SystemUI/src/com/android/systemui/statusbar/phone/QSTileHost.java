@@ -30,6 +30,7 @@ import android.util.Log;
 
 import org.meerkats.katkiss.QSConstants;
 import org.meerkats.katkiss.QSUtils;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
@@ -39,6 +40,7 @@ import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
+import com.android.systemui.qs.tiles.ImmersiveModeTile;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
@@ -270,6 +272,8 @@ public class QSTileHost implements QSTile.Host {
                 return new CastTile(this);
             case QSConstants.TILE_HOTSPOT:
                 return new HotspotTile(this);
+            case QSConstants.TILE_IMMERSIVE:
+                return new ImmersiveModeTile(this);
             default:
                 throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
         }

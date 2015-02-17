@@ -31,6 +31,7 @@ public class QSConstants {
     public static final String TILE_LOCATION = "location";
     public static final String TILE_CAST = "cast";
     public static final String TILE_HOTSPOT = "hotspot";
+    public static final String TILE_IMMERSIVE = "immersive";
 
     // Order matters
     protected static final ArrayList<String> TILES_DEFAULT = new ArrayList<String>();
@@ -43,6 +44,7 @@ public class QSConstants {
         TILES_DEFAULT.add(TILE_ROTATION);
         TILES_DEFAULT.add(TILE_FLASHLIGHT);
         TILES_DEFAULT.add(TILE_LOCATION);
+        TILES_DEFAULT.add(TILE_IMMERSIVE);
     }
 
     protected static final ArrayList<String> TILES_AVAILABLE = new ArrayList<String>();

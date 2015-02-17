@@ -137,11 +137,11 @@ public class KatUtils {
 //        new WMController(c).forceRefreshTop();
   }
 
+  public static boolean isExpanded(Context c)
+  { return Settings.System.getInt( c.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE,  0) == 1;}
+  
   public static void expandedDesktopSwitch(Context c)
-  {
-        boolean  currentlyExpanded = Settings.System.getInt( c.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE,  0) == 1;
-        expandedDesktop(c, !currentlyExpanded);
-  }
+  { expandedDesktop(c, !isExpanded(c)); }
 
   public static void sendKeyDOWN(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_DOWN); }
   public static void sendKeyUP(final int keyCode) { sendKey(keyCode, KeyEvent.ACTION_UP); }
