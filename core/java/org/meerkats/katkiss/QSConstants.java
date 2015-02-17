@@ -43,7 +43,6 @@ public class QSConstants {
         TILES_DEFAULT.add(TILE_ROTATION);
         TILES_DEFAULT.add(TILE_FLASHLIGHT);
         TILES_DEFAULT.add(TILE_LOCATION);
-        TILES_DEFAULT.add(TILE_CAST);
     }
 
     protected static final ArrayList<String> TILES_AVAILABLE = new ArrayList<String>();
@@ -52,5 +51,6 @@ public class QSConstants {
         TILES_AVAILABLE.addAll(TILES_DEFAULT);
         TILES_AVAILABLE.add(TILE_INVERSION);
         TILES_AVAILABLE.add(TILE_HOTSPOT);
+        TILES_AVAILABLE.add(TILE_CAST);
     }
 }
