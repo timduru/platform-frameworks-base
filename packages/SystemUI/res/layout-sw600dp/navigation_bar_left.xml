@@ -56,7 +56,6 @@
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_back"
                 systemui:keyConfigUri="kk_ui_back_target_uri"
-                systemui:longPressAction="killcurrent"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
                 android:layout_width="wrap_content" android:paddingStart="5dp" android:paddingEnd="5dp"
@@ -192,7 +191,6 @@
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_back"
                 systemui:keyConfigUri="kk_ui_back_target_uri"
-                systemui:longPressAction="killcurrent"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
                 android:layout_width="wrap_content" android:paddingStart="5dp" android:paddingEnd="5dp"
