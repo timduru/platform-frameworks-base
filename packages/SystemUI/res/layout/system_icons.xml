@@ -59,7 +59,7 @@
         android:layout_width="9.5dp"
         android:layout_marginBottom="@dimen/battery_margin_bottom"
         android:layout_marginStart="7dp"
-		systemui:customConf="true"        
+	systemui:customConf="true"
         />
         <TextView android:id="@+id/battery_level"
             android:layout_width="wrap_content"

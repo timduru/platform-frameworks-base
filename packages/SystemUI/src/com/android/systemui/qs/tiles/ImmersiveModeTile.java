@@ -55,7 +55,8 @@ public class ImmersiveModeTile extends QSTile<QSTile.BooleanState> implements Cu
         state.value = mode;
         state.visible = true;
         state.label = mContext.getString(R.string.quick_settings_immersive_mode_label);
-        state.iconId =  mode ? R.drawable.ic_qs_immersive_on : R.drawable.ic_qs_immersive_off;
+        final int iconId =  mode ? R.drawable.ic_qs_immersive_on : R.drawable.ic_qs_immersive_off;
+	state.icon = ResourceIcon.get(iconId);
     }
 
 	@Override

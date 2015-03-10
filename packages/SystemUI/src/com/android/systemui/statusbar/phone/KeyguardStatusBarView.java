@@ -37,6 +37,8 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
+import java.text.NumberFormat;
+
 /**
  * The header group on Keyguard.
  */
@@ -146,8 +148,6 @@ public class KeyguardStatusBarView extends RelativeLayout{
             }
         });
     }
-
-
 
     public void setKeyguardUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
         mKeyguardUserSwitcher = keyguardUserSwitcher;
