@@ -49,7 +49,7 @@
                 android:visibility="invisible"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-                android:layout_width="wrap_content" android:paddingStart="20dp" android:paddingEnd="20dp"
+                android:layout_width="wrap_content" android:paddingStart="35dp" android:paddingEnd="35dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_back"
                 android:scaleType="centerInside"
@@ -59,7 +59,7 @@
                 systemui:keyConfigUri="kk_ui_back_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
-                android:layout_width="wrap_content" android:paddingStart="20dp" android:paddingEnd="20dp"
+                android:layout_width="wrap_content" android:paddingStart="35dp" android:paddingEnd="35dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_home"
                 android:scaleType="centerInside"
@@ -70,7 +70,7 @@
                 systemui:keyConfigUri="kk_ui_home_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
-                android:layout_width="wrap_content" android:paddingStart="20dp" android:paddingEnd="20dp"
+                android:layout_width="wrap_content" android:paddingStart="35dp" android:paddingEnd="35dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent"
                 android:scaleType="centerInside"
@@ -188,7 +188,7 @@
                 android:visibility="invisible"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-                android:layout_width="wrap_content" android:paddingStart="20dp" android:paddingEnd="20dp"
+                android:layout_width="wrap_content" android:paddingStart="35dp" android:paddingEnd="35dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_back"
                 android:scaleType="centerInside"
@@ -198,7 +198,7 @@
                 systemui:keyConfigUri="kk_ui_back_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
-                android:layout_width="wrap_content" android:paddingStart="20dp" android:paddingEnd="20dp"
+                android:layout_width="wrap_content" android:paddingStart="35dp" android:paddingEnd="35dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_home"
                 android:scaleType="centerInside"
@@ -209,7 +209,7 @@
                 systemui:keyConfigUri="kk_ui_home_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
-                android:layout_width="wrap_content" android:paddingStart="20dp" android:paddingEnd="20dp"
+                android:layout_width="wrap_content" android:paddingStart="35dp" android:paddingEnd="35dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent"
                 android:scaleType="centerInside"
