@@ -6486,6 +6486,7 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
     {
       ArrayList<Uri> uris = new  ArrayList<Uri>();
       uris.add(Settings.System.getUriFor(KKC.S.USER_IMMERSIVE_MODE));
+      uris.add(Settings.System.getUriFor(KKC.S.USER_IMMERSIVE_MODE_TYPE));
       uris.add(Settings.System.getUriFor(KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK));
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_UI_BARSIZE));
       return uris;
@@ -6498,6 +6499,7 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
       refreshConf();
     }
 
+    public static final String[] IMMERSIVE_MODE_TYPES = {"immersive.full", "immersive.status", "immersive.navigation"};
 
 	private void refreshConf() 
 	{
@@ -6510,9 +6512,10 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
         }
         
         boolean userImmersiveMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE, 0) == 1;
-        Log.d(TAG, "_autoExpandedOnDock:" + _autoExpandedOnDock + " userImmersiveMode:"+userImmersiveMode);
+        int userImmersiveModeType = Settings.System.getInt(mContext.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE_TYPE, 0);
+        Log.d(TAG, "_autoExpandedOnDock:" + _autoExpandedOnDock + " userImmersiveMode:"+userImmersiveMode + " userImmersiveModeType:"+userImmersiveModeType);
 
-        Settings.Global.putString(mContext.getContentResolver(),Settings.Global.POLICY_CONTROL, userImmersiveMode?"immersive.full=*:immersive.preconfirms=*":"");
+        Settings.Global.putString(mContext.getContentResolver(),Settings.Global.POLICY_CONTROL, userImmersiveMode? IMMERSIVE_MODE_TYPES[userImmersiveModeType] + "=*:immersive.preconfirms=*":"");
         PolicyControl.reloadFromSetting(mContext);
 
 		//mUserImmersiveMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE, 0) == 1;

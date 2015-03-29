@@ -75,6 +75,7 @@ public final class KKC {
     public static final String KEYS_OVERRIDE_PREFIX = "keys_override_";
 
     public static final String USER_IMMERSIVE_MODE = "user_immersive_mode";
+    public static final String USER_IMMERSIVE_MODE_TYPE = "user_immersive_mode_type"; // 0 = full, 1=status only, 2=navonly
     public static final String AUTO_EXPANDED_DESKTOP_ONDOCK = "auto_expanded_desktop_ondock";
 	public static final String SYSTEMUI_AUDIOADJUST_SOUND = "systemui_audioadjust_sound";
 
