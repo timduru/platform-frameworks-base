@@ -31,7 +31,7 @@
     </string-array>
 
     <!-- The list of components which should be forced to be enabled. -->
-   <java-symbol type="array" name="config_disabledComponents" />
+   <java-symbol type="array" name="config_forceEnabledComponents" />
     <string-array name="config_forceEnabledComponents" translatable="false">
     </string-array>
 
