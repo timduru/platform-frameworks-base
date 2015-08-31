@@ -38,6 +38,10 @@
     <java-symbol type="integer" name="wallpaper_mode_default" />
     <integer name="wallpaper_mode_default">1</integer>
 
+    <!-- IpReachability monitor enable/Disable -->
+    <java-symbol type="bool" name="config_wifi_ipreachability_monitor" />
+    <bool translatable="false" name="config_wifi_ipreachability_monitor">false</bool>
+
 
 
 </resources>
