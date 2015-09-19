@@ -6318,7 +6318,7 @@ public class Activity extends ContextThemeWrapper
             mIsSplitView = false;
 
             if (shouldReset) {
-                wm.getSplitViewRect(getTaskId());
+                wm.getSplitViewRect(getTaskId(),true);
             }
 
             // Check for split view settings
@@ -6326,7 +6326,7 @@ public class Activity extends ContextThemeWrapper
                 // This activity/task is tagged as being in split view
                 mIsSplitView = true;
 
-                wm.setTaskChildSplit(getTaskId(), mToken, true);
+                wm.setTaskChildSplit(mToken, true);
 
                 // Then, we apply it the position and size
                 mWindow.setGravity(Gravity.LEFT | Gravity.TOP);
@@ -6348,7 +6348,7 @@ public class Activity extends ContextThemeWrapper
                     Log.e(TAG, "Could not update split view rect", e);
                 }*/
 
-                Rect windowBounds = wm.getSplitViewRect(getTaskId());
+                Rect windowBounds = wm.getSplitViewRect(getTaskId(),true);
                 mWindow.setLayout(windowBounds.right - windowBounds.left,
                         windowBounds.bottom - windowBounds.top);
 
@@ -6369,7 +6369,7 @@ public class Activity extends ContextThemeWrapper
                 mWindow.setLayout(mOriginalBounds.right - mOriginalBounds.left,
                         mOriginalBounds.bottom - mOriginalBounds.top);
 
-                wm.setTaskChildSplit(getTaskId(), mToken, false);
+                wm.setTaskChildSplit( mToken, false);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Could not perform split view actions on restart", e);
