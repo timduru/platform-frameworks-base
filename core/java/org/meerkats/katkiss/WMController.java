@@ -124,7 +124,7 @@ public class WMController
 			while ((taskFound == null) && (current < tasks.size())) 
 			{
 				RunningTaskInfo currentTask = tasks.get(current);
-				boolean isSplitViewTask = false; //FIXME isTaskSplitView(currentTask.id);
+				boolean isSplitViewTask = isTaskSplitView(currentTask.id);
 
 				String packageName = currentTask.topActivity.getPackageName();
 				if (returnLauncherToo || !isDefaultLauncherOrSystemUI(packageName))
@@ -176,7 +176,7 @@ public class WMController
 			} });
 	}
 
-	/*
+
 
 	public boolean isFloating(ActivityManager.RecentTaskInfo taskInfo)
 	{
@@ -187,7 +187,7 @@ public class WMController
 
         public boolean isFloating(Intent intent)
         {
-                return (intent.getFlags() & Intent.FLAG_FLOATING_WINDOW) == Intent.FLAG_FLOATING_WINDOW;
+                return false; //FIXME (intent.getFlags() & Intent.FLAG_FLOATING_WINDOW) == Intent.FLAG_FLOATING_WINDOW;
         }
 
 
@@ -221,7 +221,7 @@ public class WMController
 				//am.moveTaskToFront(taskID, ActivityManager.MOVE_TASK_WITH_HOME, null);
 				am.moveTaskToFront(taskID, moveFlags, null);
 		}
-*/
+
 		private synchronized  void switchToPreviousTask(final int delayMS)
 		{ 
 			AsyncTask.execute(new Runnable() {
@@ -244,7 +244,7 @@ public class WMController
 	//		restoreAnimationScales();		
 		}
 
-/*
+
 		public synchronized void refreshTopAndPrevTasks()
 		{
 			_topTask = getTopTask();
@@ -317,7 +317,7 @@ public class WMController
 
                 return tasksFound;
         }
-
+/*
 	public synchronized void switchTopAsFloating()
 	{
 		RunningTaskInfo top =  getTopTask();
@@ -371,8 +371,8 @@ public class WMController
                                       //  try{Thread.sleep(100);} catch(Exception e) {}
                                 } });
 	}
-
 */
+
 // ================================================== static
                 public synchronized static void showRecentAppsSystemUI()
                 {

@@ -121,13 +121,13 @@ public class ActionHandler {
         	WMController.showRecentAppsSystemUI();
         else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
         	new WMController(mContext).switchToPreviousTask();
-/*        else if(action.equals(KKC.A.SPLITVIEW_AUTO))
+        else if(action.equals(KKC.A.SPLITVIEW_AUTO))
         	new WMController(mContext).switchTopTaskToSplitView(-1);
         else if(action.equals(KKC.A.SPLITVIEW_1))
         	new WMController(mContext).switchTopTaskToSplitView(0);
         else if(action.equals(KKC.A.SPLITVIEW_2))
         	new WMController(mContext).switchTopTaskToSplitView(1);
-        else if(action.equals(KKC.A.RELAUNCH_FLOATING))
+/*        else if(action.equals(KKC.A.RELAUNCH_FLOATING))
         	new WMController(mContext).switchTopAsFloating();
         else if(action.equals(KKC.A.SHOW_HIDE_ALL_FLOATING))
         	new WMController(mContext).switchAllFloating();
