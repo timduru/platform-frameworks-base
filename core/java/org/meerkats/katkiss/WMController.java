@@ -294,7 +294,7 @@ public class WMController
                 int current = 0;
 
                 final ActivityManager am = (ActivityManager) _c.getSystemService(Activity.ACTIVITY_SERVICE);
-                List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasks(max, ActivityManager.RECENT_IGNORE_UNAVAILABLE| ActivityManager.RECENT_WITH_EXCLUDED | ActivityManager.RECENT_DO_NOT_COUNT_EXCLUDED);
+                List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasks(max, ActivityManager.RECENT_IGNORE_UNAVAILABLE| ActivityManager.RECENT_WITH_EXCLUDED );
 
                 try
                 {
