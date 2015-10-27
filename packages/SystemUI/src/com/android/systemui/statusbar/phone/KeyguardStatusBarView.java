@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
@@ -36,6 +35,7 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 import java.text.NumberFormat;
 
@@ -138,6 +138,10 @@ public class KeyguardStatusBarView extends RelativeLayout{
         	statusBarBatteryView.setBatteryController(mBatteryController);
         	statusBarBatteryView.addLabelView(statusBarBatteryLevel);
         }
+    }
+
+    public void setUserSwitcherController(UserSwitcherController controller) {
+        mMultiUserSwitch.setUserSwitcherController(controller);
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {

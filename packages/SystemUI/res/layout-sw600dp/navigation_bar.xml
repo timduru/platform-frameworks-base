@@ -3,16 +3,16 @@
 **
 ** Copyright 2012, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 -->
 
@@ -48,7 +48,7 @@
                 android:layout_marginStart="2dp"
                 android:visibility="invisible"
                 />
-            <Space 
+            <Space
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -83,7 +83,7 @@
                 android:contentDescription="@string/accessibility_recent"
                 systemui:keyConfigUri="kk_ui_recent_target_uri"
                 />
-            <Space 
+            <Space
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -124,7 +124,7 @@
             android:id="@+id/lights_out"
             android:visibility="gone"
             >
-            <Space 
+            <Space
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -136,6 +136,7 @@
                 android:src="@drawable/ic_sysbar_lights_out_dot_small"
                 android:scaleType="center"
                 android:layout_weight="0"
+                android:contentDescription="@string/accessibility_back"
                 />
             <ImageView
                 android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
@@ -143,6 +144,7 @@
                 android:src="@drawable/ic_sysbar_lights_out_dot_large"
                 android:scaleType="center"
                 android:layout_weight="0"
+                android:contentDescription="@string/accessibility_home"
                 />
             <ImageView
                 android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
@@ -151,8 +153,9 @@
                 android:src="@drawable/ic_sysbar_lights_out_dot_small"
                 android:scaleType="center"
                 android:layout_weight="0"
+                android:contentDescription="@string/accessibility_recent"
                 />
-            <Space 
+            <Space
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -197,7 +200,7 @@
                 android:layout_marginStart="2dp"
                 android:visibility="invisible"
                 />
-            <Space 
+            <Space
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -232,7 +235,7 @@
                 android:contentDescription="@string/accessibility_recent"
                 systemui:keyConfigUri="kk_ui_recent_target_uri"
                 />
-            <Space 
+            <Space
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -273,7 +276,7 @@
             android:id="@+id/lights_out"
             android:visibility="gone"
             >
-            <Space 
+            <Space
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -285,6 +288,7 @@
                 android:src="@drawable/ic_sysbar_lights_out_dot_small"
                 android:scaleType="center"
                 android:layout_weight="0"
+                android:contentDescription="@string/accessibility_back"
                 />
             <ImageView
                 android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
@@ -292,6 +296,7 @@
                 android:src="@drawable/ic_sysbar_lights_out_dot_large"
                 android:scaleType="center"
                 android:layout_weight="0"
+                android:contentDescription="@string/accessibility_home"
                 />
             <ImageView
                 android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
@@ -300,8 +305,9 @@
                 android:src="@drawable/ic_sysbar_lights_out_dot_small"
                 android:scaleType="center"
                 android:layout_weight="0"
+                android:contentDescription="@string/accessibility_recent"
                 />
-            <Space 
+            <Space
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
