@@ -236,13 +236,7 @@ public class SecurityControllerImpl implements SecurityController {
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
         public void onAvailable(Network network) {
-            NetworkCapabilities networkCapabilities =
-                    mConnectivityManager.getNetworkCapabilities(network);
-            if (DEBUG) Log.d(TAG, "onAvailable " + network.netId + " : " + networkCapabilities);
-            if (networkCapabilities != null &&
-                    networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
-                setCurrentNetid(network.netId);
-            }
+            if (DEBUG) Log.d(TAG, "onAvailable " + network.netId);
             updateState();
             fireCallbacks();
         };

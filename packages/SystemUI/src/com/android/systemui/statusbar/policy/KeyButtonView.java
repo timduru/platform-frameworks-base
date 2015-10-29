@@ -68,7 +68,6 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     private int mTouchSlop;
     private boolean mSupportsLongpress = true;
     private AudioManager mAudioManager;
-    private Animator mAnimateToQuiescent = new ObjectAnimator();
     boolean mCustomLongpressEnabled = false;
     boolean mIsLongPressing = false;
     String mConfigUri;
@@ -76,6 +75,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     ActionHandler mClickActionHandler;
     CustomObserver _observer;
     CustomLongClick _customLongClick;
+    private boolean mGestureAborted;
     
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -85,7 +85,6 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
                 else if (mCode != 0 && !mCustomLongpressEnabled) {
                      sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                      sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
-    private boolean mGestureAborted;
 
                 }
             }
@@ -107,7 +106,6 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
 
 
-        setDrawingAlpha(mQuiescentAlpha);
         setClickable(true);
         setLongClickable(true);
 

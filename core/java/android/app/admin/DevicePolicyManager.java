@@ -3258,7 +3258,6 @@ public class DevicePolicyManager {
      * <p>If {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is set and options is not null for all admins,
      * then it's up to the TrustAgent itself to aggregate the values from all device admins.
      * <p>Consult documentation for the specific TrustAgent to determine legal options parameters.
-     * @hide
      */
     public void setTrustAgentConfiguration(@NonNull ComponentName admin,
             @NonNull ComponentName target, PersistableBundle configuration) {
@@ -3284,7 +3283,6 @@ public class DevicePolicyManager {
      * for this {@param agent} or calls it with a null configuration, null is returned.
      * @param agent Which component to get enabled features for.
      * @return configuration for the given trust agent.
-     * @hide
      */
     public List<PersistableBundle> getTrustAgentConfiguration(@Nullable ComponentName admin,
             @NonNull ComponentName agent) {

@@ -5783,7 +5783,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean wallpaperEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableWallpaperService)
                 && !mOnlyCore;
-        boolean haveKeyguard = false;
+        boolean haveKeyguard = true;
         // TODO(multidisplay): Expand to all displays?
         final WindowList windows = getDefaultWindowListLocked();
         final int N = windows.size();
@@ -9094,8 +9094,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     || ((win.isConfigChanged() || win.setInsetsChanged()) &&
                             ((win.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
                             (win.mHasSurface && win.mAppToken != null &&
-                            win.mAppToken.layoutConfigChanges)))
-                    || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
+                            win.mAppToken.layoutConfigChanges)))){
                 if (!win.mLayoutAttached) {
                     if (initial) {
                         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");

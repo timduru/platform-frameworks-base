@@ -24,6 +24,8 @@ import org.meerkats.katkiss.CustomObserver;
 
 import android.net.Uri;
 import android.provider.Settings;
+import com.android.internal.logging.MetricsLogger;
+
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -75,4 +77,11 @@ public class ImmersiveModeTile extends QSTile<QSTile.BooleanState> implements Cu
 
 	@Override
 	public void onChangeNotification(Uri uri) { refreshState(); }
+
+        @Override
+        public int getMetricsCategory() {
+            return MetricsLogger.QS_IMMERSIVE;
+        }
+
+
 }

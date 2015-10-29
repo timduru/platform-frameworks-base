@@ -8114,6 +8114,7 @@ package android.content {
     field public static final java.lang.String ACTION_DEVICE_STORAGE_LOW = "android.intent.action.DEVICE_STORAGE_LOW";
     field public static final java.lang.String ACTION_DEVICE_STORAGE_OK = "android.intent.action.DEVICE_STORAGE_OK";
     field public static final java.lang.String ACTION_DIAL = "android.intent.action.DIAL";
+    field public static final java.lang.String ACTION_DOCK_BATTERY_CHANGED = "android.intent.action.DOCK_BATTERY_CHANGED";
     field public static final java.lang.String ACTION_DOCK_EVENT = "android.intent.action.DOCK_EVENT";
     field public static final java.lang.String ACTION_DREAMING_STARTED = "android.intent.action.DREAMING_STARTED";
     field public static final java.lang.String ACTION_DREAMING_STOPPED = "android.intent.action.DREAMING_STOPPED";
@@ -35031,10 +35032,10 @@ package android.view {
     field public static final int KEYCODE_B = 30; // 0x1e
     field public static final int KEYCODE_BACK = 4; // 0x4
     field public static final int KEYCODE_BACKSLASH = 73; // 0x49
-    field public static final int KEYCODE_BLUETOOTH = 261; // 0x105
+    field public static final int KEYCODE_BLUETOOTH = 277; // 0x115
     field public static final int KEYCODE_BOOKMARK = 174; // 0xae
     field public static final int KEYCODE_BREAK = 121; // 0x79
-    field public static final int KEYCODE_BRIGHTNESS_AUTO = 263; // 0x107
+    field public static final int KEYCODE_BRIGHTNESS_AUTO = 279; // 0x117
     field public static final int KEYCODE_BRIGHTNESS_DOWN = 220; // 0xdc
     field public static final int KEYCODE_BRIGHTNESS_UP = 221; // 0xdd
     field public static final int KEYCODE_BUTTON_1 = 188; // 0xbc
@@ -35075,7 +35076,7 @@ package android.view {
     field public static final int KEYCODE_CAMERA = 27; // 0x1b
     field public static final int KEYCODE_CAPS_LOCK = 115; // 0x73
     field public static final int KEYCODE_CAPTIONS = 175; // 0xaf
-    field public static final int KEYCODE_CAPTURE = 264; // 0x108
+    field public static final int KEYCODE_CAPTURE = 280; // 0x118
     field public static final int KEYCODE_CHANNEL_DOWN = 167; // 0xa7
     field public static final int KEYCODE_CHANNEL_UP = 166; // 0xa6
     field public static final int KEYCODE_CLEAR = 28; // 0x1c
@@ -35098,8 +35099,8 @@ package android.view {
     field public static final int KEYCODE_ENVELOPE = 65; // 0x41
     field public static final int KEYCODE_EQUALS = 70; // 0x46
     field public static final int KEYCODE_ESCAPE = 111; // 0x6f
-    field public static final int KEYCODE_EUROPE_1 = 265; // 0x109
-    field public static final int KEYCODE_EUROPE_2 = 266; // 0x10a
+    field public static final int KEYCODE_EUROPE_1 = 281; // 0x119
+    field public static final int KEYCODE_EUROPE_2 = 282; // 0x11a
     field public static final int KEYCODE_EXPLORER = 64; // 0x40
     field public static final int KEYCODE_F = 34; // 0x22
     field public static final int KEYCODE_F1 = 131; // 0x83
@@ -35231,7 +35232,7 @@ package android.view {
     field public static final int KEYCODE_SYSRQ = 120; // 0x78
     field public static final int KEYCODE_T = 48; // 0x30
     field public static final int KEYCODE_TAB = 61; // 0x3d
-    field public static final int KEYCODE_TOUCHPAD = 262; // 0x106
+    field public static final int KEYCODE_TOUCHPAD = 278; // 0x116
     field public static final int KEYCODE_TV = 170; // 0xaa
     field public static final int KEYCODE_TV_ANTENNA_CABLE = 242; // 0xf2
     field public static final int KEYCODE_TV_AUDIO_DESCRIPTION = 252; // 0xfc
@@ -35273,7 +35274,7 @@ package android.view {
     field public static final int KEYCODE_W = 51; // 0x33
     field public static final int KEYCODE_WAKEUP = 224; // 0xe0
     field public static final int KEYCODE_WINDOW = 171; // 0xab
-    field public static final int KEYCODE_WIRELESS = 260; // 0x104
+    field public static final int KEYCODE_WIRELESS = 276; // 0x114
     field public static final int KEYCODE_X = 52; // 0x34
     field public static final int KEYCODE_Y = 53; // 0x35
     field public static final int KEYCODE_YEN = 216; // 0xd8

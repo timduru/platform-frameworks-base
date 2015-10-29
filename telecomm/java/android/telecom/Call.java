@@ -187,7 +187,7 @@ public final class Call {
          * Call is able to be individually disconnected when in a {@code Conference}.
          */
         public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 0x00002000;
-        
+
         /**
          * Speed up audio setup for MT call.
          * @hide
@@ -239,12 +239,6 @@ public final class Call {
         //******************************************************************************************
         // Next PROPERTY value: 0x00000020
         //******************************************************************************************
-
-        /**
-         * Speed up audio setup for MT call.
-         * @hide
-         */
-        public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00008000;
 
         private final Uri mHandle;
         private final int mHandlePresentation;
@@ -387,9 +381,6 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_EMERGENCY_CALLBACK_MODE)) {
                 builder.append(" PROPERTY_EMERGENCY_CALLBACK_MODE");
-            }
-            if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
-                builder.append(" CAPABILITY_SPEED_UP_IMS_MT_AUDIO");
             }
             builder.append("]");
             return builder.toString();

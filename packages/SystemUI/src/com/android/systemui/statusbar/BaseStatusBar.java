@@ -1090,48 +1090,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mHandler.sendEmptyMessage(msg);
     }
 
-    @Override
-    public void showSearchPanel() {
-        if (mSearchPanelView != null && mSearchPanelView.isAssistantAvailable()) {
-            mSearchPanelView.show(true, true);
-        }
-    }
-
-    @Override
-    public void hideSearchPanel() {
-        int msg = MSG_CLOSE_SEARCH_PANEL;
-        mHandler.removeMessages(msg);
-        mHandler.sendEmptyMessage(msg);
-    }
-
-    protected abstract WindowManager.LayoutParams getSearchLayoutParams(
-            LayoutParams layoutParams);
-
-    protected void updateSearchPanel() {
-        // Search Panel
-        boolean visible = false;
-        if (mSearchPanelView != null) {
-            visible = mSearchPanelView.isShowing();
-            mWindowManager.removeView(mSearchPanelView);
-        }
-
-        // Provide SearchPanel with a temporary parent to allow layout params to work.
-        LinearLayout tmpRoot = new LinearLayout(mContext);
-        mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(getSearchLayout(), tmpRoot, false);
-        mSearchPanelView.setOnTouchListener(
-                 new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
-        mSearchPanelView.setVisibility(View.GONE);
-        boolean vertical = mNavigationBarView != null && mNavigationBarView.isVertical();
-        mSearchPanelView.setHorizontal(vertical);
-
-        WindowManager.LayoutParams lp = getSearchLayoutParams(mSearchPanelView.getLayoutParams());
-
-        mWindowManager.addView(mSearchPanelView, lp);
-        mSearchPanelView.setBar(this);
-        if (visible) {
-            mSearchPanelView.show(true, false);
-        }
-    }
 
     protected H createHandler() {
          return new H();
@@ -2184,11 +2142,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    private int getSearchLayout()
-    {
-        int uiMode =  Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT);
-        return (uiMode  == KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT || uiMode == KKC.S.SYSTEMUI_UI_MODE_SYSTEMBAR) ? R.layout.status_bar_search_panel_left : R.layout.status_bar_search_panel;
-    }
 
 	public static void updateBatteryView(View v, int batteryViewID, int batteryLevelViewID, BatteryController ctrl) 
 	{
