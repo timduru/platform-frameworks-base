@@ -30,6 +30,7 @@ public class MetricsLogger implements MetricsConstants {
     // next value is 239;
     public static final int ACTION_ASSIST_LONG_PRESS = 239;
     public static final int QS_IMMERSIVE = 240;
+    public static final int MISC = 241;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
