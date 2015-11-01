@@ -1382,8 +1382,10 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
     public void init(Context context, IWindowManager windowManager,
             WindowManagerFuncs windowManagerFuncs) {
         mContext = context;
-        mKeyOverrideManager = new KeyOverrideManager(context);
         mWindowManager = windowManager;
+
+
+
         mWindowManagerFuncs = windowManagerFuncs;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
@@ -1549,6 +1551,10 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
         filter.addAction(KKC.I.GLOBAL_ACTIONS);
         context.registerReceiver(mGlobalIntentReceiver, filter);
 
+        mKeyOverrideManager = new KeyOverrideManager(context);
+        new CustomObserver(mContext, this);
+
+
         // monitor for system gestures
         mSystemGestures = new SystemGesturesPointerEventListener(context,
                 new SystemGesturesPointerEventListener.Callbacks() {
@@ -1643,7 +1649,6 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
         }
         
        	refreshConf();
-    	new CustomObserver(mContext, this);
     }
 
     @Override
