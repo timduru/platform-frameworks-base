@@ -137,6 +137,23 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_CO
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 
+import java.util.ArrayList;
+import android.widget.Toast;
+import android.provider.Settings.SettingNotFoundException;
+import android.bluetooth.BluetoothAdapter;
+import android.net.Uri;
+import android.net.wifi.WifiManager;
+import android.os.BatteryManager;
+
+import org.meerkats.katkiss.CustomObserver;
+import org.meerkats.katkiss.KKC;
+import org.meerkats.katkiss.KatUtils;
+import org.meerkats.katkiss.KeyOverrideManager;
+import org.meerkats.katkiss.WMController;
+import android.app.AppGlobals;
+
+
+
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
  * introduces a new method suffix, Lp, for an internal lock of the
@@ -144,7 +161,10 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_CO
  * can be acquired with either the Lw and Li lock held, so has the restrictions
  * of both of those when held.
  */
-public class PhoneWindowManager implements WindowManagerPolicy {
+public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.ChangeNotification {
+	
+	private boolean _autoExpandedOnDock = false;
+
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
@@ -414,6 +434,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
 
+    KeyOverrideManager mKeyOverrideManager = null;
+
     PointerLocationView mPointerLocationView;
 
     // The current size of the screen; really; extends into the overscan area of
@@ -635,6 +657,55 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_POWER_DELAYED_PRESS = 13;
     private static final int MSG_POWER_LONG_PRESS = 14;
     private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 15;
+
+    class GlobalIntentReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(KKC.I.UI_CHANGED)) {
+                String cmd = intent.getStringExtra(KKC.I.CMD);
+
+/*                if (KKC.I.CMD_BARTYPE_CHANGED.equals(cmd))
+                    refreshBarType();
+                else if(KKC.I.CMD_BARSIZE_CHANGED.equals(cmd))
+                    refreshNavigationBarSize();
+                else if(KKC.I.CMD_REBOOT.equals(cmd))
+                    mWindowManagerFuncs.reboot(null, true);
+*/
+
+                if (intent.getBooleanExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, false)) {
+                    closeApplication("com.android.settings");
+                    closeApplication("com.android.systemui");
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mContext.startServiceAsUser(new Intent().setComponent(ComponentName
+                                    .unflattenFromString("com.android.systemui/.SystemUIService")),
+                                    new UserHandle(
+                                            UserHandle.myUserId()));
+                        }
+                    }, 250);
+                }
+            }
+            else if(action.equals(KKC.I.GLOBAL_ACTIONS)) {
+                String cmd = intent.getStringExtra(KKC.I.CMD);
+                if (KKC.A.SHOW_POWERMENU.equals(cmd))
+                    showGlobalActionsInternal();
+                else if (KKC.A.MEDIA_PREVIOUS.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.ACTION_DOWN));
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.ACTION_UP));
+                }
+                else if (KKC.A.MEDIA_NEXT.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.ACTION_DOWN));
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.ACTION_UP));
+                }
+                else if (KKC.A.MEDIA_PLAYPAUSE.equals(cmd)) {
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.ACTION_DOWN));
+                    dispatchMediaKeyWithWakeLockToAudioService(KatUtils.newKeyEvent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.ACTION_UP));
+                }
+            }
+        }
+    }
 
     private class PolicyHandler extends Handler {
         @Override
@@ -1311,6 +1382,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void init(Context context, IWindowManager windowManager,
             WindowManagerFuncs windowManagerFuncs) {
         mContext = context;
+        mKeyOverrideManager = new KeyOverrideManager(context);
         mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
@@ -1377,6 +1449,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDeskDockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
+        GlobalIntentReceiver mGlobalIntentReceiver = new GlobalIntentReceiver();
+
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mBroadcastWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");
@@ -1397,12 +1471,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_deskDockEnablesAccelerometer);
-        mLidKeyboardAccessibility = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_lidKeyboardAccessibility);
+        mLidKeyboardAccessibility = mContext.getResources().getInteger( com.android.internal.R.integer.config_lidKeyboardAccessibility);
+        int overrideAccessibility = SystemProperties.getInt("ro.lid.keyboard_accessibility", -1);
+        if(overrideAccessibility != -1) mLidKeyboardAccessibility = overrideAccessibility;
         mLidNavigationAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidNavigationAccessibility);
-        mLidControlsSleep = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_lidControlsSleep);
+        mLidControlsSleep = mContext.getResources().getBoolean( com.android.internal.R.bool.config_lidControlsSleep) &&  "1".equals(SystemProperties.get("ro.lid.controls_sleep", "1"));
         mTranslucentDecorEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableTranslucentDecor);
 
@@ -1469,6 +1543,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // register for multiuser-relevant broadcasts
         filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
         context.registerReceiver(mMultiuserReceiver, filter);
+
+        filter = new IntentFilter();
+        filter.addAction(KKC.I.UI_CHANGED);
+        filter.addAction(KKC.I.GLOBAL_ACTIONS);
+        context.registerReceiver(mGlobalIntentReceiver, filter);
 
         // monitor for system gestures
         mSystemGestures = new SystemGesturesPointerEventListener(context,
@@ -1562,6 +1641,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mDoubleTapOnHomeBehavior > DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
             mDoubleTapOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
         }
+        
+       	refreshConf();
+    	new CustomObserver(mContext, this);
     }
 
     @Override
@@ -2849,43 +2931,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (keyCode == KeyEvent.KEYCODE_SYSRQ) {
             if (down && repeatCount == 0) {
                 mHandler.post(mScreenshotRunnable);
-            }
-            return -1;
-        } else if (keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP
-                || keyCode == KeyEvent.KEYCODE_BRIGHTNESS_DOWN) {
-            if (down) {
-                int direction = keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP ? 1 : -1;
-
-                // Disable autobrightness if it's on
-                int auto = Settings.System.getIntForUser(
-                        mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS_MODE,
-                        Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                        UserHandle.USER_CURRENT_OR_SELF);
-                if (auto != 0) {
-                    Settings.System.putIntForUser(mContext.getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS_MODE,
-                            Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                            UserHandle.USER_CURRENT_OR_SELF);
-                }
-
-                int min = mPowerManager.getMinimumScreenBrightnessSetting();
-                int max = mPowerManager.getMaximumScreenBrightnessSetting();
-                int step = (max - min + BRIGHTNESS_STEPS - 1) / BRIGHTNESS_STEPS * direction;
-                int brightness = Settings.System.getIntForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS,
-                        mPowerManager.getDefaultScreenBrightnessSetting(),
-                        UserHandle.USER_CURRENT_OR_SELF);
-                brightness += step;
-                // Make sure we don't go beyond the limits.
-                brightness = Math.min(max, brightness);
-                brightness = Math.max(min, brightness);
-
-                Settings.System.putIntForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS, brightness,
-                        UserHandle.USER_CURRENT_OR_SELF);
-                startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
-                        UserHandle.CURRENT_OR_SELF);
             }
             return -1;
         } else if (KeyEvent.isMetaKey(keyCode)) {
@@ -4887,6 +4932,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + " policyFlags=" + Integer.toHexString(policyFlags));
         }
 
+        if(mKeyOverrideManager.executeOverrideIfNeeded(event)) return 0;
+
         // Basic policy based on interactive state.
         int result;
         boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
@@ -4960,7 +5007,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mScreenshotChordVolumeUpKeyTriggered = false;
                         cancelPendingScreenshotChordAction();
                     }
+                } else if (keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
+                    if (down) new KatUtils(mContext).muteVolume(keyguardActive);
+                    break;
                 }
+
                 if (down) {
                     TelecomManager telecomManager = getTelecommService();
                     if (telecomManager != null) {
@@ -5140,6 +5191,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     msg.sendToTarget();
                 }
             }
+            case KeyEvent.KEYCODE_WIRELESS:
+            case KeyEvent.KEYCODE_BLUETOOTH:
+            case KeyEvent.KEYCODE_TOUCHPAD:
+            case KeyEvent.KEYCODE_CAPTURE:
+            case KeyEvent.KEYCODE_SETTINGS:{
+                if (down) mHandler.post(new Runnable() {
+                         public void run() {
+                            if (keyCode == KeyEvent.KEYCODE_WIRELESS)       new KatUtils(mContext).wifiToggle();
+                            else if (keyCode == KeyEvent.KEYCODE_BLUETOOTH) new KatUtils(mContext).bluetoothToggle();
+                            else if (keyCode == KeyEvent.KEYCODE_TOUCHPAD)  new KatUtils(mContext).touchpadToggle();
+                            else if (keyCode == KeyEvent.KEYCODE_CAPTURE)   takeScreenshot();
+                            else if (keyCode == KeyEvent.KEYCODE_SETTINGS)  new KatUtils(mContext).launchSettings();
+                          }
+                       });
+               break;
+            }
+            case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
+            case KeyEvent.KEYCODE_BRIGHTNESS_UP:
+            case KeyEvent.KEYCODE_BRIGHTNESS_AUTO: {
+                if (down) mHandler.post(new Runnable() {
+                        public void run() { new KatUtils(mContext).brightnessControl(keyCode); }
+                    });
+                break;
+            }
+
         }
 
         if (useHapticFeedback) {
@@ -5152,6 +5228,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         return result;
     }
+
 
     /**
      * Returns true if the key can have global actions attached to it.
@@ -6092,6 +6169,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public void showBootMessage(final CharSequence msg, final boolean always) {
+        final int titleRes = mContext.getResources().getString(
+                    com.android.internal.R.string.android_installing_apk).equals(msg) ?
+                      R.string.android_installing_title :
+                      R.string.android_upgrading_title;
+
         mHandler.post(new Runnable() {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
@@ -7002,4 +7084,59 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mBurnInProtectionHelper.dump(prefix, pw);
         }
     }
+
+    private void closeApplication(String packageName) {
+        try {
+            ActivityManagerNative.getDefault().killApplicationProcess(
+                    packageName, AppGlobals.getPackageManager().getPackageUid(
+                    packageName, UserHandle.myUserId()));
+        } catch (RemoteException e) { }
+    }
+
+ // CustomObserver ChangeNotifications
+    @Override
+    public ArrayList<Uri> getObservedUris()
+    {
+      ArrayList<Uri> uris = new  ArrayList<Uri>();
+      uris.add(Settings.System.getUriFor(KKC.S.USER_IMMERSIVE_MODE));
+      uris.add(Settings.System.getUriFor(KKC.S.USER_IMMERSIVE_MODE_TYPE));
+      uris.add(Settings.System.getUriFor(KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_UI_BARSIZE));
+      return uris;
+    }
+
+    @Override
+    public void onChangeNotification(Uri uri)
+    {
+      Log.d(TAG, "onChangeNotification:" + uri);
+      refreshConf();
+    }
+
+    public static final String[] IMMERSIVE_MODE_TYPES = {"immersive.full", "immersive.status", "immersive.navigation"};
+
+	private void refreshConf() 
+	{
+        boolean newAutoExpandedOnDock  = Settings.System.getInt(mContext.getContentResolver(), KKC.S.AUTO_EXPANDED_DESKTOP_ONDOCK, 0) == 1;
+        if(newAutoExpandedOnDock != _autoExpandedOnDock)
+        {
+      	  boolean docked = mDockMode != Intent.EXTRA_DOCK_STATE_UNDOCKED;
+      	  KatUtils.expandedDesktop(mContext, docked && newAutoExpandedOnDock);
+          _autoExpandedOnDock = newAutoExpandedOnDock;
+        }
+        
+        boolean userImmersiveMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE, 0) == 1;
+        int userImmersiveModeType = Settings.System.getInt(mContext.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE_TYPE, 0);
+        Log.d(TAG, "_autoExpandedOnDock:" + _autoExpandedOnDock + " userImmersiveMode:"+userImmersiveMode + " userImmersiveModeType:"+userImmersiveModeType);
+
+        Settings.Global.putString(mContext.getContentResolver(),Settings.Global.POLICY_CONTROL, userImmersiveMode? IMMERSIVE_MODE_TYPES[userImmersiveModeType] + "=*:immersive.preconfirms=*":"");
+        PolicyControl.reloadFromSetting(mContext);
+
+		//mUserImmersiveMode = Settings.System.getInt(mContext.getContentResolver(), KKC.S.USER_IMMERSIVE_MODE, 0) == 1;
+        //mBarSize = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_UI_BARSIZE, KKC.S.SYSTEMUI_BARSIZE_MODE_SLIM);
+
+/*        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+        try { wm.setUserImmersiveMode(mUserImmersiveMode); }
+        catch(Exception e) {} */
+	}
+
 }
