@@ -1167,7 +1167,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"ഇനങ്ങൾ ഇല്ലാതാക്കുക"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"ഇല്ലാതാക്കിയവ പഴയപടിയാക്കുക"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"ഇപ്പോൾ ഒന്നും ചെയ്യേണ്ടതില്ല"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"ഒരു അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"അക്കൗണ്ട് തിരഞ്ഞെടുക്കൂ"</string>
     <string name="add_account_label" msgid="2935267344849993553">"ഒരു അക്കൗണ്ട് ചേർക്കുക"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"അക്കൗണ്ട് ചേർക്കുക"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"വർദ്ധിപ്പിക്കുക"</string>
@@ -1488,6 +1488,7 @@
       <item quantity="one">ഒരു മണിക്കൂറത്തേക്ക്</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ (അടുത്ത അലാറം)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"നിങ്ങൾ ഇത് ഓ‌ഫാക്കും വരെ"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"\'ശല്ല്യപ്പെടുത്തരുത്\' ഓഫാക്കുന്നതുവരെ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

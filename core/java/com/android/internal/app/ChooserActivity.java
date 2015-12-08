@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import android.animation.ObjectAnimator;
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,6 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -40,18 +43,24 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DocumentsContract;
 import android.service.chooser.ChooserTarget;
 import android.service.chooser.ChooserTargetService;
 import android.service.chooser.IChooserTargetResult;
 import android.service.chooser.IChooserTargetService;
 import android.text.TextUtils;
+import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
@@ -79,6 +88,7 @@ public class ChooserActivity extends ResolverActivity {
     private Intent mReferrerFillInIntent;
 
     private ChooserListAdapter mChooserListAdapter;
+    private ChooserRowAdapter mChooserRowAdapter;
 
     private final List<ChooserTargetServiceConnection> mServiceConnections = new ArrayList<>();
 
@@ -104,6 +114,7 @@ public class ChooserActivity extends ResolverActivity {
                                 sri.resultTargets);
                     }
                     unbindService(sri.connection);
+                    sri.connection.destroy();
                     mServiceConnections.remove(sri.connection);
                     if (mServiceConnections.isEmpty()) {
                         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
@@ -208,6 +219,8 @@ public class ChooserActivity extends ResolverActivity {
             mRefinementResultReceiver.destroy();
             mRefinementResultReceiver = null;
         }
+        unbindRemainingServices();
+        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
     }
 
     @Override
@@ -249,7 +262,9 @@ public class ChooserActivity extends ResolverActivity {
             boolean alwaysUseOption) {
         final ListView listView = adapterView instanceof ListView ? (ListView) adapterView : null;
         mChooserListAdapter = (ChooserListAdapter) adapter;
-        adapterView.setAdapter(new ChooserRowAdapter(mChooserListAdapter));
+        mChooserRowAdapter = new ChooserRowAdapter(mChooserListAdapter);
+        mChooserRowAdapter.registerDataSetObserver(new OffsetDataSetObserver(adapterView));
+        adapterView.setAdapter(mChooserRowAdapter);
         if (listView != null) {
             listView.setItemsCanFocus(true);
         }
@@ -263,6 +278,24 @@ public class ChooserActivity extends ResolverActivity {
     @Override
     boolean shouldGetActivityMetadata() {
         return true;
+    }
+
+    @Override
+    boolean shouldAutoLaunchSingleChoice(TargetInfo target) {
+        final Intent intent = target.getResolvedIntent();
+        final ResolveInfo resolve = target.getResolveInfo();
+
+        // When GET_CONTENT is handled by the DocumentsUI system component,
+        // we're okay automatically launching it, since it offers it's own
+        // intent disambiguation UI.
+        if (intent != null && Intent.ACTION_GET_CONTENT.equals(intent.getAction())
+                && resolve != null && resolve.priority > 0
+                && resolve.activityInfo != null && DocumentsContract.PACKAGE_DOCUMENTS_UI
+                        .equals(resolve.activityInfo.packageName)) {
+            return true;
+        }
+
+        return false;
     }
 
     private void modifyTargetIntent(Intent in) {
@@ -340,6 +373,11 @@ public class ChooserActivity extends ResolverActivity {
         int targetsToQuery = 0;
         for (int i = 0, N = adapter.getDisplayResolveInfoCount(); i < N; i++) {
             final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
+            if (adapter.getScore(dri) == 0) {
+                // A score of 0 means the app hasn't been used in some time;
+                // don't query it as it's not likely to be relevant.
+                continue;
+            }
             final ActivityInfo ai = dri.getResolveInfo().activityInfo;
             final Bundle md = ai.metaData;
             final String serviceName = md != null ? convertServiceName(ai.packageName,
@@ -371,7 +409,8 @@ public class ChooserActivity extends ResolverActivity {
                     continue;
                 }
 
-                final ChooserTargetServiceConnection conn = new ChooserTargetServiceConnection(dri);
+                final ChooserTargetServiceConnection conn =
+                        new ChooserTargetServiceConnection(this, dri);
                 if (bindServiceAsUser(serviceIntent, conn, BIND_AUTO_CREATE | BIND_NOT_FOREGROUND,
                         UserHandle.CURRENT)) {
                     if (DEBUG) {
@@ -425,6 +464,7 @@ public class ChooserActivity extends ResolverActivity {
             final ChooserTargetServiceConnection conn = mServiceConnections.get(i);
             if (DEBUG) Log.d(TAG, "unbinding " + conn);
             unbindService(conn);
+            conn.destroy();
         }
         mServiceConnections.clear();
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
@@ -637,7 +677,8 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public CharSequence getExtendedInfo() {
-            return mSourceInfo != null ? mSourceInfo.getExtendedInfo() : null;
+            // ChooserTargets have badge icons, so we won't show the extended info to disambiguate.
+            return null;
         }
 
         @Override
@@ -730,9 +771,8 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public boolean showsExtendedInfo(TargetInfo info) {
-            // Reserve space to show extended info if any one of the items in the adapter has
-            // extended info. This keeps grid item sizes uniform.
-            return hasExtendedInfo();
+            // We have badges so we don't need this text shown.
+            return false;
         }
 
         @Override
@@ -885,7 +925,63 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public int compare(ChooserTarget lhs, ChooserTarget rhs) {
             // Descending order
-            return (int) Math.signum(lhs.getScore() - rhs.getScore());
+            return (int) Math.signum(rhs.getScore() - lhs.getScore());
+        }
+    }
+
+    static class RowScale {
+        private static final int DURATION = 400;
+
+        float mScale;
+        ChooserRowAdapter mAdapter;
+        private final ObjectAnimator mAnimator;
+
+        public static final FloatProperty<RowScale> PROPERTY =
+                new FloatProperty<RowScale>("scale") {
+            @Override
+            public void setValue(RowScale object, float value) {
+                object.mScale = value;
+                object.mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public Float get(RowScale object) {
+                return object.mScale;
+            }
+        };
+
+        public RowScale(@NonNull ChooserRowAdapter adapter, float from, float to) {
+            mAdapter = adapter;
+            mScale = from;
+            if (from == to) {
+                mAnimator = null;
+                return;
+            }
+
+            mAnimator = ObjectAnimator.ofFloat(this, PROPERTY, from, to).setDuration(DURATION);
+        }
+
+        public RowScale setInterpolator(Interpolator interpolator) {
+            if (mAnimator != null) {
+                mAnimator.setInterpolator(interpolator);
+            }
+            return this;
+        }
+
+        public float get() {
+            return mScale;
+        }
+
+        public void startAnimation() {
+            if (mAnimator != null) {
+                mAnimator.start();
+            }
+        }
+
+        public void cancelAnimation() {
+            if (mAnimator != null) {
+                mAnimator.cancel();
+            }
         }
     }
 
@@ -893,15 +989,51 @@ public class ChooserActivity extends ResolverActivity {
         private ChooserListAdapter mChooserListAdapter;
         private final LayoutInflater mLayoutInflater;
         private final int mColumnCount = 4;
+        private RowScale[] mServiceTargetScale;
+        private final Interpolator mInterpolator;
 
         public ChooserRowAdapter(ChooserListAdapter wrappedAdapter) {
             mChooserListAdapter = wrappedAdapter;
             mLayoutInflater = LayoutInflater.from(ChooserActivity.this);
 
+            mInterpolator = AnimationUtils.loadInterpolator(ChooserActivity.this,
+                    android.R.interpolator.decelerate_quint);
+
             wrappedAdapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
                     super.onChanged();
+                    final int rcount = getServiceTargetRowCount();
+                    if (mServiceTargetScale == null
+                            || mServiceTargetScale.length != rcount) {
+                        RowScale[] old = mServiceTargetScale;
+                        int oldRCount = old != null ? old.length : 0;
+                        mServiceTargetScale = new RowScale[rcount];
+                        if (old != null && rcount > 0) {
+                            System.arraycopy(old, 0, mServiceTargetScale, 0,
+                                    Math.min(old.length, rcount));
+                        }
+
+                        for (int i = rcount; i < oldRCount; i++) {
+                            old[i].cancelAnimation();
+                        }
+
+                        for (int i = oldRCount; i < rcount; i++) {
+                            final RowScale rs = new RowScale(ChooserRowAdapter.this, 0.f, 1.f)
+                                    .setInterpolator(mInterpolator);
+                            mServiceTargetScale[i] = rs;
+                        }
+
+                        // Start the animations in a separate loop.
+                        // The process of starting animations will result in
+                        // binding views to set up initial values, and we must
+                        // have ALL of the new RowScale objects created above before
+                        // we get started.
+                        for (int i = oldRCount; i < rcount; i++) {
+                            mServiceTargetScale[i].startAnimation();
+                        }
+                    }
+
                     notifyDataSetChanged();
                 }
 
@@ -909,17 +1041,41 @@ public class ChooserActivity extends ResolverActivity {
                 public void onInvalidated() {
                     super.onInvalidated();
                     notifyDataSetInvalidated();
+                    if (mServiceTargetScale != null) {
+                        for (RowScale rs : mServiceTargetScale) {
+                            rs.cancelAnimation();
+                        }
+                    }
                 }
             });
+        }
+
+        private float getRowScale(int rowPosition) {
+            final int start = getCallerTargetRowCount();
+            final int end = start + getServiceTargetRowCount();
+            if (rowPosition >= start && rowPosition < end) {
+                return mServiceTargetScale[rowPosition - start].get();
+            }
+            return 1.f;
         }
 
         @Override
         public int getCount() {
             return (int) (
-                    Math.ceil((float) mChooserListAdapter.getCallerTargetCount() / mColumnCount)
-                    + Math.ceil((float) mChooserListAdapter.getServiceTargetCount() / mColumnCount)
+                    getCallerTargetRowCount()
+                    + getServiceTargetRowCount()
                     + Math.ceil((float) mChooserListAdapter.getStandardTargetCount() / mColumnCount)
             );
+        }
+
+        public int getCallerTargetRowCount() {
+            return (int) Math.ceil(
+                    (float) mChooserListAdapter.getCallerTargetCount() / mColumnCount);
+        }
+
+        public int getServiceTargetRowCount() {
+            return (int) Math.ceil(
+                    (float) mChooserListAdapter.getServiceTargetCount() / mColumnCount);
         }
 
         @Override
@@ -935,33 +1091,69 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            final View[] holder;
+            final RowViewHolder holder;
             if (convertView == null) {
                 holder = createViewHolder(parent);
             } else {
-                holder = (View[]) convertView.getTag();
+                holder = (RowViewHolder) convertView.getTag();
             }
             bindViewHolder(position, holder);
 
-            // We keep the actual list item view as the last item in the holder array
-            return holder[mColumnCount];
+            return holder.row;
         }
 
-        View[] createViewHolder(ViewGroup parent) {
-            final View[] holder = new View[mColumnCount + 1];
-
+        RowViewHolder createViewHolder(ViewGroup parent) {
             final ViewGroup row = (ViewGroup) mLayoutInflater.inflate(R.layout.chooser_row,
                     parent, false);
+            final RowViewHolder holder = new RowViewHolder(row, mColumnCount);
+            final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+
             for (int i = 0; i < mColumnCount; i++) {
-                holder[i] = mChooserListAdapter.createView(row);
-                row.addView(holder[i]);
+                final View v = mChooserListAdapter.createView(row);
+                final int column = i;
+                v.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startSelected(holder.itemIndices[column], false, true);
+                    }
+                });
+                v.setOnLongClickListener(new OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        showAppDetails(
+                                mChooserListAdapter.resolveInfoForPosition(
+                                        holder.itemIndices[column], true));
+                        return true;
+                    }
+                });
+                row.addView(v);
+                holder.cells[i] = v;
+
+                // Force height to be a given so we don't have visual disruption during scaling.
+                LayoutParams lp = v.getLayoutParams();
+                v.measure(spec, spec);
+                if (lp == null) {
+                    lp = new LayoutParams(LayoutParams.MATCH_PARENT, v.getMeasuredHeight());
+                    row.setLayoutParams(lp);
+                } else {
+                    lp.height = v.getMeasuredHeight();
+                }
+            }
+
+            // Pre-measure so we can scale later.
+            holder.measure();
+            LayoutParams lp = row.getLayoutParams();
+            if (lp == null) {
+                lp = new LayoutParams(LayoutParams.MATCH_PARENT, holder.measuredRowHeight);
+                row.setLayoutParams(lp);
+            } else {
+                lp.height = holder.measuredRowHeight;
             }
             row.setTag(holder);
-            holder[mColumnCount] = row;
             return holder;
         }
 
-        void bindViewHolder(int rowPosition, View[] holder) {
+        void bindViewHolder(int rowPosition, RowViewHolder holder) {
             final int start = getFirstRowPosition(rowPosition);
             final int startType = mChooserListAdapter.getPositionTargetType(start);
 
@@ -970,34 +1162,26 @@ public class ChooserActivity extends ResolverActivity {
                 end--;
             }
 
-            final ViewGroup row = (ViewGroup) holder[mColumnCount];
-
             if (startType == ChooserListAdapter.TARGET_SERVICE) {
-                row.setBackgroundColor(getColor(R.color.chooser_service_row_background_color));
+                holder.row.setBackgroundColor(
+                        getColor(R.color.chooser_service_row_background_color));
             } else {
-                row.setBackground(null);
+                holder.row.setBackgroundColor(Color.TRANSPARENT);
+            }
+
+            final int oldHeight = holder.row.getLayoutParams().height;
+            holder.row.getLayoutParams().height = Math.max(1,
+                    (int) (holder.measuredRowHeight * getRowScale(rowPosition)));
+            if (holder.row.getLayoutParams().height != oldHeight) {
+                holder.row.requestLayout();
             }
 
             for (int i = 0; i < mColumnCount; i++) {
-                final View v = holder[i];
+                final View v = holder.cells[i];
                 if (start + i <= end) {
                     v.setVisibility(View.VISIBLE);
-                    final int itemIndex = start + i;
-                    mChooserListAdapter.bindView(itemIndex, v);
-                    v.setOnClickListener(new OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            startSelected(itemIndex, false, true);
-                        }
-                    });
-                    v.setOnLongClickListener(new OnLongClickListener() {
-                        @Override
-                        public boolean onLongClick(View v) {
-                            showAppDetails(
-                                    mChooserListAdapter.resolveInfoForPosition(itemIndex, true));
-                            return true;
-                        }
-                    });
+                    holder.itemIndices[i] = start + i;
+                    mChooserListAdapter.bindView(holder.itemIndices[i], v);
                 } else {
                     v.setVisibility(View.GONE);
                 }
@@ -1024,54 +1208,112 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
-    class ChooserTargetServiceConnection implements ServiceConnection {
+    static class RowViewHolder {
+        final View[] cells;
+        final ViewGroup row;
+        int measuredRowHeight;
+        int[] itemIndices;
+
+        public RowViewHolder(ViewGroup row, int cellCount) {
+            this.row = row;
+            this.cells = new View[cellCount];
+            this.itemIndices = new int[cellCount];
+        }
+
+        public void measure() {
+            final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            row.measure(spec, spec);
+            measuredRowHeight = row.getMeasuredHeight();
+        }
+    }
+
+    static class ChooserTargetServiceConnection implements ServiceConnection {
         private final DisplayResolveInfo mOriginalTarget;
+        private ComponentName mConnectedComponent;
+        private ChooserActivity mChooserActivity;
+        private final Object mLock = new Object();
 
         private final IChooserTargetResult mChooserTargetResult = new IChooserTargetResult.Stub() {
             @Override
             public void sendResult(List<ChooserTarget> targets) throws RemoteException {
-                filterServiceTargets(mOriginalTarget.getResolveInfo().activityInfo.packageName,
-                        targets);
-                final Message msg = Message.obtain();
-                msg.what = CHOOSER_TARGET_SERVICE_RESULT;
-                msg.obj = new ServiceResultInfo(mOriginalTarget, targets,
-                        ChooserTargetServiceConnection.this);
-                mChooserHandler.sendMessage(msg);
+                synchronized (mLock) {
+                    if (mChooserActivity == null) {
+                        Log.e(TAG, "destroyed ChooserTargetServiceConnection received result from "
+                                + mConnectedComponent + "; ignoring...");
+                        return;
+                    }
+                    mChooserActivity.filterServiceTargets(
+                            mOriginalTarget.getResolveInfo().activityInfo.packageName, targets);
+                    final Message msg = Message.obtain();
+                    msg.what = CHOOSER_TARGET_SERVICE_RESULT;
+                    msg.obj = new ServiceResultInfo(mOriginalTarget, targets,
+                            ChooserTargetServiceConnection.this);
+                    mChooserActivity.mChooserHandler.sendMessage(msg);
+                }
             }
         };
 
-        public ChooserTargetServiceConnection(DisplayResolveInfo dri) {
+        public ChooserTargetServiceConnection(ChooserActivity chooserActivity,
+                DisplayResolveInfo dri) {
+            mChooserActivity = chooserActivity;
             mOriginalTarget = dri;
         }
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Log.d(TAG, "onServiceConnected: " + name);
-            final IChooserTargetService icts = IChooserTargetService.Stub.asInterface(service);
-            try {
-                icts.getChooserTargets(mOriginalTarget.getResolvedComponentName(),
-                        mOriginalTarget.getResolveInfo().filter, mChooserTargetResult);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Querying ChooserTargetService " + name + " failed.", e);
-                unbindService(this);
-                mServiceConnections.remove(this);
+            synchronized (mLock) {
+                if (mChooserActivity == null) {
+                    Log.e(TAG, "destroyed ChooserTargetServiceConnection got onServiceConnected");
+                    return;
+                }
+
+                final IChooserTargetService icts = IChooserTargetService.Stub.asInterface(service);
+                try {
+                    icts.getChooserTargets(mOriginalTarget.getResolvedComponentName(),
+                            mOriginalTarget.getResolveInfo().filter, mChooserTargetResult);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Querying ChooserTargetService " + name + " failed.", e);
+                    mChooserActivity.unbindService(this);
+                    destroy();
+                    mChooserActivity.mServiceConnections.remove(this);
+                }
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             if (DEBUG) Log.d(TAG, "onServiceDisconnected: " + name);
-            unbindService(this);
-            mServiceConnections.remove(this);
-            if (mServiceConnections.isEmpty()) {
-                mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
-                sendVoiceChoicesIfNeeded();
+            synchronized (mLock) {
+                if (mChooserActivity == null) {
+                    Log.e(TAG,
+                            "destroyed ChooserTargetServiceConnection got onServiceDisconnected");
+                    return;
+                }
+
+                mChooserActivity.unbindService(this);
+                destroy();
+                mChooserActivity.mServiceConnections.remove(this);
+                if (mChooserActivity.mServiceConnections.isEmpty()) {
+                    mChooserActivity.mChooserHandler.removeMessages(
+                            CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
+                    mChooserActivity.sendVoiceChoicesIfNeeded();
+                }
+                mConnectedComponent = null;
+            }
+        }
+
+        public void destroy() {
+            synchronized (mLock) {
+                mChooserActivity = null;
             }
         }
 
         @Override
         public String toString() {
-            return mOriginalTarget.getResolveInfo().activityInfo.toString();
+            return "ChooserTargetServiceConnection{service="
+                    + mConnectedComponent + ", activity="
+                    + mOriginalTarget.getResolveInfo().activityInfo.toString() + "}";
         }
     }
 
@@ -1134,6 +1376,46 @@ public class ChooserActivity extends ResolverActivity {
         public void destroy() {
             mChooserActivity = null;
             mSelectedTarget = null;
+        }
+    }
+
+    class OffsetDataSetObserver extends DataSetObserver {
+        private final AbsListView mListView;
+        private int mCachedViewType = -1;
+        private View mCachedView;
+
+        public OffsetDataSetObserver(AbsListView listView) {
+            mListView = listView;
+        }
+
+        @Override
+        public void onChanged() {
+            if (mResolverDrawerLayout == null) {
+                return;
+            }
+
+            final int chooserTargetRows = mChooserRowAdapter.getServiceTargetRowCount();
+            int offset = 0;
+            for (int i = 0; i < chooserTargetRows; i++)  {
+                final int pos = mChooserRowAdapter.getCallerTargetRowCount() + i;
+                final int vt = mChooserRowAdapter.getItemViewType(pos);
+                if (vt != mCachedViewType) {
+                    mCachedView = null;
+                }
+                final View v = mChooserRowAdapter.getView(pos, mCachedView, mListView);
+                int height = ((RowViewHolder) (v.getTag())).measuredRowHeight;
+
+                offset += (int) (height * mChooserRowAdapter.getRowScale(pos));
+
+                if (vt >= 0) {
+                    mCachedViewType = vt;
+                    mCachedView = v;
+                } else {
+                    mCachedViewType = -1;
+                }
+            }
+
+            mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
         }
     }
 }

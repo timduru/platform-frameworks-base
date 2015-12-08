@@ -793,6 +793,12 @@
     <!-- Indication on the keyguard that is shown when the device is charging. [CHAR LIMIT=40]-->
     <string name="keyguard_indication_charging_time">Charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
 
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=40]-->
+    <string name="keyguard_indication_charging_time_fast">Charging rapidly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
+
+    <!-- Indication on the keyguard that is shown when the device is charging slowly. Should match keyguard_plugged_in_charging_slowly [CHAR LIMIT=40]-->
+    <string name="keyguard_indication_charging_time_slowly">Charging slowly (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
+
     <!-- Related to user switcher --><skip/>
 
     <!-- Accessibility label for the button that opens the user switcher. -->
@@ -1119,5 +1125,15 @@
 
     <!-- Dialog asking if the tuner should really be removed from settings [CHAR LIMIT=NONE]-->
     <string name="remove_from_settings_prompt">Remove System UI Tuner from Settings and stop using all of its features?"</string>
+
+    <!-- Dialog title asking if Bluetooth should be enabled [CHAR LIMIT=NONE] -->
+    <string name="enable_bluetooth_title">Turn on Bluetooth?</string>
+
+    <!-- Dialog message explaining why Bluetooth should be enabled when a packaged keyboard is
+         conncted to the device [CHAR LIMIT=NONE] -->
+    <string name="enable_bluetooth_message">To connect your keyboard with your tablet, you first have to turn on Bluetooth.</string>
+
+    <!-- Bluetooth enablement ok text [CHAR LIMIT=40] -->
+    <string name="enable_bluetooth_confirmation_ok">Turn on</string>
 
 </resources>

@@ -26,6 +26,7 @@
         <attr name="keyClickAction" format="string" />
         <!-- used for default longpress navbuttons action-->
         <attr name="longPressAction" format="string" />
+        <attr name="android:contentDescription" />
     </declare-styleable>
     <declare-styleable name="ToggleSlider">
         <attr name="text" format="string" />

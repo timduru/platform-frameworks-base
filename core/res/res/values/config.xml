@@ -387,6 +387,13 @@
     <!-- Boolean indicating autojoin will prefer 5GHz and choose 5GHz BSSIDs -->
     <bool translatable="true" name="config_wifi_enable_5GHz_preference">true</bool>
 
+    <!-- Boolean indicating whether or not to revert to default country code when cellular
+         radio is unable to find any MCC information to infer wifi country code from -->
+    <bool translatable="false" name="config_wifi_revert_country_code_on_cellular_loss">false</bool>
+
+    <!-- Boolean indicating whether or not wifi firmware debugging is enabled -->
+    <bool translatable="false" name="config_wifi_enable_wifi_firmware_debugging">false</bool>
+
     <!-- Integer specifying the basic autojoin parameters -->
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_threshold">-65</integer>
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_factor">5</integer>
@@ -1736,6 +1743,28 @@
     -->
     <bool name="config_enableWifiDisplay">false</bool>
 
+    <!-- The color transform values that correspond to each respective configuration mode for the
+         built-in display, or -1 if the mode is unsupported by the device. The possible
+         configuration modes are:
+            1. Wide-gamut ("Vibrant")
+            2. Adobe RGB ("Natural")
+            3. sRGB ("Standard")
+
+        For example, if a device had Wide-gamut as color transform mode 1, sRGB mode as color
+        transform mode 7, and did not support Adobe RGB at all this would look like:
+
+            <integer-array name="config_colorTransforms">
+                <item>1</item>
+                <item>-1</item>
+                <item>7</item>
+            </integer-array>
+    -->
+    <integer-array name="config_colorTransforms">
+        <item>-1</item>
+        <item>-1</item>
+        <item>-1</item>
+    </integer-array>
+
     <!-- When true use the linux /dev/input/event subsystem to detect the switch changes
          on the headphone/microphone jack. When false use the older uevent framework. -->
     <bool name="config_useDevInputEventForAudioJack">false</bool>
@@ -2281,4 +2310,20 @@
     <string-array name="config_cell_retries_per_error_code">
     </string-array>
 
+    <!-- Set initial MaxRetry value for operators -->
+    <integer name="config_mdc_initial_max_retry">1</integer>
+
+    <!-- The OEM specified sensor type for the gesture to launch the camear app. -->
+    <integer name="config_cameraLaunchGestureSensorType">-1</integer>
+    <!-- The OEM specified sensor string type for the gesture to launch camera app, this value
+         must match the value of config_cameraLaunchGestureSensorType in OEM's HAL -->
+    <string translatable="false" name="config_cameraLaunchGestureSensorStringType"></string>
+
+    <!-- Allow the gesture to double tap the power button twice to start the camera while the device
+         is non-interactive. -->
+    <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
+
+    <!-- The BT name of the keyboard packaged with the device. If this is defined, SystemUI will
+         automatically try to pair with it when the device exits tablet mode. -->
+    <string translatable="false" name="config_packagedKeyboardName"></string>
 </resources>

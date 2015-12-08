@@ -327,6 +327,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Tylko\npriorytetowe"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Tylko\nalarmy"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Ładuje się (pełne naładowanie za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Szybkie ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> do końca)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Wolne ładowanie (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> do końca)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Przełącz użytkownika"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Przełącz użytkownika. Bieżący użytkownik: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Bieżący użytkownik: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -428,4 +430,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Gratulujemy, Kalibrator System UI został dodany do Ustawień"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Usuń z Ustawień"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Usunąć Kalibrator System UI z Ustawień i przestać używać wszystkich jego funkcji?"</string>
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Włączyć Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Aby połączyć klawiaturę z tabletem, musisz najpierw włączyć Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Włącz"</string>
 </resources>

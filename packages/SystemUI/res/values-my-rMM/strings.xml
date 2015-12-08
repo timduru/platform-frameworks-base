@@ -325,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ဦးစားပေးမှု\nသာ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"နှိုးစက်များ\nသာ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> အပြည့် အထိ) အားသွင်းနေ"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"လျှင်မြန်စွာအားသွင်းခြင်း (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ပြည့်သည်အထိ)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"နှေးကွေးစွာ အားသွင်းခြင်း (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ပြည့်သည်အထိ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"အသုံးပြုသူကို ပြောင်းလဲရန်"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"အသုံးပြုသူကို ပြောင်းရန်၊ လက်ရှိ အသုံးပြုသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"လတ်တလော သုံးစွဲသူ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -426,4 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"ဂုဏ်ပြုပါရစေ! စနစ် UI ဖမ်းစက်ကို ဆက်တင်ထဲသို့ ထည့်ပြီးပြီ။"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ဆက်တင် အထဲမှ ဖယ်ရှားရန်"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ဆက်တင် အထဲမှ စနစ် UI ဖမ်းစက်ကို ဖယ်ရှားလျက် ၎င်း၏ အင်္ဂါရပ်များ အားလုံး အသုံးပြုမှု ရပ်တန့်ရမလား?"</string>
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"ဘလူးတုသ် ဖွင့်ရမလား။"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"ကီးဘုတ်ကို တပ်ဘလက်နှင့် ချိတ်ဆက်ရန်၊ ပမထဦးစွာ ဘလူးတုသ်ကို ဖွင့်ပါ။"</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ဖွင့်ပါ"</string>
 </resources>

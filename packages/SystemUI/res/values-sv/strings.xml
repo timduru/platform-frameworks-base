@@ -313,10 +313,10 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre brådskande aviseringar nedan"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Tryck igen för att öppna"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Dra uppåt om du vill låsa upp"</string>
-    <string name="phone_hint" msgid="4872890986869209950">"Dra från ikonen och öppna telefonen"</string>
-    <string name="voice_hint" msgid="8939888732119726665">"Dra från ikonen och öppna röstassistenten"</string>
-    <string name="camera_hint" msgid="7939688436797157483">"Dra från ikonen och öppna kameran"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Svep uppåt om du vill låsa upp"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Svep från ikonen och öppna telefonen"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Svep från ikonen och öppna röstassistenten"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Svep från ikonen och öppna kameran"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Total tystnad. Även skärmläsningsprogram tystas."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Helt tyst"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Bara prioriterade"</string>
@@ -325,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Endast\nprioriterade"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Endast\nalarm"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Laddar (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> tills batteriet är fulladdat)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Laddas snabbt (batteriet fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Laddas sakta (batteriet fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Byt användare"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Byt användare. Aktuell användare: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Aktuell användare <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -385,7 +387,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Utöka"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Komprimera"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skärmen har fästs"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"Detta visar skärmen tills du lossar den. Tryck länge på bakåtknappen och Översikt samtidigt om du vill lossa skärmen."</string>
+    <string name="screen_pinning_description" msgid="1346522416878235405">"Med den här funktionen är skärmen synlig tills du lossar den. Tryck länge på Tillbaka och Översikt samtidigt om du vill lossa skärmen."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Detta visar skärmen tills du lossar den. Tryck länge på Översikt om du vill lossa skärmen."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nej tack"</string>
@@ -426,4 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Grattis! Inställningar för systemgränssnitt har lagts till i inställningarna."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ta bort från inställningarna"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Vill du ta bort inställningar för systemgränssnitt från inställningarna och sluta använda alla tillhörande funktioner?"</string>
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vill du aktivera Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Om du vill ansluta tangentbordet till surfplattan måste du först aktivera Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Aktivera"</string>
 </resources>

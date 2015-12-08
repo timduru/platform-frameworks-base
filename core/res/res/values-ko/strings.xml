@@ -431,7 +431,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"지문 인식 작업이 취소되었습니다."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"다시 시도해 보세요."</string>
-    <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g>번째 손가락"</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"손가락 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"지문 아이콘"</string>
@@ -1488,6 +1488,7 @@
       <item quantity="one">1시간 동안</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>(다음 알람)까지"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"이 기능을 사용 중지할 때까지"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"알림 일시중지 기능을 사용 중지할 때까지"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

@@ -325,6 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Chỉ\nưu tiên"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Chỉ\nbáo thức"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Đang sạc (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> cho đến khi đầy)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Sạc nhanh (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> cho tới khi đầy)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Sạc chậm (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> cho tới khi đầy)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Chuyển đổi người dùng"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Chuyển người dùng, người dùng hiện tại <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Người dùng hiện tại <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -426,4 +428,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Xin chúc mừng! Bộ điều hướng giao diện người dùng hệ thống đã được thêm vào Cài đặt"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Xóa khỏi Cài đặt"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Xóa Bộ điều hướng giao diện người dùng hệ thống khỏi Cài đặt và ngừng sử dụng tất cả tính năng của ứng dụng này?"</string>
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bật Bluetooth?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Để kết nối bàn phím với máy tính bảng, trước tiên, bạn phải bật Bluetooth."</string>
+    <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Bật"</string>
 </resources>

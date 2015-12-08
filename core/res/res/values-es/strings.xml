@@ -890,7 +890,7 @@
     <string name="whichHomeApplication" msgid="4307587691506919691">"Selecciona una aplicación de inicio"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Usar %1$s como aplicación de inicio"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usar siempre para esta acción"</string>
-    <string name="use_a_different_app" msgid="8134926230585710243">"Uitliza otra aplicación"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Utiliza otra aplicación"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Para borrar los valores predeterminados, accede a Ajustes del sistema &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Selecciona una acción"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Elegir una aplicación para el dispositivo USB"</string>
@@ -1488,6 +1488,7 @@
       <item quantity="one">Durante 1 hora</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hasta las <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Hasta las <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hasta apagar el dispositivo"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hasta que desactives la opción No molestar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>

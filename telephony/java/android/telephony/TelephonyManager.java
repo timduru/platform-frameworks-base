@@ -1059,11 +1059,21 @@ public class TelephonyManager {
         case RILConstants.NETWORK_MODE_LTE_GSM_WCDMA:
         case RILConstants.NETWORK_MODE_LTE_WCDMA:
         case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA:
+        case RILConstants.NETWORK_MODE_TDSCDMA_ONLY:
+        case RILConstants.NETWORK_MODE_TDSCDMA_WCDMA:
+        case RILConstants.NETWORK_MODE_LTE_TDSCDMA:
+        case RILConstants.NETWORK_MODE_TDSCDMA_GSM:
+        case RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM:
+        case RILConstants.NETWORK_MODE_TDSCDMA_GSM_WCDMA:
+        case RILConstants.NETWORK_MODE_LTE_TDSCDMA_WCDMA:
+        case RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA:
+        case RILConstants.NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA:
             return PhoneConstants.PHONE_TYPE_GSM;
 
         // Use CDMA Phone for the global mode including CDMA
         case RILConstants.NETWORK_MODE_GLOBAL:
         case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO:
+        case RILConstants.NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA:
             return PhoneConstants.PHONE_TYPE_CDMA;
 
         case RILConstants.NETWORK_MODE_LTE_ONLY:
@@ -2824,7 +2834,7 @@ public class TelephonyManager {
     /**
      * Returns all observed cell information from all radios on the
      * device including the primary and neighboring cells. This does
-     * not cause or change the rate of PhoneStateListner#onCellInfoChanged.
+     * not cause or change the rate of PhoneStateListener#onCellInfoChanged.
      *<p>
      * The list can include one or more of {@link android.telephony.CellInfoGsm CellInfoGsm},
      * {@link android.telephony.CellInfoCdma CellInfoCdma},
@@ -2837,6 +2847,9 @@ public class TelephonyManager {
      * This is preferred over using getCellLocation although for older
      * devices this may return null in which case getCellLocation should
      * be called.
+     *<p>
+     * This API will return valid data for registered cells on devices with
+     * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY}
      *<p>
      * @return List of CellInfo or null if info unavailable.
      *
@@ -3561,11 +3574,12 @@ public class TelephonyManager {
      *
      * @hide
      */
-    public boolean setNetworkSelectionModeManual(int subId, OperatorInfo operator) {
+    public boolean setNetworkSelectionModeManual(int subId, OperatorInfo operator,
+            boolean persistSelection) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.setNetworkSelectionModeManual(subId, operator);
+                return telephony.setNetworkSelectionModeManual(subId, operator, persistSelection);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setNetworkSelectionModeManual RemoteException", ex);
         } catch (NullPointerException ex) {
@@ -4352,13 +4366,13 @@ public class TelephonyManager {
        }
    }
 
-   /**
-    * Returns the Status of Volte
-    *@hide
-    */
-   public boolean isVolteEnabled() {
+    /**
+     * Returns the Status of Volte
+     * @hide
+     */
+    public boolean isVolteAvailable() {
        try {
-           return getITelephony().isVolteEnabled();
+           return getITelephony().isVolteAvailable();
        } catch (RemoteException ex) {
            return false;
        } catch (NullPointerException ex) {
@@ -4366,13 +4380,27 @@ public class TelephonyManager {
        }
    }
 
-   /**
-    * Returns the Status of Wi-Fi Calling
-    *@hide
-    */
-   public boolean isWifiCallingEnabled() {
+    /**
+     * Returns the Status of video telephony (VT)
+     * @hide
+     */
+    public boolean isVideoTelephonyAvailable() {
+        try {
+            return getITelephony().isVideoTelephonyAvailable();
+        } catch (RemoteException ex) {
+            return false;
+        } catch (NullPointerException ex) {
+            return false;
+        }
+    }
+
+    /**
+     * Returns the Status of Wi-Fi Calling
+     * @hide
+     */
+    public boolean isWifiCallingAvailable() {
        try {
-           return getITelephony().isWifiCallingEnabled();
+           return getITelephony().isWifiCallingAvailable();
        } catch (RemoteException ex) {
            return false;
        } catch (NullPointerException ex) {

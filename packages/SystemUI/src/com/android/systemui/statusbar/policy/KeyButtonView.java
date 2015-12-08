@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
@@ -26,6 +27,7 @@ import android.os.SystemClock;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -63,6 +65,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     // TODO: Get rid of this
     public static final float DEFAULT_QUIESCENT_ALPHA = 1f;
 
+    private int mContentDescriptionRes;
     private long mDownTime;
     private int mCode;
     private int mTouchSlop;
@@ -105,6 +108,10 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
 
         mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
 
+        TypedValue value = new TypedValue();
+        if (a.getValue(R.styleable.KeyButtonView_android_contentDescription, value)) {
+            mContentDescriptionRes = value.resourceId;
+        }
 
         setClickable(true);
         setLongClickable(true);
@@ -180,6 +187,15 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         mCustomLongpressEnabled = _customLongClick.getAction() != null;
     }
     
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if (mContentDescriptionRes != 0) {
+            setContentDescription(mContext.getString(mContentDescriptionRes));
+        }
+    }
+
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);

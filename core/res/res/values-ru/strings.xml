@@ -914,7 +914,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"Приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" не отвечает. Закрыть его?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Приложение \"<xliff:g id="PROCESS">%1$s</xliff:g>\" не отвечает.\n\nЗакрыть его?"</string>
     <string name="force_close" msgid="8346072094521265605">"ОК"</string>
-    <string name="report" msgid="4060218260984795706">"Отзыв"</string>
+    <string name="report" msgid="4060218260984795706">"Отправить отчет"</string>
     <string name="wait" msgid="7147118217226317732">"Подождать"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Страница не отвечает.\n\nЗакрыть ее?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Приложение перенаправлено"</string>
@@ -1056,7 +1056,7 @@
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"Передача фото через USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI через USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB-устройство подключено"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Ещё варианты"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Нажмите, чтобы настроить."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Нажмите, чтобы отключить отладку по USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Выбор раскладки"</string>
@@ -1150,7 +1150,7 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"Не выбран файл"</string>
     <string name="reset" msgid="2448168080964209908">"Сбросить"</string>
     <string name="submit" msgid="1602335572089911941">"Отправить"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Включен режим \"Штурман\""</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим \"В автомобиле\""</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Чтобы выйти, нажмите здесь."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Включен режим модема"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Нажмите для настройки."</string>
@@ -1522,6 +1522,7 @@
       <item quantity="other">На %d часа</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Следующий сигнал в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Пока я не отключу"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Пока вы не отключите режим \"Не беспокоить\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

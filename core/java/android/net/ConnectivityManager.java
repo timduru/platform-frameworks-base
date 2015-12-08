@@ -100,6 +100,16 @@ public class ConnectivityManager {
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
 
     /**
+     * A temporary hack until SUPL system can get off the legacy APIS.
+     * They do too many network requests and the long list of apps listening
+     * and waking due to the CONNECTIVITY_ACTION bcast makes it expensive.
+     * Use this bcast intent instead for SUPL requests.
+     * @hide
+     */
+    public static final String CONNECTIVITY_ACTION_SUPL =
+            "android.net.conn.CONNECTIVITY_CHANGE_SUPL";
+
+    /**
      * The device has connected to a network that has presented a captive
      * portal, which is blocking Internet connectivity. The user was presented
      * with a notification that network sign in is required,
@@ -885,8 +895,12 @@ public class ConnectivityManager {
      * Tells the underlying networking system that the caller wants to
      * begin using the named feature. The interpretation of {@code feature}
      * is completely up to each networking implementation.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param networkType specifies which network the request pertains to
      * @param feature the name of the feature to be used
      * @return an integer value representing the outcome of the request.
@@ -936,8 +950,12 @@ public class ConnectivityManager {
      * Tells the underlying networking system that the caller is finished
      * using the named feature. The interpretation of {@code feature}
      * is completely up to each networking implementation.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param networkType specifies which network the request pertains to
      * @param feature the name of the feature that is no longer needed
      * @return an integer value representing the outcome of the request.
@@ -1181,12 +1199,154 @@ public class ConnectivityManager {
         return true;
     }
 
+    /** @hide */
+    public static class PacketKeepaliveCallback {
+        /** The requested keepalive was successfully started. */
+        public void onStarted() {}
+        /** The keepalive was successfully stopped. */
+        public void onStopped() {}
+        /** An error occurred. */
+        public void onError(int error) {}
+    }
+
+    /**
+     * Allows applications to request that the system periodically send specific packets on their
+     * behalf, using hardware offload to save battery power.
+     *
+     * To request that the system send keepalives, call one of the methods that return a
+     * {@link ConnectivityManager.PacketKeepalive} object, such as {@link #startNattKeepalive},
+     * passing in a non-null callback. If the callback is successfully started, the callback's
+     * {@code onStarted} method will be called. If an error occurs, {@code onError} will be called,
+     * specifying one of the {@code ERROR_*} constants in this class.
+     *
+     * To stop an existing keepalive, call {@link stop}. The system will call {@code onStopped} if
+     * the operation was successfull or {@code onError} if an error occurred.
+     *
+     * @hide
+     */
+    public class PacketKeepalive {
+
+        private static final String TAG = "PacketKeepalive";
+
+        /** @hide */
+        public static final int SUCCESS = 0;
+
+        /** @hide */
+        public static final int NO_KEEPALIVE = -1;
+
+        /** @hide */
+        public static final int BINDER_DIED = -10;
+
+        /** The specified {@code Network} is not connected. */
+        public static final int ERROR_INVALID_NETWORK = -20;
+        /** The specified IP addresses are invalid. For example, the specified source IP address is
+          * not configured on the specified {@code Network}. */
+        public static final int ERROR_INVALID_IP_ADDRESS = -21;
+        /** The requested port is invalid. */
+        public static final int ERROR_INVALID_PORT = -22;
+        /** The packet length is invalid (e.g., too long). */
+        public static final int ERROR_INVALID_LENGTH = -23;
+        /** The packet transmission interval is invalid (e.g., too short). */
+        public static final int ERROR_INVALID_INTERVAL = -24;
+
+        /** The hardware does not support this request. */
+        public static final int ERROR_HARDWARE_UNSUPPORTED = -30;
+        /** The hardware returned an error. */
+        public static final int ERROR_HARDWARE_ERROR = -31;
+
+        public static final int NATT_PORT = 4500;
+
+        private final Network mNetwork;
+        private final PacketKeepaliveCallback mCallback;
+        private final Looper mLooper;
+        private final Messenger mMessenger;
+
+        private volatile Integer mSlot;
+
+        void stopLooper() {
+            mLooper.quit();
+        }
+
+        public void stop() {
+            try {
+                mService.stopKeepalive(mNetwork, mSlot);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error stopping packet keepalive: ", e);
+                stopLooper();
+            }
+        }
+
+        private PacketKeepalive(Network network, PacketKeepaliveCallback callback) {
+            checkNotNull(network, "network cannot be null");
+            checkNotNull(callback, "callback cannot be null");
+            mNetwork = network;
+            mCallback = callback;
+            HandlerThread thread = new HandlerThread(TAG);
+            thread.start();
+            mLooper = thread.getLooper();
+            mMessenger = new Messenger(new Handler(mLooper) {
+                @Override
+                public void handleMessage(Message message) {
+                    switch (message.what) {
+                        case NetworkAgent.EVENT_PACKET_KEEPALIVE:
+                            int error = message.arg2;
+                            try {
+                                if (error == SUCCESS) {
+                                    if (mSlot == null) {
+                                        mSlot = message.arg1;
+                                        mCallback.onStarted();
+                                    } else {
+                                        mSlot = null;
+                                        stopLooper();
+                                        mCallback.onStopped();
+                                    }
+                                } else {
+                                    stopLooper();
+                                    mCallback.onError(error);
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Exception in keepalive callback(" + error + ")", e);
+                            }
+                            break;
+                        default:
+                            Log.e(TAG, "Unhandled message " + Integer.toHexString(message.what));
+                            break;
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Starts an IPsec NAT-T keepalive packet with the specified parameters.
+     *
+     * @hide
+     */
+    public PacketKeepalive startNattKeepalive(
+            Network network, int intervalSeconds, PacketKeepaliveCallback callback,
+            InetAddress srcAddr, int srcPort, InetAddress dstAddr) {
+        final PacketKeepalive k = new PacketKeepalive(network, callback);
+        try {
+            mService.startNattKeepalive(network, intervalSeconds, k.mMessenger, new Binder(),
+                    srcAddr.getHostAddress(), srcPort, dstAddr.getHostAddress());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error starting packet keepalive: ", e);
+            k.stopLooper();
+            return null;
+        }
+        return k;
+    }
+
     /**
      * Ensure that a network route exists to deliver traffic to the specified
      * host via the specified network interface. An attempt to add a route that
      * already exists is ignored, but treated as successful.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param networkType the type of the network over which traffic to the specified
      * host is to be routed
      * @param hostAddress the IP address of the host to which the route is desired
@@ -1206,8 +1366,12 @@ public class ConnectivityManager {
      * Ensure that a network route exists to deliver traffic to the specified
      * host via the specified network interface. An attempt to add a route that
      * already exists is ignored, but treated as successful.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param networkType the type of the network over which traffic to the specified
      * host is to be routed
      * @param hostAddress the IP address of the host to which the route is desired
@@ -1407,6 +1571,13 @@ public class ConnectivityManager {
         return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
+    /** {@hide} */
+    public static final void enforceChangePermission(Context context) {
+        int uid = Binder.getCallingUid();
+        Settings.checkAndNoteChangeNetworkStateOperation(context, uid, Settings
+                .getPackageNameForUid(context, uid), true /* throwException */);
+    }
+
     /** {@hide */
     public static final void enforceTetherChangePermission(Context context) {
         if (context.getResources().getStringArray(
@@ -1417,8 +1588,8 @@ public class ConnectivityManager {
                     android.Manifest.permission.CONNECTIVITY_INTERNAL, "ConnectivityService");
         } else {
             int uid = Binder.getCallingUid();
-            Settings.checkAndNoteChangeNetworkStateOperation(context, uid, Settings
-                    .getPackageNameForUid(context, uid), true);
+            Settings.checkAndNoteWriteSettingsOperation(context, uid, Settings
+                    .getPackageNameForUid(context, uid), true /* throwException */);
         }
     }
 
@@ -1523,8 +1694,11 @@ public class ConnectivityManager {
      * allowed between the tethered devices and this device, though upstream net
      * access will of course fail until an upstream network interface becomes
      * active.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
      *
      * @param iface the interface name to tether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
@@ -1541,8 +1715,11 @@ public class ConnectivityManager {
 
     /**
      * Stop tethering the named interface.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
      *
      * @param iface the interface name to untether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
@@ -1642,8 +1819,11 @@ public class ConnectivityManager {
      * attempt to switch to Rndis and subsequently tether the resulting
      * interface on {@code true} or turn off tethering and switch off
      * Rndis on {@code false}.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
      *
      * @param enable a boolean - {@code true} to enable tethering
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
@@ -2113,6 +2293,7 @@ public class ConnectivityManager {
         private final AtomicInteger mRefCount;
         private static final String TAG = "ConnectivityManager.CallbackHandler";
         private final ConnectivityManager mCm;
+        private static final boolean DBG = false;
 
         CallbackHandler(Looper looper, HashMap<NetworkRequest, NetworkCallback>callbackMap,
                 AtomicInteger refCount, ConnectivityManager cm) {
@@ -2124,7 +2305,7 @@ public class ConnectivityManager {
 
         @Override
         public void handleMessage(Message message) {
-            Log.d(TAG, "CM callback handler got msg " + message.what);
+            if (DBG) Log.d(TAG, "CM callback handler got msg " + message.what);
             NetworkRequest request = (NetworkRequest) getObject(message, NetworkRequest.class);
             Network network = (Network) getObject(message, Network.class);
             switch (message.what) {
@@ -2312,8 +2493,11 @@ public class ConnectivityManager {
      * network may never attain, and whether a network will attain these states
      * is unknown prior to bringing up the network so the framework does not
      * know how to go about satisfing a request with these capabilities.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
      *
      * @param request {@link NetworkRequest} describing this request.
      * @param networkCallback The {@link NetworkCallback} to be utilized for this
@@ -2335,8 +2519,12 @@ public class ConnectivityManager {
      * network is not found within the given time (in milliseconds) the
      * {@link NetworkCallback#unavailable} callback is called.  The request must
      * still be released normally by calling {@link releaseNetworkRequest}.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param request {@link NetworkRequest} describing this request.
      * @param networkCallback The callbacks to be utilized for this request.  Note
      *                        the callbacks must not be shared - they uniquely specify
@@ -2409,8 +2597,12 @@ public class ConnectivityManager {
      * network may never attain, and whether a network will attain these states
      * is unknown prior to bringing up the network so the framework does not
      * know how to go about satisfing a request with these capabilities.
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
+     *
+     * <p>This method requires the caller to hold either the
+     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
+     * or the ability to modify system settings as determined by
+     * {@link android.provider.Settings.System#canWrite}.</p>
+     *
      * @param request {@link NetworkRequest} describing this request.
      * @param operation Action to perform when the network is available (corresponds
      *                  to the {@link NetworkCallback#onAvailable} call.  Typically

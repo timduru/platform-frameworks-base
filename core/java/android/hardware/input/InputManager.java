@@ -16,8 +16,10 @@
 
 package android.hardware.input;
 
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 
+import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
@@ -29,6 +31,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -37,7 +40,10 @@ import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides information about input devices and available key layouts.
@@ -66,6 +72,11 @@ public final class InputManager {
     private InputDevicesChangedListener mInputDevicesChangedListener;
     private final ArrayList<InputDeviceListenerDelegate> mInputDeviceListeners =
             new ArrayList<InputDeviceListenerDelegate>();
+
+    // Guarded by mTabletModeLock
+    private final Object mTabletModeLock = new Object();
+    private TabletModeChangedListener mTabletModeChangedListener;
+    private List<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners;
 
     /**
      * Broadcast Action: Query available keyboard layouts.
@@ -170,6 +181,31 @@ public final class InputManager {
      * @hide
      */
     public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH = 2;  // see InputDispatcher.h
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SWITCH_STATE_UNKNOWN, SWITCH_STATE_OFF, SWITCH_STATE_ON})
+    public @interface SwitchState {}
+
+    /**
+     * Switch State: Unknown.
+     *
+     * The system has yet to report a valid value for the switch.
+     * @hide
+     */
+    public static final int SWITCH_STATE_UNKNOWN = -1;
+
+    /**
+     * Switch State: Off.
+     * @hide
+     */
+    public static final int SWITCH_STATE_OFF = 0;
+
+    /**
+     * Switch State: On.
+     * @hide
+     */
+    public static final int SWITCH_STATE_ON = 1;
 
     private InputManager(IInputManager im) {
         mIm = im;
@@ -324,6 +360,89 @@ public final class InputManager {
         final int numListeners = mInputDeviceListeners.size();
         for (int i = 0; i < numListeners; i++) {
             if (mInputDeviceListeners.get(i).mListener == listener) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Queries whether the device is in tablet mode.
+     *
+     * @return The tablet switch state which is one of {@link #SWITCH_STATE_UNKNOWN},
+     * {@link #SWITCH_STATE_OFF} or {@link #SWITCH_STATE_ON}.
+     * @hide
+     */
+    @SwitchState
+    public int isInTabletMode() {
+        try {
+            return mIm.isInTabletMode();
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not get tablet mode state", ex);
+            return SWITCH_STATE_UNKNOWN;
+        }
+    }
+
+    /**
+     * Register a tablet mode changed listener.
+     *
+     * @param listener The listener to register.
+     * @param handler The handler on which the listener should be invoked, or null
+     * if the listener should be invoked on the calling thread's looper.
+     * @hide
+     */
+    public void registerOnTabletModeChangedListener(
+            OnTabletModeChangedListener listener, Handler handler) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+        synchronized (mTabletModeLock) {
+            if (mOnTabletModeChangedListeners == null) {
+                initializeTabletModeListenerLocked();
+            }
+            int idx = findOnTabletModeChangedListenerLocked(listener);
+            if (idx < 0) {
+                OnTabletModeChangedListenerDelegate d =
+                    new OnTabletModeChangedListenerDelegate(listener, handler);
+                mOnTabletModeChangedListeners.add(d);
+            }
+        }
+    }
+
+    /**
+     * Unregister a tablet mode changed listener.
+     *
+     * @param listener The listener to unregister.
+     * @hide
+     */
+    public void unregisterOnTabletModeChangedListener(OnTabletModeChangedListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+        synchronized (mTabletModeLock) {
+            int idx = findOnTabletModeChangedListenerLocked(listener);
+            if (idx >= 0) {
+                OnTabletModeChangedListenerDelegate d = mOnTabletModeChangedListeners.remove(idx);
+                d.removeCallbacksAndMessages(null);
+            }
+        }
+    }
+
+    private void initializeTabletModeListenerLocked() {
+        final TabletModeChangedListener listener = new TabletModeChangedListener();
+        try {
+            mIm.registerTabletModeChangedListener(listener);
+        } catch (RemoteException ex) {
+            throw new RuntimeException("Could not register tablet mode changed listener", ex);
+        }
+        mTabletModeChangedListener = listener;
+        mOnTabletModeChangedListeners = new ArrayList<>();
+    }
+
+    private int findOnTabletModeChangedListenerLocked(OnTabletModeChangedListener listener) {
+        final int N = mOnTabletModeChangedListeners.size();
+        for (int i = 0; i < N; i++) {
+            if (mOnTabletModeChangedListeners.get(i).mListener == listener) {
                 return i;
             }
         }
@@ -769,6 +888,22 @@ public final class InputManager {
         return false;
     }
 
+
+    private void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
+        if (DEBUG) {
+            Log.d(TAG, "Received tablet mode changed: "
+                    + "whenNanos=" + whenNanos + ", inTabletMode=" + inTabletMode);
+        }
+        synchronized (mTabletModeLock) {
+            final int N = mOnTabletModeChangedListeners.size();
+            for (int i = 0; i < N; i++) {
+                OnTabletModeChangedListenerDelegate listener =
+                        mOnTabletModeChangedListeners.get(i);
+                listener.sendTabletModeChanged(whenNanos, inTabletMode);
+            }
+        }
+    }
+
     /**
      * Gets a vibrator service associated with an input device, assuming it has one.
      * @return The vibrator, never null.
@@ -833,6 +968,57 @@ public final class InputManager {
                     break;
                 case MSG_DEVICE_CHANGED:
                     mListener.onInputDeviceChanged(msg.arg1);
+                    break;
+            }
+        }
+    }
+
+    /** @hide */
+    public interface OnTabletModeChangedListener {
+        /**
+         * Called whenever the device goes into or comes out of tablet mode.
+         *
+         * @param whenNanos The time at which the device transitioned into or
+         * out of tablet mode. This is given in nanoseconds in the
+         * {@link SystemClock#uptimeMillis} time base.
+         */
+        void onTabletModeChanged(long whenNanos, boolean inTabletMode);
+    }
+
+    private final class TabletModeChangedListener extends ITabletModeChangedListener.Stub {
+        @Override
+        public void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
+            InputManager.this.onTabletModeChanged(whenNanos, inTabletMode);
+        }
+    }
+
+    private static final class OnTabletModeChangedListenerDelegate extends Handler {
+        private static final int MSG_TABLET_MODE_CHANGED = 0;
+
+        public final OnTabletModeChangedListener mListener;
+
+        public OnTabletModeChangedListenerDelegate(
+                OnTabletModeChangedListener listener, Handler handler) {
+            super(handler != null ? handler.getLooper() : Looper.myLooper());
+            mListener = listener;
+        }
+
+        public void sendTabletModeChanged(long whenNanos, boolean inTabletMode) {
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = (int) (whenNanos & 0xFFFFFFFF);
+            args.argi2 = (int) (whenNanos >> 32);
+            args.arg1 = (Boolean) inTabletMode;
+            obtainMessage(MSG_TABLET_MODE_CHANGED, args).sendToTarget();
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_TABLET_MODE_CHANGED:
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    long whenNanos = (args.argi1 & 0xFFFFFFFFl) | ((long) args.argi2 << 32);
+                    boolean inTabletMode = (boolean) args.arg1;
+                    mListener.onTabletModeChanged(whenNanos, inTabletMode);
                     break;
             }
         }

@@ -24,6 +24,7 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -31,6 +32,7 @@ import android.view.View;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.LinearInterpolator;
+import android.widget.Chronometer;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
@@ -87,6 +89,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationGuts mGuts;
     private StatusBarNotification mStatusBarNotification;
     private boolean mIsHeadsUp;
+    private boolean mLastChronometerRunning = true;
     private View mExpandButton;
     private View mExpandButtonDivider;
     private ViewStub mExpandButtonStub;
@@ -109,6 +112,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     !mChildrenExpanded);
         }
     };
+
+    private boolean mJustClicked;
 
     public NotificationContentView getPrivateLayout() {
         return mPrivateLayout;
@@ -291,6 +296,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     public void setPinned(boolean pinned) {
         mIsPinned = pinned;
+        setChronometerRunning(mLastChronometerRunning);
     }
 
     public boolean isPinned() {
@@ -299,6 +305,56 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public int getHeadsUpHeight() {
         return mHeadsUpHeight;
+    }
+
+    /**
+     * Mark whether this notification was just clicked, i.e. the user has just clicked this
+     * notification in this frame.
+     */
+    public void setJustClicked(boolean justClicked) {
+        mJustClicked = justClicked;
+    }
+
+    /**
+     * @return true if this notification has been clicked in this frame, false otherwise
+     */
+    public boolean wasJustClicked() {
+        return mJustClicked;
+    }
+
+    public void setChronometerRunning(boolean running) {
+        mLastChronometerRunning = running;
+        setChronometerRunning(running, mPrivateLayout);
+        setChronometerRunning(running, mPublicLayout);
+        if (mChildrenContainer != null) {
+            List<ExpandableNotificationRow> notificationChildren =
+                    mChildrenContainer.getNotificationChildren();
+            for (int i = 0; i < notificationChildren.size(); i++) {
+                ExpandableNotificationRow child = notificationChildren.get(i);
+                child.setChronometerRunning(running);
+            }
+        }
+    }
+
+    private void setChronometerRunning(boolean running, NotificationContentView layout) {
+        if (layout != null) {
+            running = running || isPinned();
+            View contractedChild = layout.getContractedChild();
+            View expandedChild = layout.getExpandedChild();
+            View headsUpChild = layout.getHeadsUpChild();
+            setChronometerRunningForChild(running, contractedChild);
+            setChronometerRunningForChild(running, expandedChild);
+            setChronometerRunningForChild(running, headsUpChild);
+        }
+    }
+
+    private void setChronometerRunningForChild(boolean running, View child) {
+        if (child != null) {
+            View chronometer = child.findViewById(com.android.internal.R.id.chronometer);
+            if (chronometer instanceof Chronometer) {
+                ((Chronometer) chronometer).setStarted(running);
+            }
+        }
     }
 
     public interface ExpansionLogger {

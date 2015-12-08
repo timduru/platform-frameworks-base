@@ -316,6 +316,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real.
     static final int PROC_START_TIMEOUT = 10*1000;
+    // How long we wait for an attached process to publish its content providers
+    // before we decide it must be hung.
+    static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT = 10*1000;
 
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real, when the process was
@@ -365,6 +368,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     // we will consider it to be doing interaction for usage stats.
     static final int SERVICE_USAGE_INTERACTION_TIME = 30*60*1000;
 
+    // Maximum amount of time we will allow to elapse before re-reporting usage stats
+    // interaction with foreground processes.
+    static final long USAGE_STATS_INTERACTION_INTERVAL = 24*60*60*1000L;
+
     // Maximum number of users we allow to be running at a time.
     static final int MAX_RUNNING_USERS = 3;
 
@@ -399,6 +406,17 @@ public final class ActivityManagerService extends ActivityManagerNative
     // Necessary ApplicationInfo flags to mark an app as persistent
     private static final int PERSISTENT_MASK =
             ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT;
+
+
+    // Delay to disable app launch boost
+    static final int APP_BOOST_MESSAGE_DELAY = 3000;
+    // Lower delay than APP_BOOST_MESSAGE_DELAY to disable the boost
+    static final int APP_BOOST_TIMEOUT = 2500;
+
+    private static native int nativeMigrateToBoost();
+    private static native int nativeMigrateFromBoost();
+    private boolean mIsBoosted = false;
+    private long mBoostStartTime = 0;
 
     /** All system services */
     SystemServiceManager mSystemServiceManager;
@@ -1356,6 +1374,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int REPORT_TIME_TRACKER_MSG = 55;
     static final int REPORT_USER_SWITCH_COMPLETE_MSG = 56;
     static final int SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG = 57;
+    static final int APP_BOOST_DEACTIVATE_MSG = 58;
+    static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG = 59;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1687,6 +1707,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ProcessRecord app = (ProcessRecord)msg.obj;
                 synchronized (ActivityManagerService.this) {
                     processStartTimedOutLocked(app);
+                }
+            } break;
+            case CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG: {
+                ProcessRecord app = (ProcessRecord)msg.obj;
+                synchronized (ActivityManagerService.this) {
+                    processContentProviderPublishTimedOutLocked(app);
                 }
             } break;
             case DO_PENDING_ACTIVITY_LAUNCHES_MSG: {
@@ -2030,6 +2056,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Only a UiAutomation can set this flag and now that
                 // it is finished we make sure it is reset to its default.
                 mUserIsMonkey = false;
+            } break;
+            case APP_BOOST_DEACTIVATE_MSG : {
+                synchronized(ActivityManagerService.this) {
+                    if (mIsBoosted) {
+                        if (mBoostStartTime < (SystemClock.uptimeMillis() - APP_BOOST_TIMEOUT)) {
+                            nativeMigrateFromBoost();
+                            mIsBoosted = false;
+                            mBoostStartTime = 0;
+                        } else {
+                            Message newmsg = mHandler.obtainMessage(APP_BOOST_DEACTIVATE_MSG);
+                            mHandler.sendMessageDelayed(newmsg, APP_BOOST_TIMEOUT);
+                        }
+                    }
+                }
             } break;
             }
         }
@@ -3112,6 +3152,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             // If this is an isolated process, it can't re-use an existing process.
             app = null;
+        }
+
+        // app launch boost for big.little configurations
+        // use cpusets to migrate freshly launched tasks to big cores
+        synchronized(ActivityManagerService.this) {
+            nativeMigrateToBoost();
+            mIsBoosted = true;
+            mBoostStartTime = SystemClock.uptimeMillis();
+            Message msg = mHandler.obtainMessage(APP_BOOST_DEACTIVATE_MSG);
+            mHandler.sendMessageDelayed(msg, APP_BOOST_MESSAGE_DELAY);
         }
 
         // We don't have to do anything more if:
@@ -5908,6 +5958,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         return needRestart;
     }
 
+    private final void processContentProviderPublishTimedOutLocked(ProcessRecord app) {
+        cleanupAppInLaunchingProvidersLocked(app, true);
+        removeProcessLocked(app, false, true, "timeout publishing content providers");
+    }
+
     private final void processStartTimedOutLocked(ProcessRecord app) {
         final int pid = app.pid;
         boolean gone = false;
@@ -5934,7 +5989,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
             // Take care of any launching providers waiting for this process.
-            checkAppInLaunchingProvidersLocked(app, true);
+            cleanupAppInLaunchingProvidersLocked(app, true);
             // Take care of any services that are waiting for the process.
             mServices.processStartTimedOutLocked(app);
             app.kill("start timeout", true);
@@ -6029,6 +6084,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         boolean normalMode = mProcessesReady || isAllowedWhileBooting(app.info);
         List<ProviderInfo> providers = normalMode ? generateApplicationProvidersLocked(app) : null;
+
+        if (providers != null && checkAppInLaunchingProvidersLocked(app)) {
+            Message msg = mHandler.obtainMessage(CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG);
+            msg.obj = app;
+            mHandler.sendMessageDelayed(msg, CONTENT_PROVIDER_PUBLISH_TIMEOUT);
+        }
 
         if (!normalMode) {
             Slog.i(TAG, "Launching preboot mode app: " + app);
@@ -9861,7 +9922,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
 
             final int N = providers.size();
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < N; i++) {
                 ContentProviderHolder src = providers.get(i);
                 if (src == null || src.info == null || src.provider == null) {
                     continue;
@@ -9876,14 +9937,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                         mProviderMap.putProviderByName(names[j], dst);
                     }
 
-                    int NL = mLaunchingProviders.size();
+                    int launchingCount = mLaunchingProviders.size();
                     int j;
-                    for (j=0; j<NL; j++) {
+                    boolean wasInLaunchingProviders = false;
+                    for (j = 0; j < launchingCount; j++) {
                         if (mLaunchingProviders.get(j) == dst) {
                             mLaunchingProviders.remove(j);
+                            wasInLaunchingProviders = true;
                             j--;
-                            NL--;
+                            launchingCount--;
                         }
+                    }
+                    if (wasInLaunchingProviders) {
+                        mHandler.removeMessages(CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG, r);
                     }
                     synchronized (dst) {
                         dst.provider = src.provider;
@@ -15501,7 +15567,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.pubProviders.clear();
 
         // Take care of any launching providers waiting for this process.
-        if (checkAppInLaunchingProvidersLocked(app, false)) {
+        if (cleanupAppInLaunchingProvidersLocked(app, false)) {
             restart = true;
         }
 
@@ -15623,7 +15689,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         return false;
     }
 
-    boolean checkAppInLaunchingProvidersLocked(ProcessRecord app, boolean alwaysBad) {
+    boolean checkAppInLaunchingProvidersLocked(ProcessRecord app) {
+        for (int i = mLaunchingProviders.size() - 1; i >= 0; i--) {
+            ContentProviderRecord cpr = mLaunchingProviders.get(i);
+            if (cpr.launchingApp == app) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean cleanupAppInLaunchingProvidersLocked(ProcessRecord app, boolean alwaysBad) {
         // Look through the content providers we are waiting to have launched,
         // and if any run in this process then either schedule a restart of
         // the process or kill the client waiting for it if this process has
@@ -18590,7 +18666,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private final boolean applyOomAdjLocked(ProcessRecord app, boolean doingAll, long now) {
+    private final boolean applyOomAdjLocked(ProcessRecord app, boolean doingAll, long now,
+            long nowElapsed) {
         boolean success = true;
 
         if (app.curRawAdj != app.setRawAdj) {
@@ -18694,7 +18771,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (app.setProcState != app.curProcState) {
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                     "Proc state change of " + app.processName
-                    + " to " + app.curProcState);
+                            + " to " + app.curProcState);
             boolean setImportant = app.setProcState < ActivityManager.PROCESS_STATE_SERVICE;
             boolean curImportant = app.curProcState < ActivityManager.PROCESS_STATE_SERVICE;
             if (setImportant && !curImportant) {
@@ -18705,14 +18782,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
                 synchronized (stats) {
                     app.lastWakeTime = stats.getProcessWakeTime(app.info.uid,
-                            app.pid, SystemClock.elapsedRealtime());
+                            app.pid, nowElapsed);
                 }
                 app.lastCpuTime = app.curCpuTime;
 
             }
             // Inform UsageStats of important process state change
             // Must be called before updating setProcState
-            maybeUpdateUsageStatsLocked(app);
+            maybeUpdateUsageStatsLocked(app, nowElapsed);
 
             app.setProcState = app.curProcState;
             if (app.setProcState >= ActivityManager.PROCESS_STATE_HOME) {
@@ -18723,6 +18800,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else {
                 app.procStateChanged = true;
             }
+        } else if (app.reportedInteraction && (nowElapsed-app.interactionEventTime)
+                > USAGE_STATS_INTERACTION_INTERVAL) {
+            // For apps that sit around for a long time in the interactive state, we need
+            // to report this at least once a day so they don't go idle.
+            maybeUpdateUsageStatsLocked(app, nowElapsed);
         }
 
         if (changes != 0) {
@@ -18817,7 +18899,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private void maybeUpdateUsageStatsLocked(ProcessRecord app) {
+    private void maybeUpdateUsageStatsLocked(ProcessRecord app, long nowElapsed) {
         if (DEBUG_USAGE_STATS) {
             Slog.d(TAG, "Checking proc [" + Arrays.toString(app.getPackageList())
                     + "] state changes: old = " + app.setProcState + ", new = "
@@ -18834,19 +18916,20 @@ public final class ActivityManagerService extends ActivityManagerNative
             isInteraction = true;
             app.fgInteractionTime = 0;
         } else if (app.curProcState <= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
-            final long now = SystemClock.elapsedRealtime();
             if (app.fgInteractionTime == 0) {
-                app.fgInteractionTime = now;
+                app.fgInteractionTime = nowElapsed;
                 isInteraction = false;
             } else {
-                isInteraction = now > app.fgInteractionTime + SERVICE_USAGE_INTERACTION_TIME;
+                isInteraction = nowElapsed > app.fgInteractionTime + SERVICE_USAGE_INTERACTION_TIME;
             }
         } else {
             isInteraction = app.curProcState
                     <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
             app.fgInteractionTime = 0;
         }
-        if (isInteraction && !app.reportedInteraction) {
+        if (isInteraction && (!app.reportedInteraction
+                || (nowElapsed-app.interactionEventTime) > USAGE_STATS_INTERACTION_INTERVAL)) {
+            app.interactionEventTime = nowElapsed;
             String[] packages = app.getPackageList();
             if (packages != null) {
                 for (int i = 0; i < packages.length; i++) {
@@ -18856,6 +18939,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         app.reportedInteraction = isInteraction;
+        if (!isInteraction) {
+            app.interactionEventTime = 0;
+        }
     }
 
     private final void setProcessTrackerStateLocked(ProcessRecord proc, int memFactor, long now) {
@@ -18878,7 +18964,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         computeOomAdjLocked(app, cachedAdj, TOP_APP, doingAll, now);
 
-        return applyOomAdjLocked(app, doingAll, now);
+        return applyOomAdjLocked(app, doingAll, now, SystemClock.elapsedRealtime());
     }
 
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
@@ -18970,6 +19056,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final ActivityRecord TOP_ACT = resumedAppLocked();
         final ProcessRecord TOP_APP = TOP_ACT != null ? TOP_ACT.app : null;
         final long now = SystemClock.uptimeMillis();
+        final long nowElapsed = SystemClock.elapsedRealtime();
         final long oldTime = now - ProcessList.MAX_EMPTY_TIME;
         final int N = mLruProcesses.size();
 
@@ -19096,7 +19183,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                applyOomAdjLocked(app, true, now);
+                applyOomAdjLocked(app, true, now, nowElapsed);
 
                 // Count the number of process types.
                 switch (app.curProcState) {
