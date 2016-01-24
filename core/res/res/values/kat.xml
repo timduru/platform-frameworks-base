@@ -36,7 +36,7 @@
     </string-array>
 
     <java-symbol type="integer" name="wallpaper_mode_default" />
-    <integer name="wallpaper_mode_default">0</integer>
+    <integer name="wallpaper_mode_default">1</integer>
 
 
 
