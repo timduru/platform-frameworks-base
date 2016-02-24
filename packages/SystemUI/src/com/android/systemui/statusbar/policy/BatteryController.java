@@ -31,6 +31,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import android.os.SystemProperties;
+
+
 public class BatteryController extends BroadcastReceiver {
     private static final String TAG = "BatteryController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -46,6 +49,8 @@ public class BatteryController extends BroadcastReceiver {
     private Context mContext;
     private RefreshDockStatus mRefreshDockThread; 
     
+    private boolean hasDockBattery = SystemProperties.getInt("ro.nodockbattery", 0) != 1;
+
     private class RefreshDockStatus extends Thread
     {
     	private final static String DOCK_STATUS_PATH = "/sys/class/power_supply/dock_battery/status";
@@ -86,10 +91,12 @@ public class BatteryController extends BroadcastReceiver {
     		if(!_present) _capacity = -1;
     	}
 
-    	private void postUpdateIfNeeded()
+    	private void postUpdateIfNeeded() { postUpdate(false); }
+
+    	public void postUpdate(boolean force)
     	{
     		
-    		if(_prevStatus == _status && _prevCapacity == _capacity  || mContext == null) return;
+    		if(!force && _prevStatus == _status && _prevCapacity == _capacity  || mContext == null) return;
     		
     		Intent batteryChangedIntent = new Intent(Intent.ACTION_DOCK_BATTERY_CHANGED);
     		batteryChangedIntent.putExtra(BatteryManager.EXTRA_LEVEL, _capacity);
@@ -128,7 +135,8 @@ public class BatteryController extends BroadcastReceiver {
         context.registerReceiver(this, filter);
         updatePowerSave();
     	mRefreshDockThread = new RefreshDockStatus();
-        mRefreshDockThread.start();
+	if(hasDockBattery) mRefreshDockThread.start();
+	else mRefreshDockThread.postUpdate(true); // Force update once if no dock Battery to hide it (SL101..)
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
