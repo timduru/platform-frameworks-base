@@ -53,8 +53,6 @@ class AutomaticBrightnessController {
     // auto-brightness adjustment setting.
     private static final float SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_MAX_GAMMA = 3.0f;
 
-    private static final int SCREEN_AUTO_BRIGHTNESS_MIN = 20; // Never go below this value even with compensation
-
     // Light sensor event rate in milliseconds.
     private static final int LIGHT_SENSOR_RATE_MILLIS = 1000;
 
@@ -510,8 +508,8 @@ class AutomaticBrightnessController {
             }
         }
 
-        int newScreenAutoBrightness = clampScreenBrightness(Math.round(value * PowerManager.BRIGHTNESS_ON));
-	if( newScreenAutoBrightness < SCREEN_AUTO_BRIGHTNESS_MIN )  newScreenAutoBrightness = SCREEN_AUTO_BRIGHTNESS_MIN;
+        int newScreenAutoBrightness =
+            clampScreenBrightness(Math.round(value * PowerManager.BRIGHTNESS_ON));
         if (mScreenAutoBrightness != newScreenAutoBrightness) {
             if (DEBUG) {
                 Slog.d(TAG, "updateAutoBrightness: mScreenAutoBrightness="
