@@ -31,9 +31,7 @@ import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.media.AudioManager;
-
-
-
+import android.util.MathUtils;
 
 
 public class KatUtils {
@@ -249,27 +247,28 @@ public class KatUtils {
 	else if(keyCode == KeyEvent.KEYCODE_BRIGHTNESS_AUTO) brightnessControl(KKC.A.BRIGHTNESS_AUTO);
     }
 
+
     public void brightnessControl(String action) 
     {
-        int level = 255;
-        int incrementBacklight = 15;
+        int max = 255;
+        int min = 4;
+        int currentLevel = getBrightness();
+        int newLevel = currentLevel;
+
+        int incrementBacklight = (currentLevel > 20)? 10:2; // use shorter step for levels below 20
+
         if (KKC.A.BRIGHTNESS_UP.equals(action))
-	{
-            setBrightnessMode(Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
-         // Prevent the new brightness value from exceeding 255
-            if ((getBrightness() + (2 * incrementBacklight)) <= level) 	
-		level = getBrightness() + incrementBacklight;
-            setBrightness(level);
-        } else if (KKC.A.BRIGHTNESS_DOWN.equals(action))
-	{
-            setBrightnessMode(Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
-            level = 4;
-            // Prevent the new brightness value from falling below 4
-            if (getBrightness() - 2 * incrementBacklight >= level) 
-                level = getBrightness() - incrementBacklight;
-            setBrightness(level);
-        } else if(KKC.A.BRIGHTNESS_AUTO.equals(action))
+            newLevel += incrementBacklight; 
+        else if (KKC.A.BRIGHTNESS_DOWN.equals(action))
+            newLevel -= incrementBacklight; 
+        else if(KKC.A.BRIGHTNESS_AUTO.equals(action))
 	    setBrightnessMode( getBrightnessMode() == Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL ? Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC: Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+
+
+        if(!KKC.A.BRIGHTNESS_AUTO.equals(action))  setBrightnessMode(Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+
+        newLevel = MathUtils.constrain(newLevel, min, max);
+        if(newLevel != currentLevel) setBrightness(newLevel); 
 
         Intent intent = new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG);
         mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT_OR_SELF);
