@@ -89,6 +89,7 @@ public final class KKC {
 
     public static final String UI_CHANGED = "intent_ui_changed";
     public static final String GLOBAL_ACTIONS = "intent_global_actions";
+    public static final String MW_SWITCH = "mw_switch";
 
     public static final String CMD_BARTYPE_CHANGED = "bar_type_changed";
     public static final String CMD_BARSIZE_CHANGED = "bar_size_changed";

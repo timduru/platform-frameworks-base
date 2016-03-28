@@ -234,6 +234,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".kat.MWReceiver"
+                  android:exported="false">
+            <intent-filter>
+                <action android:name="mw_switch" />
+            </intent-filter>
+        </receiver>
+
         <!-- Callback for dismissing screenshot notification after a share target is picked -->
         <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"
                   android:process=":screenshot"

@@ -83,7 +83,7 @@ public class WMController
 	
 	private String getDefaultLauncherPackage()
 	{
-		String defaultHomePackage = "com.android.launcher";
+		String defaultHomePackage = "com.android.launcher3";
 		final Intent intent = new Intent(Intent.ACTION_MAIN);
 		intent.addCategory(Intent.CATEGORY_HOME);
 

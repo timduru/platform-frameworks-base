@@ -180,6 +180,14 @@ public class KatUtils {
                 .putExtra(KKC.I.EXTRA_RESTART_SYSTEMUI, shouldRestartUI);
         c.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_ALL));
     }
+
+  public static void sendIntent(Context c, String action, String cmd) 
+  {
+        Intent intent = new Intent()
+                .setAction(action)
+                .putExtra(KKC.I.CMD,  cmd);
+        c.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_ALL));
+    }
 /*
   public static void ethernetToggle(Context c)
   {
