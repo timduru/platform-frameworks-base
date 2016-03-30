@@ -24,48 +24,14 @@ public class MWReceiver extends BroadcastReceiver {
             case KKC.I.MW_SWITCH: 
             {
                 String cmd = intent.getStringExtra(KKC.I.CMD);
+                int numapps = intent.getIntExtra("numapps", 2);
                 
-				if(mMgr == null) mMgr = new MWManager(context);
-                mMgr.refresh(context, 2);
+				if(mMgr == null) mMgr = new MWManager(context, numapps);
+				mMgr.refresh(context, numapps);
 				mMgr.switchTopTask();
                 
-/*             RunningTaskInfo topTask =  mProxy.getTopMostTask();
-    Log.d(TAG, "RunningTaskInfo, top: " + topTask.baseActivity);
-                
-             
-                int focusedStack = mProxy.getFocusedStack();
-                List<RecentTaskInfo> taskList = mProxy.getRecentTasks(10, UserHandle.myUserId(), true);
-
-
-                RecentTaskInfo topInfo = taskList.get(0); //FIXME
-                Log.i(TAG, "cmd:" + cmd + " top="+ topInfo.baseIntent +" top.stackId="+ topInfo.stackId);
-                Log.i(TAG, " focusedStack=" + focusedStack);
-                
-				if(topInfo == null || topInfo.id == -1) return;
-							
-				Rect usableScreenRect = mProxy.getWindowRect();
-
-				//int focusedStack = topInfo.stackId ; //mProxy.getFocusedStack();
-				
-				Rect focusedStackRect = mProxy.getTaskBounds(focusedStack);
-				boolean fullscreen = focusedStackRect.equals(usableScreenRect);
-
-				Rect newRect = new Rect();
-				newRect.set(usableScreenRect);
-
-				Log.i(TAG, "fullscreen" + fullscreen + "focusedStackRect" + focusedStackRect + "usableScreenRect" + usableScreenRect);
-
-				if(fullscreen)
-					newRect.right = usableScreenRect.centerX();
-
-				mProxy.resizeTask(topInfo.id, newRect);
-
-				am.moveTaskToFront(topInfo.id, 0, null);
-            * */
                 break;
             }
 		}
     }
-    
-    
 }

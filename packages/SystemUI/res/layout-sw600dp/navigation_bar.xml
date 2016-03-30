@@ -99,7 +99,23 @@
                 systemui:keyConfigUri="kk_ui_splitview_auto_target_uri"
                 systemui:keyClickAction="splitview_auto"
                 />
-
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/splitview_auto3"
+                android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_navbar_splitview_auto3_landscape"
+                android:scaleType="centerInside"
+                systemui:keyConfigUri="kk_ui_splitview_auto3_target_uri"
+                systemui:keyClickAction="splitview_auto3"
+                />
+                        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/splitview_auto4"
+                android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_navbar_splitview_auto4_landscape"
+                android:scaleType="centerInside"
+                systemui:keyConfigUri="kk_ui_splitview_auto4_target_uri"
+                systemui:keyClickAction="splitview_auto4"
+                />
+            
             <Space 
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -223,7 +239,7 @@
                 android:layout_weight="1"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-                android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
+                android:layout_width="wrap_content" android:paddingStart="24dp" android:paddingEnd="42dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_back"
                 android:scaleType="centerInside"
@@ -233,7 +249,7 @@
                 systemui:keyConfigUri="kk_ui_back_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
-                android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
+                android:layout_width="wrap_content" android:paddingStart="42dp" android:paddingEnd="42dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_home"
                 android:scaleType="centerInside"
@@ -244,7 +260,7 @@
                 systemui:keyConfigUri="kk_ui_home_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
-                android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
+                android:layout_width="wrap_content" android:paddingStart="42dp" android:paddingEnd="42dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent"
                 android:scaleType="centerInside"
@@ -253,7 +269,7 @@
                 systemui:keyConfigUri="kk_ui_recent_target_uri"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/switch_toprevious_task"
-                android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
+                android:layout_width="wrap_content" android:paddingStart="42dp" android:paddingEnd="42dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_switch_toprevious_task"
                 android:scaleType="centerInside"
@@ -261,12 +277,30 @@
                 systemui:keyClickAction="switch_toprevious_task"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/splitview_auto"
-                android:layout_width="162dp" android:paddingStart="42dp" android:paddingEnd="42dp"
+                android:layout_width="wrap_content" android:paddingStart="42dp" android:paddingEnd="42dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_navbar_splitview_auto_portrait"
                 android:scaleType="centerInside"
                 systemui:keyConfigUri="kk_ui_splitview_auto_target_uri"
                 systemui:keyClickAction="splitview_auto"
+                />
+
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/splitview_auto3"
+                android:layout_width="wrap_content" android:paddingStart="42dp" android:paddingEnd="42dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_navbar_splitview_auto3_portrait"
+                android:scaleType="centerInside"
+                systemui:keyConfigUri="kk_ui_splitview_auto3_target_uri"
+                systemui:keyClickAction="splitview_auto3"
+                />
+
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/splitview_auto4"
+                android:layout_width="wrap_content" android:paddingStart="42dp" android:paddingEnd="42dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_navbar_splitview_auto4_portrait"
+                android:scaleType="centerInside"
+                systemui:keyConfigUri="kk_ui_splitview_auto4_target_uri"
+                systemui:keyClickAction="splitview_auto4"
                 />
 
             <Space 

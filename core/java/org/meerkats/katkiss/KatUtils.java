@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.Map.Entry;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -23,7 +24,6 @@ import android.view.KeyEvent;
 import android.view.KeyCharacterMap;
 import android.os.SystemClock;
 import android.os.UserHandle;
-
 import android.widget.Toast;
 import android.provider.Settings.SettingNotFoundException;
 import android.bluetooth.BluetoothAdapter;
@@ -181,11 +181,22 @@ public class KatUtils {
         c.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_ALL));
     }
 
-  public static void sendIntent(Context c, String action, String cmd) 
+  public static void splitView(Context c, String action, String cmd)
+  {
+	int numapps = 2;
+	
+	if(cmd.length() > KKC.A.SPLITVIEW_AUTO.length())
+		numapps = Integer.parseInt(cmd.substring(KKC.A.SPLITVIEW_AUTO.length()));
+	
+	splitView(c, action, cmd, numapps);
+  }
+	
+  public static void splitView(Context c, String action, String cmd, int numapps) 
   {
         Intent intent = new Intent()
                 .setAction(action)
-                .putExtra(KKC.I.CMD,  cmd);
+                .putExtra(KKC.I.CMD,  cmd)
+                .putExtra("numapps",  numapps);
         c.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_ALL));
     }
 /*

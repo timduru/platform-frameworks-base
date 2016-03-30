@@ -178,7 +178,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected Boolean mScreenOn;
 //KK
-    private boolean mShowBtnSwitchToPrevious, mShowBtnSplitViewAuto ;
+    private boolean mShowBtnSwitchToPrevious, mShowBtnSplitViewAuto, mShowBtnSplitViewAuto3, mShowBtnSplitViewAuto4;
 
     // The second field is a bit different from the first one because it only listens to screen on/
     // screen of events from Keyguard. We need this so we don't have a race condition with the
@@ -2209,9 +2209,13 @@ public abstract class BaseStatusBar extends SystemUI implements
     public void refreshNewNavButtonVisibility() {
         mShowBtnSwitchToPrevious = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS, 1) == 1;
         mShowBtnSplitViewAuto = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO, 1) == 1;
+        mShowBtnSplitViewAuto3 = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO + "3", 1) == 1;
+        mShowBtnSplitViewAuto4 = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO + "4", 1) == 1;
 
         setNavButtonVisibility(R.id.switch_toprevious_task, mShowBtnSwitchToPrevious);
         setNavButtonVisibility(R.id.splitview_auto, mShowBtnSplitViewAuto);
+        setNavButtonVisibility(R.id.splitview_auto3, mShowBtnSplitViewAuto3);
+        setNavButtonVisibility(R.id.splitview_auto4, mShowBtnSplitViewAuto4);
     }
 
 
@@ -2219,6 +2223,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     {
         setNavButtonVisibility(R.id.switch_toprevious_task, mShowBtnSwitchToPrevious && visible);
         setNavButtonVisibility(R.id.splitview_auto, mShowBtnSplitViewAuto && visible);
+        setNavButtonVisibility(R.id.splitview_auto3, mShowBtnSplitViewAuto3 && visible);
+        setNavButtonVisibility(R.id.splitview_auto4, mShowBtnSplitViewAuto4 && visible);
     }
 
     public void setNavButtonVisibility(int id, boolean visible)
@@ -2286,6 +2292,8 @@ public abstract class BaseStatusBar extends SystemUI implements
       ArrayList<Uri> uris = new  ArrayList<Uri>();
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS));
       uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO + "3"));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO + "4"));
       return uris;
     }
 
@@ -2294,7 +2302,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     {
       Log.d(TAG, "onChangeNotification:" + uri);
       if(uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SWITCH_TOPREVIOUS))
-        || uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO))
+    	        || uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO))
+    	        || uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO + "3"))
+    	        || uri.equals(Settings.System.getUriFor(KKC.S.SYSTEMUI_BTN_SPLITVIEW_AUTO + "4"))
         )
         refreshNewNavButtonVisibility();
     }

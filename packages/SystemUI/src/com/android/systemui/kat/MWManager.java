@@ -34,21 +34,22 @@ class MWManager
     WindowManager mWm;
 
 	private ArrayList<MWTask> mTasks;
-	private int mNumTasks = 2;
+	private int mNumTasks;
 	private boolean mIsLandscape = true;
 	
 	private String homePackage = "";
 	private final MWPositions mPOS;
 
-	public MWManager(Context c)
+	public MWManager(Context c, int numTasks)
 	{
 		Log.d(TAG, "MWManager: construct");
 
 		_c = c;
+		mNumTasks = numTasks;
 		mAM = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
 		mIam = ActivityManagerNative.getDefault();			
-        mWm = (WindowManager) _c.getSystemService(Context.WINDOW_SERVICE);
-		mPOS = new MWPositions(getWindowRect(), 2);
+		mWm = (WindowManager) _c.getSystemService(Context.WINDOW_SERVICE);
+		mPOS = new MWPositions(getWindowRect(), numTasks);
 		refreshOrientation();
 	}
 	
