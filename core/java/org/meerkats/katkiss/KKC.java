@@ -5,11 +5,9 @@ public final class KKC {
     // Settings
   public final class S {
     public static final String SYSTEMUI_UI_MODE = "systemui_ui_mode";
-    public static final int SYSTEMUI_UI_MODE_PHABLETUI = 4;
-    public static final int SYSTEMUI_UI_MODE_NAVBAR_LEFT = 0;
-    public static final int SYSTEMUI_UI_MODE_PHABLETUI_NO_NAVBAR = 1;
-    public static final int SYSTEMUI_UI_MODE_SYSTEMBAR = 3; // TabletUI
-    public static final int SYSTEMUI_UI_MODE_NOBAR = 2;
+    public static final int SYSTEMUI_UI_MODE_ANDROID = 1;
+    public static final int SYSTEMUI_UI_MODE_NAVBAR_LEFT = 2;
+    public static final int SYSTEMUI_UI_MODE_NAVBAR_BALANCED = 0;
 
 
     public static final String SYSTEMUI_UI_BARSIZE = "systemui_ui_barsize";

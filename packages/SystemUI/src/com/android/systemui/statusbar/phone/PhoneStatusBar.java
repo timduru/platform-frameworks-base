@@ -190,8 +190,7 @@ import org.meerkats.katkiss.KKC;
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener,
         HeadsUpManager.OnHeadsUpChangedListener {
-    static final int LAYOUT_NAV_BAR_STOCK = com.android.systemui.R.layout.navigation_bar;
-    static final int LAYOUT_NAV_BAR_LEFT = com.android.systemui.R.layout.navigation_bar_left;
+    static final int[] LAYOUT_NAV_BAR = {com.android.systemui.R.layout.navigation_bar_katkiss, com.android.systemui.R.layout.navigation_bar, com.android.systemui.R.layout.navigation_bar_left};
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
@@ -718,8 +717,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
-                int navBarLayout = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT)
-                    == KKC.S.SYSTEMUI_UI_MODE_NAVBAR_LEFT ? LAYOUT_NAV_BAR_LEFT : LAYOUT_NAV_BAR_STOCK;
+                int navBarLayout =  LAYOUT_NAV_BAR[0];
+            	int navBarMode = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_NAVBAR_BALANCED);
+            	
+            	if(navBarMode < LAYOUT_NAV_BAR.length)
+            		navBarLayout = LAYOUT_NAV_BAR[navBarMode];
 
                 mNavigationBarView = (NavigationBarView) View.inflate(context, navBarLayout, null);
 
