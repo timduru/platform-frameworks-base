@@ -175,26 +175,41 @@ class MWManager
 		return mPOS.isFullScreen(mTasks.get(0).currentSize);
 	}		
 
-	public void switchTopTask()
-	{			
+	public void switchTopTaskAndChilds()
+	{
 		if(mTasks.size() < 1) return;
 		
 		boolean isLandscape = isLandscape();
 		boolean isTopFull  = isTopFull(); 
 		Log.d(TAG, "isTopFull=" +isTopFull + " isLandscape=" + isLandscape);
-		
-		List<Rect> posRect = mPOS.getRects(); // TODO f(numTasks)
-		
 
-		for(int i=0; i<mNumTasks && i< mTasks.size(); i++)
+		switchTasksPositions(mPOS.getRects(), !isTopFull);  // TODO f(numTasks)
+	}
+
+	public void swap2LastTasks()
+	{
+		if(mTasks.size() < 1) return;
+		
+		List<Rect> pos = new ArrayList<Rect>();
+		if(mTasks.size()>1) pos.add(mTasks.get(1).currentSize);
+		if(mTasks.size()>0) pos.add(mTasks.get(0).currentSize);
+				
+		switchTasksPositions(pos, false);
+	}
+
+	public void switchTasksPositions(List<Rect> posList, boolean allToFull)
+	{						
+		int max = Math.min(posList.size() , mTasks.size());
+
+		for(int i=0; i<max ; i++)
 		{
 			MWTask task = mTasks.get(i);
-			Rect newSize = isTopFull? posRect.get(i) : mPOS.getFull();
+			Rect newSize = allToFull? mPOS.getFull(): posList.get(i); 
 			Log.d(TAG, "taski=" +task.info.baseActivity + " newSize="+newSize);
 			resizeTask(task.taskId, newSize);
 		}
 
-		for(int i=Math.min(mNumTasks, mTasks.size()) -1 ; i>=0; i--)
+		for(int i= max-1 ; i>=0; i--)
 		{	
 			MWTask task = mTasks.get(i);
 			mAM.moveTaskToFront(task.taskId, 0, null);

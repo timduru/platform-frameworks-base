@@ -184,8 +184,7 @@ public class KatUtils {
   public static void splitView(Context c, String action, String cmd)
   {
 	int numapps = 2;
-	
-	if(cmd.length() > KKC.A.SPLITVIEW_AUTO.length())
+	if(cmd.startsWith(KKC.A.SPLITVIEW_AUTO) && cmd.length() > KKC.A.SPLITVIEW_AUTO.length())
 		numapps = Integer.parseInt(cmd.substring(KKC.A.SPLITVIEW_AUTO.length()));
 	
 	splitView(c, action, cmd, numapps);

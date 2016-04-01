@@ -121,7 +121,7 @@ public class ActionHandler {
         	WMController.showRecentAppsSystemUI();
         else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
         	new WMController(mContext).switchToPreviousTask();
-        else if(action.startsWith(KKC.A.SPLITVIEW_AUTO))
+        else if(action.startsWith(KKC.A.SPLITVIEW_AUTO) || action.equals(KKC.A.SPLITVIEW_SWAP))
         	KatUtils.splitView(mContext, KKC.I.MW_SWITCH, action);
 
 /*        else if(action.equals(KKC.A.SPLITVIEW_1))

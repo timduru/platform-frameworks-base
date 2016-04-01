@@ -24,12 +24,17 @@ public class MWReceiver extends BroadcastReceiver {
             case KKC.I.MW_SWITCH: 
             {
                 String cmd = intent.getStringExtra(KKC.I.CMD);
+				if(cmd == null || cmd.equals("")) cmd = KKC.A.SPLITVIEW_AUTO;
+				
                 int numapps = intent.getIntExtra("numapps", 2);
                 
 				if(mMgr == null) mMgr = new MWManager(context, numapps);
 				mMgr.refresh(context, numapps);
-				mMgr.switchTopTask();
-                
+				
+				if(cmd.startsWith(KKC.A.SPLITVIEW_AUTO))
+					mMgr.switchTopTaskAndChilds();
+				else if(cmd.equals(KKC.A.SPLITVIEW_SWAP))
+					mMgr.swap2LastTasks();              
                 break;
             }
 		}
