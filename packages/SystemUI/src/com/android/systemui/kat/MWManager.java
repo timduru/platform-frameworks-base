@@ -188,12 +188,18 @@ class MWManager
 
 	public void swap2LastTasks()
 	{
-		if(mTasks.size() < 1) return;
-		
+		if(mTasks.size() < 2) return;
+
 		List<Rect> pos = new ArrayList<Rect>();
-		if(mTasks.size()>1) pos.add(mTasks.get(1).currentSize);
-		if(mTasks.size()>0) pos.add(mTasks.get(0).currentSize);
-				
+
+		for(int i=0; i<2; i++)
+			pos.add(mTasks.get(i).currentSize);
+
+		//swap task order to have the prevtask get focus in the end
+		MWTask taskTmp = mTasks.get(0);
+		mTasks.set(0, mTasks.get(1));
+		mTasks.set(1, taskTmp);
+					
 		switchTasksPositions(pos, false);
 	}
 
@@ -224,4 +230,3 @@ class MWManager
         catch (Exception e) {}
     }
 }
-
