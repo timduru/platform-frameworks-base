@@ -90,6 +90,7 @@
                 android:scaleType="centerInside"
                 systemui:keyConfigUri="kk_ui_switch_toprevious_task_target_uri"
                 systemui:keyClickAction="switch_toprevious_task"
+                systemui:longPressAction="splitview_swap"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/splitview_auto"
                 android:layout_width="128dp" android:paddingStart="25dp" android:paddingEnd="25dp"
@@ -275,6 +276,7 @@
                 android:scaleType="centerInside"
                 systemui:keyConfigUri="kk_ui_switch_toprevious_task_target_uri"
                 systemui:keyClickAction="switch_toprevious_task"
+                systemui:longPressAction="splitview_swap"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/splitview_auto"
                 android:layout_width="wrap_content" android:paddingStart="42dp" android:paddingEnd="42dp"
