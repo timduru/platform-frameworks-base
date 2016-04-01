@@ -83,7 +83,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
-                 //Log.d("KeyButtonView", "longpressed: mCustomLongpressEnabled=" +mCustomLongpressEnabled);
+                 Log.d("KeyButtonView", "longpressed: mCustomLongpressEnabled=" +mCustomLongpressEnabled);
                 if (isLongClickable() || mCustomLongpressEnabled) { mIsLongPressing = true; performLongClick(); }
                 else if (mCode != 0 && !mCustomLongpressEnabled) {
                      sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
@@ -164,7 +164,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
             performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             playSoundEffect(SoundEffectConstants.CLICK);
             performTask(mAction);
-            return false;
+            return true;
         }
 
         @Override
@@ -350,7 +350,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
       IActivityManager activityManager = ActivityManagerNative.getDefault();
       Log.v(TAG, "activityManager.isInLockTaskMode():" + activityManager.isInLockTaskMode());
       if(activityManager.isInLockTaskMode()) activityManager.stopLockTaskModeOnCurrent();
-      else if( mCustomLongpressEnabled && _customLongClick != null) _customLongClick.onLongClick(this);
+      else if( mCustomLongpressEnabled && _customLongClick != null) return _customLongClick.onLongClick(this);
     }
     catch (Exception e) {}
 
