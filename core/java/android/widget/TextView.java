@@ -7081,7 +7081,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (boring == null || boring == UNKNOWN_BORING) {
                 if (des < 0) {
-                    des = (int) Math.ceil(Layout.getDesiredWidth(mTransformed, mTextPaint));
+                    des = (int) Math.ceil(Layout.getDesiredWidth(mTransformed, 0,
+                            mTransformed.length(), mTextPaint, mTextDir));
                 }
                 width = des;
             } else {
@@ -7111,7 +7112,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (hintBoring == null || hintBoring == UNKNOWN_BORING) {
                     if (hintDes < 0) {
-                        hintDes = (int) Math.ceil(Layout.getDesiredWidth(mHint, mTextPaint));
+                        hintDes = (int) Math.ceil(Layout.getDesiredWidth(mHint, 0, mHint.length(),
+                                mTextPaint, mTextDir));
                     }
                     hintWidth = hintDes;
                 } else {
