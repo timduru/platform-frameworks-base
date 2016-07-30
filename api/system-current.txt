@@ -31083,10 +31083,13 @@ package android.service.wallpaper {
 
   public abstract class WallpaperService extends android.app.Service {
     ctor public WallpaperService();
+    method public java.util.ArrayList<android.net.Uri> getObservedUris();
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onChangeNotification(android.net.Uri);
     method public abstract android.service.wallpaper.WallpaperService.Engine onCreateEngine();
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.wallpaper.WallpaperService";
     field public static final java.lang.String SERVICE_META_DATA = "android.service.wallpaper";
+    field protected int mWallpaperMode;
   }
 
   public class WallpaperService.Engine {
