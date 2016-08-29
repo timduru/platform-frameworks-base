@@ -176,6 +176,7 @@ public abstract class WallpaperService extends Service implements CustomObserver
         final Rect mDispatchedOutsets = new Rect();
         final Rect mFinalSystemInsets = new Rect();
         final Rect mFinalStableInsets = new Rect();
+        final Rect mBackdropFrame = new Rect();
         final Configuration mConfiguration = new Configuration();
 
         final WindowManager.LayoutParams mLayout
@@ -279,7 +280,8 @@ public abstract class WallpaperService extends Service implements CustomObserver
             @Override
             public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                     Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                    Configuration newConfig) {
+                    Configuration newConfig, Rect backDropRect, boolean forceLayout,
+                    boolean alwaysConsumeNavBar) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0, outsets);
                 mCaller.sendMessage(msg);
@@ -686,8 +688,8 @@ public abstract class WallpaperService extends Service implements CustomObserver
                     final int relayoutResult = mSession.relayout(
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, mWinFrame, mOverscanInsets, mContentInsets,
-                            mVisibleInsets, mStableInsets, mOutsets, mConfiguration,
-                            mSurfaceHolder.mSurface);
+                            mVisibleInsets, mStableInsets, mOutsets, mBackdropFrame,
+                            mConfiguration, mSurfaceHolder.mSurface);
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
                             + ", frame=" + mWinFrame);
@@ -800,7 +802,7 @@ public abstract class WallpaperService extends Service implements CustomObserver
                             mFinalStableInsets.set(mDispatchedStableInsets);
                             WindowInsets insets = new WindowInsets(mFinalSystemInsets,
                                     null, mFinalStableInsets,
-                                    getResources().getConfiguration().isScreenRound());
+                                    getResources().getConfiguration().isScreenRound(), false);
                             if (DEBUG) {
                                 Log.v(TAG, "dispatching insets=" + insets);
                             }

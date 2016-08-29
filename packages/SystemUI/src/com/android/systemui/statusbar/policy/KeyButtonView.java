@@ -20,8 +20,11 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.ServiceManager;
@@ -79,16 +82,17 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     CustomObserver _observer;
     CustomLongClick _customLongClick;
     private boolean mGestureAborted;
+    private boolean mLongClicked;
     
-    Runnable mCheckLongPress = new Runnable() {
+    private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
                  Log.d("KeyButtonView", "longpressed: mCustomLongpressEnabled=" +mCustomLongpressEnabled);
-                if (isLongClickable() || mCustomLongpressEnabled) { mIsLongPressing = true; performLongClick(); }
+                if (isLongClickable() || mCustomLongpressEnabled) { mIsLongPressing = true; performLongClick();  mLongClicked = true;}
                 else if (mCode != 0 && !mCustomLongpressEnabled) {
                      sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                      sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
-
+                      mLongClicked = true;
                 }
             }
         }
@@ -187,6 +191,24 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         mCustomLongpressEnabled = _customLongClick.getAction() != null;
     }
     
+    public void setCode(int code) {
+        mCode = code;
+    }
+
+    public void loadAsync(String uri) {
+        new AsyncTask<String, Void, Drawable>() {
+            @Override
+            protected Drawable doInBackground(String... params) {
+                return Icon.createWithContentUri(params[0]).loadDrawable(mContext);
+            }
+
+            @Override
+            protected void onPostExecute(Drawable drawable) {
+                setImageDrawable(drawable);
+            }
+        }.execute(uri);
+    }
+
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -246,6 +268,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mDownTime = SystemClock.uptimeMillis();
+                mLongClicked = false;
                 setPressed(true);
                 if (mCode != 0) {
                     sendEvent(KeyEvent.ACTION_DOWN, 0, mDownTime);
@@ -275,7 +298,7 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                final boolean doIt = isPressed();
+                final boolean doIt = isPressed() && !mLongClicked;
                 setPressed(false);
                 if (mCode != 0) {
                     if (doIt & !mIsLongPressing) {

@@ -28,10 +28,9 @@
         android:orientation="horizontal"/>
 
     <include layout="@layout/signal_cluster_view"
-        android:id="@+id/signal_cluster"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="2.5dp"/>
+        android:layout_marginStart="@dimen/signal_cluster_margin_start"/>
 
         <!-- battery must be padded below to match assets -->
     <com.android.systemui.BatteryMeterView android:id="@+id/dock_battery"

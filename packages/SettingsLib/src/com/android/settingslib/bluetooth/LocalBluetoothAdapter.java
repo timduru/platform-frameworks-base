@@ -162,6 +162,10 @@ public final class LocalBluetoothAdapter {
                 if (a2dp != null && a2dp.isA2dpPlaying()) {
                     return;
                 }
+                A2dpSinkProfile a2dpSink = mProfileManager.getA2dpSinkProfile();
+                if ((a2dpSink != null) && (a2dpSink.isA2dpPlaying())){
+                    return;
+                }
             }
 
             if (mAdapter.startDiscovery()) {
@@ -204,7 +208,7 @@ public final class LocalBluetoothAdapter {
         return false;
     }
 
-    public void setBluetoothEnabled(boolean enabled) {
+    public boolean setBluetoothEnabled(boolean enabled) {
         boolean success = enabled
                 ? mAdapter.enable()
                 : mAdapter.disable();
@@ -221,6 +225,7 @@ public final class LocalBluetoothAdapter {
 
             syncBluetoothState();
         }
+        return success;
     }
 
     public BluetoothDevice getRemoteDevice(String address) {

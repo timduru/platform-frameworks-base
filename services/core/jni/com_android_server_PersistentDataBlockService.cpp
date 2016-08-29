@@ -84,7 +84,11 @@ namespace android {
         if (fd < 0)
             return 0;
 
-        return get_block_device_size(fd);
+        const uint64_t size = get_block_device_size(fd);
+
+        close(fd);
+
+        return size;
     }
 
     static int com_android_server_PersistentDataBlockService_wipe(JNIEnv *env, jclass, jstring jpath) {
@@ -94,10 +98,14 @@ namespace android {
         if (fd < 0)
             return 0;
 
-        return wipe_block_device(fd);
+        const int ret = wipe_block_device(fd);
+
+        close(fd);
+
+        return ret;
     }
 
-    static JNINativeMethod sMethods[] = {
+    static const JNINativeMethod sMethods[] = {
          /* name, signature, funcPtr */
         {"nativeGetBlockDeviceSize", "(Ljava/lang/String;)J", (void*)com_android_server_PersistentDataBlockService_getBlockDeviceSize},
         {"nativeWipe", "(Ljava/lang/String;)I", (void*)com_android_server_PersistentDataBlockService_wipe},

@@ -75,6 +75,7 @@ import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.os.BatteryManager.EXTRA_HEALTH;
 import static android.os.BatteryManager.EXTRA_LEVEL;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
+import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
 
@@ -155,6 +156,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     private static final int FINGERPRINT_STATE_CANCELLING_RESTARTING = 3;
 
+    private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
+
     private static KeyguardUpdateMonitor sInstance;
 
     private final Context mContext;
@@ -185,7 +188,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     /** Tracks whether strong authentication hasn't been used since quite some time per user. */
     private ArraySet<Integer> mStrongAuthNotTimedOut = new ArraySet<>();
-    private final StrongAuthTracker mStrongAuthTracker = new StrongAuthTracker();
+    private final StrongAuthTracker mStrongAuthTracker;
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
@@ -603,6 +606,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
+        @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (DEBUG) Log.d(TAG, "received broadcast " + action);
@@ -616,10 +620,25 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
                 final int level = intent.getIntExtra(EXTRA_LEVEL, 0);
                 final int health = intent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
-                final int maxChargingCurrent = intent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
+
+                final int maxChargingMicroAmp = intent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
+                int maxChargingMicroVolt = intent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
+                final int maxChargingMicroWatt;
+
+                if (maxChargingMicroVolt <= 0) {
+                    maxChargingMicroVolt = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
+                }
+                if (maxChargingMicroAmp > 0) {
+                    // Calculating muW = muA * muV / (10^6 mu^2 / mu); splitting up the divisor
+                    // to maintain precision equally on both factors.
+                    maxChargingMicroWatt = (maxChargingMicroAmp / 1000)
+                            * (maxChargingMicroVolt / 1000);
+                } else {
+                    maxChargingMicroWatt = -1;
+                }
                 final Message msg = mHandler.obtainMessage(
                         MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health,
-                        maxChargingCurrent));
+                                maxChargingMicroWatt));
                 mHandler.sendMessage(msg);
             } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
                 SimData args = SimData.fromIntent(intent);
@@ -656,6 +675,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private final BroadcastReceiver mBroadcastAllReceiver = new BroadcastReceiver() {
 
+        @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED.equals(action)) {
@@ -788,6 +808,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             return new SimData(state, slotId, subId);
         }
 
+        @Override
         public String toString() {
             return "SimData{state=" + simState + ",slotId=" + slotId + ",subId=" + subId + "}";
         }
@@ -803,13 +824,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         public final int level;
         public final int plugged;
         public final int health;
-        public final int maxChargingCurrent;
-        public BatteryStatus(int status, int level, int plugged, int health, int maxChargingCurrent) {
+        public final int maxChargingWattage;
+        public BatteryStatus(int status, int level, int plugged, int health,
+                int maxChargingWattage) {
             this.status = status;
             this.level = level;
             this.plugged = plugged;
             this.health = health;
-            this.maxChargingCurrent = maxChargingCurrent;
+            this.maxChargingWattage = maxChargingWattage;
         }
 
         /**
@@ -841,14 +863,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         public final int getChargingSpeed(int slowThreshold, int fastThreshold) {
-            return maxChargingCurrent <= 0 ? CHARGING_UNKNOWN :
-                    maxChargingCurrent < slowThreshold ? CHARGING_SLOWLY :
-                    maxChargingCurrent > fastThreshold ? CHARGING_FAST :
+            return maxChargingWattage <= 0 ? CHARGING_UNKNOWN :
+                    maxChargingWattage < slowThreshold ? CHARGING_SLOWLY :
+                    maxChargingWattage > fastThreshold ? CHARGING_FAST :
                     CHARGING_REGULAR;
         }
     }
 
     public class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+        public StrongAuthTracker(Context context) {
+            super(context);
+        }
 
         public boolean isUnlockingWithFingerprintAllowed() {
             int userId = getCurrentUser();
@@ -959,6 +984,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mSubscriptionManager = SubscriptionManager.from(context);
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
+        mStrongAuthTracker = new StrongAuthTracker(context);
 
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
@@ -1419,7 +1445,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         // change in charging current while plugged in
-        if (nowPluggedIn && current.maxChargingCurrent != old.maxChargingCurrent) {
+        if (nowPluggedIn && current.maxChargingWattage != old.maxChargingWattage) {
             return true;
         }
 
@@ -1530,12 +1556,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mFailedAttempts.delete(sCurrentUser);
     }
 
-    public int getFailedUnlockAttempts() {
-        return mFailedAttempts.get(sCurrentUser, 0);
+    public int getFailedUnlockAttempts(int userId) {
+        return mFailedAttempts.get(userId, 0);
     }
 
-    public void reportFailedStrongAuthUnlockAttempt() {
-        mFailedAttempts.put(sCurrentUser, getFailedUnlockAttempts() + 1);
+    public void reportFailedStrongAuthUnlockAttempt(int userId) {
+        mFailedAttempts.put(userId, getFailedUnlockAttempts(userId) + 1);
     }
 
     public void clearFingerprintRecognized() {
@@ -1692,6 +1718,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         pw.println("  Service states:");
         for (int subId : mServiceStates.keySet()) {
             pw.println("    " + subId + "=" + mServiceStates.get(subId));
+        }
+        if (mFpm != null && mFpm.isHardwareDetected()) {
+            final int userId = ActivityManager.getCurrentUser();
+            final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
+            pw.println("  Fingerprint state (user=" + userId + ")");
+            pw.println("    allowed=" + isUnlockingWithFingerprintAllowed());
+            pw.println("    auth'd=" + mUserFingerprintAuthenticated.get(userId));
+            pw.println("    authSinceBoot="
+                    + getStrongAuthTracker().hasUserAuthenticatedSinceBoot());
+            pw.println("    disabled(DPM)=" + isFingerprintDisabled(userId));
+            pw.println("    possible=" + isUnlockWithFingerprintPossible(userId));
+            pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
+            pw.println("    timedout=" + hasFingerprintUnlockTimedOut(userId));
+            pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
         }
     }
 }

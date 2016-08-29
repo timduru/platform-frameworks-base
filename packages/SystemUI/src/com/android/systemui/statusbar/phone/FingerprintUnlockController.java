@@ -173,7 +173,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             if (DEBUG_FP_WAKELOCK) {
                 Log.i(TAG, "fp wakelock: Authenticated, waking up...");
             }
-            mPowerManager.wakeUp(SystemClock.uptimeMillis());
+            mPowerManager.wakeUp(SystemClock.uptimeMillis(), "android.policy:FINGERPRINT");
         }
         releaseFingerprintWakeLock();
         switch (mMode) {
@@ -190,7 +190,8 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                         FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR);
                 break;
             case MODE_WAKE_AND_UNLOCK_PULSING:
-                mPhoneStatusBar.updateMediaMetaData(false /* metaDataChanged */);
+                mPhoneStatusBar.updateMediaMetaData(false /* metaDataChanged */, 
+                        true /* allowEnterAnimation */);
                 // Fall through.
             case MODE_WAKE_AND_UNLOCK:
                 mStatusBarWindowManager.setStatusBarFocusable(false);

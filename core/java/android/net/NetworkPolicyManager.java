@@ -28,10 +28,10 @@ import android.content.pm.Signature;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.format.Time;
+import android.util.DebugUtils;
 
 import com.google.android.collect.Sets;
 
-import java.io.PrintWriter;
 import java.util.HashSet;
 
 /**
@@ -49,14 +49,39 @@ public class NetworkPolicyManager {
     /** Allow network use (metered or not) in the background in battery save mode. */
     public static final int POLICY_ALLOW_BACKGROUND_BATTERY_SAVE = 0x2;
 
-    /* RULE_* are not masks and they must be exclusive */
-    public static final int RULE_UNKNOWN = -1;
-    /** All network traffic should be allowed. */
-    public static final int RULE_ALLOW_ALL = 0;
+    /*
+     * Rules defining whether an uid has access to a network given its type (metered / non-metered).
+     *
+     * These rules are bits and can be used in bitmask operations; in particular:
+     * - rule & RULE_MASK_METERED: returns the metered-networks status.
+     * - rule & RULE_MASK_ALL: returns the all-networks status.
+     *
+     * The RULE_xxx_ALL rules applies to all networks (metered or non-metered), but on
+     * metered networks, the RULE_xxx_METERED rules should be checked first. For example,
+     * if the device is on Battery Saver Mode and Data Saver Mode simulatenously, and a uid
+     * is whitelisted for the former but not the latter, its status would be
+     * RULE_REJECT_METERED | RULE_ALLOW_ALL, meaning it could have access to non-metered
+     * networks but not to metered networks.
+     *
+     * See network-policy-restrictions.md for more info.
+     */
+    /** No specific rule was set */
+    public static final int RULE_NONE = 0;
+    /** Allow traffic on metered networks. */
+    public static final int RULE_ALLOW_METERED = 1 << 0;
+    /** Temporarily allow traffic on metered networks because app is on foreground. */
+    public static final int RULE_TEMPORARY_ALLOW_METERED = 1 << 1;
     /** Reject traffic on metered networks. */
-    public static final int RULE_REJECT_METERED = 1;
+    public static final int RULE_REJECT_METERED = 1 << 2;
+    /** Network traffic should be allowed on all networks (metered or non-metered), although
+     * metered-network restrictions could still apply. */
+    public static final int RULE_ALLOW_ALL = 1 << 5;
     /** Reject traffic on all networks. */
-    public static final int RULE_REJECT_ALL = 2;
+    public static final int RULE_REJECT_ALL = 1 << 6;
+    /** Mask used to get the {@code RULE_xxx_METERED} rules */
+    public static final int MASK_METERED_NETWORKS = 0b00001111;
+    /** Mask used to get the {@code RULE_xxx_ALL} rules */
+    public static final int MASK_ALL_NETWORKS     = 0b11110000;
 
     public static final int FIREWALL_RULE_DEFAULT = 0;
     public static final int FIREWALL_RULE_ALLOW = 1;
@@ -68,10 +93,12 @@ public class NetworkPolicyManager {
     public static final int FIREWALL_CHAIN_NONE = 0;
     public static final int FIREWALL_CHAIN_DOZABLE = 1;
     public static final int FIREWALL_CHAIN_STANDBY = 2;
+    public static final int FIREWALL_CHAIN_POWERSAVE = 3;
 
     public static final String FIREWALL_CHAIN_NAME_NONE = "none";
     public static final String FIREWALL_CHAIN_NAME_DOZABLE = "dozable";
     public static final String FIREWALL_CHAIN_NAME_STANDBY = "standby";
+    public static final String FIREWALL_CHAIN_NAME_POWERSAVE = "powersave";
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
@@ -106,6 +133,7 @@ public class NetworkPolicyManager {
         try {
             mService.setUidPolicy(uid, policy);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -118,6 +146,7 @@ public class NetworkPolicyManager {
         try {
             mService.addUidPolicy(uid, policy);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -130,6 +159,7 @@ public class NetworkPolicyManager {
         try {
             mService.removeUidPolicy(uid, policy);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -137,7 +167,7 @@ public class NetworkPolicyManager {
         try {
             return mService.getUidPolicy(uid);
         } catch (RemoteException e) {
-            return POLICY_NONE;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -145,7 +175,7 @@ public class NetworkPolicyManager {
         try {
             return mService.getUidsWithPolicy(policy);
         } catch (RemoteException e) {
-            return new int[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -153,6 +183,7 @@ public class NetworkPolicyManager {
         try {
             mService.registerListener(listener);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -160,6 +191,7 @@ public class NetworkPolicyManager {
         try {
             mService.unregisterListener(listener);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -167,6 +199,7 @@ public class NetworkPolicyManager {
         try {
             mService.setNetworkPolicies(policies);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -174,7 +207,7 @@ public class NetworkPolicyManager {
         try {
             return mService.getNetworkPolicies(mContext.getOpPackageName());
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -182,6 +215,7 @@ public class NetworkPolicyManager {
         try {
             mService.setRestrictBackground(restrictBackground);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -189,7 +223,7 @@ public class NetworkPolicyManager {
         try {
             return mService.getRestrictBackground();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -202,6 +236,7 @@ public class NetworkPolicyManager {
         try {
             mService.factoryReset(subscriber);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -326,5 +361,19 @@ public class NetworkPolicyManager {
 
         // nothing found above; we can apply policy to UID
         return true;
+    }
+
+    /*
+     * @hide
+     */
+    public static String uidRulesToString(int uidRules) {
+        final StringBuilder string = new StringBuilder().append(uidRules).append(" (");
+        if (uidRules == RULE_NONE) {
+            string.append("NONE");
+        } else {
+            string.append(DebugUtils.flagsToString(NetworkPolicyManager.class, "RULE_", uidRules));
+        }
+        string.append(")");
+        return string.toString();
     }
 }
