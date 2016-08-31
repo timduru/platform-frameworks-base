@@ -1624,7 +1624,7 @@ public class InputManagerService extends IInputManager.Stub
     public void updateTouchpadStatusFromSettings()
     {
         int status = getTouchpadStatusSetting(1);
-Log.d("TTT", "updateTouchpadStatusFromSettings:" + status);
+Slog.d("TTT", "updateTouchpadStatusFromSettings:" + status);
         nativeSetTouchpadStatus(mPtr, status);
     }
 
@@ -1634,7 +1634,7 @@ Log.d("TTT", "updateTouchpadStatusFromSettings:" + status);
         try { val = Settings.System.getInt(mContext.getContentResolver(), KKC.S.DEVICE_SETTINGS_RIGHTCLICK_MODE);
         } catch (SettingNotFoundException snfe) { }
 
-Log.d("TTT", "updateRightClickModeFromSettings:" + val);
+Slog.d("TTT", "updateRightClickModeFromSettings:" + val);
         nativeSetRightClickMode(mPtr, val);
     }
 

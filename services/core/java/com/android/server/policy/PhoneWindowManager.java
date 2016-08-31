@@ -5837,7 +5837,7 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
                             if (keyCode == KeyEvent.KEYCODE_WIRELESS)       new KatUtils(mContext).wifiToggle();
                             else if (keyCode == KeyEvent.KEYCODE_BLUETOOTH) new KatUtils(mContext).bluetoothToggle();
                             else if (keyCode == KeyEvent.KEYCODE_TOUCHPAD)  new KatUtils(mContext).touchpadToggle();
-                            else if (keyCode == KeyEvent.KEYCODE_CAPTURE)   takeScreenshot();
+                            else if (keyCode == KeyEvent.KEYCODE_CAPTURE)   takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN);
                             else if (keyCode == KeyEvent.KEYCODE_SETTINGS)  new KatUtils(mContext).launchSettings();
                           }
                        });
@@ -7879,7 +7879,7 @@ public class PhoneWindowManager implements WindowManagerPolicy, CustomObserver.C
         try {
             ActivityManagerNative.getDefault().killApplicationProcess(
                     packageName, AppGlobals.getPackageManager().getPackageUid(
-                    packageName, UserHandle.myUserId()));
+                    packageName, 0, UserHandle.myUserId()));
         } catch (RemoteException e) { }
     }
 

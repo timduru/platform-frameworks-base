@@ -580,8 +580,4 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public ViewRootImpl getViewRootImpl() {
         return mPhoneStatusBar.getStatusBarView().getViewRootImpl();
     }
-
-    public boolean isKeyguardShowingMedia() {
-        return mPhoneStatusBar.isKeyguardShowingMedia();
-    }
 }

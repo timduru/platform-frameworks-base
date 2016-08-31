@@ -210,7 +210,6 @@
   <java-symbol type="id" name="timePickerLayout" />
   <java-symbol type="id" name="profile_badge" />
   <java-symbol type="id" name="transitionPosition" />
-  <java-symbol type="id" name="filtered_item_container" />
   <java-symbol type="id" name="selection_start_handle" />
   <java-symbol type="id" name="selection_end_handle" />
   <java-symbol type="id" name="insertion_handle" />

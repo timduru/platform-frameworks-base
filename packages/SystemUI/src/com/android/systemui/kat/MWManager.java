@@ -175,7 +175,7 @@ class MWManager
 		return mPOS.isFullScreen(mTasks.get(0).currentSize);
 	}		
 
-	public void switchTopTaskAndChilds()
+/*	public void switchTopTaskAndChilds()
 	{
 		if(mTasks.size() < 1) return;
 		
@@ -185,6 +185,7 @@ class MWManager
 
 		switchTasksPositions(mPOS.getRects(), !isTopFull);  // TODO f(numTasks)
 	}
+
 
 	public void swap2LastTasks()
 	{
@@ -229,4 +230,5 @@ class MWManager
         try { mIam.resizeTask(taskId, bounds); }
         catch (Exception e) {}
     }
+*/
 }

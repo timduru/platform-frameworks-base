@@ -372,8 +372,8 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     {
       IActivityManager activityManager = ActivityManagerNative.getDefault();
       Log.v(TAG, "activityManager.isInLockTaskMode():" + activityManager.isInLockTaskMode());
-      if(activityManager.isInLockTaskMode()) activityManager.stopLockTaskModeOnCurrent();
-      else if( mCustomLongpressEnabled && _customLongClick != null) return _customLongClick.onLongClick(this);
+/*TOCHECK      if(activityManager.isInLockTaskMode()) activityManager.stopLockTaskModeOnCurrent();
+      else */if( mCustomLongpressEnabled && _customLongClick != null) return _customLongClick.onLongClick(this);
     }
     catch (Exception e) {}
 

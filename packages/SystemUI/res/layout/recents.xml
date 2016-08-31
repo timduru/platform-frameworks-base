@@ -33,18 +33,6 @@
         android:layout_height="128dp"
         android:layout_gravity="center_horizontal|top" />
 
-    <!-- Clear Recents View -->
-    <ImageView
-        android:id="@+id/clear_recents"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="bottom|left"
-        android:src="@drawable/ic_dismiss_all"
-        android:scaleType="fitCenter"
-        android:layout_marginLeft="16dp"
-        android:layout_marginBottom="48dp"
-        android:background="@drawable/recents_button_bg" />
-
     <!-- Nav Bar Scrim View -->
     <ImageView
         android:id="@+id/nav_bar_scrim"

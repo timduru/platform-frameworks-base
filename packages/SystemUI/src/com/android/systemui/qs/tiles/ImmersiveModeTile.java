@@ -25,6 +25,8 @@ import org.meerkats.katkiss.CustomObserver;
 import android.net.Uri;
 import android.provider.Settings;
 import com.android.internal.logging.MetricsLogger;
+import android.content.Intent;
+
 
 
 import com.android.systemui.R;
@@ -41,7 +43,7 @@ public class ImmersiveModeTile extends QSTile<QSTile.BooleanState> implements Cu
     }
 
     @Override
-    protected BooleanState newTileState() { return new BooleanState(); }
+    public BooleanState newTileState() { return new BooleanState(); }
 
     @Override
     public void handleClick() { KatUtils.expandedDesktopSwitch(mContext);}
@@ -55,7 +57,6 @@ public class ImmersiveModeTile extends QSTile<QSTile.BooleanState> implements Cu
     {
         final boolean mode = KatUtils.isExpanded(mContext);
         state.value = mode;
-        state.visible = true;
         state.label = mContext.getString(R.string.quick_settings_immersive_mode_label);
         final int iconId =  mode ? R.drawable.ic_qs_immersive_on : R.drawable.ic_qs_immersive_off;
 	state.icon = ResourceIcon.get(iconId);
@@ -82,6 +83,17 @@ public class ImmersiveModeTile extends QSTile<QSTile.BooleanState> implements Cu
         public int getMetricsCategory() {
             return MetricsLogger.QS_IMMERSIVE;
         }
+
+    @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.quick_settings_immersive_mode_label);
+    }
+
+ @Override
+    public Intent getLongClickIntent() {
+        return null;
+    }
+
 
 
 }

@@ -16,7 +16,7 @@ public class MWReceiver extends BroadcastReceiver {
 	
     @Override
     public void onReceive(Context context, Intent intent) {
-        Recents recents = Recents.getInstanceAndStartIfNeeded(context);
+/*Recents recents = Recents.getInstanceAndStartIfNeeded(context);
 
 
         switch (intent.getAction())  
@@ -38,5 +38,6 @@ public class MWReceiver extends BroadcastReceiver {
                 break;
             }
 		}
+*/
     }
 }

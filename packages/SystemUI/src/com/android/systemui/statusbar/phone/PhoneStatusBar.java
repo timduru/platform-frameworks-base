@@ -26,7 +26,6 @@ import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
-import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -41,7 +40,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
@@ -199,12 +197,9 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 
-import org.meerkats.katkiss.KKC;
-
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener,
         HeadsUpManager.OnHeadsUpChangedListener {
-    static final int[] LAYOUT_NAV_BAR = {com.android.systemui.R.layout.navigation_bar_katkiss, com.android.systemui.R.layout.navigation_bar, com.android.systemui.R.layout.navigation_bar_left};
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
@@ -358,7 +353,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mKeyguardGoingAway;
     // Keyguard is actually fading away now.
     private boolean mKeyguardFadingAway;
-    private boolean mKeyguardShowingMedia;
     private long mKeyguardFadingAwayDelay;
     private long mKeyguardFadingAwayDuration;
 
@@ -924,10 +918,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardStatusBar.setUserSwitcherController(mUserSwitcherController);
         mUserInfoController.reloadUserInfo();
 
-        mHeader.setBatteryController(mBatteryController);
-        BaseStatusBar.updateBatteryView(mStatusBarView, R.id.battery, R.id.battery_level, mBatteryController);
-        BaseStatusBar.updateBatteryView(mStatusBarView, R.id.dock_battery, R.id.dock_battery_level, mBatteryController);
-        
         ((BatteryMeterView) mStatusBarView.findViewById(R.id.battery)).setBatteryController(
                 mBatteryController);
         mKeyguardStatusBar.setBatteryController(mBatteryController);
@@ -944,7 +934,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SET_WALLPAPER);
         context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
 
         IntentFilter demoFilter = new IntentFilter();
@@ -1092,11 +1081,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     protected void inflateNavigationBarView(Context context) {
-                int navBarLayout =  LAYOUT_NAV_BAR[0];
-                int navBarMode = Settings.System.getInt(mResolver, KKC.S.SYSTEMUI_UI_MODE, KKC.S.SYSTEMUI_UI_MODE_NAVBAR_BALANCED);
-                if(navBarMode < LAYOUT_NAV_BAR.length) navBarLayout = LAYOUT_NAV_BAR[navBarMode];
-
-                mNavigationBarView = (NavigationBarView) View.inflate(context, navBarLayout, null);
+        mNavigationBarView = (NavigationBarView) View.inflate(
+                context, R.layout.navigation_bar, null);
     }
 
     protected void initSignalCluster(View containerView) {
@@ -1352,7 +1338,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         homeButton.setOnLongClickListener(mLongPressHomeListener);
 
         mAssistManager.onConfigurationChanged();
-        refreshNewNavButtonVisibility();
     }
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
@@ -2070,23 +2055,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
-    private Bitmap getWallpaperBitmap() {
-         if(Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_WALLPAPER_MODE, KKC.S.WALLPAPER_MODE_DISABLE_SYSTEM) != KKC.S.WALLPAPER_MODE_DISABLE_SYSTEM) return null;
-  
-         WallpaperManager wallpaperManager = WallpaperManager.getInstance(mContext);
-         if(wallpaperManager == null) return null;
- 
-         Bitmap bmp = null;
-         if (wallpaperManager.getWallpaperInfo() == null) {
-             Drawable wallpaper = wallpaperManager.getDrawable();
-             if (wallpaper instanceof BitmapDrawable)
-                 bmp = ((BitmapDrawable) wallpaper).getBitmap();
-         }
-         
-         return bmp;
-	}
-    
-    
     /**
      * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
      */
@@ -2131,9 +2099,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         && mStatusBarKeyguardViewManager.isShowing();
             }
         }
-
-        // apply wallpaper image if rendering internally
-        if (backdropBitmap == null) backdropBitmap = getWallpaperBitmap();
 
         boolean hideBecauseOccluded = mStatusBarKeyguardViewManager != null
                 && mStatusBarKeyguardViewManager.isOccluded();
@@ -2186,7 +2151,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mBackdropBack.setBackgroundColor(0xFFFFFFFF);
                     mBackdropBack.setImageDrawable(new ColorDrawable(c));
                 } else {
-                    mBackdropBack.setImageBitmap(backdropBitmap);
+                    mBackdropBack.setImageDrawable(artworkDrawable);
                 }
                 if (mScrimSrcModeEnabled) {
                     mBackdropBack.getDrawable().mutate().setXfermode(mSrcXferMode);
@@ -2336,7 +2301,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         | StatusBarManager.DISABLE_SEARCH)) != 0) {
             // the nav bar will take care of these
             if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state1);
-            setExtraNavButtonsVisibility((state1 & StatusBarManager.DISABLE_RECENT) == 0);
 
             if ((state1 & StatusBarManager.DISABLE_RECENT) != 0) {
                 // close recents if it's visible
@@ -2393,10 +2357,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public boolean isGoingToNotificationShade() {
         return mLeaveOpenOnKeyguardHide;
-    }
-
-    public boolean isKeyguardShowingMedia() {
-        return mKeyguardShowingMedia;
     }
 
     public boolean isQsExpanded() {
@@ -3435,8 +3395,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (DEBUG_MEDIA_FAKE_ARTWORK) {
                     updateMediaMetaData(true, true);
                 }
-            } else if (Intent.ACTION_SET_WALLPAPER.equals(action)) {
-                updateMediaMetaData(true);
             }
         }
     };

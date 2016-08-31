@@ -30,7 +30,6 @@ import android.widget.TextView;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
@@ -42,7 +41,8 @@ import java.text.NumberFormat;
 /**
  * The header group on Keyguard.
  */
-public class KeyguardStatusBarView extends RelativeLayout{
+public class KeyguardStatusBarView extends RelativeLayout
+        implements BatteryController.BatteryStateChangeCallback {
 
     private boolean mBatteryCharging;
     private boolean mKeyguardUserSwitcherShowing;
@@ -149,7 +149,7 @@ public class KeyguardStatusBarView extends RelativeLayout{
         } else if (mMultiUserSwitch.getParent() == this && mKeyguardUserSwitcherShowing) {
             removeView(mMultiUserSwitch);
         }
-        //mBatteryLevel.setVisibility(mBatteryCharging ? View.VISIBLE : View.GONE);
+        mBatteryLevel.setVisibility(mBatteryCharging ? View.VISIBLE : View.GONE);
     }
 
     private void updateSystemIconsLayoutParams() {
@@ -162,7 +162,17 @@ public class KeyguardStatusBarView extends RelativeLayout{
         }
     }
 
-
+    public void setListening(boolean listening) {
+        if (listening == mBatteryListening) {
+            return;
+        }
+        mBatteryListening = listening;
+        if (mBatteryListening) {
+            mBatteryController.addStateChangedCallback(this);
+        } else {
+            mBatteryController.removeStateChangedCallback(this);
+        }
+    }
 
     private void updateUserSwitcher() {
         boolean keyguardSwitcherAvailable = mKeyguardUserSwitcher != null;
@@ -173,16 +183,7 @@ public class KeyguardStatusBarView extends RelativeLayout{
 
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
-        BaseStatusBar.updateBatteryView(this, R.id.battery, R.id.battery_level, mBatteryController);
-        BaseStatusBar.updateBatteryView(this, R.id.dock_battery, R.id.dock_battery_level, mBatteryController);
-         BatteryMeterView statusBarBatteryView = ((BatteryMeterView) findViewById(R.id.battery));
-        TextView statusBarBatteryLevel = ((TextView) findViewById(R.id.battery_level));
-
-        if(statusBarBatteryView != null)
-        {
-        	statusBarBatteryView.setBatteryController(mBatteryController);
-        	statusBarBatteryView.addLabelView(statusBarBatteryLevel);
-        }
+        ((BatteryMeterView) findViewById(R.id.battery)).setBatteryController(batteryController);
     }
 
     public void setUserSwitcherController(UserSwitcherController controller) {

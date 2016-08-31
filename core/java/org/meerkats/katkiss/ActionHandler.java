@@ -117,8 +117,8 @@ public class ActionHandler {
         	screenOff();
 /*        else if (action.equals(KKC.A.SYSTEMUI_TASK_ASSIST))
         	startAssistActivity(); */
-        else if(action.equals(KKC.A.SYSTEMUI_RECENT))
-        	WMController.showRecentAppsSystemUI();
+//        else if(action.equals(KKC.A.SYSTEMUI_RECENT))
+//        	WMController.showRecentAppsSystemUI();
         else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
         	new WMController(mContext).switchToPreviousTask();
         else if(action.startsWith(KKC.A.SPLITVIEW_AUTO) || action.equals(KKC.A.SPLITVIEW_SWAP))
@@ -172,8 +172,8 @@ public class ActionHandler {
         	KatUtils.sendIntentToWindowManager(mContext, KKC.I.GLOBAL_ACTIONS, action, false);
         else if(action.equals(KKC.A.SHOW_NOTIFICATIONS_PANEL))
         	WMController.showNotificationsPanel();
-        else if(action.equals(KKC.A.SHOW_SETTINGS_PANEL))
-        	WMController.showSettingsPanel();
+//        else if(action.equals(KKC.A.SHOW_SETTINGS_PANEL))
+//       	WMController.showSettingsPanel();
 //        else if (action.equals(KKC.A.SYSTEMUI_TASK_POWER_MENU))
 //        	showPowerMenu();
         else if (action.startsWith(KKC.A.SENDKEY_BASE)) {

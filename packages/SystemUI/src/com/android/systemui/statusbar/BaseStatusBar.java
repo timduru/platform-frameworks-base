@@ -121,7 +121,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import android.content.ContentResolver;
 import org.meerkats.katkiss.KKC;
 import android.net.Uri;
@@ -131,7 +130,7 @@ import org.meerkats.katkiss.CustomObserver;
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
-        ExpandableNotificationRow.OnExpandClickListener, CustomObserver.ChangeNotification
+        ExpandableNotificationRow.OnExpandClickListener, CustomObserver.ChangeNotification, 
         OnGutsClosedListener {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
@@ -2679,7 +2678,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         TextView batteryLevel = ((TextView) v.findViewById(batteryLevelViewID));
         if(batteryLevel == null) return;        
-        batteryView.addLabelView(batteryLevel);
+        //TOFIXbatteryView.addLabelView(batteryLevel);
 		
 	}
     public boolean isKeyguardSecure() {

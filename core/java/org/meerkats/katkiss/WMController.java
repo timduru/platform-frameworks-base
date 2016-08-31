@@ -374,23 +374,25 @@ public class WMController
 
 */
 // ================================================== static
-                public synchronized static void showRecentAppsSystemUI()
+/*                public synchronized static void showRecentAppsSystemUI()
                 {
                         try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).toggleRecentApps(); }
                         catch (Exception e) { }
                 }
 
+*/
                 public synchronized static void showNotificationsPanel()
                 {
                         try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).expandNotificationsPanel(); }
                         catch (Exception e) { }
                 }
-
+/*
                 public synchronized static void showSettingsPanel()
                 {
                         try { IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar")).expandSettingsPanel(); }
                         catch (Exception e) { }
                 }
+*/
 
                 public synchronized static void killApp(Context c, String packageName)
                 {

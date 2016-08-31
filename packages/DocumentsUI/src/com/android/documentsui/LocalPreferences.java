@@ -34,11 +34,6 @@ import java.lang.annotation.RetentionPolicy;
 
 public class LocalPreferences {
     private static final String KEY_FILE_SIZE = "fileSize";
-
-    public static boolean getDisplayAdvancedDevices(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean(KEY_ADVANCED_DEVICES, true);
-    }
     private static final String INCLUDE_DEVICE_ROOT = "includeDeviceRoot-";
     private static final String ROOT_VIEW_MODE_PREFIX = "rootViewMode-";
 
