@@ -271,6 +271,10 @@ public final class ShutdownThread extends Thread {
         // Path 3: Regular reboot / shutdown
         //   Condition: Otherwise
         //   UI: spinning circle only (no progress bar)
+        pd.setTitle(context.getText( (mReboot || mRebootSafeMode) ? com.android.internal.R.string.reboot : com.android.internal.R.string.power_off));
+        if(mReboot)
+            pd.setMessage(context.getText( (mReason != null && mReason.equals("recovery")) ? com.android.internal.R.string.reboot_recovery : com.android.internal.R.string.reboot));
+        else
         if (PowerManager.REBOOT_RECOVERY_UPDATE.equals(mReason)) {
             // We need the progress bar if uncrypt will be invoked during the
             // reboot, which might be time-consuming.
