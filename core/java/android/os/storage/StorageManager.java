@@ -1239,7 +1239,10 @@ public class StorageManager {
             return mMountService.mountAppFuse(name);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (Exception e) {
+            Log.e(TAG, "TTT mountAppFuse error: "+e.getMessage());
         }
+        return null;
     }
 
     /// Consts to match the password types in cryptfs.h

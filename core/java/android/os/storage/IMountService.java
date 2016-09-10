@@ -2150,6 +2150,7 @@ public interface IMountService extends IInterface {
                     data.enforceInterface(DESCRIPTOR);
                     String name = data.readString();
                     ParcelFileDescriptor fd = mountAppFuse(name);
+                    if(fd == null) return true;
                     reply.writeNoException();
                     reply.writeParcelable(fd, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
                     return true;
