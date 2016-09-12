@@ -35,87 +35,85 @@ key GRAVE {
 key 1 {
     label:                              '1'
     base:                               '1'
-    shift, capslock:                    '!'
+    shift:                              '!'
     ralt:                               '!'
 }
 
 key 2 {
     label:                              '2'
     base:                               '2'
-    shift, capslock:                    '@'
+    shift:                              '@'
     ralt:                               '@'
 }
 
 key 3 {
     label:                              '3'
     base:                               '3'
-    shift, capslock:                    '\u2116'
+    shift:                              '\u2116'
     ralt:                               '#'
 }
 
 key 4 {
     label:                              '4'
     base:                               '4'
-    shift, capslock:                    ';'
+    shift:                              ';'
     ralt:                               '$'
 }
 
 key 5 {
     label:                              '5'
     base:                               '5'
-    shift, capslock:                    '%'
+    shift:                              '%'
     ralt:                               '%'
 }
 
 key 6 {
     label:                              '6'
     base:                               '6'
-    shift, capslock:                    ':'
+    shift:                              ':'
     ralt:                               '^'
 }
 
 key 7 {
     label:                              '7'
     base:                               '7'
-    shift, capslock:                    '?'
+    shift:                              '?'
     ralt:                               '&'
 }
 
 key 8 {
     label:                              '8'
     base:                               '8'
-    shift, capslock:                    '*'
+    shift:                              '*'
     ralt:                               '*'
 }
 
 key 9 {
     label:                              '9'
     base:                               '9'
-    shift, capslock:                    '('
+    shift:                              '('
     ralt:                               '('
 }
 
 key 0 {
     label:                              '0'
     base:                               '0'
-    shift, capslock:                    ')'
+    shift:                              ')'
     ralt:                               ')'
 }
 
 key MINUS {
     label:                              '-'
     base:                               '-'
-    shift, capslock:                    '_'
-    ralt:                               '-'
-    ralt+shift:                         '_'
+    shift:                              '_'
+    ralt:                               '_'
 }
 
 key EQUALS {
     label:                              '='
     base:                               '='
-    shift, capslock:                    '+'
-    ralt:                               '='
-    ralt+shift:                         '+'
+    shift:                              '+'
+    ralt:                               '+'
 }
 
 ### ROW 2
