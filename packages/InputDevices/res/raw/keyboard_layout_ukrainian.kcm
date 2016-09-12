@@ -305,20 +305,20 @@ key APOSTROPHE {
 }
 
 key BACKSLASH {
-    label:                              '\\'
-    base:                               '\\'
-    shift, capslock:                    '/'
-    ralt:                               '|'
+    label:                              '\u0490'
+    base:                               '\u0491'
+    shift, capslock:                    '\u0490'
+    ralt:                               '\\'
+    ralt+shift, ralt+capslock:          '/'
 }
 
 ### ROW 4
 
 key PLUS {
-    label:                              '\u0490'
-    base:                               '\u0491'
-    shift, capslock:                    '\u0490'
-    ralt:                               '\\'
-    ralt+shift:                         '|'
+    label:                              '\\'
+    base:                               '\\'
+    shift, capslock:                    '/'
+    ralt:                               '|'
 }
 
 key Z {
