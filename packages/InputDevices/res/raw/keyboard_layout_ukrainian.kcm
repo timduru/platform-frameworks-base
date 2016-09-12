@@ -25,9 +25,9 @@ map key 86 PLUS
 ### ROW 1
 
 key GRAVE {
-    label:                              '\u0401'
-    base:                               '\u0451'
-    shift, capslock:                    '\u0401'
+    label:                              '\''
+    base:                               '\''
+    shift:                              '"'
     ralt:                               '`'
     ralt+shift:                         '~'
 }
@@ -42,7 +42,7 @@ key 1 {
 key 2 {
     label:                              '2'
     base:                               '2'
-    shift, capslock:                    '"'
+    shift, capslock:                    '@'
     ralt:                               '@'
 }
 
