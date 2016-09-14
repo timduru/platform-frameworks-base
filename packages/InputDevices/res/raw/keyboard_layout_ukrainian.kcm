@@ -396,7 +396,7 @@ key PERIOD {
 key SLASH {
     label:                              '.'
     base:                               '.'
-    shift, capslock:                    ','
+    shift:                              ','
     ralt:                               '/'
     ralt+shift:                         '?'
 }
