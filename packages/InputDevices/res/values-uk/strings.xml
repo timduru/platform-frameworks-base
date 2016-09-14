@@ -41,4 +41,13 @@
     <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"литовська"</string>
     <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"іспанська (латиниця)"</string>
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"латвійська"</string>
+    <string name="keyboard_layout_nl_BE">"данська (Бельгія)"</string>
+    <string name="keyboard_layout_en_CA">"англійська (Канада)"</string>
+    <string name="keyboard_layout_it_CH">"італійська (Швейцарія)"</string>
+    <string name="keyboard_layout_ko_KR">"корейська"</string>
+    <string name="keyboard_layout_pt_BR">"португальська (Бразилія)"</string>
+    <string name="keyboard_layout_es_LA">"іспанська (Лаос)"</string>
+    <string name="keyboard_layout_es_US">"іспанська (США)"</string>
+    <string name="keyboard_layout_th_TH">"тайська"</string>
+    <string name="keyboard_layout_pl_PL">"польська"</string>
 </resources>
