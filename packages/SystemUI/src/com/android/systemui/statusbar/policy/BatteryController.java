@@ -39,6 +39,8 @@ public interface BatteryController extends DemoMode {
 
     void addStateChangedCallback(BatteryStateChangeCallback cb);
     void removeStateChangedCallback(BatteryStateChangeCallback cb);
+    void addStateChangedCallback(BatteryStateChangeCallback cb, boolean dockMode);
+    void removeStateChangedCallback(BatteryStateChangeCallback cb, boolean dockMode);
 
     /**
      * A listener that will be notified whenever a change in battery level or power save mode

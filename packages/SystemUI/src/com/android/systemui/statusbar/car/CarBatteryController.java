@@ -109,6 +109,12 @@ public class CarBatteryController extends BroadcastReceiver implements BatteryCo
         mChangeCallbacks.remove(cb);
     }
 
+   @Override
+    public void addStateChangedCallback(BatteryController.BatteryStateChangeCallback cb, boolean dockMode) {}
+
+   @Override
+    public void removeStateChangedCallback(BatteryController.BatteryStateChangeCallback cb, boolean dockMode) { }
+
     public void addBatteryViewHandler(BatteryViewHandler batteryViewHandler) {
         mBatteryViewHandler = batteryViewHandler;
     }

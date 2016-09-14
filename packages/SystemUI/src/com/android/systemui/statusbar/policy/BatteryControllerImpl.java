@@ -31,18 +31,20 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import android.os.SystemProperties;
+
 /**
  * Default implementation of a {@link BatteryController}. This controller monitors for battery
  * level change events that are broadcasted by the system.
  */
-public class BatteryControllerImpl extends BroadcastReceiver implements BatteryController {
+public class BatteryControllerImpl extends BroadcastReceiver implements BatteryController, DockBatteryRefresh.DockStatusChangeCB {
     private static final String TAG = "BatteryController";
 
     public static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
 
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final ArrayList<BatteryController.BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<>();
+    private final ArrayList<BatteryController.BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<>(),  mDockChangeCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
     private final Handler mHandler;
     private final Context mContext;
@@ -54,6 +56,10 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     protected boolean mPowerSave;
     private boolean mTestmode = false;
 
+    private DockBatteryRefresh mRefreshDockThread;
+    private boolean hasDockBattery = SystemProperties.getInt("ro.nodockbattery", 0) != 1;
+
+
     public BatteryControllerImpl(Context context) {
         mContext = context;
         mHandler = new Handler();
@@ -61,11 +67,18 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
         registerReceiver();
         updatePowerSave();
+
+       mRefreshDockThread = new DockBatteryRefresh();
+       mRefreshDockThread.setCB(this);
+       if(hasDockBattery) mRefreshDockThread.start();
+       else mRefreshDockThread.postUpdate(true); // Force update once if no dock Battery to hide it (SL101..)
+
     }
 
     private void registerReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(Intent.ACTION_DOCK_EVENT);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
         filter.addAction(ACTION_LEVEL_TEST);
@@ -99,6 +112,20 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         mChangeCallbacks.remove(cb);
     }
 
+  @Override
+    public void addStateChangedCallback(BatteryController.BatteryStateChangeCallback cb, boolean dockMode) {
+	if(dockMode) {mDockChangeCallbacks.add(cb); }
+        else { mChangeCallbacks.add(cb); cb.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging); }
+        cb.onPowerSaveChanged(mPowerSave);
+    }
+
+    @Override
+    public void removeStateChangedCallback(BatteryController.BatteryStateChangeCallback cb, boolean dockMode) {
+	if(dockMode)  mDockChangeCallbacks.remove(cb);
+        else mChangeCallbacks.remove(cb);
+    }
+
+
     @Override
     public void onReceive(final Context context, Intent intent) {
         final String action = intent.getAction();
@@ -119,6 +146,8 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             updatePowerSave();
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)) {
             setPowerSave(intent.getBooleanExtra(PowerManager.EXTRA_POWER_SAVE_MODE, false));
+        } else if (action.equals(Intent.ACTION_DOCK_EVENT)) {
+           mRefreshDockThread.interrupt();
         } else if (action.equals(ACTION_LEVEL_TEST)) {
             mTestmode = true;
             mHandler.post(new Runnable() {
@@ -207,4 +236,16 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             fireBatteryLevelChanged();
         }
     }
+
+
+    @Override
+    public void onDockBatteryLevelChanged(int level, boolean present, boolean charging) {
+        final int N = mDockChangeCallbacks.size();
+        for (int i = 0; i < N; i++) {
+            mDockChangeCallbacks.get(i).onBatteryLevelChanged(level, charging, charging);
+        }
+    }
+   
+
+ 
 }

@@ -100,6 +100,7 @@ public class BatteryMeterDrawable extends Drawable implements
     private int mLevel = -1;
     private boolean mPluggedIn;
     private boolean mListening;
+    private boolean mDockMode=false;
 
     public BatteryMeterDrawable(Context context, Handler handler, int frameColor) {
         mContext = context;
@@ -184,13 +185,13 @@ public class BatteryMeterDrawable extends Drawable implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
         updateShowPercent();
-        if(mBatteryController != null) mBatteryController.addStateChangedCallback(this);
+        if(mBatteryController != null) mBatteryController.addStateChangedCallback(this, mDockMode);
     }
 
     public void stopListening() {
         mListening = false;
         mContext.getContentResolver().unregisterContentObserver(mSettingObserver);
-        mBatteryController.removeStateChangedCallback(this);
+        mBatteryController.removeStateChangedCallback(this, mDockMode);
     }
 
     public void disableShowPercent() {
@@ -207,6 +208,7 @@ public class BatteryMeterDrawable extends Drawable implements
         });
     }
 
+    public void setDockMode(boolean mode) { mDockMode = mode; };
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
         mPowerSaveEnabled = mBatteryController.isPowerSave();

@@ -33,6 +33,8 @@ public class BatteryMeterView extends ImageView implements
     private final BatteryMeterDrawable mDrawable;
     private final String mSlotBattery;
     private BatteryController mBatteryController;
+    private boolean mDockMode = false;
+
 
     public BatteryMeterView(Context context) {
         this(context, null, 0);
@@ -47,6 +49,9 @@ public class BatteryMeterView extends ImageView implements
 
         TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
                 defStyle, 0);
+
+        mDockMode = atts.getBoolean(R.styleable.BatteryMeterView_dockMode, false);
+
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
                 context.getColor(R.color.batterymeter_frame_color));
         mDrawable = new BatteryMeterDrawable(context, new Handler(), frameColor);
@@ -73,7 +78,7 @@ public class BatteryMeterView extends ImageView implements
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if(mBatteryController != null) mBatteryController.addStateChangedCallback(this);
+        if(mBatteryController != null) mBatteryController.addStateChangedCallback(this, mDockMode);
         mDrawable.startListening();
         TunerService.get(getContext()).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
     }
@@ -81,7 +86,7 @@ public class BatteryMeterView extends ImageView implements
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mBatteryController.removeStateChangedCallback(this);
+        mBatteryController.removeStateChangedCallback(this, mDockMode);
         mDrawable.stopListening();
         TunerService.get(getContext()).removeTunable(this);
     }
@@ -100,6 +105,7 @@ public class BatteryMeterView extends ImageView implements
 
     public void setBatteryController(BatteryController mBatteryController) {
         this.mBatteryController = mBatteryController;
+        mDrawable.setDockMode(mDockMode);
         mDrawable.setBatteryController(mBatteryController);
     }
 
