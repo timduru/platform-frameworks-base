@@ -48,7 +48,6 @@
             android:layout_marginStart="@dimen/header_battery_margin_keyguard"
             android:paddingEnd="@dimen/battery_level_padding_end"
             android:textColor="#ffffff"
-            android:visibility="gone"
             android:textSize="@dimen/battery_level_text_size"
             android:importantForAccessibility="noHideDescendants"/>
         
@@ -62,7 +61,7 @@
         android:layout_height="@dimen/status_bar_battery_icon_height"
         android:layout_width="@dimen/status_bar_battery_icon_width"
         android:layout_marginBottom="@dimen/battery_margin_bottom"
-        android:layout_marginStart="50dp"
+        android:layout_marginStart="10dp"
 	systemui:customConf="true"
         />
         <TextView android:id="@+id/battery_level"
@@ -72,7 +71,6 @@
             android:layout_marginStart="@dimen/header_battery_margin_keyguard"
             android:paddingEnd="@dimen/battery_level_padding_end"
             android:textColor="#ffffff"
-            android:visibility="gone"
             android:textSize="@dimen/battery_level_text_size"
             android:importantForAccessibility="noHideDescendants"/>    
 </LinearLayout>

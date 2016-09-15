@@ -22,6 +22,7 @@ import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -51,10 +52,13 @@ public class BatteryMeterView extends ImageView implements
                 defStyle, 0);
 
         mDockMode = atts.getBoolean(R.styleable.BatteryMeterView_dockMode, false);
+        boolean customConf = atts.getBoolean(R.styleable.BatteryMeterView_customConf, false);
+
 
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
                 context.getColor(R.color.batterymeter_frame_color));
         mDrawable = new BatteryMeterDrawable(context, new Handler(), frameColor);
+        mDrawable.setCustomConf(customConf);
         atts.recycle();
 
         mSlotBattery = context.getString(
@@ -112,4 +116,7 @@ public class BatteryMeterView extends ImageView implements
     public void setDarkIntensity(float f) {
         mDrawable.setDarkIntensity(f);
     }
+
+    public void addLabelView(TextView v) { mDrawable.addLabelView(v); }
+
 }

@@ -240,12 +240,13 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     @Override
     public void onDockBatteryLevelChanged(int level, boolean present, boolean charging) {
-        final int N = mDockChangeCallbacks.size();
-        for (int i = 0; i < N; i++) {
-            mDockChangeCallbacks.get(i).onBatteryLevelChanged(level, charging, charging);
-        }
+        mHandler.post(new Runnable() {
+           @Override
+           public void run() {
+             final int N = mDockChangeCallbacks.size();
+             for (int i = 0; i < N; i++) 
+               	mDockChangeCallbacks.get(i).onBatteryLevelChanged(level, charging, charging);
+           }
+        });
     }
-   
-
- 
 }

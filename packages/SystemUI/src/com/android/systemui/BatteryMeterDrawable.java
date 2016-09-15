@@ -37,8 +37,15 @@ import android.provider.Settings;
 
 import com.android.systemui.statusbar.policy.BatteryController;
 
+import android.view.View;
+import java.util.ArrayList;
+import android.net.Uri;
+import android.util.Log;
+import android.widget.TextView;
+import org.meerkats.katkiss.*;
+
 public class BatteryMeterDrawable extends Drawable implements
-        BatteryController.BatteryStateChangeCallback {
+        BatteryController.BatteryStateChangeCallback, CustomObserver.ChangeNotification {
 
     private static final float ASPECT_RATIO = 9.5f / 14.5f;
     public static final String TAG = BatteryMeterDrawable.class.getSimpleName();
@@ -100,7 +107,12 @@ public class BatteryMeterDrawable extends Drawable implements
     private int mLevel = -1;
     private boolean mPluggedIn;
     private boolean mListening;
+
     private boolean mDockMode=false;
+    private boolean mShowIcon = true, mShowText = false, mShowTextPercent = false;
+    private boolean mCustomConf;
+    private ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
+    protected boolean mBatteryAvailable = false;
 
     public BatteryMeterDrawable(Context context, Handler handler, int frameColor) {
         mContext = context;
@@ -209,6 +221,18 @@ public class BatteryMeterDrawable extends Drawable implements
     }
 
     public void setDockMode(boolean mode) { mDockMode = mode; };
+
+    public void setCustomConf(boolean mode) { 
+        mCustomConf = mode; 
+        if(mCustomConf)
+        {
+            refreshConf();
+            new CustomObserver(mContext, this);
+            updateLabel();
+            updateIconState();
+        }
+    };
+
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
         mPowerSaveEnabled = mBatteryController.isPowerSave();
@@ -218,7 +242,9 @@ public class BatteryMeterDrawable extends Drawable implements
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
         mLevel = level;
         mPluggedIn = pluggedIn;
-
+        mBatteryAvailable = level != -1;
+        updateLabel();
+        updateIconState();
         postInvalidate();
     }
 
@@ -326,6 +352,8 @@ public class BatteryMeterDrawable extends Drawable implements
     @Override
     public void draw(Canvas c) {
         final int level = mLevel;
+
+        if(!mShowIcon) return;
 
         if (level == -1) return;
 
@@ -520,4 +548,59 @@ public class BatteryMeterDrawable extends Drawable implements
         }
     }
 
+    private void refreshConf() {
+        mShowIcon = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_BATTERY_ICON, 1) == 1;
+        mShowText = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_BATTERY_TEXT, 1) == 1;
+        mShowTextPercent = Settings.System.getInt(mContext.getContentResolver(), KKC.S.SYSTEMUI_BATTERY_TEXT_PERCENT, 1) == 1;
+        mShowPercent = Settings.System.getInt(mContext.getContentResolver(), KKC.S.NATIVE_BATTERY_TEXT_ON_ICON, 0) == 1;
+    }
+
+    public void addLabelView(TextView v) { mLabelViews.add(v); refreshConf(); updateLabel(); postInvalidate();}
+
+    public void updateLabel()
+    {
+        int N = mLabelViews.size();
+        for (int i = 0; i < N; i++) {
+            TextView v = mLabelViews.get(i);
+
+            boolean show =  mBatteryAvailable && mShowText;
+            v.setVisibility(show? View.VISIBLE : View.GONE);
+
+            if(show) {
+
+              String label = "" + mLevel;
+              if (mShowTextPercent) label += "%";
+              v.setTextColor(getColorForLevel(mLevel));
+              v.setText(label);
+            }
+        }
+    }
+
+    protected void updateIconState()
+    {
+    //        boolean show =  mBatteryAvailable && mShowIcon;
+    //        setVisibility(show? View.VISIBLE : View.GONE);
+    }
+
+ // CustomObserver ChangeNotifications
+    @Override
+    public ArrayList<Uri> getObservedUris()
+    {
+      ArrayList<Uri> uris = new  ArrayList<Uri>();
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BATTERY_ICON));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BATTERY_TEXT));
+      uris.add(Settings.System.getUriFor(KKC.S.SYSTEMUI_BATTERY_TEXT_PERCENT));
+      uris.add(Settings.System.getUriFor(KKC.S.NATIVE_BATTERY_TEXT_ON_ICON));
+      return uris;
+    }
+
+    @Override
+    public void onChangeNotification(Uri uri)
+    {
+      Log.d(TAG, "onChangeNotification:" + uri);
+      refreshConf();
+      updateIconState();
+      updateLabel();
+      postInvalidate();
+    }
 }

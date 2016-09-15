@@ -2678,7 +2678,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         TextView batteryLevel = ((TextView) v.findViewById(batteryLevelViewID));
         if(batteryLevel == null) return;        
-        //TOFIXbatteryView.addLabelView(batteryLevel);
+        batteryView.addLabelView(batteryLevel);
 		
 	}
     public boolean isKeyguardSecure() {
