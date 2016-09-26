@@ -504,6 +504,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".katkiss.UISettings" />
+
+
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
             android:name=".doze.DozeService"

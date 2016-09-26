@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/kk_ui_settings"
+        xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
+
+<!--    <PreferenceCategory
+        android:key="kk_ui_navbar"
+        android:title="@string/kk_ui_navbar_title" >
+
+        <ListPreference
+            android:key="kk_ui_mode"
+            android:title="@string/kk_ui_mode"
+            android:summary="@string/kk_ui_mode_summary"
+            android:persistent="false"
+            android:entries="@array/kk_ui_mode_entries"
+            android:entryValues="@array/kk_ui_mode_values" />
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/kk_ui_navbar_size_entries"
+            android:entryValues="@array/kk_ui_navbar_size_values"
+            android:key="kk_ui_barsize"
+            android:summary="@string/kk_ui_barsize_summary"
+            android:title="@string/kk_ui_barsize_title" />
+    <PreferenceScreen
+            android:fragment="com.android.settings.katkiss.SoftKeyActions"
+            android:key="ui_interface_navkeys"
+            android:title="@string/kk_ui_interface_navkeys"
+            android:summary="@string/kk_ui_interface_navkeys_summary"/>
+
+    <CheckBoxPreference
+            android:key="kk_ui_btn_switch_toprevious"
+            android:title="@string/kk_ui_switch_toprevious_task_visibility_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="kk_ui_multiwindow"
+        android:title="@string/kk_ui_multiwindow_title" >
+        <CheckBoxPreference
+            android:key="kk_ui_btn_splitview_auto"
+            android:title="@string/kk_ui_splitview_auto_visibility_title" />
+        <CheckBoxPreference
+            android:key="kk_ui_btn_splitview_auto3"
+            android:title="@string/kk_ui_splitview_auto3_visibility_title" />
+        <CheckBoxPreference
+            android:key="kk_ui_btn_splitview_auto4"
+            android:title="@string/kk_ui_splitview_auto4_visibility_title" />
+        <CheckBoxPreference
+            android:key="kk_ui_btn_relaunch_floating"
+            android:title="@string/kk_ui_relaunch_floating_visibility_title" />
+        <CheckBoxPreference
+            android:key="kk_ui_recents_multiwindow_icons"
+            android:title="@string/kk_ui_recents_multiwindow_icons_visibility_title" />
+
+    </PreferenceCategory>
+
+-->
+
+    <PreferenceCategory
+        android:key="kk_ui_user_immersive"
+        android:title="@string/kk_ui_user_immersive_title" >        
+        <ListPreference
+            android:key="user_immersive_mode_type"
+            android:title="@string/kk_ui_user_immersive_mode_type"
+            android:summary="@string/kk_ui_user_immersive_mode_type_summary"
+            android:persistent="false"
+            android:entries="@array/kk_ui_user_immersive_mode_type_entries"
+            android:entryValues="@array/kk_ui_user_immersive_mode_type_values" />
+        <CheckBoxPreference
+            android:key="user_immersive_mode"
+            android:title="@string/kk_ui_user_immersive_mode" />
+        <CheckBoxPreference
+           android:key="auto_expanded_desktop_ondock"
+           android:defaultValue="false"
+           android:title="@string/auto_expanded_desktop_ondock_title"
+	       />
+    </PreferenceCategory>
+        
+    
+<!--        
+    <PreferenceCategory
+        android:key="kk_ui_clock"
+        android:title="@string/kk_ui_clock_title" >
+        <CheckBoxPreference
+            android:key="kk_ui_clock_time"
+            android:title="@string/kk_ui_clock_time_title" />
+     </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="kk_ui_recents"
+        android:title="@string/kk_ui_recents_title" >
+        <CheckBoxPreference
+            android:key="kk_ui_recents_killall_button"
+            android:title="@string/kk_ui_recents_killall_button_title" />
+        <CheckBoxPreference
+            android:key="kk_ui_recents_mem_display"
+            android:title="@string/kk_ui_recents_mem_display_title" />
+        </PreferenceCategory>
+    <PreferenceCategory
+        android:key="kk_ui_misc"
+        android:title="@string/kk_ui_misc_title" >
+    <CheckBoxPreference
+            android:key="inputmethod_shownotification" 
+            android:defaultValue="false"
+            android:title="@string/inputmethod_shownotification_title"
+            android:summary="@string/inputmethod_shownotification_summary"
+        />
+    <CheckBoxPreference
+            android:key="enable_panels_dropshadow"
+            android:defaultValue="false"
+            android:title="@string/enable_panels_dropshadow_title"
+        />
+    </PreferenceCategory>
+   --> 
+</PreferenceScreen>

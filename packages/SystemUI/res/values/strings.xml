@@ -1529,7 +1529,7 @@
     <string name="switch_bar_off">Off</string>
 
     <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
-    <string name="nav_bar">Navigation bar</string>
+    <string name="nav_bar">Navigation bar editor</string>
 
     <!-- SysUI Tuner: Group of buttons that show on the start of the screen [CHAR LIMIT=30] -->
     <string name="start">Start</string>
