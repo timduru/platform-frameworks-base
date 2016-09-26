@@ -111,6 +111,7 @@ public class BatteryMeterDrawable extends Drawable implements
     private boolean mDockMode=false;
     private boolean mShowIcon = true, mShowText = false, mShowTextPercent = false;
     private boolean mCustomConf;
+    private View mParentView;
     private ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
     protected boolean mBatteryAvailable = false;
 
@@ -222,8 +223,9 @@ public class BatteryMeterDrawable extends Drawable implements
 
     public void setDockMode(boolean mode) { mDockMode = mode; };
 
-    public void setCustomConf(boolean mode) { 
+    public void setCustomConf(View parentView, boolean mode) { 
         mCustomConf = mode; 
+        mParentView = parentView; 
         if(mCustomConf)
         {
             refreshConf();
@@ -578,8 +580,8 @@ public class BatteryMeterDrawable extends Drawable implements
 
     protected void updateIconState()
     {
-    //        boolean show =  mBatteryAvailable && mShowIcon;
-    //        setVisibility(show? View.VISIBLE : View.GONE);
+        boolean show =  mBatteryAvailable && mShowIcon;
+        if(mParentView != null) mParentView.setVisibility(show? View.VISIBLE : View.GONE);
     }
 
  // CustomObserver ChangeNotifications

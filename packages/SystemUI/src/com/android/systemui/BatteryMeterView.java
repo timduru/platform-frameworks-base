@@ -58,7 +58,7 @@ public class BatteryMeterView extends ImageView implements
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
                 context.getColor(R.color.batterymeter_frame_color));
         mDrawable = new BatteryMeterDrawable(context, new Handler(), frameColor);
-        mDrawable.setCustomConf(customConf);
+        mDrawable.setCustomConf(this, customConf);
         atts.recycle();
 
         mSlotBattery = context.getString(
