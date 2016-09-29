@@ -22,6 +22,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 import android.view.IWindowManager;
+import android.view.KeyEvent;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,8 +119,8 @@ public class ActionHandler {
         	screenOff();
 /*        else if (action.equals(KKC.A.SYSTEMUI_TASK_ASSIST))
         	startAssistActivity(); */
-//        else if(action.equals(KKC.A.SYSTEMUI_RECENT))
-//        	WMController.showRecentAppsSystemUI();
+        else if(action.equals(KKC.A.SYSTEMUI_RECENT))
+        	sendKey(KeyEvent.KEYCODE_APP_SWITCH);
         else if(action.equals(KKC.A.SYSTEMUI_SWITCH_TOPREVIOUS_TASK))
         	new WMController(mContext).switchToPreviousTask();
         else if(action.startsWith(KKC.A.SPLITVIEW_AUTO) || action.equals(KKC.A.SPLITVIEW_SWAP))
@@ -176,14 +178,19 @@ public class ActionHandler {
 //       	WMController.showSettingsPanel();
 //        else if (action.equals(KKC.A.SYSTEMUI_TASK_POWER_MENU))
 //        	showPowerMenu();
-        else if (action.startsWith(KKC.A.SENDKEY_BASE)) {
-		int keyCode = Integer.parseInt(action.substring(KKC.A.SENDKEY_BASE.length()));
-		KatUtils.sendKeyDOWN(keyCode);
-		KatUtils.sendKeyUP(keyCode);
-        }
+        else if (action.equals(KKC.A.INPUT_LANGUAGE_SWITCH))
+		sendKey(KeyEvent.KEYCODE_LANGUAGE_SWITCH);
+        else if (action.startsWith(KKC.A.SENDKEY_BASE))
+		sendKey( Integer.parseInt(action.substring(KKC.A.SENDKEY_BASE.length())));
         else if (action.startsWith("app:"))
         	launchActivity(action);
     }
+
+    private void sendKey(int keyCode) {
+        KatUtils.sendKeyDOWN(keyCode);
+        KatUtils.sendKeyUP(keyCode);
+    }
+  
 
     public Handler getHandler() {
         return H;
