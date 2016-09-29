@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string name="quick_settings_immersive_mode_label">Розширений екран</string>
+
+
+    <!-- Strings -->
+    <string name="kat_settings">Центр Управління</string>
+
+    <!--  Categories -->
+    <string name="kk_ui_general_title">Загальне</string>
+    <string name="kk_ui_navbar_title">Панель навігації</string>
+    <string name="kk_ui_misc_title">Інше</string>
+    <string name="kk_ui_clock_title">Час</string>
+    <string name="kk_ui_battery_title">Батарея</string>
+    <string name="kk_ui_recents_title">Панель запущених додатків</string>
+    
+    <string name="kk_ui_settings">Інтерфейс</string>
+    <string name="kk_ui_mode">Режим інтерфейсу</string>
+    <string name="kk_ui_mode_summary">Обрати режим інтерфейсу</string>
+
+    <string name="kk_ui_barsize_title">Висота панелі навігації</string>
+    <string name="kk_ui_barsize_summary">Оберіть розмір панелі навігації</string>
+    
+    
+    <string name="kk_ui_interface_navkeys">Кнопки панелі навігації</string>
+    <string name="kk_ui_interface_navkeys_summary">Призначити дії кнопок панелі навігації</string>
+
+    <string name="kk_ui_back_longpress_title">Дія довгого тапу кнопки "Назад"</string>
+    <string name="kk_ui_recent_longpress_title">Дія довгого тапу кнопки "Запущені додатки"</string>
+    <string name="kk_ui_menu_longpress_title">Дія довгого тапу кнопки "Меню"</string>  
+
+
+    <string name="kk_ui_switch_toprevious_task_longpress_title">Дія довгого тапу кнопки "Попередній додаток"</string>  
+    <string name="kk_ui_splitview_auto_longpress_title">Дія довгого тапу кнопки "Режим розділеного екрану"</string>  
+    <string name="kk_ui_relaunch_floating_longpress_title">Дія довгого тапу кнопки "Режим вікон"</string>   
+
+    <string name="kk_ui_multiwindow_title">Налаштування режиму вікон</string>  
+    <string name="kk_ui_switch_toprevious_task_visibility_title">Показати кнопку переходу до останнього додатка</string>  
+    <string name="kk_ui_splitview_auto_visibility_title">Показати кнопку режиму розділеного екрану</string>  
+    <string name="kk_ui_splitview_auto3_visibility_title">Показати кнопку 3-х панельного розділеного екрану</string>  
+    <string name="kk_ui_splitview_auto4_visibility_title">Показати кнопку 4-х панельного розділеного екрану</string>  
+    <string name="kk_ui_relaunch_floating_visibility_title">Показати кнопку режиму вікон</string>  
+    <string name="kk_ui_recents_multiwindow_icons_visibility_title">Показати управління багатовіконним режимом на Панелі запущених додатків</string>  
+
+    <string name="kk_ui_back_target_uri">kk_ui_back_target_uri</string>
+    <string name="kk_ui_recent_target_uri">kk_ui_recent_target_uri</string>
+    <string name="kk_ui_menu_target_uri">kk_ui_menu_target_uri</string>
+    <string name="kk_ui_switch_toprevious_task_target_uri">kk_ui_switch_toprevious_task_target_uri</string>
+    <string name="kk_ui_splitview_auto_target_uri">kk_ui_splitview_auto_target_uri</string>
+    <string name="kk_ui_relaunch_floating_target_uri">kk_ui_relaunch_floating_target_uri</string>
+    
+    <string name="kk_ui_screenshot_title">Знімок екрану</string>
+    <string name="kk_ui_screenoff_title">Вимкнути екран</string>
+    <string name="kk_ui_kill_process_title">Зупинити процес</string>
+    <string name="kk_ui_package_removed">Обраний раніше пакунок не знайдений</string>
+    <string name="kk_ui_activity_pref_default_title">Дія не обрана</string>
+    <string name="kk_ui_activity_pref_default_summary">Оберіть дію довгого тапу</string>
+
+    <string name="kk_ui_wallpaper_mode_title">Режим фонового малюнку</string>
+
+
+    <string name="kk_activity_dialog_title">Обрати дію</string>
+    <string name="kk_action_dialog_title">Обрати дію</string>
+    <string name="kk_keycode_title">Введіть код клавіші</string>
+    <string name="kk_keycode_msg">Код клавіші:</string>
+    <string name="kk_detectkey_title">Натисніть, щоб визначити клавішу</string>
+    <string name="kk_keycode">Код клавіші:</string>
+    <string name="kk_keylabel">Ярлик клавіші:</string>
+
+    
+    <string name="kk_ui_battery_icon_title">Показати іконку батареї</string>
+    <string name="kk_ui_battery_text_title">Показати відсоток заряду</string>
+    <string name="kk_ui_battery_text_on_icon_title">Показати відсоток заряду в іконці (коли не заряджається чи повністю заряджений)</string>
+    <string name="kk_ui_battery_text_percent_title">Показати %</string>
+    
+    <string name="kk_ui_clock_time_title">Показати час</string>
+    <string name="kk_ui_clock_date_title">Показати дату</string>
+    
+    <string name="inputmethod_shownotification_title">Показати сповіщення вибору методу вводу</string>
+    <string name="inputmethod_shownotification_summary">Ввімкнути/Вимкнути постійне сповіщення вибору методу вводу</string>
+
+    <string name="kk_sendkey_title">Призначити дію</string>    
+    
+    <string name="add">Додати</string>    
+    
+
+    <string name="kk_ui_user_immersive_title">Розширений екран</string>
+    <string name="kk_ui_user_immersive_mode">Обов\'язковий розширений екран в додатках</string>
+    <string name="kk_ui_user_immersive_mode_type">Тип розширеного екрана</string>
+    <string name="kk_ui_user_immersive_mode_type_summary">Оберіть яку панель(і) сховати</string>
+    
+    <string name="auto_expanded_desktop_ondock_title">Розширений екран при підключенні Док-станції</string>
+    <string name="enable_panels_dropshadow_title">Ввімкнути затемнення екрану при відкритих панелях</string>
+    
+<!-- Arrays -->
+
+    <string-array name="kk_ui_mode_entries">
+        <item>По центру (за замовчуванням)</item>
+        <item>Збалансовано (за типом Pixel C)</item>
+        <item>Зліва</item>
+    </string-array>
+    <string-array name="kk_ui_mode_values">
+        <item>1</item>
+        <item>0</item>
+        <item>2</item>
+        </string-array>
+
+     <string-array name="kk_ui_user_immersive_mode_type_entries">
+        <item>Повний - приховати обидві панелі</item>
+        <item>Приховати лише панель сповіщень</item>
+        <item>Приховати лише панель навігації</item>
+        </string-array>
+    <string-array name="kk_ui_user_immersive_mode_type_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        </string-array>
+    
+    <string-array name="kk_ui_navbar_size_entries">
+        <item>Нормальний (48dp)</item>
+        <item>Малий (36dp)</item>
+        <item>Мінімальний (24dp)</item>
+    </string-array>
+    <string-array name="kk_ui_navbar_size_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+
+    <string-array name="kk_action_dialog_entries">
+        <item>Запуск додатка</item>
+        <item>Призначити дію</item>
+        <item>Код клавіші</item>
+        <item>Закрити додаток</item>
+        <item>Перехід до останнього додатка</item>
+        <item>Розширений екран</item>
+        <item>Автоповорот екрану</item>
+<!--        <item>Запущені додатки</item> -->
+        <item>Меню живлення</item>
+        <item>Розгорнути/Згорнути панель сповіщень</item>
+        <item>Ввімкнути Wi-Fi</item>
+<!--        <item>Ввімкнути Ethernet</item> -->
+        <item>Ввімкнути Bluetooth</item>
+        <item>Тачпад</item>
+<!--        <item>Запуск Налаштувань</item> -->
+        <item>Знімок Екрану</item>
+        <item>Зменшити Яскравість</item>
+        <item>Збільшити Яскравість</item>
+        <item>Автояскравість</item>
+        <item>Медіа: Назад</item>
+        <item>Медіа: Далі</item>
+        <item>Медіа: Грати/Пауза</item>
+<!--        <item>Audio Down</item>
+        <item>Audio Up</item> -->
+        <item>Вимкнути звук</item>
+        <item>Вимкнути екран</item>
+        <item>Поміняти два останніх додатка місцями</item>
+        <item>Перемкнути останні додатки між розділеним екраном (2 панелі) та повним екраном</item>
+        <item>Перемкнути останні додатки між розділеним екраном (3 панелі) та повним екраном</item>
+        <item>Перемкнути останні додатки між розділеним екраном (4 панелі) та повним екраном</item>
+<!--        <item>Перемикання запущеного додатка між режимом розділеного екрану та повноекранним режимом</item>
+        <item>Перемикання запущеного додатка між першою половиною розділеного екрану та повноекранним режимом</item>
+        <item>Перемикання запущеного додатка між другою половиною розділеного екрану та повноекранним режимом</item>
+        <item>Запуск додатка у вікні</item>
+        <item>Розгорнути/Згорнути всі вікна</item>
+-->
+        <item>Нічого</item>
+    </string-array>
+     
+</resources>
