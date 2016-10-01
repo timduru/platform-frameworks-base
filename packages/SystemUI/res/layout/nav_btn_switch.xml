@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.android.systemui.statusbar.policy.KeyButtonView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+
+    android:id="@+id/switch_toprevious_task"
+    android:src="@drawable/ic_sysbar_switch_toprevious_task"
+    systemui:keyClickAction="switch_toprevious_task"
+    systemui:keyConfigUri="kk_ui_switch_toprevious_task_target_uri"
+
+    android:layout_width="@dimen/navigation_key_width"
+    android:layout_height="match_parent"
+    android:layout_weight="0"
+    android:scaleType="center"
+    android:paddingStart="@dimen/navigation_key_padding"
+    android:paddingEnd="@dimen/navigation_key_padding"
+    />
+
+    <!--
+        systemui:longPressAction="splitview_swap"
+    -->

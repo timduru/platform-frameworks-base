@@ -27,6 +27,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Space;
 import com.android.systemui.R;
+import com.android.systemui.kat.KatCustomNavBar;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
 
@@ -69,8 +70,12 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     private View mLastRot0;
     private View mLastRot90;
 
+    private KatCustomNavBar mKatCustomNavBar;
+
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mKatCustomNavBar = new KatCustomNavBar();
+
         mDensity = context.getResources().getConfiguration().densityDpi;
         createInflaters();
     }
@@ -253,7 +258,9 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
                 ((KeyButtonView) v).loadAsync(uri);
             }
         } else {
-            return null;
+            v = mKatCustomNavBar.inflateButton(button, inflater, buttonSpec, parent, landscape, indexInParent);
+            if (v == null) return null;
+            if (landscape && isSw600Dp())   setupLandButton(v);
         }
 
         if (size != 0) {
@@ -323,7 +330,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         }
     }
 
-    private boolean isSw600Dp() {
+    public boolean isSw600Dp() {
         Configuration configuration = mContext.getResources().getConfiguration();
         return (configuration.smallestScreenWidthDp >= 600);
     }

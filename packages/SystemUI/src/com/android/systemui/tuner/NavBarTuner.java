@@ -49,10 +49,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.NavigationBarInflaterView;
 import com.android.systemui.tuner.katkiss.NavBarPredefinedLayoutListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.BACK;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.BUTTON_SEPARATOR;
@@ -71,6 +74,9 @@ import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZ
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_START;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractButton;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractSize;
+
+import com.android.systemui.kat.KatCustomNavBar;
+
 
 public class NavBarTuner extends Fragment implements TunerService.Tunable {
 
@@ -232,7 +238,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         } else if (button.startsWith(KEY)) {
             return context.getString(R.string.keycode);
         }
-        return button;
+        else return new KatCustomNavBar().getLabel( NavigationBarInflaterView.extractButton(button), context );
     }
 
     private static class Holder extends RecyclerView.ViewHolder {
@@ -442,9 +448,9 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         }
 
         private void showAddDialog(final Context context) {
-            final String[] options = new String[] {
-                    BACK, HOME, RECENT, MENU_IME, NAVSPACE, CLIPBOARD, KEY,
-            };
+            final String[] options =  new KatCustomNavBar().getButtonList(
+                                                new String[] { BACK, HOME, RECENT, MENU_IME, NAVSPACE, CLIPBOARD, KEY, }
+                                               );
             final CharSequence[] labels = new CharSequence[options.length];
             for (int i = 0; i < options.length; i++) {
                 labels[i] = getLabel(options[i], context);
