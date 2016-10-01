@@ -151,13 +151,13 @@ public class RecentsView extends FrameLayout {
                 }
             });
             addView(mStackActionButton);
-            mStackActionButton.setClipToOutline(true);
+            /*mStackActionButton.setClipToOutline(true);
             mStackActionButton.setOutlineProvider(new ViewOutlineProvider() {
                 @Override
                 public void getOutline(View view, Outline outline) {
                     outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius);
                 }
-            });
+            });*/
         }
         mEmptyView = (TextView) inflater.inflate(R.layout.recents_empty, this, false);
         addView(mEmptyView);
@@ -299,6 +299,7 @@ public class RecentsView extends FrameLayout {
         mEmptyView.setVisibility(View.VISIBLE);
         mEmptyView.bringToFront();
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            mStackActionButton.setVisibility(View.GONE);
             mStackActionButton.bringToFront();
         }
     }
@@ -311,6 +312,7 @@ public class RecentsView extends FrameLayout {
         mTaskStackView.setVisibility(View.VISIBLE);
         mTaskStackView.bringToFront();
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            mStackActionButton.setVisibility(View.VISIBLE);
             mStackActionButton.bringToFront();
         }
     }
@@ -466,13 +468,13 @@ public class RecentsView extends FrameLayout {
                 true /* animateAlpha */, false /* animateBounds */);
 
         // Temporarily hide the stack action button without changing visibility
-        if (mStackActionButton != null) {
+ /*       if (mStackActionButton != null) {
             mStackActionButton.animate()
                     .alpha(0f)
                     .setDuration(HIDE_STACK_ACTION_BUTTON_DURATION)
                     .setInterpolator(Interpolators.ALPHA_OUT)
                     .start();
-        }
+        }*/
     }
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
@@ -684,7 +686,7 @@ public class RecentsView extends FrameLayout {
      * Hides the stack action button.
      */
     private void hideStackActionButton(int duration, boolean translate) {
-        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
+        if (true || !RecentsDebugFlags.Static.EnableStackActionButton) {
             return;
         }
 
@@ -698,7 +700,7 @@ public class RecentsView extends FrameLayout {
      */
     private void hideStackActionButton(int duration, boolean translate,
                                        final ReferenceCountedTrigger postAnimationTrigger) {
-        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
+        if (true || !RecentsDebugFlags.Static.EnableStackActionButton) {
             return;
         }
 

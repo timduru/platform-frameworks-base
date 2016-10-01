@@ -32,5 +32,4 @@
     android:shadowRadius="5"
     android:fontFamily="sans-serif-medium"
     android:background="?android:selectableItemBackground"
-    android:visibility="invisible"
     android:forceHasOverlappingRendering="false" />
