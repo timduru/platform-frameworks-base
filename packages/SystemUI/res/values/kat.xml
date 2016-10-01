@@ -21,9 +21,9 @@
     </string-array>
     <string-array name="kk_ui_mode_values">
         <item></item>
-        <item>back[0.5],home[0.5],recent[0.5];space;menu_ime[0.5],recent[0.5],switch_toprevious_task[0.5]</item>
-        <item>back[0.5],home[0.5],recent[0.5],switch_toprevious_task[0.5];space;menu_ime[0.5]</item>
-        <item>back[0.5],home[0.5];space;menu_ime[0.5],recent[0.5]</item>
+        <item>back[0.5],home[0.5],recent[0.5];space;menu_ime[1.2],recent[0.5],switch_toprevious_task[0.5]</item>
+        <item>back[0.5],home[0.5],recent[0.5],switch_toprevious_task[0.5];space;menu_ime</item>
+        <item>back[0.5],home[0.5];space;menu_ime[1.2],recent[0.5]</item>
         <item>space;back,home,recent;menu_ime</item>
     </string-array>
 
