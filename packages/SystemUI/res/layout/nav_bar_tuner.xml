@@ -20,6 +20,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,6 +49,11 @@
             android:layout_height="wrap_content" />
 
     </LinearLayout>
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/kk_navbar_predefined" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@android:id/list"

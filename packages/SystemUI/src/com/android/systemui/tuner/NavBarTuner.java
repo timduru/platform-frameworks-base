@@ -32,6 +32,7 @@ import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -44,9 +45,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.tuner.katkiss.NavBarPredefinedLayoutListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,12 +83,18 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
 
     private NavBarAdapter mNavBarAdapter;
     private PreviewNavInflater mPreview;
+    private Spinner mPredefinedLayouts;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.nav_bar_tuner, container, false);
         inflatePreview((ViewGroup) view.findViewById(R.id.nav_preview_frame));
+
+        mPredefinedLayouts = (Spinner) view.findViewById(R.id.predefined_layouts);
+        mPredefinedLayouts.setOnItemSelectedListener(new NavBarPredefinedLayoutListener(this));
+
+
         return view;
     }
 
@@ -162,7 +171,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         CharSequence[] groupLabels = new String[] { getString(R.string.start),
                 getString(R.string.center), getString(R.string.end) };
         mNavBarAdapter.clear();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < views.length; i++) {
             mNavBarAdapter.addButton(groups[i], groupLabels[i]);
             for (String button : views[i].split(BUTTON_SEPARATOR)) {
                 mNavBarAdapter.addButton(button, getLabel(button, context));
@@ -183,6 +192,8 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        mPredefinedLayouts.setSelection(0);
+
         if (item.getItemId() == SAVE) {
             if (!mNavBarAdapter.hasHomeButton()) {
                 new AlertDialog.Builder(getContext())
@@ -193,6 +204,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
             } else {
                 Settings.Secure.putString(getContext().getContentResolver(),
                         NAV_BAR_VIEWS, mNavBarAdapter.getNavString());
+                Log.d("TTT", mNavBarAdapter.getNavString());
             }
             return true;
         } else if (item.getItemId() == RESET) {
@@ -200,6 +212,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
                     NAV_BAR_VIEWS, null);
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 

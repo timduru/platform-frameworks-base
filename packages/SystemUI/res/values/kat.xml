@@ -3,18 +3,32 @@
 
     <string name="quick_settings_immersive_mode_label">Immersive mode</string>
 
+    <!--  Tuner -->
+    <string name="kk_ui_battery_title">Battery</string>
+    <string name="kk_ui_general_title">General UI settings</string>
 
-    <!-- Strings -->
-    <string name="kat_settings">Control Center</string>
+    <string name="kk_nav_predefined_layouts">Predefined layout:</string>
+    <string name="kk_nav_customize_layout">Customize layout:</string>
+
+
+    <string-array name="kk_ui_mode_entries">
+        <item>-- Select --</item>
+        <item>Left Aligned + Balanced Buttons (default)</item>
+        <item>Left Aligned Buttons</item>
+        <item>Default Android Centered Buttons</item>
+    </string-array>
+    <string-array name="kk_ui_mode_values">
+        <item></item>
+        <item>back[0.5],home[0.5],recent[0.5];space;menu_ime,recent</item>
+        <item>back[0.5],home[0.5],recent[0.5];space;menu_ime</item>
+        <item>space;back,home,recent;menu_ime</item>
+    </string-array>
 
     <!--  Categories -->
-    <string name="kk_ui_general_title">General UI settings</string>
     <string name="kk_ui_navbar_title">Navigation Bar</string>
     <string name="kk_ui_misc_title">Misc</string>
     <string name="kk_ui_clock_title">Clock</string>
-    <string name="kk_ui_battery_title">Battery</string>
-    <string name="kk_ui_recents_title">Recent Apps Screen</string>
-    
+
     <string name="kk_ui_settings">User Interface</string>
     <string name="kk_ui_mode">Interface Mode</string>
     <string name="kk_ui_mode_summary">Choose the Buttons alignment</string>
@@ -95,16 +109,7 @@
     
 <!-- Arrays -->
 
-    <string-array name="kk_ui_mode_entries">
-        <item>Default Android Centered Buttons</item>
-        <item>Balanced Buttons (Back+Home:left  Recents:right  MultiWindow:center)</item>
-        <item>Left Aligned Buttons</item>
-    </string-array>
-    <string-array name="kk_ui_mode_values">
-        <item>1</item>
-        <item>0</item>
-        <item>2</item>
-        </string-array>
+
 
      <string-array name="kk_ui_user_immersive_mode_type_entries">
         <item>Full - Hide Status Bar and Navigation Bar</item>
