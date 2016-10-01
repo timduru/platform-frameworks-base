@@ -558,7 +558,7 @@ public class NotificationManagerService extends SystemService {
         public void onNotificationClear(int callingUid, int callingPid,
                 String pkg, String tag, int id, int userId) {
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
-                    Notification.FLAG_ONGOING_EVENT ,
+                    0,
                     true, userId, REASON_DELEGATE_CANCEL, null);
         }
 
@@ -2687,10 +2687,10 @@ public class NotificationManagerService extends SystemService {
 
                 // Ensure if this is a foreground service that the proper additional
                 // flags are set.
-                if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+/*                if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
                     notification.flags |= Notification.FLAG_ONGOING_EVENT
                             | Notification.FLAG_NO_CLEAR;
-                }
+                }*/
 
                 applyZenModeLocked(r);
                 mRankingHelper.sort(mNotificationList);
