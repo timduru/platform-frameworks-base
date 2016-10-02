@@ -5,10 +5,32 @@
 
 <!--  UI Tuner -->
     <string name="kk_ui_battery_title">Battery</string>
+        <string name="kk_ui_battery_icon_title">Show battery icon</string>
+        <string name="kk_ui_battery_text_title">Show battery value</string>
+        <string name="kk_ui_battery_text_on_icon_title">Show battery value on icon (when not charging and not fully charged)</string>
+        <string name="kk_ui_battery_text_percent_title">Show percent symbol</string>
+
     <string name="kk_ui_general_title">General UI settings</string>
+        <string name="kk_ui_user_immersive_title">User Immersive Mode</string>
+            <string name="kk_ui_user_immersive_mode">Force Immersive Mode for apps</string>
+            <string name="kk_ui_user_immersive_mode_type">Immersive Mode Type</string>
+            <string name="kk_ui_user_immersive_mode_type_summary">Choose which bar(s) to hide</string>
+            <string name="auto_expanded_desktop_ondock_title">Auto Immersive Mode When Docked</string>
+
+            <string-array name="kk_ui_user_immersive_mode_type_entries">
+                <item>Full - Hide Status Bar and Navigation Bar</item>
+                <item>Hide Status Bar Only</item>
+                <item>Hide NavBar Bar Only</item>
+            </string-array>
+            <string-array name="kk_ui_user_immersive_mode_type_values">
+                <item>0</item>
+                <item>1</item>
+                <item>2</item>
+            </string-array>
 
 
-<!--  NavBar Tuner -->
+
+    <!--  NavBar Tuner -->
     <string name="kk_nav_predefined_layouts">Predefined layout:</string>
     <string name="kk_nav_customize_layout">Customize layout:</string>
 
@@ -30,207 +52,32 @@
     <!-- buttons -->
     <string name="nav_btn_switch_label">Switch to previous task</string>
     <string name="nav_btn_relaunch_floating_label">Relaunch app in floating mode</string>
-    <string name="nav_btn_relaunch_floating_label">Relaunch app in floating mode</string>
+    <string name="nav_btn_kill_process_label">Kill Current Process</string>
 
 
 
 
 
 <!--  TOSORT -->
+    <string name="kk_ui_settings">User Interface</string>
 
     <!--  Categories -->
-    <string name="kk_ui_navbar_title">Navigation Bar</string>
+<!--    <string name="kk_ui_navbar_title">Navigation Bar</string>
     <string name="kk_ui_misc_title">Misc</string>
     <string name="kk_ui_clock_title">Clock</string>
-
-    <string name="kk_ui_settings">User Interface</string>
-    <string name="kk_ui_mode">Interface Mode</string>
-    <string name="kk_ui_mode_summary">Choose the Buttons alignment</string>
-
-    <string name="kk_ui_barsize_title">Navigation Bar Size</string>
-    <string name="kk_ui_barsize_summary">Choose between standard bar size and smaller sizes</string>
-    
-    
-    <string name="kk_ui_interface_navkeys">Buttons Long Press Settings</string>
-    <string name="kk_ui_interface_navkeys_summary">Change Nav Buttons Long Press Actions</string>
-
-    <string name="kk_ui_back_longpress_title">Back Button Long Press Action</string>
-    <string name="kk_ui_recent_longpress_title">Recent Button Long Press Action</string>
-    <string name="kk_ui_menu_longpress_title">Menu Button Long Press Action</string>  
-
-
-    <string name="kk_ui_switch_toprevious_task_longpress_title">Switch To Previous App Long Press Action</string>  
-    <string name="kk_ui_splitview_auto_longpress_title">Split View Long Press Action</string>  
-    <string name="kk_ui_relaunch_floating_longpress_title">Relaunch Floating Long Press Action</string>  
-
-    <string name="kk_ui_multiwindow_title">MultiWindow Settings</string>  
-    <string name="kk_ui_switch_toprevious_task_visibility_title">Show Switch To Previous App NavBar Button</string>  
-    <string name="kk_ui_splitview_auto_visibility_title">Show 2 Panes Split View NavBar Button</string>  
-    <string name="kk_ui_splitview_auto3_visibility_title">Show 3 Panes Split View NavBar Button</string>  
-    <string name="kk_ui_splitview_auto4_visibility_title">Show 4 Panes Split View NavBar Button</string>  
-    <string name="kk_ui_relaunch_floating_visibility_title">Show Relaunch Floating NavBar Button</string>  
-    <string name="kk_ui_recents_multiwindow_icons_visibility_title">Show MultiWindow Icons On Recent Apps Screen</string>  
-
-    <string name="kk_ui_back_target_uri">kk_ui_back_target_uri</string>
-    <string name="kk_ui_recent_target_uri">kk_ui_recent_target_uri</string>
-    <string name="kk_ui_menu_target_uri">kk_ui_menu_target_uri</string>
-    <string name="kk_ui_switch_toprevious_task_target_uri">kk_ui_switch_toprevious_task_target_uri</string>
-    <string name="kk_ui_splitview_auto_target_uri">kk_ui_splitview_auto_target_uri</string>
-    <string name="kk_ui_relaunch_floating_target_uri">kk_ui_relaunch_floating_target_uri</string>
-    
-    <string name="kk_ui_screenshot_title">Screenshot</string>
-    <string name="kk_ui_screenoff_title">Screen Off</string>
-    <string name="kk_ui_kill_process_title">Kill Current Process</string>
-    <string name="kk_ui_package_removed">The previously selected package was not found</string>
-    <string name="kk_ui_activity_pref_default_title">No Action Selected</string>
-    <string name="kk_ui_activity_pref_default_summary">Tap to select a custom long press activity</string>
 
     <string name="kk_ui_wallpaper_mode_title">Wallpaper Mode/Disable</string>
 
 
-    <string name="kk_activity_dialog_title">Select Activity</string>
-    <string name="kk_action_dialog_title">Select Action</string>
-    <string name="kk_keycode_title">Enter Keycode</string>
-    <string name="kk_keycode_msg">Keycode:</string>
-    <string name="kk_detectkey_title">Press Key to Detect</string>
-    <string name="kk_keycode">Key Code:</string>
-    <string name="kk_keylabel">Key Label:</string>
-
-    
-    <string name="kk_ui_battery_icon_title">Show battery icon</string>
-    <string name="kk_ui_battery_text_title">Show battery value</string>
-    <string name="kk_ui_battery_text_on_icon_title">Show battery value on icon (when not charging and not fully charged)</string>
-    <string name="kk_ui_battery_text_percent_title">Show percent symbol</string>
-    
     <string name="kk_ui_clock_time_title">Show Time</string>
     <string name="kk_ui_clock_date_title">Show Date</string>
     
     <string name="inputmethod_shownotification_title">Show InputMethod Chooser Notification</string>
     <string name="inputmethod_shownotification_summary">Enable/Disable the permanent InputMethod Notification</string>
 
-    <string name="kk_sendkey_title">Send Key</string>    
-    
     <string name="add">Add</string>    
     
-
-    <string name="kk_ui_user_immersive_title">User Immersive Mode</string>
-    <string name="kk_ui_user_immersive_mode">Force Immersive Mode for apps</string>
-    <string name="kk_ui_user_immersive_mode_type">Immersive Mode Type</string>
-    <string name="kk_ui_user_immersive_mode_type_summary">Choose which bar(s) to hide</string>
-    
-    <string name="auto_expanded_desktop_ondock_title">Auto Immersive Mode When Docked</string>
     <string name="enable_panels_dropshadow_title">Enable Screen Shadow When Panels Expanded (PhabletUI)</string>
-    
-<!-- Arrays -->
-
-
-
-     <string-array name="kk_ui_user_immersive_mode_type_entries">
-        <item>Full - Hide Status Bar and Navigation Bar</item>
-        <item>Hide Status Bar Only</item>
-        <item>Hide NavBar Bar Only</item>
-        </string-array>
-    <string-array name="kk_ui_user_immersive_mode_type_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        </string-array>
-    
-    <string-array name="kk_ui_navbar_size_entries">
-        <item>Normal (48dp)</item>
-        <item>Slim (36dp)</item>
-        <item>Small (24dp)</item>
-    </string-array>
-    <string-array name="kk_ui_navbar_size_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
-
-
-    <string-array name="kk_action_dialog_entries">
-        <item>Start Application</item>
-        <item>Send Key</item>
-        <item>Send KeyCode</item>
-        <item>Kill process</item>
-        <item>Switch To Previous App</item>
-        <item>Immersive Mode</item>
-        <item>Autorotation Toggle</item>
-<!--        <item>Display Recent Apps</item> -->
-        <item>Show Power Menu</item>
-        <item>Show Notifications Panel</item>
-        <item>Wifi Toggle</item>
-<!--        <item>Ethernet Toggle</item> -->
-        <item>Bluetooth Toggle</item>
-        <item>Touchpad Toggle</item>
-<!--        <item>Launch Settings</item> -->
-        <item>Take screenshot</item>
-        <item>Brightness Down</item>
-        <item>Brightness Up</item>
-        <item>Brightness Auto</item>
-        <item>Media Previous</item>
-        <item>Media Next</item>
-        <item>Media Play/Pause</item>
-<!--        <item>Audio Down</item>
-        <item>Audio Up</item> -->
-        <item>Audio Mute</item>
-        <item>Screen off</item>
-        <item>Swap 2 last apps Position/size </item>
-        <item>Switch Top Application between SplitView (2 Panes) and FullScreen</item>
-        <item>Switch Top Application between SplitView (3 Panes) and FullScreen</item>
-        <item>Switch Top Application between SplitView (4 Panes) and FullScreen</item>
-<!--        <item>Switch Top Application between 1st SplitView Slot and FullScreen</item>
-        <item>Switch Top Application between 2nd SplitView Slot and FullScreen</item>
-        <item>Relaunch Top Application as Floating</item>
-        <item>Show/Hide All Floating Apps</item>
--->
-        <item>None</item>
-    </string-array>
-    <string-array name="kk_action_dialog_values">
-        <item>app</item>
-        <item>sendkey</item>
-        <item>sendkey</item>
-        <item>killcurrent</item>
-        <item>switch_toprevious_task</item>
-        <item>expanded_desktop</item>
-        <item>autorotation</item>
-<!--        <item>recent</item> -->
-        <item>show_powermenu</item>
-        <item>show_notifications_panel</item>
-        <item>wifi_toggle</item>
-<!--        <item>ethernet_toggle</item>-->
-        <item>bluetooth_toggle</item>
-        <item>touchpad_toggle</item>
-<!--        <item>launch_settings</item> -->
-        <item>screenshot</item>
-        <item>brightness_down</item>
-        <item>brightness_up</item>
-        <item>brightness_auto</item>
-        <item>media_previous</item>
-        <item>media_next</item>
-        <item>media_playpause</item>
-<!--        <item>audio_down</item>
-        <item>audio_up</item> -->
-        <item>audio_mute</item>
-        <item>screenoff</item>
-
-        <item>splitview_swap</item>
-        <item>splitview_auto</item>
-        <item>splitview_auto3</item>
-        <item>splitview_auto4</item>
-<!--        <item>splitview_1</item>
-        <item>splitview_2</item>
-        <item>relaunch_floating</item>
-        <item>show_hide_all_floating</item>
--->
-        <item>none</item>
-    </string-array>
-    
-
-<!-- styles  -->
-    <declare-styleable name="ActionPreference">
-        <attr name="providerUri" format="reference" />
-    </declare-styleable>
-     
+    -->
 </resources>
 
