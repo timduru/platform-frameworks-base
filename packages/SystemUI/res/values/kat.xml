@@ -3,14 +3,14 @@
 
     <string name="quick_settings_immersive_mode_label">Immersive mode</string>
 
-    <!--  Tuner -->
+<!--  UI Tuner -->
     <string name="kk_ui_battery_title">Battery</string>
     <string name="kk_ui_general_title">General UI settings</string>
 
+
+<!--  NavBar Tuner -->
     <string name="kk_nav_predefined_layouts">Predefined layout:</string>
     <string name="kk_nav_customize_layout">Customize layout:</string>
-
-
 
     <string-array name="kk_ui_mode_entries">
         <item>-- Select --</item>
@@ -29,11 +29,14 @@
 
     <!-- buttons -->
     <string name="nav_btn_switch_label">Switch to previous task</string>
+    <string name="nav_btn_relaunch_floating_label">Relaunch app in floating mode</string>
+    <string name="nav_btn_relaunch_floating_label">Relaunch app in floating mode</string>
 
 
 
 
 
+<!--  TOSORT -->
 
     <!--  Categories -->
     <string name="kk_ui_navbar_title">Navigation Bar</string>

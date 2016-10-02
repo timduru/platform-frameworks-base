@@ -49,11 +49,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
 import android.util.Log;
-import org.meerkats.katkiss.KKC;
 import org.meerkats.katkiss.ActionHandler;
-import org.meerkats.katkiss.CustomObserver;
-import android.net.Uri;
-import java.util.ArrayList;
 import android.app.IActivityManager;
 import android.app.ActivityManagerNative;
 
@@ -61,7 +57,7 @@ import android.app.ActivityManagerNative;
 
 import com.android.systemui.R;
 
-public class KeyButtonView extends ImageView implements CustomObserver.ChangeNotification{
+public class KeyButtonView extends ImageView {
     private static final String TAG = "StatusBar.KeyButtonView";
     private static final boolean DEBUG = false;
 
@@ -76,14 +72,12 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     private AudioManager mAudioManager;
     boolean mCustomLongpressEnabled = false;
     boolean mIsLongPressing = false;
-    String mConfigUri;
     String mDefaultLongClickAction;
     ActionHandler mClickActionHandler;
-    CustomObserver _observer;
     CustomLongClick _customLongClick;
     private boolean mGestureAborted;
     private boolean mLongClicked;
-    
+
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
@@ -104,7 +98,6 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
 
     public KeyButtonView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
-
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.KeyButtonView,
                 defStyle, 0);
 
@@ -121,30 +114,15 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         setLongClickable(true);
 
 
-        mConfigUri = a.getString(R.styleable.KeyButtonView_keyConfigUri);
-        String clickAction = a.getString(R.styleable.KeyButtonView_keyClickAction);
-        if( clickAction != null) mClickActionHandler = new ActionHandler(context, clickAction);
+        setClickAction( a.getString(R.styleable.KeyButtonView_keyClickAction));
+        setLongPressAction(a.getString(R.styleable.KeyButtonView_longPressAction));
 
-        if(mSupportsLongpress) 
-        {
-          _customLongClick = new CustomLongClick(mContext);
-          setOnLongClickListener(_customLongClick);
 
-         mDefaultLongClickAction = a.getString(R.styleable.KeyButtonView_longPressAction);
-
-         _observer = new CustomObserver(context, this);
-         updateCustomConfig();
-
-         mCustomLongpressEnabled = _customLongClick.getAction() != null;
-       }
-
-        
         a.recycle();
 
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         setBackground(new KeyButtonRipple(context, this));
-        
     }    
 
     private class CustomLongClick extends ActionHandler implements View.OnLongClickListener {
@@ -179,18 +157,6 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     }
     
 
-    private void updateCustomConfig() {
-        if(mConfigUri == null || _customLongClick == null) return;
-
-        String action = Settings.System.getString(mContext.getContentResolver(), mConfigUri);
-
-        if(action == null || action.equals("none"))
-                action = mDefaultLongClickAction;
-
-        _customLongClick.setAction(action);
-        mCustomLongpressEnabled = _customLongClick.getAction() != null;
-    }
-    
     public void setCode(int code) {
         mCode = code;
     }
@@ -343,28 +309,13 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
     }
 
   
-// ChangeNotifications
-  @Override
-  public ArrayList<Uri> getObservedUris()
-  {
-    ArrayList<Uri> uris = new  ArrayList<Uri>();
-    uris.add(Settings.System.getUriFor(mConfigUri));
-    return uris;
-  }
-
-  @Override
-  public void onChangeNotification(Uri uri)
-  {
-    Log.d(TAG, "onChangeNotification:" + uri);
-    if(uri.equals(Settings.System.getUriFor(mConfigUri))) updateCustomConfig();
-  }
-
   @Override
   public boolean performClick()
   {
     if(mClickActionHandler != null) mClickActionHandler.executeAllActions();
     return super.performClick();
   }
+
   @Override
   public boolean performLongClick()
   {
@@ -385,6 +336,27 @@ public class KeyButtonView extends ImageView implements CustomObserver.ChangeNot
         setPressed(false);
         mGestureAborted = true;
     }
+
+    public void setClickAction(String action)
+    {
+        if( action != null) mClickActionHandler = new ActionHandler(getContext(), action);
+    }
+
+    public void setLongPressAction(String action)
+    {
+        if(action == null) return;
+
+        if(mSupportsLongpress)
+        {
+            _customLongClick = new CustomLongClick(getContext());
+            setOnLongClickListener(_customLongClick);
+
+            mDefaultLongClickAction = action;
+            _customLongClick.setAction(action);
+            mCustomLongpressEnabled = _customLongClick.getAction() != null;
+        }
+    }
+
 }
 
 

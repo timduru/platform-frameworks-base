@@ -301,7 +301,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
 
     public static float extractSize(String buttonSpec) {
         if (!buttonSpec.contains(SIZE_MOD_START)) {
-            return 1;
+            return 0.5f;
         }
         final int sizeStart = buttonSpec.indexOf(SIZE_MOD_START);
         String sizeStr = buttonSpec.substring(sizeStart + 1, buttonSpec.indexOf(SIZE_MOD_END));
