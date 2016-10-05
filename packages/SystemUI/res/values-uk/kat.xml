@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string name="quick_settings_immersive_mode_label">Розширений екран</string>
+
+<!--  UI Tuner -->
+    <string name="kk_ui_battery_title">Батарея</string>
+        <string name="kk_ui_battery_icon_title">Показати іконку батареї</string>
+        <string name="kk_ui_battery_text_title">Показати відсоток заряду</string>
+        <string name="kk_ui_battery_text_on_icon_title">Показати відсоток заряду в іконці (коли не заряджається чи повністю заряджений)</string>
+        <string name="kk_ui_battery_text_percent_title">Показати %</string>
+
+    <string name="kk_ui_general_title">Загальне</string>
+        <string name="kk_ui_user_immersive_title">Розширений екран</string>
+            <string name="kk_ui_user_immersive_mode">Обов\'язковий розширений екран в додатках</string>
+            <string name="kk_ui_user_immersive_mode_type">Тип розширеного екрана</string>
+            <string name="kk_ui_user_immersive_mode_type_summary">Оберіть яку панель(і) сховати</string>
+            <string name="auto_expanded_desktop_ondock_title">Розширений екран при підключенні Док-станції</string>
+
+            <string-array name="kk_ui_user_immersive_mode_type_entries">
+                <item>Повний - приховати обидві панелі</item>
+                <item>Приховати лише панель сповіщень</item>
+                <item>Приховати лише панель навігації</item>
+            </string-array>
+            <string-array name="kk_ui_user_immersive_mode_type_values">
+                <item>0</item>
+                <item>1</item>
+                <item>2</item>
+            </string-array>
+
+
+
+    <!--  NavBar Tuner -->
+    <string name="kk_nav_predefined_layouts">Поточне розташування:</string>
+    <string name="kk_nav_customize_layout">Змінити розташування:</string>
+
+    <string-array name="kk_ui_mode_entries">
+        <item>-- Обрати --</item>
+        <item>Зліва + збалансовано (за замовчуванням)</item>
+        <item>Зліва</item>
+        <item>За типом Pixel C</item>
+        <item>По центру</item>
+    </string-array>
+    <string-array name="kk_ui_mode_values">
+        <item></item>
+        <item>back[0.5],home[0.5],recent[0.5];space;menu_ime[1.2],recent[0.5],switch_toprevious_task[0.5]</item>
+        <item>back[0.5],home[0.5],recent[0.5],switch_toprevious_task[0.5];space;menu_ime</item>
+        <item>back[0.5],home[0.5];space;menu_ime[1.2],recent[0.5]</item>
+        <item>space;back,home,recent;menu_ime</item>
+    </string-array>
+
+    <!-- buttons -->
+    <string name="nav_btn_switch_label">Перейти до попереднього додатка</string>
+    <string name="nav_btn_relaunch_floating_label">Перезапустити додаток у вікні</string>
+    <string name="nav_btn_kill_process_label">Припинити поточний процес</string>
+
+
+
+
+
+<!--  TOSORT -->
+    <string name="kk_ui_settings">Інтерфейс</string>
+
+    <!--  Categories -->
+<!--    <string name="kk_ui_navbar_title">Панель навігації</string>
+    <string name="kk_ui_misc_title">Інше</string>
+    <string name="kk_ui_clock_title">Час</string>
+    
+    <string name="kk_ui_wallpaper_mode_title">Режим фонового малюнку</string>
+    
+    <string name="kk_ui_clock_time_title">Показати час</string>
+    <string name="kk_ui_clock_date_title">Показати дату</string>
+    
+    <string name="inputmethod_shownotification_title">Показати сповіщення вибору методу вводу</string>
+    <string name="inputmethod_shownotification_summary">Ввімкнути/Вимкнути постійне сповіщення вибору методу вводу</string>
+
+    <string name="add">Додати</string>
+    
+    <string name="enable_panels_dropshadow_title">Ввімкнути затемнення екрану при відкритих панелях</string>
+    -->
+</resources>
+
