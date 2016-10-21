@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.Map.Entry;
+
+import android.app.ActivityOptions;
+import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -244,6 +247,45 @@ public class WMController
 	//		restoreAnimationScales();		
 		}
 
+	public synchronized void switchTopAsFloating()
+	{
+		RunningTaskInfo top =  getTopTask();
+		if(top == null) { Log.w(TAG, "relaunchTopAsFloating: no TopTask"); return; }
+
+		String packageName = top.baseActivity.getPackageName();
+		if(packageName == null) { Log.w(TAG, "relaunchTopAsFloating: no packageName"); return; }
+		Log.d(TAG, "relaunchTopAsFloating: packageName=" + packageName );
+
+		PackageManager pm = _c.getPackageManager();
+		Intent intent = pm.getLaunchIntentForPackage(packageName);
+		if(intent == null) { Log.w(TAG, "relaunchTopAsFloating: no intent for packageName:" + packageName); return; }
+
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		/*
+		intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT|
+				Intent.FLAG_ACTIVITY_MULTIPLE_TASK|
+				Intent.FLAG_ACTIVITY_NEW_TASK); */
+
+		killApp(_c, packageName);
+
+
+
+  AsyncTask.execute(new Runnable() {
+                        public void run()
+                        {
+                                try{Thread.sleep(500);} catch(Exception e) {}
+		Rect rect = new Rect(100, 100, 700, 600); //TODO calc from screen
+		ActivityOptions options = ActivityOptions.makeBasic();
+		ActivityOptions bounds = options.setLaunchBounds(rect);
+		_c.startActivity(intent, bounds.toBundle());
+                        } });
+
+
+		//_c.startActivityAsUser(intent, bounds.toBundle(), UserHandle.CURRENT);
+	}
+
+
 /*
 		public synchronized void refreshTopAndPrevTasks()
 		{
@@ -318,25 +360,6 @@ public class WMController
                 return tasksFound;
         }
 
-	public synchronized void switchTopAsFloating()
-	{
-		RunningTaskInfo top =  getTopTask();
-		if(top == null) { Log.w(TAG, "relaunchTopAsFloating: no TopTask"); return; }
-
-		String packageName = top.baseActivity.getPackageName();
-		if(packageName == null) { Log.w(TAG, "relaunchTopAsFloating: no packageName"); return; }
-		Log.d(TAG, "relaunchTopAsFloating: packageName=" + packageName );
-
-		//killApp(killApp);
-		PackageManager pm = _c.getPackageManager();
-		Intent intent = pm.getLaunchIntentForPackage(packageName);
-		if(intent == null) { Log.w(TAG, "relaunchTopAsFloating: no intent for packageName:" + packageName); return; }
-
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		if(isTopFloating()) killApp(_c, packageName);
-		else intent.addFlags(Intent.FLAG_FLOATING_WINDOW);
-		_c.startActivityAsUser(intent, UserHandle.CURRENT);
-	}
 
 	public synchronized boolean isTopFloating()
 	{
@@ -373,6 +396,7 @@ public class WMController
 	}
 
 */
+
 // ================================================== static
 /*                public synchronized static void showRecentAppsSystemUI()
                 {
@@ -407,5 +431,6 @@ public class WMController
 		
 		       	         	return task.baseActivity.getPackageName();
 				}
+
 
 }

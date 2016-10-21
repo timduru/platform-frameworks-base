@@ -130,11 +130,11 @@ public class ActionHandler {
         	new WMController(mContext).switchTopTaskToSplitView(0);
         else if(action.equals(KKC.A.SPLITVIEW_2))
         	new WMController(mContext).switchTopTaskToSplitView(1);
-        else if(action.equals(KKC.A.RELAUNCH_FLOATING))
-        	new WMController(mContext).switchTopAsFloating();
         else if(action.equals(KKC.A.SHOW_HIDE_ALL_FLOATING))
         	new WMController(mContext).switchAllFloating();
 */
+        else if(action.equals(KKC.A.RELAUNCH_FLOATING))
+            new WMController(mContext).switchTopAsFloating();
 
         else if(action.equals(KKC.A.EXPANDED_DESKTOP))
         	KatUtils.expandedDesktopSwitch(mContext);
