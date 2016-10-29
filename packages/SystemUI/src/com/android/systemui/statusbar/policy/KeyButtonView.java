@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.DrawableRes;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -44,10 +46,12 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.ButtonDispatcher;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
+<<<<<<< HEAD
 import android.util.Log;
 import org.meerkats.katkiss.ActionHandler;
 import android.app.IActivityManager;
@@ -57,7 +61,7 @@ import android.app.ActivityManagerNative;
 
 import com.android.systemui.R;
 
-public class KeyButtonView extends ImageView {
+public class KeyButtonView extends ImageView implements ButtonDispatcher.ButtonInterface {
     private static final String TAG = "StatusBar.KeyButtonView";
     private static final boolean DEBUG = false;
 
@@ -338,6 +342,7 @@ public class KeyButtonView extends ImageView {
   }
 
 
+    @Override
     public void abortCurrentGesture() {
         setPressed(false);
         mGestureAborted = true;
@@ -363,6 +368,25 @@ public class KeyButtonView extends ImageView {
         }
     }
 
+    @Override
+    public void setImageResource(@DrawableRes int resId) {
+        super.setImageResource(resId);
+    }
+
+    @Override
+    public void setImageDrawable(@Nullable Drawable drawable) {
+        super.setImageDrawable(drawable);
+    }
+
+    @Override
+    public void setLandscape(boolean landscape) {
+        //no op
+    }
+
+    @Override
+    public void setCarMode(boolean carMode) {
+        // no op
+    }
 }
 
 

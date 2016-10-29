@@ -259,4 +259,9 @@ public class TvStatusBar extends BaseStatusBar {
         } catch (RemoteException ex) {
         }
     }
+
+    @Override
+    public void handleSystemNavigationKey(int arg1) {
+        // Not implemented
+    }
 }

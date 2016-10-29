@@ -31,5 +31,5 @@
     android:shadowDy="2"
     android:shadowRadius="5"
     android:fontFamily="sans-serif-medium"
-    android:background="?android:selectableItemBackground"
+    android:background="@drawable/recents_stack_action_background"
     android:forceHasOverlappingRendering="false" />
