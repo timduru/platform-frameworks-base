@@ -51,7 +51,6 @@ import com.android.systemui.statusbar.phone.ButtonDispatcher;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
-<<<<<<< HEAD
 import android.util.Log;
 import org.meerkats.katkiss.ActionHandler;
 import android.app.IActivityManager;
