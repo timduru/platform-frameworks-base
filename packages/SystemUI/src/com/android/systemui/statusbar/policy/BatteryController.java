@@ -84,7 +84,7 @@ public class BatteryController extends BroadcastReceiver {
     		{
     			_capacity = readSysIntVal(DOCK_CAPACITY_PATH);
     			_status = readSysStringVal(DOCK_STATUS_PATH);
-    			_present = true;
+    			_present = !_status.equals("Unknown");
     		}
     		catch(Exception e )
     		{_present = false;}
