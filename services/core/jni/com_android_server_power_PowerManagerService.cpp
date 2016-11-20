@@ -106,6 +106,8 @@ static void nativeInit(JNIEnv* env, jobject obj) {
     status_t err = hw_get_module(POWER_HARDWARE_MODULE_ID,
             (hw_module_t const**)&gPowerModule);
     if (!err) {
+        hw_device_t *device = NULL;
+        if(gPowerModule->common.methods->open != NULL) gPowerModule->common.methods->open((hw_module_t const*)gPowerModule, POWER_HARDWARE_MODULE_ID, &device);
         gPowerModule->init(gPowerModule);
     } else {
         ALOGE("Couldn't load %s module (%s)", POWER_HARDWARE_MODULE_ID, strerror(-err));
