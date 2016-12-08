@@ -79,6 +79,7 @@ public class KeyButtonView extends ImageView implements ButtonDispatcher.ButtonI
     CustomLongClick _customLongClick;
     private boolean mGestureAborted;
     private boolean mLongClicked;
+    private OnClickListener mOnClickListener;
 
     static AudioManager mAudioManager;
     static AudioManager getAudioManager(Context context) {
@@ -170,6 +171,12 @@ public class KeyButtonView extends ImageView implements ButtonDispatcher.ButtonI
         mCode = code;
     }
 
+    @Override
+    public void setOnClickListener(OnClickListener onClickListener) {
+        super.setOnClickListener(onClickListener);
+        mOnClickListener = onClickListener;
+    }
+
     public void loadAsync(String uri) {
         new AsyncTask<String, Void, Drawable>() {
             @Override
@@ -251,6 +258,7 @@ public class KeyButtonView extends ImageView implements ButtonDispatcher.ButtonI
                     // Provide the same haptic feedback that the system offers for virtual keys.
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 }
+                playSoundEffect(SoundEffectConstants.CLICK);
                 removeCallbacks(mCheckLongPress);
                 postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
                 break;
@@ -279,14 +287,13 @@ public class KeyButtonView extends ImageView implements ButtonDispatcher.ButtonI
                     if (doIt & !mIsLongPressing) {
                         sendEvent(KeyEvent.ACTION_UP, 0);
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
-                        playSoundEffect(SoundEffectConstants.CLICK);
                     } else {
                         sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
                     }
                 } else {
                     // no key code, just a regular ImageView
-                    if (doIt & !mIsLongPressing) {
-                        performClick();
+                    if (doIt && !mIsLongPressing) {
+                        localClick();
                     }
                 }
                 if (mSupportsLongpress) {
@@ -318,11 +325,12 @@ public class KeyButtonView extends ImageView implements ButtonDispatcher.ButtonI
     }
 
   
-  @Override
-  public boolean performClick()
+  public void localClick()
   {
     if(mClickActionHandler != null) mClickActionHandler.executeAllActions();
-    return super.performClick();
+    if(mOnClickListener == null) return;
+    mOnClickListener.onClick(this);
+    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
   }
 
   @Override

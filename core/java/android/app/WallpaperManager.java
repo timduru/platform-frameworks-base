@@ -913,7 +913,7 @@ public class WallpaperManager {
      * wallpaper.
      */
     public void setResource(@RawRes int resid) throws IOException {
-        setResource(resid, FLAG_SYSTEM);
+        setResource(resid, FLAG_SYSTEM | FLAG_LOCK);
     }
 
     /**
@@ -1019,7 +1019,7 @@ public class WallpaperManager {
      */
     public int setBitmap(Bitmap fullImage, Rect visibleCropHint, boolean allowBackup)
             throws IOException {
-        return setBitmap(fullImage, visibleCropHint, allowBackup, FLAG_SYSTEM);
+        return setBitmap(fullImage, visibleCropHint, allowBackup, FLAG_SYSTEM | FLAG_LOCK);
     }
 
     /**
@@ -1157,7 +1157,7 @@ public class WallpaperManager {
      */
     public int setStream(InputStream bitmapData, Rect visibleCropHint, boolean allowBackup)
             throws IOException {
-        return setStream(bitmapData, visibleCropHint, allowBackup, FLAG_SYSTEM);
+        return setStream(bitmapData, visibleCropHint, allowBackup, FLAG_SYSTEM | FLAG_LOCK);
     }
 
     /**
@@ -1396,6 +1396,7 @@ public class WallpaperManager {
      */
     @SystemApi
     public void clearWallpaper() {
+        clearWallpaper(FLAG_LOCK, mContext.getUserId());
         clearWallpaper(FLAG_SYSTEM, mContext.getUserId());
     }
 

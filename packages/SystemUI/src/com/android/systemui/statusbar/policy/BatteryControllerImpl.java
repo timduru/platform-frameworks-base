@@ -55,6 +55,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     protected boolean mCharged;
     protected boolean mPowerSave;
     private boolean mTestmode = false;
+    private boolean mHasReceivedBattery = false;
 
     private DockBatteryRefresh mRefreshDockThread;
     private boolean hasDockBattery = SystemProperties.getInt("ro.nodockbattery", 0) != 1;
@@ -105,6 +106,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         synchronized (mChangeCallbacks) {
             mChangeCallbacks.add(cb);
         }
+        if (!mHasReceivedBattery) return;
         cb.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
         cb.onPowerSaveChanged(mPowerSave);
     }
@@ -135,6 +137,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
             if (mTestmode && !intent.getBooleanExtra("testmode", false)) return;
+            mHasReceivedBattery = true;
             mLevel = (int)(100f
                     * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                     / intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
