@@ -42,6 +42,7 @@ public class KatSwitch extends SwitchPreference {
     @Override
     public void onAttached() {
         super.onAttached();
+        setChecked( Settings.System.getInt( mResolver, getKey(), 1) == 1);
     }
 
     @Override
