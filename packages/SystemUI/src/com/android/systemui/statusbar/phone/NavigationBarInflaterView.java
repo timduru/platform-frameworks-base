@@ -32,6 +32,8 @@ import com.android.systemui.kat.KatCustomNavBar;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
 
+import com.android.systemui.kat.KatCustomNavBar.ButtonInfo;
+
 import java.util.Objects;
 
 public class NavigationBarInflaterView extends FrameLayout implements TunerService.Tunable {
@@ -57,6 +59,8 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     public static final String KEY_CODE_START = "(";
     public static final String KEY_IMAGE_DELIM = ":";
     public static final String KEY_CODE_END = ")";
+
+    public static final String EXTRA = "|";
 
     protected LayoutInflater mLayoutInflater;
     protected LayoutInflater mLandscapeInflater;
@@ -241,47 +245,34 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             return new LinearLayout.LayoutParams(layoutParams.width, layoutParams.height,
                     ((LinearLayout.LayoutParams) layoutParams).weight);
         }
-        return new LayoutParams(layoutParams.width, layoutParams.height);
-    }
+		return new LayoutParams(layoutParams.width, layoutParams.height);
+	    }
 
-    @Nullable
-    protected View inflateButton(String buttonSpec, ViewGroup parent, boolean landscape,
-            int indexInParent) {
-        LayoutInflater inflater = landscape ? mLandscapeInflater : mLayoutInflater;
-        float size = extractSize(buttonSpec);
-        String button = extractButton(buttonSpec);
-        View v = null;
-        if (HOME.equals(button)) {
-            v = inflater.inflate(R.layout.home, parent, false);
-            if (landscape && isSw600Dp()) {
-                setupLandButton(v);
+	    @Nullable
+	    protected View inflateButton(String buttonSpecWithExtra, ViewGroup parent, boolean landscape,
+		    int indexInParent) {
+		LayoutInflater inflater = landscape ? mLandscapeInflater : mLayoutInflater;
+
+		String buttonSpec = extractExtra(buttonSpecWithExtra, true); // strip EXTRA
+		String extra = extractExtra(buttonSpecWithExtra, false);
+
+		float size = extractSize(buttonSpec);
+		String button = extractButton(buttonSpec);
+		View v = mKatCustomNavBar.inflateButton(button, inflater, buttonSpec, extra, parent, landscape, indexInParent);
+	if (HOME.equals(button) || BACK.equals(button) || RECENT.equals(button)) {
+	    if (landscape && isSw600Dp()) {
+		setupLandButton(v);
             }
-        } else if (BACK.equals(button)) {
-            v = inflater.inflate(R.layout.back, parent, false);
-            if (landscape && isSw600Dp()) {
-                setupLandButton(v);
-            }
-        } else if (RECENT.equals(button)) {
-            v = inflater.inflate(R.layout.recent_apps, parent, false);
-            if (landscape && isSw600Dp()) {
-                setupLandButton(v);
-            }
-        } else if (MENU_IME.equals(button)) {
-            v = inflater.inflate(R.layout.menu_ime, parent, false);
         } else if (NAVSPACE.equals(button)) {
             v = inflater.inflate(R.layout.nav_key_space, parent, false);
-        } else if (CLIPBOARD.equals(button)) {
-            v = inflater.inflate(R.layout.clipboard, parent, false);
         } else if (button.startsWith(KEY)) {
             String uri = extractImage(button);
             int code = extractKeycode(button);
-            v = inflater.inflate(R.layout.custom_key, parent, false);
             ((KeyButtonView) v).setCode(code);
             if (uri != null) {
                 ((KeyButtonView) v).loadAsync(uri);
             }
         } else {
-            v = mKatCustomNavBar.inflateButton(button, inflater, buttonSpec, parent, landscape, indexInParent);
             if (v == null) return null;
             if (landscape && isSw600Dp())   setupLandButton(v);
         }
@@ -332,11 +323,21 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     }
 
     public static String extractButton(String buttonSpec) {
-        if (!buttonSpec.contains(SIZE_MOD_START)) {
+        if (!buttonSpec.contains(SIZE_MOD_START) && !buttonSpec.contains(EXTRA)) {
             return buttonSpec;
         }
-        return buttonSpec.substring(0, buttonSpec.indexOf(SIZE_MOD_START));
+	int end = buttonSpec.indexOf(SIZE_MOD_START);
+	if(end == -1) end = buttonSpec.indexOf(EXTRA);
+        return buttonSpec.substring(0, end);
     }
+
+  public static String extractExtra(String buttonSpec, boolean stripExtra) {
+       String[] spec_extra =  buttonSpec.split("\\" + EXTRA);
+       if(stripExtra) return spec_extra[0];
+       else if (spec_extra.length >= 2) return spec_extra[1];
+       else return null;
+    }
+
 
     private void addToDispatchers(View v, boolean landscape) {
         if (mButtonDispatchers != null) {

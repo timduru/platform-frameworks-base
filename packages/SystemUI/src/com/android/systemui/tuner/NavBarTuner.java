@@ -223,21 +223,8 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
     }
 
     private static CharSequence getLabel(String button, Context context) {
-        if (button.startsWith(HOME)) {
-            return context.getString(R.string.accessibility_home);
-        } else if (button.startsWith(BACK)) {
-            return context.getString(R.string.accessibility_back);
-        } else if (button.startsWith(RECENT)) {
-            return context.getString(R.string.accessibility_recent);
-        } else if (button.startsWith(NAVSPACE)) {
+        if (button.startsWith(NAVSPACE))
             return context.getString(R.string.space);
-        } else if (button.startsWith(MENU_IME)) {
-            return context.getString(R.string.menu_ime);
-        } else if (button.startsWith(CLIPBOARD)) {
-            return context.getString(R.string.clipboard);
-        } else if (button.startsWith(KEY)) {
-            return context.getString(R.string.keycode);
-        }
         else return new KatCustomNavBar().getLabel( NavigationBarInflaterView.extractButton(button), context );
     }
 

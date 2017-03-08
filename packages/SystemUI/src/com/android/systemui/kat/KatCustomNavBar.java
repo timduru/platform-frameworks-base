@@ -16,13 +16,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import com.android.systemui.statusbar.phone.NavigationBarInflaterView;
 
 
 public class KatCustomNavBar
 {
     private HashMap<String, ButtonInfo> _buttonsInfo = new HashMap<>();
 
-    class ButtonInfo
+    public class ButtonInfo
     {
         public String name;
         public int labelID;
@@ -41,6 +42,21 @@ public class KatCustomNavBar
     public KatCustomNavBar() {
         String name = "";
 
+// Native Buttons
+        name = NavigationBarInflaterView.BACK;
+        _buttonsInfo.put(name,  new ButtonInfo(null, R.string.accessibility_back, 0, R.layout.back));
+        name = NavigationBarInflaterView.HOME;
+        _buttonsInfo.put(name,  new ButtonInfo(null, R.string.accessibility_home, 0, R.layout.home));
+        name = NavigationBarInflaterView.RECENT;
+        _buttonsInfo.put(name,  new ButtonInfo(null, R.string.accessibility_recent, 0, R.layout.recent_apps));
+        name = NavigationBarInflaterView.MENU_IME;
+        _buttonsInfo.put(name,  new ButtonInfo(null, R.string.menu_ime, 0, R.layout.menu_ime));
+        name = NavigationBarInflaterView.CLIPBOARD;
+        _buttonsInfo.put(name,  new ButtonInfo(null, R.string.clipboard, 0, R.layout.clipboard));
+        name = NavigationBarInflaterView.KEY;
+        _buttonsInfo.put(name,  new ButtonInfo(null, R.string.keycode, 0, R.layout.custom_key));
+
+//KK Buttons
         name = "switch_toprevious_task";
         _buttonsInfo.put(name,  new ButtonInfo(name, R.string.nav_btn_switch_label, R.drawable.ic_sysbar_switch_toprevious_task, 0));
         name = "expanded_desktop";
@@ -59,19 +75,24 @@ public class KatCustomNavBar
          return fullList.toArray(new String[fullList.size()]);
     }
 
-    public View inflateButton(String name, LayoutInflater inflater, String buttonSpec, ViewGroup parent, boolean landscape, int indexInParent)
+    public View inflateButton(String name, LayoutInflater inflater, String buttonSpec, String extra, ViewGroup parent, boolean landscape, int indexInParent)
     {
         View v = null;
 
-        ButtonInfo info = _buttonsInfo.get(name);
-        if(info != null) v = inflater.inflate(info.layoutID, parent, false);
+        ButtonInfo info = null;
+        if(name.startsWith(NavigationBarInflaterView.KEY)) info = _buttonsInfo.get(NavigationBarInflaterView.KEY);
+        else info = _buttonsInfo.get(name);
+
+        if(info == null) return null; 
+
+        v = inflater.inflate(info.layoutID, parent, false);
 
         if(v instanceof KeyButtonView)
         {
             KeyButtonView btn = ((KeyButtonView) v);
             if(info.imageID != 0) btn.setImageResource(info.imageID);
-            btn.setClickAction(info.name);
-            //btn.setLongPressAction("killcurrent");
+            if(info.name != null) btn.setClickAction(info.name);
+            if(extra != null && !extra.equals("")) btn.setLongPressAction(extra);
         }
 
         return v;
@@ -83,5 +104,4 @@ public class KatCustomNavBar
         if(info != null) return context.getString(info.labelID);
         else return name;
     }
-
 }
