@@ -32,7 +32,7 @@ import com.android.systemui.kat.KatCustomNavBar;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
 
-import com.android.systemui.kat.KatCustomNavBar.ButtonInfo;
+import com.android.systemui.kat.ButtonSpec;
 
 import java.util.Objects;
 
@@ -48,19 +48,8 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     public static final String RECENT = "recent";
     public static final String NAVSPACE = "space";
     public static final String CLIPBOARD = "clipboard";
-    public static final String KEY = "key";
-
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
-
-    public static final String SIZE_MOD_START = "[";
-    public static final String SIZE_MOD_END = "]";
-
-    public static final String KEY_CODE_START = "(";
-    public static final String KEY_IMAGE_DELIM = ":";
-    public static final String KEY_CODE_END = ")";
-
-    public static final String EXTRA = "|";
 
     protected LayoutInflater mLayoutInflater;
     protected LayoutInflater mLandscapeInflater;
@@ -253,22 +242,18 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
 		    int indexInParent) {
 		LayoutInflater inflater = landscape ? mLandscapeInflater : mLayoutInflater;
 
-		String buttonSpec = extractExtra(buttonSpecWithExtra, true); // strip EXTRA
-		String extra = extractExtra(buttonSpecWithExtra, false);
-
-		float size = extractSize(buttonSpec);
-		String button = extractButton(buttonSpec);
-		View v = mKatCustomNavBar.inflateButton(button, inflater, buttonSpec, extra, parent, landscape, indexInParent);
+		ButtonSpec btn = new ButtonSpec(buttonSpecWithExtra);
+		String button = btn.button;
+		View v = mKatCustomNavBar.inflateButton(button, inflater, btn.extra, parent, landscape, indexInParent);
 	if (HOME.equals(button) || BACK.equals(button) || RECENT.equals(button)) {
 	    if (landscape && isSw600Dp()) {
 		setupLandButton(v);
             }
         } else if (NAVSPACE.equals(button)) {
             v = inflater.inflate(R.layout.nav_key_space, parent, false);
-        } else if (button.startsWith(KEY)) {
-            String uri = extractImage(button);
-            int code = extractKeycode(button);
-            ((KeyButtonView) v).setCode(code);
+        } else if (button.startsWith(ButtonSpec.KEY)) {
+            String uri = btn.image;
+            ((KeyButtonView) v).setCode(btn.keyCode);
             if (uri != null) {
                 ((KeyButtonView) v).loadAsync(uri);
             }
@@ -277,9 +262,9 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             if (landscape && isSw600Dp())   setupLandButton(v);
         }
 
-        if (size != 0) {
+        if (btn.size != 0) {
             ViewGroup.LayoutParams params = v.getLayoutParams();
-            params.width = (int) (params.width * size);
+            params.width = (int) (params.width * btn.size);
         }
         parent.addView(v);
         addToDispatchers(v, landscape);
@@ -293,49 +278,6 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             mLastRot0 = v;
         }
         return v;
-    }
-
-    public static String extractImage(String buttonSpec) {
-        if (!buttonSpec.contains(KEY_IMAGE_DELIM)) {
-            return null;
-        }
-        final int start = buttonSpec.indexOf(KEY_IMAGE_DELIM);
-        String subStr = buttonSpec.substring(start + 1, buttonSpec.indexOf(KEY_CODE_END));
-        return subStr;
-    }
-
-    public static int extractKeycode(String buttonSpec) {
-        if (!buttonSpec.contains(KEY_CODE_START)) {
-            return 1;
-        }
-        final int start = buttonSpec.indexOf(KEY_CODE_START);
-        String subStr = buttonSpec.substring(start + 1, buttonSpec.indexOf(KEY_IMAGE_DELIM));
-        return Integer.parseInt(subStr);
-    }
-
-    public static float extractSize(String buttonSpec) {
-        if (!buttonSpec.contains(SIZE_MOD_START)) {
-            return 0.5f;
-        }
-        final int sizeStart = buttonSpec.indexOf(SIZE_MOD_START);
-        String sizeStr = buttonSpec.substring(sizeStart + 1, buttonSpec.indexOf(SIZE_MOD_END));
-        return Float.parseFloat(sizeStr);
-    }
-
-    public static String extractButton(String buttonSpec) {
-        if (!buttonSpec.contains(SIZE_MOD_START) && !buttonSpec.contains(EXTRA)) {
-            return buttonSpec;
-        }
-	int end = buttonSpec.indexOf(SIZE_MOD_START);
-	if(end == -1) end = buttonSpec.indexOf(EXTRA);
-        return buttonSpec.substring(0, end);
-    }
-
-  public static String extractExtra(String buttonSpec, boolean stripExtra) {
-       String[] spec_extra =  buttonSpec.split("\\" + EXTRA);
-       if(stripExtra) return spec_extra[0];
-       else if (spec_extra.length >= 2) return spec_extra[1];
-       else return null;
     }
 
 

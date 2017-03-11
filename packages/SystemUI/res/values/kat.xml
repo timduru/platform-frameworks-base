@@ -83,5 +83,7 @@
     
     <string name="enable_panels_dropshadow_title">Enable Screen Shadow When Panels Expanded (PhabletUI)</string>
     -->
+
+    <string name="long_press">LP</string>
 </resources>
 

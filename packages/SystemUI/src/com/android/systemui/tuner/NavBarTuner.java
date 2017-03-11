@@ -62,20 +62,13 @@ import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.BUT
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.CLIPBOARD;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.GRAVITY_SEPARATOR;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.HOME;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY_CODE_END;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY_CODE_START;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY_IMAGE_DELIM;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.MENU_IME;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.NAVSPACE;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.NAV_BAR_VIEWS;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.RECENT;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_END;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_START;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractButton;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractSize;
 
 import com.android.systemui.kat.KatCustomNavBar;
+import com.android.systemui.kat.ButtonSpec;
 
 
 public class NavBarTuner extends Fragment implements TunerService.Tunable {
@@ -90,6 +83,8 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
     private NavBarAdapter mNavBarAdapter;
     private PreviewNavInflater mPreview;
     private Spinner mPredefinedLayouts;
+
+    private static final int ACTION_PICKER_REQ = 100;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -179,8 +174,8 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         mNavBarAdapter.clear();
         for (int i = 0; i < views.length; i++) {
             mNavBarAdapter.addButton(groups[i], groupLabels[i]);
-            for (String button : views[i].split(BUTTON_SEPARATOR)) {
-                mNavBarAdapter.addButton(button, getLabel(button, context));
+            for (String buttonSpec : views[i].split(BUTTON_SEPARATOR)) {
+                mNavBarAdapter.addButton(buttonSpec, getLabel(buttonSpec, context));
             }
         }
         mNavBarAdapter.addButton(NavBarAdapter.ADD, getString(R.string.add_button));
@@ -222,10 +217,10 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         return super.onOptionsItemSelected(item);
     }
 
-    private static CharSequence getLabel(String button, Context context) {
-        if (button.startsWith(NAVSPACE))
+    private static CharSequence getLabel(String buttonSpec, Context context) {
+        if (buttonSpec.startsWith(NAVSPACE))
             return context.getString(R.string.space);
-        else return new KatCustomNavBar().getLabel( NavigationBarInflaterView.extractButton(button), context );
+        else return new KatCustomNavBar().getLabel( new ButtonSpec(buttonSpec).button, context );
     }
 
     private static class Holder extends RecyclerView.ViewHolder {
@@ -276,6 +271,8 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
             final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION);
             getContext().getContentResolver().takePersistableUriPermission(uri, takeFlags);
             mNavBarAdapter.onImageSelected(uri);
+        } else if(requestCode == ACTION_PICKER_REQ &&  resultCode == Activity.RESULT_OK && data != null) {
+          mNavBarAdapter.handleActionPickerResult(data);
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
@@ -299,6 +296,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         private int mButtonLayout;
         private ItemTouchHelper mTouchHelper;
 
+        private int mCurrent = -1;
         // Stored keycode while we wait for image selection on a KEY.
         private int mKeycode;
 
@@ -423,8 +421,15 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         private void bindButton(final Holder holder, int position) {
             holder.itemView.findViewById(android.R.id.icon_frame).setVisibility(View.GONE);
             holder.itemView.findViewById(android.R.id.summary).setVisibility(View.GONE);
+
+            ButtonSpec btn = new ButtonSpec( mButtons.get(holder.getAdapterPosition()) );
+            boolean gone = btn.button.startsWith(NavigationBarInflaterView.NAVSPACE) || btn.button.startsWith(ButtonSpec.KEY);
+            holder.itemView.findViewById(R.id.long_press_divider).setVisibility(gone ? View.GONE:View.VISIBLE);
+            holder.itemView.findViewById(R.id.long_press).setVisibility(gone ? View.GONE:View.VISIBLE);
+
             bindClick(holder.itemView.findViewById(R.id.close), holder);
             bindClick(holder.itemView.findViewById(R.id.width), holder);
+            bindClick(holder.itemView.findViewById(R.id.long_press), holder);
             holder.itemView.findViewById(R.id.drag).setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
@@ -436,7 +441,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
 
         private void showAddDialog(final Context context) {
             final String[] options =  new KatCustomNavBar().getButtonList(
-                                                new String[] { BACK, HOME, RECENT, MENU_IME, NAVSPACE, CLIPBOARD, KEY, }
+                                                new String[] { BACK, HOME, RECENT, MENU_IME, NAVSPACE, CLIPBOARD, ButtonSpec.KEY, }
                                                );
             final CharSequence[] labels = new CharSequence[options.length];
             for (int i = 0; i < options.length; i++) {
@@ -447,7 +452,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
                     .setItems(labels, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (KEY.equals(options[which])) {
+                            if (ButtonSpec.KEY.equals(options[which])) {
                                 showKeyDialogs(context);
                             } else {
                                 int index = mButtons.size() - 1;
@@ -465,9 +470,9 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
 
         private void onImageSelected(Uri uri) {
             int index = mButtons.size() - 1;
-            mButtons.add(index, KEY + KEY_CODE_START + mKeycode + KEY_IMAGE_DELIM + uri.toString()
-                    + KEY_CODE_END);
-            mLabels.add(index, getLabel(KEY, getContext()));
+            mButtons.add(index, ButtonSpec.KEY + ButtonSpec.KEY_CODE_START + mKeycode + ButtonSpec.KEY_IMAGE_DELIM + uri.toString()
+                    + ButtonSpec.KEY_CODE_END);
+            mLabels.add(index, getLabel(ButtonSpec.KEY, getContext()));
 
             notifyItemInserted(index);
             notifyChanged();
@@ -513,6 +518,8 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
             Holder holder = (Holder) v.getTag();
             if (v.getId() == R.id.width) {
                 showWidthDialog(holder, v.getContext());
+            } else if (v.getId() == R.id.long_press) {
+                showLongPressDialog(holder, v.getContext());
             } else if (v.getId() == R.id.close) {
                 int position = holder.getAdapterPosition();
                 mButtons.remove(position);
@@ -522,9 +529,25 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
             }
         }
 
+        private void showLongPressDialog(final Holder holder, Context context) {
+            mCurrent = holder.getAdapterPosition();
+            final Intent intent = new Intent();
+            intent.setClassName("com.android.settings","com.android.settings.katkiss.ActionPickerActivity");
+            startActivityForResult(intent, ACTION_PICKER_REQ);
+        }
+
+       public void handleActionPickerResult(Intent data) {
+            ButtonSpec btn = new ButtonSpec( mButtons.get(mCurrent) );
+            btn.extra = data.getStringExtra("action");
+            if(btn.extra.equals("none")) btn.extra  = null;
+            mButtons.set(mCurrent, btn.getSpec());
+            notifyChanged();
+       }
+
         private void showWidthDialog(final Holder holder, Context context) {
-            final String buttonSpec = mButtons.get(holder.getAdapterPosition());
-            float amount = extractSize(buttonSpec);
+            ButtonSpec btn = new ButtonSpec( mButtons.get(holder.getAdapterPosition()) );
+
+            float amount = btn.size;
             final AlertDialog dialog = new AlertDialog.Builder(context)
                     .setTitle(R.string.adjust_button_width)
                     .setView(R.layout.nav_width_view)
@@ -534,14 +557,13 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface d, int which) {
-                            final String button = extractButton(buttonSpec);
                             SeekBar seekBar = (SeekBar) dialog.findViewById(R.id.seekbar);
                             if (seekBar.getProgress() == 75) {
-                                mButtons.set(holder.getAdapterPosition(), button);
+                                mButtons.set(holder.getAdapterPosition(), btn.button);
                             } else {
                                 float amount = (seekBar.getProgress() + 25) / 100f;
-                                mButtons.set(holder.getAdapterPosition(), button
-                                        + SIZE_MOD_START + amount + SIZE_MOD_END);
+                                btn.size = amount;
+                                mButtons.set(holder.getAdapterPosition(), btn.getSpec()); 
                             }
                             notifyChanged();
                         }

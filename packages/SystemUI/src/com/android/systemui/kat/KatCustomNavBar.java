@@ -53,7 +53,7 @@ public class KatCustomNavBar
         _buttonsInfo.put(name,  new ButtonInfo(null, R.string.menu_ime, 0, R.layout.menu_ime));
         name = NavigationBarInflaterView.CLIPBOARD;
         _buttonsInfo.put(name,  new ButtonInfo(null, R.string.clipboard, 0, R.layout.clipboard));
-        name = NavigationBarInflaterView.KEY;
+        name = ButtonSpec.KEY;
         _buttonsInfo.put(name,  new ButtonInfo(null, R.string.keycode, 0, R.layout.custom_key));
 
 //KK Buttons
@@ -75,12 +75,12 @@ public class KatCustomNavBar
          return fullList.toArray(new String[fullList.size()]);
     }
 
-    public View inflateButton(String name, LayoutInflater inflater, String buttonSpec, String extra, ViewGroup parent, boolean landscape, int indexInParent)
+    public View inflateButton(String name, LayoutInflater inflater, String extra, ViewGroup parent, boolean landscape, int indexInParent)
     {
         View v = null;
 
         ButtonInfo info = null;
-        if(name.startsWith(NavigationBarInflaterView.KEY)) info = _buttonsInfo.get(NavigationBarInflaterView.KEY);
+        if(name.startsWith(ButtonSpec.KEY)) info = _buttonsInfo.get(ButtonSpec.KEY);
         else info = _buttonsInfo.get(name);
 
         if(info == null) return null; 
