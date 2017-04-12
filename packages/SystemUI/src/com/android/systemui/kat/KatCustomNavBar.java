@@ -75,7 +75,7 @@ public class KatCustomNavBar
          return fullList.toArray(new String[fullList.size()]);
     }
 
-    public View inflateButton(String name, LayoutInflater inflater, String extra, ViewGroup parent, boolean landscape, int indexInParent)
+    public View inflateButton(String name, LayoutInflater inflater, String extra, ViewGroup parent, boolean landscape)
     {
         View v = null;
 
