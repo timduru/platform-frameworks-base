@@ -63,6 +63,8 @@ public class KatCustomNavBar
         _buttonsInfo.put(name,  new ButtonInfo(name, R.string.quick_settings_immersive_mode_label, R.drawable.ic_navbar_immersive, 0));
         name = "killcurrent";
         _buttonsInfo.put(name,  new ButtonInfo(name, R.string.nav_btn_kill_process_label, R.drawable.ic_close_white, 0));
+        name = "wifi_toggle";
+        _buttonsInfo.put(name,  new ButtonInfo(name, R.string.nav_btn_wifi_label, R.drawable.ic_qs_wifi_full_4, 0));
 //        name = "relaunch_floating";
 //        _buttonsInfo.put(name,  new ButtonInfo(name, R.string.nav_btn_relaunch_floating_label, R.drawable.ic_sysbar_splitview_auto, 0));
     }

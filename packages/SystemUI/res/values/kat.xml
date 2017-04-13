@@ -57,6 +57,7 @@
     <string name="nav_btn_switch_label">Switch to previous task</string>
     <string name="nav_btn_relaunch_floating_label">Relaunch app in floating mode</string>
     <string name="nav_btn_kill_process_label">Kill Current Process</string>
+    <string name="nav_btn_wifi_label">Wifi On/Off</string>
 
 
 
