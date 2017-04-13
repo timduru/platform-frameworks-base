@@ -57,6 +57,10 @@ static const char* kPathWhitelist[] = {
   "/dev/urandom",
   "/dev/ion",
   "/dev/dri/renderD129", // Fixes b/31172436
+
+  "/dev/console",
+  "/dev/knvmap",
+  "/dev/nvhost-ctrl",
 };
 
 static const char* kFdPath = "/proc/self/fd";
