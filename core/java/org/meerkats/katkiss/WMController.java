@@ -33,6 +33,13 @@ import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.statusbar.IStatusBarService;
 
+import android.graphics.Point;
+import android.view.Display;
+import android.view.WindowManager;
+
+
+
+
 public class WMController 
 {
 	public static final boolean DEBUG = true;
@@ -275,9 +282,8 @@ public class WMController
                         public void run()
                         {
                                 try{Thread.sleep(500);} catch(Exception e) {}
-		Rect rect = new Rect(100, 100, 700, 600); //TODO calc from screen
 		ActivityOptions options = ActivityOptions.makeBasic();
-		ActivityOptions bounds = options.setLaunchBounds(rect);
+		ActivityOptions bounds = options.setLaunchBounds(getDefaultFreeformWindowSize(_c));
 		_c.startActivity(intent, bounds.toBundle());
                         } });
 
@@ -433,4 +439,12 @@ public class WMController
 				}
 
 
+                public synchronized static Rect getDefaultFreeformWindowSize(Context c)
+                {
+			Point screenSize = new Point();
+			WindowManager wm = (WindowManager) c.getSystemService(Context.WINDOW_SERVICE);
+			Display d = wm.getDefaultDisplay();
+			d.getRealSize(screenSize);
+			return new Rect(100, 100, screenSize.x/2, screenSize.y/2);
+                }
 }

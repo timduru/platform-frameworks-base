@@ -61,6 +61,8 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
+import org.meerkats.katkiss.WMController;
+
 /* The task bar view */
 public class TaskViewHeader extends FrameLayout
         implements View.OnClickListener, View.OnLongClickListener {
@@ -621,7 +623,12 @@ public class TaskViewHeader extends FrameLayout
                     Constants.Metrics.DismissSourceHeaderButton);
         } else if (v == mMoveTaskButton) {
             TaskView tv = Utilities.findParent(this, TaskView.class);
-            EventBus.getDefault().send(new LaunchTaskEvent(tv, mTask, null,
+
+            Rect bounds = mMoveTaskTargetStackId == FREEFORM_WORKSPACE_STACK_ID
+                    ? WMController.getDefaultFreeformWindowSize(getContext())
+                    : new Rect();
+
+            EventBus.getDefault().send(new LaunchTaskEvent(tv, mTask, bounds,
                     mMoveTaskTargetStackId, false));
         } else if (v == mAppInfoView) {
             EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
