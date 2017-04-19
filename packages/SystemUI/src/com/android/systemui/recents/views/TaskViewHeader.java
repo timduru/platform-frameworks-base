@@ -359,10 +359,10 @@ public class TaskViewHeader extends FrameLayout
         mTitleView.setVisibility(showTitle ? View.VISIBLE : View.INVISIBLE);
         if (mMoveTaskButton != null) {
             mMoveTaskButton.setVisibility(showMoveIcon ? View.VISIBLE : View.INVISIBLE);
-            mMoveTaskButton.setTranslationX(rightInset);
+            mMoveTaskButton.setTranslationX(rightInset - mHeaderButtonPadding);
         }
         mDismissButton.setVisibility(showDismissIcon ? View.VISIBLE : View.INVISIBLE);
-        mDismissButton.setTranslationX(rightInset);
+        mDismissButton.setTranslationX(rightInset - mHeaderButtonPadding);
 
         setLeftTopRightBottom(0, 0, width, getMeasuredHeight());
     }
