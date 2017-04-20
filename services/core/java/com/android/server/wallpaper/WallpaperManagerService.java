@@ -111,9 +111,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+import android.os.SystemProperties;
+
 public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperManagerService";
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = true;
 
     public static class Lifecycle extends SystemService {
         private WallpaperManagerService mService;
@@ -432,9 +434,22 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         if (DEBUG) {
                             Slog.v(TAG, "scale " + heightR + ", extracting " + cropHint);
                         }
-                        final int destWidth = (int)(cropHint.width() * heightR);
+
+                        int openGLMax = 0;
+                        try { openGLMax = SystemProperties.getInt("sys.max_texture_size", 0); } catch (Exception e) { }
+                        int destWidth = (int)(cropHint.width() * heightR);
+                        int destHeight = wallpaper.height;
+                        if(openGLMax !=0 && destWidth > openGLMax) { 
+                            Slog.w(TAG, "generateCrop: destWidth: " + destWidth + " > openGLMax: "+openGLMax );
+                            destWidth = openGLMax;
+                            final float ratio = (float)cropHint.height() / (float)cropHint.width(); // real image ratio, wallpaper.height and wallpaper.width are max suggested values, not the real wallpaper ratio
+                            destHeight = (int)((destWidth * ratio) + 0.5);
+                            Slog.d(TAG, "generateCrop: destWidth: " + destWidth); 
+                            Slog.d(TAG, "generateCrop: destHeight: " + destHeight); 
+                        }
+
                         final Bitmap finalCrop = Bitmap.createScaledBitmap(cropped,
-                                destWidth, wallpaper.height, true);
+                                destWidth, destHeight, true);
                         if (DEBUG) {
                             Slog.v(TAG, "Final extract:");
                             Slog.v(TAG, "  dims: w=" + wallpaper.width
@@ -1230,6 +1245,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     public void setDimensionHints(int width, int height, String callingPackage)
             throws RemoteException {
+        Slog.d(TAG, callingPackage + " called setDimensionHints: width x height: " + width + " x "+height );
         checkPermission(android.Manifest.permission.SET_WALLPAPER_HINTS);
         if (!isWallpaperSupported(callingPackage)) {
             return;
@@ -1244,6 +1260,26 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             Point displaySize = getDefaultDisplaySize();
             width = Math.max(width, displaySize.x);
             height = Math.max(height, displaySize.y);
+
+            int openGLMax = 0;
+            try { openGLMax = SystemProperties.getInt("sys.max_texture_size", 0); } catch (Exception e) { }
+
+            if (openGLMax > 0) {
+                if ((width > openGLMax) || (height > openGLMax)) {
+                    final float ratio = (float)height / (float)width;
+                    if (width > height) {
+                        Slog.w(TAG, "setDimensionHints: width: " + width + " > openGLMax: "+openGLMax );
+                        width = openGLMax;
+                        height = (int)((width * ratio) + 0.5);
+                        Slog.d(TAG, "setDimensionHints: width x height: " + width + " x "+height );
+                    } else {
+                        Slog.w(TAG, "setDimensionHints: height: " + height + " > openGLMax: "+openGLMax );
+                        height = openGLMax;
+                        width = (int)((height / ratio) + 0.5);
+                        Slog.d(TAG, "setDimensionHints: width x height: " + width + " x "+height );
+                    }
+                }
+            }
 
             if (width != wallpaper.width || height != wallpaper.height) {
                 wallpaper.width = width;
@@ -1417,6 +1453,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                 false /* all */, true /* full */, "changing wallpaper", null /* pkg */);
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
+
 
         if ((which & (FLAG_LOCK|FLAG_SYSTEM)) == 0) {
             final String msg = "Must specify a valid wallpaper category to set";
