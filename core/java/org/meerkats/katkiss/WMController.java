@@ -445,6 +445,9 @@ public class WMController
 			WindowManager wm = (WindowManager) c.getSystemService(Context.WINDOW_SERVICE);
 			Display d = wm.getDefaultDisplay();
 			d.getRealSize(screenSize);
-			return new Rect(100, 100, screenSize.x/2, screenSize.y/2);
+                        int offset = screenSize.x /10;
+			Rect frame = new Rect(0, 0, screenSize.x/2, 2*screenSize.y/3);
+			frame.offsetTo(offset, offset);
+			return frame;
                 }
 }
