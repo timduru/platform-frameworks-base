@@ -40,4 +40,7 @@ interface IDeviceIdleController {
     void exitIdle(String reason);
     boolean registerMaintenanceActivityListener(IMaintenanceActivityListener listener);
     void unregisterMaintenanceActivityListener(IMaintenanceActivityListener listener);
+    String[] getSystemPowerWhitelistOriginal();
+    void addSystemPowerSaveWhitelistApp(String name);
+    void removeSystemPowerSaveWhitelistApp(String name);
 }
